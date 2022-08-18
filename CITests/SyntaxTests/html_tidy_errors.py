@@ -4,7 +4,7 @@ import argparse
 import shutil
 from git import Repo
 import toml
-
+from CITests.CI_Configuration.config_CI_test import CI_test_configuration
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
