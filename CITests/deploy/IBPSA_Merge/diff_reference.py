@@ -1,25 +1,24 @@
+
+import numpy as np
 import sys, difflib
 import os 
 from git import Repo
+from shutil import copyfile
 import shutil
 import pathlib
 import glob
-import toml
+
+from CI_Configuration.configuration import Config
 
 
-class Return_diff_files(object):
+
+
+class Return_diff_files(Config):
+
 	def __init__(self, library, wh_library):
 		self.library = library
 		self.wh_library = wh_library
-
-		setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-		data = toml.load(setting_file)
-		folder = data["folder"]
-		files = data["files"]
-		self.artifacts_dir = folder["artifacts_dir"]
-		self.ref_file_dir = folder["ref_file_dir"]
-		self.new_ref_file = files["new_ref_file"]
-		self.resource_dir = folder["resource_dir"]
+		super().__init__()
 		self.path_lib_script = f'{self.library}{os.sep}{self.resource_dir}'
 		self.path_wh_lib_script = f'modelica-ibpsa{os.sep}{self.wh_library}{os.sep}{self.resource_dir}'
 		self.diff_ref_dir = f'{self.artifacts_dir}{os.sep}diff_ref'
@@ -55,6 +54,7 @@ class Return_diff_files(object):
 				ibpsa = f'modelica-ibpsa{os.sep}{lib_mos.replace(self.library, self.wh_library)}'
 				result = f'{self.diff_mos_dir}{os.sep}{lib_mos}'
 				result = result.replace(self.path_lib_script, "")
+				#createFolder(result[:result.rfind(os.sep)])
 				output_file = open(result, "w")
 				input_lib_file = open(aix, "r")
 				input_wh_lib_file = open(ibpsa, "r")
@@ -71,6 +71,7 @@ class Return_diff_files(object):
 				output_file.close()
 				if os.stat(result).st_size == 0:
 					os.remove(result)
+
 		new_ref_list =(set_lib ^ set_wh_lib) & inter_set
 		new_mos_list = []
 		for ref in new_ref_list:
@@ -82,6 +83,7 @@ class Return_diff_files(object):
 				source = self.new_mos_dir +os.sep+i
 				for l in ibpsa:
 					shutil.copy2(l,source)
+
 
 	def _diff_ref(self, path_aix, path_ibpsa, path_diff, path_new):
 		aix_ref_files = os.listdir(path_aix)
@@ -128,7 +130,7 @@ class Return_diff_files(object):
 		new_ref =os.listdir(path_new)
 		return diff_ref, new_ref
 
-	def _add_new_ref(self, diff_ref,new_ref, path_aix, path_ibpsa, path_new, path_diff):
+	def _add_new_ref(self, diff_ref,new_ref,path_aix,path_ibpsa,path_new,path_diff):
 		new_ref_list = []
 		for i in new_ref:
 			source = path_new+os.sep+i

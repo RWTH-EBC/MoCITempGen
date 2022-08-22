@@ -4,9 +4,9 @@ import platform
 import multiprocessing
 import argparse
 import time
-import toml
+from CI_Configuration.configuration import Config
 
-class Reg_Reference(object):
+class Reg_Reference(Config):
 
     def __init__(self, package, library, n_pro, tool, batch, show_gui, path):
         self.package = package
@@ -17,29 +17,17 @@ class Reg_Reference(object):
         self.show_gui = show_gui
         self.path = path
 
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        folder = data["folder"]
+        super().__init__()
 
-
-        self.ref_file_path = folder["ref_file_dir"]
-        self.resource_file_path = folder["resource_dir"]
-        self.ref_whitelist = f'..{os.sep}{files["ref_whitelist_file"]}'
-        self.update_ref_file = files["update_ref_file"]
-        self.exit_file = f'..{os.sep}{files["exit_file"]}'
-        self.ref_file = f'..{os.sep}{files["ref_file"]}'
-
-        self.CRED = '\033[91m'  # Color
-        self.CEND = '\033[0m'
-        self.green = "\033[0;32m"
-
+        self.ref_whitelist = f'..{os.sep}{self.ref_whitelist_file}'
+        self.exit_file = f'..{os.sep}{self.exit_file}'
+        self.ref_file = f'..{os.sep}{self.ref_file}'
         import buildingspy.development.regressiontest as u  # Buildingspy
         self.ut = u.Tester(tool=self.tool)
 
     def _get_mos_scripts(self):  # obtain mos scripts that are feasible for regression testing
         mos_list = []
-        for subdir, dirs, files in os.walk(self.resource_file_path):
+        for subdir, dirs, files in os.walk(self.resource_dir):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mos"):
@@ -66,7 +54,7 @@ class Reg_Reference(object):
 
     def _get_check_ref(self):  # give a reference list
         ref_list = []
-        for subdir, dirs, files in os.walk(self.ref_file_path):
+        for subdir, dirs, files in os.walk(self.ref_file_dir):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".txt"):
@@ -75,7 +63,7 @@ class Reg_Reference(object):
         return ref_list
 
     def _delte_ref_file(self, ref_list):  # delete reference files
-        ref_dir = f'{self.library}{os.sep}{self.ref_file_path}'
+        ref_dir = f'{self.library}{os.sep}{self.ref_file_dir}'
         for ref in ref_list:
             print(f'Update reference file: {ref_dir}{os.sep}{ref}\n')
             if os.path.exists(f'..{os.sep}{ref_dir}{os.sep}{ref}') is True:
@@ -95,7 +83,7 @@ class Reg_Reference(object):
         return package_list
 
     def _get_whitelist_package(self):  # get and filter package from reference whitelist
-        ref_wh = open(self.ref_whitelist, "r")
+        ref_wh = open(self.ref_whitelist_file, "r")
         lines = ref_wh.readlines()
         wh_list = []
         for line in lines:
@@ -246,25 +234,17 @@ class Reg_Reference(object):
         retVal = self.ut.run()
         return retVal
 
-class Extended_model(object):
+class Extended_model(Config):
 
     def __init__(self, package, library, dymolaversion, path):
         self.package = package
         self.library = library
         self.dymolaversion = dymolaversion
         self.path = path
+        super().__init__()
+        self.resource_dir = f'{self.resource_dir}{os.sep}{self.package.replace(self.library + ".", "")}'
 
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        folder = data["folder"]
-        self.changed_file = f'..{os.sep}{files["ch_file"]}'
-        self.resource_file_path = f'{folder["resource_dir"]}{os.sep}{self.package.replace(self.library + ".", "")}'
-        self.package_path = f'{self.package}'
 
-        self.CRED = '\033[91m'  # Color
-        self.CEND = '\033[0m'
-        self.green = "\033[0;32m"
 
         if self.package is None:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
@@ -309,7 +289,7 @@ class Extended_model(object):
             f'2: Using Dymola port   {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
     def _get_lines(self):  # get lines from reference whitelist
-        changed_models = open(self.changed_file, "r", encoding='utf8')
+        changed_models = open(self.ch_file, "r", encoding='utf8')
         lines = changed_models.readlines()
         changed_models.close()
         return lines

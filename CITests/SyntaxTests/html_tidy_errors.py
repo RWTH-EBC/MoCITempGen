@@ -3,8 +3,8 @@ import io
 import argparse
 import shutil
 from git import Repo
-import toml
-from CITests.CI_Configuration.config_CI_test import CI_test_configuration
+import sys
+from CI_Configuration.configuration import Config
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -42,7 +42,7 @@ In case of trouble just put the dll in your working dir.
 """
 
 
-class HTML_Tidy(object):
+class HTML_Tidy(Config):
     """Class to Check Packages and run CheckModel Tests"""
 
     def __init__(self, package, correct_overwrite, correct_backup, log, font, align, correct_view,
@@ -56,15 +56,7 @@ class HTML_Tidy(object):
         self.correct_view = correct_view
         self.library = library
         self.wh_library = wh_library
-
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        self.exit_file = files["exit_file"]
-        self.html_wh_file = files["html_wh_file"]
-        self.CRED = '\033[91m'
-        self.CEND = '\033[0m'
-        self.green = "\033[0;32m"
+        super().__init__()
 
     def run_files(self):  # Make sure that the parameter rootDir points to a Modelica package.
         rootDir = self.package.replace(".", os.sep)
@@ -538,16 +530,12 @@ class HTML_Tidy(object):
         return library_list
 
 
-class HTML_whitelist(object):
+class HTML_whitelist(Config):
 
     def __init__(self, wh_library, git_url):
         self.wh_library = wh_library
         self.git_url = git_url
-
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        self.html_wh_file = files["html_wh_file"]
+        super().__init__()
 
     def create_whitelist(self):  # Create a new whiteList
         Repo.clone_from(self.git_url, self.wh_library)

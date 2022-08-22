@@ -1,7 +1,7 @@
+import sys
+import configparser
 import os
 import argparse
-import toml
-
 
 class Check_Settings(object):
 
@@ -69,10 +69,14 @@ if __name__ == '__main__':
                                   help="Environment Variable owner/RepositoryName")
     check_test_group.add_argument('-GP', "--GL-Token",  help="Set your gitlab page url")
     args = parser.parse_args()
+    sys.path.append('bin/CITests')
 
     from setting_check import Check_Settings
-
-    ci_config_file = f'CITests{os.sep}_config_CI_tests.toml'
-    data = toml.load(ci_config_file)
-    #_check_variables(variable_main_list, github_token=args.github_token, github_private_key=args.github_private_key)
+    from _config import *
+    file_list = [ch_file, exit_file, eof_file, new_ref_file, ref_file, wh_file, ref_whitelist_file, html_wh_file, show_ref_file, update_ref_file, reg_temp_file, write_temp_file, sim_temp_file, page_temp_file, ibpsa_temp_file,
+                 style_check_temp_file, html_temp_file, main_temp_file, main_yml_file, chart_temp_file, index_temp_file, layout_temp_file, setting_file]
+    path_list = [artifacts_dir, temp_dir, chart_dir, ref_file_dir, resource_dir]
+    #_check_dir(path_list)
+    _check_file(file_list)
+    _check_variables(variable_main_list, github_token=args.github_token, github_private_key=args.github_private_key)
 

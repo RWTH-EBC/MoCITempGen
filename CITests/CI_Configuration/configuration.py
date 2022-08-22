@@ -1,6 +1,6 @@
 import os
 
-class CI_test_configuration(object):
+class Config(object):
 
     def __init__(self):
         self.wh_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
@@ -17,8 +17,19 @@ class CI_test_configuration(object):
         self.new_ref_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_new_created_reference.txt'
 
         self.artifacts_dir = f'dymola-ci-tests{os.sep}templates{os.sep}04_artifacts'
-        self.chart_dir = f'dymola-ci-tests{os.sep}templates{os.sep}02_charts'
+        self.chart_dir = f'dymola-ci-tests{os.sep}templates{os.sep}02_charts'  # path for layout index
         self.ref_file_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
 
+        # Color
+        self.CRED = '\033[91m'  # Colors
+        self.CEND = '\033[0m'
+        self.green = '\033[0;32m'
+
+    def test(self):
+        return self.resource_dir
+
+if __name__ == '__main__':
+    conf = Config()
+    conf.resource_dir
 

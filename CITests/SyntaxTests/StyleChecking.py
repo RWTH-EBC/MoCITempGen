@@ -5,9 +5,9 @@ import os
 import sys 
 import platform
 import time
-import toml
+from CI_Configuration.configuration import Config
 
-class StyleCheck(object):
+class StyleCheck(Config):
 	""" Class to Check the Style of Packages and Models
 	Export a HTML-Log File"""
 	
@@ -16,16 +16,9 @@ class StyleCheck(object):
 		self.library = library
 		self.dymolaversion = dymolaversion
 		self.changed_models = changed_models
+		super().__init__()
 
-		setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-		data = toml.load(setting_file)
-		files = data["files"]
-		self.exit_file = files["exit_file"]
-		self.html_wh_file = files["html_wh_file"]
 
-		self.CRED = '\033[91m'  # Colors
-		self.CEND = '\033[0m'
-		self.green = "\033[0;32m"
 
 		from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
 		from dymola.dymola_exception import DymolaException
@@ -162,7 +155,7 @@ class StyleCheck(object):
 		else:
 			if ErrorCount == 0:
 				for model in model_list:
-					print(f'{self.green}\n Style check of model or package {model} was successful.{self.CEND}')
+					print(f'{green}\n Style check of model or package {model} was successful.{self.CEND}')
 					continue
 				exit(0)
 			elif ErrorCount > 0 :
@@ -191,7 +184,7 @@ if  __name__ == '__main__':
 								library=args.path,
 								dymolaversion=args.dymolaversion,
 								changed_models=args.changed_models)
-	if platform.system() == "Windows":  # Set path for python-dymola-interface: Operating System windows and linux
+	if platform.system()  == "Windows":  # Set path for python-dymola-interface: Operating System windows and linux
 		_setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
 		sys.path.insert(0, os.path.join('C:\\',
                             'Program Files',

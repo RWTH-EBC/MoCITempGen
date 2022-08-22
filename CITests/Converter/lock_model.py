@@ -1,16 +1,15 @@
 import os
 from pathlib import Path
 import argparse
-import toml
+import sys
+from CI_Configuration.configuration import Config
 
-class Lock_model(object):
+class Lock_model(Config):
 
     def __init__(self,  library, wh_library):
         self.library = library
         self.wh_library = wh_library
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        self.html_wh_file = data["files"]["html_wh_file"]
+        super().__init__()
 
     def _read_wh(self):  # Read whitelist and return a list
         wh = open(self.html_wh_file, "r")
@@ -62,6 +61,7 @@ class Lock_model(object):
 
     def lock_model(self, model, content):
         mo = model[model.rfind(os.sep) + 1:model.rfind(".mo")]
+
         last_entry = content[len(content) - 1]
         flag = '   __Dymola_LockedEditing="Model from IBPSA");'
         old_html_flag = '</html>"));'
@@ -69,6 +69,7 @@ class Lock_model(object):
         old = ');'
         new = ', \n' + flag
         replacements = {old_html_flag: new_html_flag, old: new}
+
         if last_entry.find(mo) > -1 and last_entry.find("end") > -1:
             flag_lines = content[len(content) - 2]
             if flag_lines.isspace() == True:
@@ -92,7 +93,7 @@ class Lock_model(object):
             return content
 
     def write_lock_model(self, model, new_content):
-        print(f'lock object: {model}')
+        print("lock object: " + model)
         outfile = open(model, 'w')
         new_content = (' '.join(new_content))
         outfile.write(new_content)
@@ -105,7 +106,9 @@ if __name__ == '__main__':
     unit_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
     args = parser.parse_args()
 
+    from lock_model import Lock_model
     lock = Lock_model(library=args.library, wh_library=args.wh_library)
+
     wl_lines = lock._read_wh()  # read html whitelist (models from IBPSA)
     mo_li = lock._sort_list(wl_lines)  # Sort list of IPBSA Models
     for model in mo_li:

@@ -7,7 +7,7 @@ from git import Repo
 import time
 import glob
 from natsort import natsorted
-import toml
+from CI_Configuration.configuration import Config
 
 class Git_Repository_Clone(object):
     def __init__(self, repo_dir, git_url):
@@ -22,7 +22,7 @@ class Git_Repository_Clone(object):
             Repo.clone_from(self.git_url, self.repo_dir)
 
 
-class ValidateTest(object):
+class ValidateTest(Config):
     """Class to Check Packages and run CheckModel Tests"""
     """Import Python Libraries"""
 
@@ -39,18 +39,8 @@ class ValidateTest(object):
         self.wh_library = wh_library
         self.filter_wh = filter_wh
 
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-
-
-        self.ch_file = files["ch_file"]
-        self.wh_file = files["wh_file"]
+        super().__init__()
         self.err_log = f'{self.mo_library}{os.sep}{self.mo_library}.{self.package}-errorlog.txt'
-
-        self.CRED = '\033[91m'  # Colors
-        self.CEND = '\033[0m'
-        self.green = "\033[0;32m"
 
         from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
         from dymola.dymola_exception import DymolaException
@@ -90,14 +80,7 @@ class ValidateTest(object):
         elif pack_check is False:
             print(f'Library path is wrong. Please check path of {self.mo_library} library path.')
             exit(1)
-        #library_check = self.dymola.openModel("../../../../../library/Modelica 4.0.0/package.mo")  # Load modelica library MSL 4.0.0
-        # self.dymola.ExecuteCommand("DefaultModelicaVersion('4.0.0', true);")
-        #if library_check is False:
-        #    print("Failed to load Modelica library 4.0.0")
-        #    exit(1)
-        #if library_check is True:
-        #    print("Load Modelica library 4.0.0 successful")
-        #self.dymola.ExecuteCommand('DymolaCommands.Others.DefaultModelicaVersion("4.0.0", true);')
+
         error_model = []
         error_message = []
         for model in model_list:
@@ -280,23 +263,14 @@ class ValidateTest(object):
             exit(1)
 
 
-class Create_whitelist(object):
+class Create_whitelist(Config):
 
     def __init__(self, library, wh_lib):
         self.library = library
         self.wh_lib = wh_lib
         self.wh_lib_path = f'{self.wh_lib}{os.sep}{self.wh_lib}{os.sep}package.mo'
+        super().__init__()
 
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        self.ch_file = files["ch_file"]
-        self.wh_file = files["wh_file"]
-        self.exit_file = files["exit_file"]
-
-        self.CRED = '\033[91m'  # Colors
-        self.CEND = '\033[0m'
-        self.green = '\033[0;32m'
         from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
         from dymola.dymola_exception import DymolaException
         print(f'1: Starting Dymola instance')
@@ -397,6 +371,7 @@ class Create_whitelist(object):
         self.dymola.savelog(f'{self.wh_lib}-log.txt')
         self.dymola.close()
         return error_model, error_message
+        #return error_model
 
     def _write_exit_log(self, version_check):  # write entry in exit file
         exit = open(self.exit_file, "w")

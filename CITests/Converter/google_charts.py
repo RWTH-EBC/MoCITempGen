@@ -1,38 +1,35 @@
+import matplotlib.pyplot as plt
+from matplotlib.widgets import CheckButtons
+import numpy as np
+import sys, difflib
 import os
+from git import Repo
+from shutil import copyfile
 import shutil
+import pathlib
+import glob
 import pandas as pd
 import argparse
-import toml
+from CI_Configuration.configuration import Config
 
-class Plot_Charts(object):
+
+class Plot_Charts(Config):
 
     def __init__(self, package, library):
         self.package = package
         self.library = library
+        super().__init__()
 
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-        folder = data["folder"]
-        self.new_ref_file = files["new_ref_file"]
-        self.ch_file = files["ch_file"]
-        self.chart_temp_file = files["chart_temp_file"]  # path for google chart template
-        self.index_temp_file = files["index_temp_file"]
-        self.layout_temp_file = files["layout_temp_file"]
         self.f_log = f'{self.library}{os.sep}unitTests-dymola.log'  # path for unitTest-dymola.log, important for errors
         self.csv_file = f'reference.csv'
         self.test_csv = f'test.csv'
-        self.show_ref_file = files["show_ref_file"]
-        self.update_ref_file = files["update_ref_file"]
-        self.chart_dir = folder["chart_dir"]  # path for layout index
+
         self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'  # path for every single package
         self.funnel_path = f'{self.library}{os.sep}funnel_comp'
         self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
         self.layout_html_file = f'{self.chart_dir}{os.sep}index.html'
-        self.green = '\033[0;32m'
-        self.CRED = '\033[91m'
-        self.CEND = '\033[0m'
+
 
     def _read_show_reference(self):
         if os.path.isfile(self.show_ref_file) is False:
@@ -80,6 +77,8 @@ class Plot_Charts(object):
             value_list.append("[" + a + "]")
         value_list = map(str, (value_list))
         return value_list
+    #def calculate_time_interval(self):
+
 
     def _read_data(self, ref_file):  # Read Reference results in AixLib\Resources\ReferenceResults\Dymola\${modelname}.txt
         legend_List = []
@@ -441,7 +440,7 @@ class Plot_Charts(object):
         folder = os.listdir(self.funnel_path)
         return folder
 
-    def _delte_folder(self):
+    def _delete_folder(self):
         if os.path.isdir(self.chart_dir) is False:
             print(f'Directonary {self.chart_dir} does not exist.')
         else:
@@ -524,7 +523,7 @@ if __name__ == '__main__':
         print(f'Setting package: {args.single_package}\n')
 
     if args.line_html is True:  # Create Line chart html
-        charts._delte_folder()
+        charts._delete_folder()
         if args.error is True:  # Plot all data with an error
             charts._check_file()
             model_var_list = charts._read_unitTest_log()
@@ -600,6 +599,7 @@ if __name__ == '__main__':
                     results = charts._read_data(ref_file)
                     value_list = results[0]
                     legend_List = results[1]
+
                     charts._mako_line_html_new_chart(ref_file, value_list, legend_List)
             charts._create_index_layout()
             charts._create_layout()

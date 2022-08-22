@@ -1,24 +1,17 @@
 import os
 import codecs
+import sys
 import shutil
 import argparse
-import toml
+import glob
+from CI_Configuration.configuration import Config
 
-class Deploy_Artifacts(object):
+class Deploy_Artifacts(Config):
 
     def __init__(self, library):
         self.library = library
         self.folder = 'Referencefiles'
-        self.green = '\033[0;32m'
-        self.CRED = '\033[91m'
-        self.CEND = '\033[0m'
-
-        setting_file = f'CITests{os.sep}_config_CI_tests.toml'
-        data = toml.load(setting_file)
-        files = data["files"]
-
-        self.new_ref_file = files["new_ref_file"]
-        self.update_ref_file = files["update_ref_file"]
+        super().__init__()
 
     def _get_changed_ref(self):  # list all changed reference results to a list
         changed_file = codecs.open(self.new_ref_file, "r", encoding='utf8')
@@ -77,12 +70,13 @@ if __name__ == '__main__':
                                  help="Plot new models with new created reference files",
                                  action="store_true")
     args = parser.parse_args()
+    from deploy_artifacts import Deploy_Artifacts
 
     if args.ref is True:
         ref_artifact = Deploy_Artifacts(library=args.library)
         if args.new_ref is True:  # python bin/02_CITests/deploy/deploy_artifacts.py --library AixLib --ref --new-ref
             changed_ref = ref_artifact._get_changed_ref()
             ref_artifact.copy_txt(changed_ref)
-        if args.updated_ref is True:   # python bin/02_CITests/deploy/deploy_artifacts.py --library AixLib --ref --updated-ref
+        if args.updated_ref is True:  # python bin/02_CITests/deploy/deploy_artifacts.py --library AixLib --ref --updated-ref
             updated_ref = ref_artifact._get_update_ref()
             ref_artifact.copy_txt(updated_ref)
