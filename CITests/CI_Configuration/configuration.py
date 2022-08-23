@@ -3,22 +3,34 @@ import os
 class Config(object):
 
     def __init__(self):
+        '''
+        Dont change the self.<name>. But you can change the paths and file name
+        '''
+        # Files
         self.wh_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
         self.ref_whitelist_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}reference_check_whitelist.txt'
         self.html_wh_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
-        self.show_ref_file = f'bin{os.sep}interact_CI{os.sep}show_ref.txt'
-        self.update_ref_file = f'bin{os.sep}interact_CI{os.sep}update_ref.txt'
-        self.chart_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}01_google_templates{os.sep}google_chart.txt'
-        self.index_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}01_google_templates{os.sep}index.txt'
-        self.layout_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}01_google_templates{os.sep}layout_index.txt'
+
+        self.show_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}show_ref.txt'
+        self.update_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}update_ref.txt'
+
+        self.chart_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}google_chart.txt'
+        self.index_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}index.txt'
+        self.layout_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}layout_index.txt'
+
         self.exit_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}exit.sh'
         self.ref_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_reference_list.txt'
         self.ch_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_changed_model_list.txt'
         self.new_ref_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_new_created_reference.txt'
 
-        self.artifacts_dir = f'dymola-ci-tests{os.sep}templates{os.sep}04_artifacts'
-        self.chart_dir = f'dymola-ci-tests{os.sep}templates{os.sep}02_charts'  # path for layout index
-        self.ref_file_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
+        # Folders
+        self.ci_whitelist_dir = f'dymola-ci-tests{os.sep}ci_whitelist'
+        self.interact_ci_dir = f'dymola-ci-tests{os.sep}interact_CI'
+        self.config_dir = f'dymola-ci-tests{os.sep}Configfiles'
+        self.chart_temp_dir = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates'
+        self.artifacts_dir = f'dymola-ci-tests{os.sep}templates{os.sep}artifacts'
+        self.chart_dir = f'dymola-ci-tests{os.sep}templates{os.sep}charts'  # path for layout index
+        self.ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
 
         # Color
@@ -26,10 +38,25 @@ class Config(object):
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
 
-    def test(self):
-        return self.resource_dir
+    def return_file_list(self):
+        file_list = []
+        file_dic = (vars(Config()))
+        for file in file_dic:
+            if file.find("_file") > -1:
+                file_list.append(file_dic[file])
+        return file_list
+
+    def return_file_dir(self):
+        dir_list = []
+        dir_dic = (vars(Config()))
+        for dir in dir_dic:
+            if dir.find("_dir") > -1:
+                dir_list.append(dir_dic[dir])
+        return dir_list
+
+
 
 if __name__ == '__main__':
     conf = Config()
-    conf.resource_dir
+    conf.return_file_list()
 

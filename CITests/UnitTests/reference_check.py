@@ -54,7 +54,7 @@ class Reg_Reference(Config):
 
     def _get_check_ref(self):  # give a reference list
         ref_list = []
-        for subdir, dirs, files in os.walk(self.ref_file_dir):
+        for subdir, dirs, files in os.walk(self.ref_results_dir):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".txt"):
@@ -63,7 +63,7 @@ class Reg_Reference(Config):
         return ref_list
 
     def _delte_ref_file(self, ref_list):  # delete reference files
-        ref_dir = f'{self.library}{os.sep}{self.ref_file_dir}'
+        ref_dir = f'{self.library}{os.sep}{self.ref_results_dir}'
         for ref in ref_list:
             print(f'Update reference file: {ref_dir}{os.sep}{ref}\n')
             if os.path.exists(f'..{os.sep}{ref_dir}{os.sep}{ref}') is True:
