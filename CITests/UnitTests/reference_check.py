@@ -6,7 +6,7 @@ import argparse
 import time
 from CI_Configuration.configuration import Config
 
-class Reg_Reference(Config):
+class Buildingspy_Regression_Check(Config):
 
     def __init__(self, package, library, n_pro, tool, batch, show_gui, path):
         self.package = package
@@ -45,12 +45,13 @@ class Reg_Reference(Config):
                     continue
         return mos_list
 
-    def _write_reg_list(self):  # writes a list for feasible regression tests
-        mos_list = Reg_Reference._get_mos_scripts(self)
+    def _write_regression_list(self):  # writes a list for feasible regression tests
+        mos_list = self._get_mos_scripts(self)
         wh_file = open(self.ref_file, "w")
         for mos in mos_list:
             wh_file.write(f'\n{mos}\n')
         wh_file.close()
+        exit(0)
 
     def _get_check_ref(self):  # give a reference list
         ref_list = []
@@ -72,7 +73,7 @@ class Reg_Reference(Config):
                 print(f'File {ref_dir}{os.sep}{ref} does not exist\n')
 
     def _get_ref_package(self):  # reproduces packages in which reference results are missing
-        mos_list = Reg_Reference._compare_ref_mos(self)
+        mos_list = self._compare_ref_mos(self)
         package_list = []
         if mos_list is not None:
             for mos in mos_list:
@@ -98,8 +99,8 @@ class Reg_Reference(Config):
         return wh_list
 
     def _compare_ref_mos(self):  # compares if both files existed
-        mos_list = Reg_Reference._get_mos_scripts(self)  # Mos Scripts
-        ref_list = Reg_Reference._get_check_ref(self)  # Reference files
+        mos_list = self._get_mos_scripts(self)  # Mos Scripts
+        ref_list = self._get_check_ref(self)  # Reference files
         err_list = []
         for mos in mos_list:
             for ref in ref_list:
@@ -110,9 +111,7 @@ class Reg_Reference(Config):
             mos_list.remove(err)  # remove all mos script for that a ref file exists
         return mos_list
 
-    def _compare_wh_mos(self):  # filter model from whitelist
-        package_list = Reg_Reference._get_ref_package(self)
-        wh_list = Reg_Reference._get_whitelist_package(self)
+    def _compare_wh_mos(self, package_list, wh_list):  # filter model from whitelist
         err_list = []
         for package in package_list:
             for wh_package in wh_list:
@@ -130,15 +129,15 @@ class Reg_Reference(Config):
     def _create_reference_results(self):  # creates reference files that do not yet exist
         self.ut.batchMode(False)
         self.ut.setLibraryRoot(self.path)
-        model_list = Reg_Reference._compare_wh_mos(self)
-        package_list = []
-        print(f'\n \n')
+        package_list = self._get_ref_package(self)
+        wh_list = self._get_whitelist_package(self)
+        model_list = self._compare_wh_mos(self, package_list=package_list, wh_list=wh_list)
         model_list = list(set(model_list))
+        package_list = []
         for model in model_list:
             print(f'{self.green}Generate new reference results for model: {self.CEND} {model}')
             package_list.append(model[:model.rfind(".")])
         package_list = list(set(package_list))
-        print(f'\n \n')
         if len(package_list) > 0:
             for package in package_list:
                 print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
@@ -165,10 +164,9 @@ class Reg_Reference(Config):
         ref_package_list = []
         for ref in ref_list:
             if ref.rfind("Validation") > -1:
-                ref_package_list.append(ref[:ref.rfind("_Validation")+11].replace("_","."))
+                ref_package_list.append(ref[:ref.rfind("_Validation")+11].replace("_", "."))
             elif ref.rfind("Examples") > -1:
                 ref_package_list.append(ref[:ref.rfind("_Examples")+9].replace("_", "."))
-
         ref_package_list = list(set(ref_package_list))
         return ref_package_list
 
@@ -187,37 +185,22 @@ class Reg_Reference(Config):
             exit(0)
         return ref_list
 
-    def _update_ref(self, package):  # Update reference results
+    def _update_ref(self, package_list):  # Update reference results
         self.ut.batchMode(False)
         self.ut.setLibraryRoot(self.path)
-        if package is not None:
-            self.ut.setSinglePackage(package)
-            print(f'{self.green}Update reference results for the packages: {self.CEND} {package}')
         self.ut.setNumberOfThreads(self.n_pro)
         self.ut.pedanticModelica(False)
         self.ut.showGUI(self.show_gui)
-        retVal = self.ut.run()
-        return retVal
-
-    def _get_ref_model(self):
-        mo_list = []
-        ref_file = open(self.ref_file, "r")
-        lines = ref_file.readlines()
-        for line in lines:
-            if line.find(self.package) > -1:
-                mo_list.append(line.strip())
-        ref_file.close()
-        return mo_list
-
-    def _compare_reg_model(self, modelica_list, mo_list):
-        reg_list = []
-        for model in modelica_list:
-            for mo in mo_list:
-                if model == mo:
-                    reg_list.append(model)
-        return reg_list
+        for package in package_list:
+            if package is not None:
+                self.ut.setSinglePackage(package)
+                print(f'{self.green}Update reference results for the packages: {self.CEND} {package}')
+                self.ut.run()
+            else:
+                continue
 
     def _check_regression_test(self, package):  # start regression test for a package
+        print(f'Check package: {package}')
         if package is None:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
             exit(1)
@@ -232,7 +215,13 @@ class Reg_Reference(Config):
         self.ut.pedanticModelica(False)
         self.ut.showGUI(self.show_gui)
         retVal = self.ut.run()
-        return retVal
+        if retVal != 0:
+            print(f'{self.CRED}Regression test for model {package} was not successfull{self.CEND}')
+            return package
+        else:
+            print(f'{self.green} Regression test for model {package} was successful {self.CEND}')
+            return None
+
 
 class Extended_model(Config):
 
@@ -243,8 +232,6 @@ class Extended_model(Config):
         self.path = path
         super().__init__()
         self.resource_dir = f'{self.resource_dir}{os.sep}{self.package.replace(self.library + ".", "")}'
-
-
 
         if self.package is None:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
@@ -287,6 +274,35 @@ class Extended_model(Config):
                     exit(1)
         print(
             f'2: Using Dymola port   {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
+
+    def _ref_response(self, error_list):
+        if len(error_list) > 0:
+            print(f'{self.CRED} Regression test failed{self.CEND}')
+            print(f'The following packages{self.CRED} failed: {self.CEND}')
+            for error in error_list:
+                print(f'{self.CRED}Error:{self.CEND} {error}')
+            exit(1)
+        else:
+            print(f'{self.green}Regression test was successful {self.CEND}')
+            exit(0)
+
+    def _compare_reg_model(self, modelica_list, mo_list):
+        reg_list = []
+        for model in modelica_list:
+            for mo in mo_list:
+                if model == mo:
+                    reg_list.append(model)
+        return reg_list
+
+    def _get_ref_model(self):
+        mo_list = []
+        ref_file = open(self.ref_file, "r")
+        lines = ref_file.readlines()
+        for line in lines:
+            if line.find(self.package) > -1:
+                mo_list.append(line.strip())
+        ref_file.close()
+        return mo_list
 
     def _get_lines(self):  # get lines from reference whitelist
         changed_models = open(self.ch_file, "r", encoding='utf8')
@@ -377,6 +393,24 @@ class Extended_model(Config):
         changed_list = list(set(changed_list))
         return changed_list
 
+    def _get_changed_regression_models(self):
+        lines = self._get_lines()  # string change ref file
+        ref_list = self._get_ref(lines=lines)  # get reference files from ref file
+        mos_list = self._get_mos(lines=lines)  # get mos script from ref file
+        modelica_list = self._get_mo(lines=lines)  # get modelica files from ref file
+        mo_list = self._get_ref_model()  # get the regression models from reference file list
+        modelica_list = self._compare_reg_model(modelica_list=modelica_list, mo_list=mo_list)  # filter: get mo_list == modelica_list
+        model_list = self._get_usedmodel(mo_list=mo_list)  # gives a list of regression models where submodels have been modified
+        changed_list = self._insert_list(ref_list=ref_list, mos_list=mos_list, modelica_list=modelica_list,model_list=model_list)  # give a list with packages to check
+        if len(changed_list) == 0:
+            print(f'No models to check and cannot start a regression test')
+            exit(0)
+        else:
+            print(f'Number of checked packages: {str(len(changed_list))}')
+            return changed_list
+
+
+
     def _get_ref(self, lines):  # return all reference results, that changed
         ref_list = []
         for line in lines:
@@ -413,6 +447,59 @@ class Extended_model(Config):
         return modelica_list
 
 
+
+
+
+
+
+
+
+
+
+
+
+class Buildingspy_Validate_test(Config):
+
+    def __init__(self, path):
+        self.path = path
+        import buildingspy.development.validator as validate
+        self.validate = validate
+        super().__init__()
+
+    def _validate_html(self):  # validate the html syntax
+        val = self.validate.Validator()
+        errMsg = val.validateHTMLInPackage(self.path)
+        n_msg = len(errMsg)
+        for i in range(n_msg):
+            if i == 0:
+                print("The following malformed html syntax has been found:\n%s" % errMsg[i])
+            else:
+                print(errMsg[i])
+        if n_msg == 0:
+            exit(0)
+        else:
+            print(f'{self.CRED}html check failed.{self.CEND}')
+            exit(1)
+
+    def _validate_experiment_setup(self):  # validate regression test setup
+        val = self.validate.Validator()
+        retVal = val.validateExperimentSetup(self.path)
+        exit(retVal)
+
+    def _run_coverage_only(self, batch, tool, package):  # Specifies which models are tested
+        import buildingspy.development.regressiontest as u
+        ut = u.Tester(tool=tool)
+        ut.batchMode(batch)
+        ut.setLibraryRoot(self.path)
+        if package is not None:
+            ut.setSinglePackage(package)
+        ut.get_test_example_coverage()
+        exit(0)
+
+
+
+
+
 def _setEnvironmentVariables(var, value):  # Add to the environment variable `var` the value `value`
     if var in os.environ:
         if platform.system() == "Windows":
@@ -422,39 +509,30 @@ def _setEnvironmentVariables(var, value):  # Add to the environment variable `va
     else:
         os.environ[var] = value
 
-
-def _validate_html(path):  # validate the html syntax
-    import buildingspy.development.validator as v
-    val = v.Validator()
-    errMsg = val.validateHTMLInPackage(path)
-    n_msg = len(errMsg)
-    for i in range(n_msg):
-        if i == 0:
-            print("The following malformed html syntax has been found:\n%s" % errMsg[i])
-        else:
-            print(errMsg[i])
-    if n_msg == 0:
-        return 0
+def _setEnvironmentPath(dymolaversion):
+    if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
+        _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
+        sys.path.insert(0, os.path.join('C:\\',
+                                        'Program Files',
+                                        'Dymola ' + dymolaversion,
+                                        'Modelica',
+                                        'Library',
+                                        'python_interface',
+                                        'dymola.egg'))
     else:
-        return 1
-
-
-def _validate_experiment_setup(path):  # validate regression test setup
-    import buildingspy.development.validator as v
-    val = v.Validator()
-    retVal = val.validateExperimentSetup(path)
-    return retVal
-
-
-def _run_coverage_only(batch, tool, package, path):  # Specifies which models are tested
-    import buildingspy.development.regressiontest as u
-    ut = u.Tester(tool=tool)
-    ut.batchMode(batch)
-    ut.setLibraryRoot(path)
-    if package is not None:
-        ut.setSinglePackage(package)
-    ut.get_test_example_coverage()
-    return 0
+        _setEnvironmentVariables("LD_LIBRARY_PATH",
+                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
+                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
+        sys.path.insert(0, os.path.join('opt',
+                                        'dymola-' + dymolaversion + '-x86_64',
+                                        'Modelica',
+                                        'Library',
+                                        'python_interface',
+                                        'dymola.egg'))
+    print(f'operating system {platform.system()}')
+    sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
+    # The path to buildingspy must be added to sys.path to work on Linux.
+    # If only added to os.environ, the Python interpreter won't find buildingspy
 
 
 if __name__ == '__main__':
@@ -501,92 +579,53 @@ if __name__ == '__main__':
                                  action="store_true")
     unit_test_group.add_argument("--validate-html-only", action="store_true")
     unit_test_group.add_argument("--validate-experiment-setup", action="store_true")
-    CRED = '\033[91m'  # Color
-    CEND = '\033[0m'
-    green = "\033[0;32m"
 
     args = parser.parse_args()  # Parse the arguments
-    if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
-        _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
-        sys.path.insert(0, os.path.join('C:\\',
-                                        'Program Files',
-                                        'Dymola ' + args.dymolaversion,
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    else:
-        _setEnvironmentVariables("LD_LIBRARY_PATH",
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
-        sys.path.insert(0, os.path.join('opt',
-                                        'dymola-' + args.dymolaversion + '-x86_64',
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    # The path to buildingspy must be added to sys.path to work on Linux.
-    # If only added to os.environ, the Python interpreter won't find buildingspy
-    sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
-
-    from reference_check import Reg_Reference
+    _setEnvironmentPath(dymolaversion=args.dymolaversion)
 
     # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --validate-html-only
     if args.validate_html_only:  # Validate the html syntax only, and then exit
-        ret_val = _validate_html(args.path)
-        if ret_val == 1:
-            print(f'{CRED}html check failed.{CEND}')
-        exit(ret_val)
+        Buildingspy_Validate_test(path=args.path)._validate_html()
 
     # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --validate-experiment-setup
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
-        ret_val = _validate_experiment_setup(args.path)
-        exit(ret_val)
-
-    # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --coverage-only
-    elif args.coverage_only:
+        Buildingspy_Validate_test(path=args.path)._validate_experiment_setup()
+    elif args.coverage_only:   # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --coverage-only
         if args.single_package:
             single_package = args.single_package
         else:
             single_package = None
-        ret_val = _run_coverage_only(batch=args.batch,
-                                     tool=args.tool,
-                                     package=single_package,
-                                     path=args.path)
-        exit(ret_val)
+        Buildingspy_Validate_test(path=args.path)._run_coverage_only(batch=args.batch,
+                                                                     tool=args.tool,
+                                                                     package=single_package)
 
-    ref_check = Reg_Reference(package=args.single_package,
-                              library=args.library,
-                              n_pro=args.number_of_processors,
-                              tool=args.tool,
-                              batch=args.batch,
-                              show_gui=args.show_gui,
-                              path=args.path)
+    ref_check = Buildingspy_Regression_Check(package=args.single_package,
+                                             library=args.library,
+                                             n_pro=args.number_of_processors,
+                                             tool=args.tool,
+                                             batch=args.batch,
+                                             show_gui=args.show_gui,
+                                             path=args.path)
     if args.ref_list:
-        ref_check._write_reg_list()
-        exit(0)
-    # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --create-ref
-    elif args.create_ref:
+        ref_check._write_regression_list()
+
+    elif args.create_ref:  # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --create-ref
         ref_check._create_reference_results()
-        exit(1)
-    # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --update-ref --single-package
-    elif args.update_ref:
+
+    elif args.update_ref:  # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --update-ref --single-package
         ref_list = ref_check._get_update_ref()
-        ref_check._delte_ref_file(ref_list)
-        package_list = ref_check._get_update_package(ref_list)
-        for package in package_list:
-            print(package)
-            ret_val = ref_check._update_ref(package)
+        ref_check._delte_ref_file(ref_list=ref_list)
+        package_list = ref_check._get_update_package(ref_list=ref_list)
+        ref_check._update_ref(package_list=package_list)
         exit(0)
     else:
-        # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --single-package Airflow --library AixLib --batch -DS 2019
-        if args.modified_models is False:
+        if args.modified_models is False:  # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --single-package Airflow --library AixLib --batch -DS 2019
             list_reg_model = Extended_model(package=args.single_package,
                                             library=args.library,
                                             dymolaversion=args.dymolaversion,
                                             path="package.mo")
             list_reg_model._dym_check_lic()
-            ret_val = ref_check._check_regression_test(args.single_package)
+            ret_val = ref_check._check_regression_test(package=args.single_package)
             exit(ret_val)
         # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --single-package Airflow --library AixLib --batch -DS 2019 -n 2 --modified-model
         if args.modified_models is True:
@@ -597,36 +636,11 @@ if __name__ == '__main__':
                                             dymolaversion=args.dymolaversion,
                                             path="package.mo")
             list_reg_model._dym_check_lic()
-            lines = list_reg_model._get_lines()  # string change ref file
-            ref_list = list_reg_model._get_ref(lines)  # get reference files from ref file
-            mos_list = list_reg_model._get_mos(lines)  # get mos script from ref file
-            modelica_list = list_reg_model._get_mo(lines)  # get modelica files from ref file
-            mo_list = ref_check._get_ref_model()  # get the regression models from reference file list
-            modelica_list = ref_check._compare_reg_model(modelica_list, mo_list)  # filter: get mo_list == modelica_list
-            model_list = list_reg_model._get_usedmodel(
-                mo_list)  # gives a list of regression models where submodels have been modified
-            changed_list = list_reg_model._insert_list(ref_list, mos_list, modelica_list,
-                                                       model_list)  # give a list with packages to check
-            if len(changed_list) == 0:
-                print(f'No models to check and cannot start a regression test')
-                retVal = 0
-            elif len(changed_list) > 0:
-                error_list = []
-                print(f'Number of checked packages: {str(len(changed_list))}')
-                for package in changed_list:
-                    print(f'Check package: {package}')
-                    retVal = ref_check._check_regression_test(package)
-                    if retVal != 0:
-                        error_list.append(package)
-                        print(f'{CRED}Regression test for model {package} was not successfull{CEND}')
-                    else:
-                        print(f'{green} Regression test for model {package} was successful {CEND}')
-                if len(error_list) > 0:
-                    print(f'{CRED} Regression test failed{CEND}')
-                    print(f'The following packages{CRED} failed: {CEND}')
-                    for error in error_list:
-                        print(f'{CRED}Error:{CEND} {error}')
-                    exit(1)
-                else:
-                    print(f'{green}Regression test was successful {CEND}')
-                    exit(0)
+            changed_list = list_reg_model._get_changed_regression_models()
+            error_list = []
+            for package in changed_list:
+                package = ref_check._check_regression_test(package=package)
+                if package is not None:
+                    error_list.append(package)
+            list_reg_model._ref_response(error_list=error_list)
+
