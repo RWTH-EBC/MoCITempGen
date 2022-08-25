@@ -7,9 +7,9 @@ class Config(object):
         Dont change the self.<name>. But you can change the paths and file name
         '''
         # Files
-        self.wh_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
+        self.wh_model_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
         self.ref_whitelist_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}reference_check_whitelist.txt'
-        self.html_wh_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
+        self.wh_html_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
 
         self.show_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}show_ref.txt'
         self.update_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}update_ref.txt'
