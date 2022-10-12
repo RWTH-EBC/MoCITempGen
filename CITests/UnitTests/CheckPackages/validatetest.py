@@ -7,7 +7,7 @@ from git import Repo
 import time
 import glob
 from natsort import natsorted
-from CI_Configuration.configuration import Config
+from CITests.CI_Configuration.configuration import CI_configuration
 
 class Git_Repository_Clone(object):
 
@@ -24,7 +24,7 @@ class Git_Repository_Clone(object):
             Repo.clone_from(self.git_url, self.repo_dir)
 
 
-class ValidateTest(Config):
+class ValidateTest(CI_configuration):
     """Class to Check Packages and run CheckModel Tests"""
 
     def __init__(self, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library, wh_library, filterwhitelist):
@@ -318,7 +318,7 @@ class ValidateTest(Config):
         self._write_errorlog(error_model=result[0], error_message=result[1])
         self._check_result(error_model=result[0])
 
-class Create_whitelist(Config):
+class Create_whitelist(CI_configuration):
 
     def __init__(self, library, wh_library, repo_dir, git_url):
         self.library = library
@@ -569,7 +569,7 @@ if __name__ == '__main__':
                                   number_of_processors=args.number_of_processors,
                                   show_gui=args.show_gui,
                                   simulate_examples=args.simulate_examples,
-                                  changedmodels=args.changedmodel,
+                                  changedmodel=args.changedmodel,
                                   library=args.library,
                                   wh_library=args.wh_library,
                                   filterwhitelist=args.filterwhitelist)

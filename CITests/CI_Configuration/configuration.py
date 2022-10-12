@@ -1,6 +1,6 @@
 import os
 
-class Config(object):
+class CI_configuration(object):
 
     def __init__(self):
         '''
