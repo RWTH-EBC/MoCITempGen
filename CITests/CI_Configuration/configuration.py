@@ -40,7 +40,7 @@ class CI_conf_class(object):
 
     def return_file_list(self):
         file_list = []
-        file_dic = (vars(Config()))
+        file_dic = (vars(CI_conf_class()))
         for file in file_dic:
             if file.find("_file") > -1:
                 file_list.append(file_dic[file])
@@ -48,7 +48,7 @@ class CI_conf_class(object):
 
     def return_file_dir(self):
         dir_list = []
-        dir_dic = (vars(Config()))
+        dir_dic = (vars(CI_conf_class()))
         for dir in dir_dic:
             if dir.find("_dir") > -1:
                 dir_list.append(dir_dic[dir])
@@ -57,6 +57,6 @@ class CI_conf_class(object):
 
 
 if __name__ == '__main__':
-    conf = Config()
+    conf = CI_conf_class()
     conf.return_file_list()
 

@@ -199,8 +199,8 @@ class ValidateTest(CI_conf_class):
             models.remove(example)
         return models
 
-    def _get_wh_models(self):  # Return a List with all models from the Whitelist
-        wh_file = open(self.wh_file, "r")
+    def _get_wh_models(self):  # Return a list with all models from the whitelist
+        wh_file = open(self.wh_model_file, "r")
         lines = wh_file.readlines()
         wh_list_models = []
         for line in lines:
