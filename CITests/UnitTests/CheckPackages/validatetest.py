@@ -12,7 +12,6 @@ class Git_Repository_Clone(object):
         self.library = library
 
     def _clone_repository(self):  # pull git repo
-
         if os.path.exists(self.repo_dir):
             print(f'{self.library} folder exists already!')
         else:
@@ -23,7 +22,7 @@ class Git_Repository_Clone(object):
 class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
-    def __init__(self, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
+    def __init__(self, dymola, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
                  wh_library, filterwhitelist):
         self.single_package = single_package
         self.number_of_processors = number_of_processors
@@ -39,14 +38,7 @@ class ValidateTest(CI_conf_class):
         super().__init__()
         self.err_log = f'{self.library}{os.sep}{self.library}.{self.single_package}-errorlog.txt'
 
-        # Load modelica python interface
-        from dymola.dymola_interface import DymolaInterface
-        from dymola.dymola_exception import DymolaException
-        print(f'1: Starting Dymola instance')
-        if platform.system() == "Windows":
-            dymola = DymolaInterface()
-        else:
-            dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+
         self.dymola = dymola
         self.dymola_exception = DymolaException()
         self.dymola.ExecuteCommand(
@@ -321,7 +313,7 @@ class ValidateTest(CI_conf_class):
 
 class Create_whitelist(CI_conf_class):
 
-    def __init__(self, library, wh_library, repo_dir, git_url):
+    def __init__(self, dymola, library, wh_library, repo_dir, git_url):
         self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
@@ -329,13 +321,6 @@ class Create_whitelist(CI_conf_class):
         self.wh_lib_path = f'{self.wh_lib}{os.sep}{self.wh_lib}{os.sep}package.mo'
         super().__init__()
 
-        from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
-        from dymola.dymola_exception import DymolaException
-        print(f'1: Starting Dymola instance')
-        if platform.system() == "Windows":
-            dymola = DymolaInterface()
-        else:
-            dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         self.dymola = dymola
         self.dymola_exception = DymolaException()
         self.dymola.ExecuteCommand(
@@ -499,8 +484,7 @@ class Create_whitelist(CI_conf_class):
 
 
 def _setEnvironmentVariables(var, value):  # Add to the environment variable 'var' the value 'value'
-    import os
-    import platform
+    import os, platform
     if var in os.environ:
         if platform.system() == "Windows":
             os.environ[var] = value + ";" + os.environ[var]
@@ -562,24 +546,33 @@ if __name__ == '__main__':
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
-
+    # Load modelica python interface
+    from dymola.dymola_interface import DymolaInterface
+    from dymola.dymola_exception import DymolaException
+    print(f'1: Starting Dymola instance')
+    if platform.system() == "Windows":
+        dymola = DymolaInterface()
+    else:
+        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
 
     if args.whitelist is True:  # Write a new WhiteList
-        wh = Create_whitelist(library=args.library,
+        wh = Create_whitelist(dymola=dymola,
+                              library=args.library,
                               wh_library=args.wh_library,
                               repo_dir=args.repo_dir,
                               git_url=args.git_url)
         wh.create_wh_workflow()
     else:
-        CheckModelTest = ValidateTest(single_package=args.single_package,
-                                  number_of_processors=args.number_of_processors,
-                                  show_gui=args.show_gui,
-                                  simulate_examples=args.simulate_examples,
-                                  changedmodel=args.changedmodel,
-                                  library=args.library,
-                                  wh_library=args.wh_library,
-                                  filterwhitelist=args.filterwhitelist)
-        if args.simulateexamples is True:  # Simulate Models
+        CheckModelTest = ValidateTest(dymola=dymola,
+                                      single_package=args.single_package,
+                                      number_of_processors=args.number_of_processors,
+                                      show_gui=args.show_gui,
+                                      simulate_examples=args.simulate_examples,
+                                      changedmodel=args.changedmodel,
+                                      library=args.library,
+                                      wh_library=args.wh_library,
+                                      filterwhitelist=args.filterwhitelist)
+        if args.simulate_examples is True:  # Simulate Models
             CheckModelTest.simulate_example_workflow()
         else:  # Check all Models in a Package
             CheckModelTest.check_model_workflow()
