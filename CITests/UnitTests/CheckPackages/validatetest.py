@@ -563,7 +563,7 @@ if __name__ == '__main__':
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
 
-    '''
+
     if args.whitelist is True:  # Write a new WhiteList
         wh = Create_whitelist(library=args.library,
                               wh_library=args.wh_library,
@@ -583,4 +583,4 @@ if __name__ == '__main__':
             CheckModelTest.simulate_example_workflow()
         else:  # Check all Models in a Package
             CheckModelTest.check_model_workflow()
-        '''
+
