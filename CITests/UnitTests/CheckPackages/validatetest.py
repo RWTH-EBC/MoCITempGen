@@ -150,7 +150,7 @@ class ValidateTest(CI_conf_class):
         for line in lines:
             if line.find("extends") > -1 and line.find("Modelica.Icons.Example") > -1:
                 example = filepath.replace(os.sep, ".")
-                example = example[example.rfind(self.mo_library):example.rfind(".mo")]
+                example = example[example.rfind(self.library):example.rfind(".mo")]
                 ex_file.close()
                 return example
 
@@ -245,7 +245,7 @@ class ValidateTest(CI_conf_class):
                     error_message.append(log)
                     print(f'{log}')
                     continue
-        self.dymola.savelog(self.mo_library + "." + self.package + "-log.txt")
+        self.dymola.savelog(self.library + "." + self.single_package + "-log.txt")
         self.dymola.close()
         return error_model, error_message
 
@@ -275,7 +275,7 @@ class ValidateTest(CI_conf_class):
                         print(f'{log}')
                         error_model.append(example)
                         error_message.append(log)
-        self.dymola.savelog(self.mo_library + "." + self.package + "-log.txt")
+        self.dymola.savelog(self.library + "." + self.single_package + "-log.txt")
         self.dymola.close()
         return error_model, error_message
 
