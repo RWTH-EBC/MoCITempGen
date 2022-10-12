@@ -1,11 +1,6 @@
-import re
-import json
-import requests
+import re, json, requests, argparse, time
 from datetime import datetime
 from datetime import date
-import argparse
-import time
-import os
 
 class Slack_Notification(object):
 

@@ -1,8 +1,4 @@
-import os
-import sys 
-import shutil
-import glob
-import argparse
+import os, sys, shutil, glob, argparse
 from natsort import natsorted
 
 def copy_mos(ibpsa_dir, dst):

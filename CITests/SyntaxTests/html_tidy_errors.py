@@ -1,10 +1,7 @@
-import os
-import io
-import argparse
-import shutil
+import os, io, argparse, shutil, sys
 from git import Repo
-import sys
-from CI_Configuration.configuration import Config
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -42,7 +39,7 @@ In case of trouble just put the dll in your working dir.
 """
 
 
-class HTML_Tidy(Config):
+class HTML_Tidy(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
     def __init__(self, package, correct_overwrite, correct_backup, log, font, align, correct_view,
@@ -530,7 +527,7 @@ class HTML_Tidy(Config):
         return library_list
 
 
-class HTML_whitelist(Config):
+class HTML_whitelist(CI_conf_class):
 
     def __init__(self, wh_library, git_url):
         self.wh_library = wh_library

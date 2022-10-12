@@ -1,19 +1,20 @@
 import matplotlib.pyplot as plt
 from matplotlib.widgets import CheckButtons
 import numpy as np
-import sys, difflib
-import os
+import sys, difflib, os, shutil
+
 from git import Repo
 from shutil import copyfile
-import shutil
+
 import pathlib
 import glob
 import pandas as pd
 import argparse
-from CI_Configuration.configuration import Config
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
 
-class Plot_Charts(Config):
+class Plot_Charts(CI_conf_class):
 
     def __init__(self, package, library):
         self.package = package

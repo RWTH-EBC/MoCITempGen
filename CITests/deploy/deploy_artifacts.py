@@ -1,12 +1,8 @@
-import os
-import codecs
-import sys
-import shutil
-import argparse
-import glob
-from CI_Configuration.configuration import Config
+import os, codecs, sys, shutil, argparse, glob
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
-class Deploy_Artifacts(Config):
+class Deploy_Artifacts(CI_conf_class):
 
     def __init__(self, library):
         self.library = library

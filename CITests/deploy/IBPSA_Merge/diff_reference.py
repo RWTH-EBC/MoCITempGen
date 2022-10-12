@@ -1,19 +1,13 @@
-
 import numpy as np
-import sys, difflib
-import os 
+import sys, difflib, os, shutil, pathlib, glob
 from git import Repo
 from shutil import copyfile
-import shutil
-import pathlib
-import glob
-
-from CI_Configuration.configuration import Config
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
 
 
-
-class Return_diff_files(Config):
+class Return_diff_files(CI_conf_class):
 
 	def __init__(self, library, wh_library):
 		self.library = library

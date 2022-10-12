@@ -1,6 +1,14 @@
-import multiprocessing, argparse, os, platform, time, glob, sys
+import argparse
+import glob
+import multiprocessing
+import os
+import platform
+import sys
+import time
+
 from git import Repo
 from natsort import natsorted
+
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
@@ -13,7 +21,7 @@ class Git_Repository_Clone(object):
 
     def _clone_repository(self):  # pull git repo
         if os.path.exists(self.repo_dir):
-            print(f'{self.library} folder exists already!')
+            print(f'{self.library} folder already exists.')
         else:
             print(f'Clone {self.library} Repo')
             Repo.clone_from(self.git_url, self.repo_dir)
@@ -31,19 +39,17 @@ class ValidateTest(CI_conf_class):
         self.library = library
         self.wh_library = wh_library
         self.filterwhitelist = filterwhitelist
-
         self.lib_path = f'{self.library}{os.sep}package.mo'
         self.root_package = f'{self.library}{os.sep}{self.single_package}'
-        super().__init__()
         self.err_log = f'{self.library}{os.sep}{self.library}.{self.single_package}-errorlog.txt'
-
+        super().__init__()
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")   # Writes all information in the log file, not only the
 
     def _dym_check_lic(self):  # check dymola license
-        dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
         lic_counter = 0
+        dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
         while dym_sta_lic_available is False:
             print(f'{self.CRED} No Dymola License is available {self.CEND} \n Check Dymola license after 180.0 seconds')
             self.dymola.close()
@@ -100,15 +106,18 @@ class ValidateTest(CI_conf_class):
             print(f'Don´t find models that failed.')
             exit(1)
 
-    ###################################################################################################################
     ## Write logs (error logs)
     def _write_errorlog(self, error_model,
                         error_message):  # Write a Error log with all models, that don´t pass the check
-        error_log = open(self.err_log, "w")
-        for model, message in zip(error_model, error_message):
-            error_log.write(f'\n \n Error in model:  {model} \n')
-            error_log.write(str(message))
-        error_log.close()
+        try:
+            error_log = open(self.err_log, "w")
+            for model, message in zip(error_model, error_message):
+                error_log.write(f'\n \n Error in model:  {model} \n')
+                error_log.write(str(message))
+            error_log.close()
+        except IOError:
+            print(f'Error: File {self.err_log} does not exist.')
+            exit(0)
 
     ## Get Models to check or simulate
     def _get_model(self):  # list all models in package
@@ -123,36 +132,45 @@ class ValidateTest(CI_conf_class):
         if len(model_list) == 0:
             print(f'No models in package {self.single_package}')
             exit(1)
-        return model_list
+        else:
+            return model_list
 
     def _get_changed_models(self):
         print(f'Test only changed or new models')
-        changed_model_file = open(self.ch_file, "r", encoding='utf8')
-        lines = changed_model_file.readlines()
-        modelica_models = []
-        for line in lines:
-            if line.rfind(".mo") > -1 and line.find("package") == -1:
-                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
-                        "ReferenceResults") == -1:
-                    model_name = line.replace(os.sep, ".")
-                    model_name = model_name.replace('/', ".")
-                    modelica_models.append(model_name)
-                    continue
-        if len(modelica_models) == 0:
-            print(f'No changed models in Package: {self.single_package}')
+        try:
+            changed_model_file = open(self.ch_file, "r", encoding='utf8')
+            lines = changed_model_file.readlines()
+            modelica_models = []
+            for line in lines:
+                if line.rfind(".mo") > -1 and line.find("package") == -1:
+                    if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
+                            "ReferenceResults") == -1:
+                        model_name = line.replace(os.sep, ".")
+                        model_name = model_name.replace('/', ".")
+                        modelica_models.append(model_name)
+                        continue
+            if len(modelica_models) == 0:
+                print(f'No changed models in Package: {self.single_package}')
+                exit(0)
+            changed_model_file.close()
+            return modelica_models
+        except IOError:
+            print(f'Error: File {self.ch_file} does not exist.')
             exit(0)
-        changed_model_file.close()
-        return modelica_models
 
     def _get_icon_example(self, filepath):
-        ex_file = open(filepath, "r", encoding='utf8', errors='ignore')
-        lines = ex_file.readlines()
-        for line in lines:
-            if line.find("extends") > -1 and line.find("Modelica.Icons.Example") > -1:
-                example = filepath.replace(os.sep, ".")
-                example = example[example.rfind(self.library):example.rfind(".mo")]
-                ex_file.close()
-                return example
+        try:
+            ex_file = open(filepath, "r", encoding='utf8', errors='ignore')
+            lines = ex_file.readlines()
+            for line in lines:
+                if line.find("extends") > -1 and line.find("Modelica.Icons.Example") > -1:
+                    example = filepath.replace(os.sep, ".")
+                    example = example[example.rfind(self.library):example.rfind(".mo")]
+                    ex_file.close()
+                    return example
+        except IOError:
+            print(f'Error: File {filepath} does not exist.')
+            exit(0)
 
     def _get_simulate_examples(self):  # list all examples in package
         example_list = []
@@ -165,39 +183,49 @@ class ValidateTest(CI_conf_class):
         if len(example_list) == 0:
             print(f'No models in package {self.single_package}')
             exit(0)
-        return example_list
+        else:
+            return example_list
 
     def _get_changed_simulate_examples(self):  # list all changed examples in package
         print(f'Test only changed or new models')
-        changed_model_file = open(self.ch_file, "r", encoding='utf8',
-                                  errors='ignore')
         example_list = []
-        lines = changed_model_file.readlines()
-        for line in lines:
-            if line.rfind(".mo") > -1 and line.find("package") == -1:
-                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
-                        "ReferenceResults") == -1:
-                    model = line.lstrip()
-                    model = model.strip().replace("\n", "")
-                    model_name = model[model.rfind(self.library):]
-                    example = self._get_icon_example(filepath=model_name)
-                    example_list.append(example)
-        changed_model_file.close()
-        if len(example_list) == 0:
-            print(f'No changed models in Package: {self.single_package}')
-            exit(0)
-        return example_list
+        try:
+            changed_model_file = open(self.ch_file, "r", encoding='utf8',
+                                      errors='ignore')
+            lines = changed_model_file.readlines()
+            for line in lines:
+                if line.rfind(".mo") > -1 and line.find("package") == -1:
+                    if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
+                            "ReferenceResults") == -1:
+                        model = line.lstrip()
+                        model = model.strip().replace("\n", "")
+                        model_name = model[model.rfind(self.library):]
+                        example = self._get_icon_example(filepath=model_name)
+                        example_list.append(example)
+            changed_model_file.close()
+            if len(example_list) == 0:
+                print(f'No changed models in Package: {self.single_package}')
+                exit(0)
+            else:
+                return example_list
+        except IOError:
+            print(f'Error: File {self.ch_file} does not exist.')
+            exit(1)
 
     def _filter_wh_models(self, models, wh_list):
         wh_list_mo = []
-        for element in models:
-            for subelement in wh_list:
-                if element == subelement:
-                    wh_list_mo.append(element)
-        wh_list_mo = list(set(wh_list_mo))
-        for example in wh_list_mo:
-            models.remove(example)
-        return models
+        if len(models) == 0:
+            print(f'No examples models in package: {self.single_package}')
+            exit(0)
+        else:
+            for element in models:
+                for subelement in wh_list:
+                    if element == subelement:
+                        wh_list_mo.append(element)
+            wh_list_mo = list(set(wh_list_mo))
+            for example in wh_list_mo:
+                models.remove(example)
+            return models
 
     def _get_wh_models(self):  # Return a list with all models from the whitelist
         wh_list_models = []
@@ -206,8 +234,7 @@ class ValidateTest(CI_conf_class):
             lines = wh_file.readlines()
             for line in lines:
                 model = line.lstrip()
-                model = model.strip()
-                model = model.replace("\n", "")
+                model = model.strip().replace("\n", "")
                 if model.find(f'{self.wh_library}.{self.single_package}') > -1:
                     print(f'Dont test {self.wh_library} model: {model}. Model is on the whitelist.')
                     wh_list_models.append(model.replace(self.wh_library, self.library))
@@ -222,32 +249,35 @@ class ValidateTest(CI_conf_class):
 
     def _checkmodel(self, model_list):  # Check models and return a Error Log, if the check failed
         print(f'Check models')
-
         self._library_path_check()
         error_model = []
         error_message = []
-        for model in model_list:
-            result = self.dymola.checkModel(model)
-            if result is True:
-                print(f'\n {self.green} Successful: {self.CEND} {model} \n')
-                continue
-            if result is False:
-                print(
-                    f'Check for Model {model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} {model}\nSecond Check Test for model {model}')
-                sec_result = self.dymola.checkModel(model)
-                if sec_result is True:
+        if len(model_list) == 0:
+            print(f'{self.CRED}Error:{self.CEND} Found no models in {self.single_package}.')
+            exit(0)
+        else:
+            for model in model_list:
+                result = self.dymola.checkModel(model)
+                if result is True:
                     print(f'\n {self.green} Successful: {self.CEND} {model} \n')
                     continue
-                if sec_result is False:
-                    print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
-                    log = self.dymola.getLastError()
-                    error_model.append(model)
-                    error_message.append(log)
-                    print(f'{log}')
-                    continue
-        self.dymola.savelog(self.library + "." + self.single_package + "-log.txt")
-        self.dymola.close()
-        return error_model, error_message
+                if result is False:
+                    print(
+                        f'Check for Model {model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} {model}\nSecond Check Test for model {model}')
+                    sec_result = self.dymola.checkModel(model)
+                    if sec_result is True:
+                        print(f'\n {self.green} Successful: {self.CEND} {model} \n')
+                        continue
+                    if sec_result is False:
+                        print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
+                        log = self.dymola.getLastError()
+                        error_model.append(model)
+                        error_message.append(log)
+                        print(f'{log}')
+                        continue
+            self.dymola.savelog(self.library + "." + self.single_package + "-log.txt")
+            self.dymola.close()
+            return error_model, error_message
 
     def _simulate_examples(self, example_list):  # Simulate examples or validations
         print(f'Simulate examples and validations')
@@ -255,7 +285,7 @@ class ValidateTest(CI_conf_class):
         error_model = []
         error_message = []
         if len(example_list) == 0:
-            print(f'{self.CRED}Error:{self.CEND} Found no examples')
+            print(f'{self.CRED}Error:{self.CEND} Found no examples in {self.single_package}.')
             exit(0)
         else:
             for example in example_list:
@@ -291,9 +321,13 @@ class ValidateTest(CI_conf_class):
             model_list = self._filter_wh_models(models=models, wh_list=wh_list)
         else:  # Check all models in package
             model_list = self._get_model()
-        result = self._checkmodel(model_list=model_list)
-        self._write_errorlog(error_model=result[0], error_message=result[1])
-        self._check_result(error_model=result[0])
+        if len(model_list) == 0:
+            print(f'Find no models in package {self.single_package}')
+            exit(0)
+        else:
+            result = self._checkmodel(model_list=model_list)
+            self._write_errorlog(error_model=result[0], error_message=result[1])
+            self._check_result(error_model=result[0])
 
     def simulate_example_workflow(self):
         self._check_packages()
@@ -307,9 +341,12 @@ class ValidateTest(CI_conf_class):
             simulate_example_list = self._filter_wh_models(models=models, wh_list=wh_list)
         else:
             simulate_example_list = self._get_simulate_examples()
-        result = self._simulate_examples(example_list=simulate_example_list)
-        self._write_errorlog(error_model=result[0], error_message=result[1])
-        self._check_result(error_model=result[0])
+        if len(simulate_example_list) == 0:
+            print(f'Find no examples in package {self.single_package}')
+        else:
+            result = self._simulate_examples(example_list=simulate_example_list)
+            self._write_errorlog(error_model=result[0], error_message=result[1])
+            self._check_result(error_model=result[0])
 
 
 class Create_whitelist(CI_conf_class):
@@ -319,30 +356,50 @@ class Create_whitelist(CI_conf_class):
         self.wh_library = wh_library
         self.repo_dir = repo_dir
         self.git_url = git_url
-        self.wh_lib_path = f'{self.wh_lib}{os.sep}{self.wh_lib}{os.sep}package.mo'
+        self.wh_lib_path = f'{self.wh_library}{os.sep}{self.wh_library}{os.sep}package.mo'
+        self.err_log = f'{self.wh_library}{os.sep}{self.wh_library}-errorlog.txt'
         super().__init__()
-
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand(
             "Advanced.TranslationInCommandLog:=true;")  # ## Writes all information in the log file, not only the
 
+    def _write_whitelist_errorlog(self, error_model,
+                        error_message):  # Write a Error log with all models, that don´t pass the check
+        try:
+            error_log = open(self.err_log, "w")
+            for model, message in zip(error_model, error_message):
+                error_log.write(f'\n \n Error in model:  {model} \n')
+                error_log.write(str(message))
+            error_log.close()
+        except IOError:
+            print(f'Error: File {self.err_log} does not exist.')
+            exit(0)
+
     def _write_whitelist(self, error_model_list, version):  # write a new whitelist
-        wh_file = open(self.wh_model_file, "w")
-        wh_file.write(f'\n{version} \n \n')
-        for model in error_model_list:
-            wh_file.write(f'\n{model} \n \n')
-        print(
-            f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
-        wh_file.close()
+        try:
+            wh_file = open(self.wh_model_file, "w")
+            wh_file.write(f'\n{version} \n \n')
+            for model in error_model_list:
+                wh_file.write(f'\n{model} \n \n')
+            print(
+                f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
+            wh_file.close()
+        except IOError:
+            print(f'Error: File {self.wh_model_file} does not exist.')
+            return wh_list_models
 
     def _write_exit_log(self, version_check):  # write entry in exit file
-        exit = open(self.exit_file, "w")
-        if version_check is False:
-            exit.write(f'FAIL')
-        else:
-            exit.write(f'successful')
-        exit.close()
+        try:
+            exit = open(self.exit_file, "w")
+            if version_check is False:
+                exit.write(f'FAIL')
+            else:
+                exit.write(f'successful')
+            exit.close()
+        except IOError:
+            print(f'Error: File {self.exit_file} does not exist.')
+            return wh_list_models
 
     def read_script_version(self):
         dir = f'{self.library}{os.sep}Resources{os.sep}Scripts'
@@ -361,22 +418,26 @@ class Create_whitelist(CI_conf_class):
         if os.path.exists(self.wh_file):
             print(f'Whitelist does exist. Update the whitelist under {self.wh_file}')
         else:
-            print(f' Whitelist does not exist. Create a new one under {self.wh_file}')
+            print(f'Whitelist does not exist. Create a new one under {self.wh_file}')
             file = open(self.wh_file, "w+")
             file.close()
 
     def _check_whitelist(self,
                          version):  # Write a new Whitelist with all models in IBPSA Library of those models who have not passed the Check Test
-        vfile = open(self.wh_file, "r")  # Read the last version of whitelist
-        lines = vfile.readlines()
-        version_check = False
-        for line in lines:
-            line = line.strip()
-            if line.strip("\n") == version.strip("\n"):
-                print(f'Whitelist is on version {version}. The whitelist is already up to date')
-                version_check = True
-        vfile.close()
-        return version_check
+        try:
+            vfile = open(self.wh_file, "r")  # Read the last version of whitelist
+            lines = vfile.readlines()
+            version_check = False
+            for line in lines:
+                line = line.strip()
+                if line.strip("\n") == version.strip("\n"):
+                    print(f'Whitelist is on version {version}. The whitelist is already up to date')
+                    version_check = True
+            vfile.close()
+            return version_check
+        except IOError:
+            print(f'Error: File {self.wh_file} does not exist.')
+            return wh_list_models
 
     def _get_wh_model(self, wh_path):
         model_list = []
@@ -385,7 +446,7 @@ class Create_whitelist(CI_conf_class):
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mo") and file != "package.mo":
                     model = filepath.replace(os.sep, ".")
-                    model = model[model.rfind(self.wh_lib):model.rfind(".mo")]
+                    model = model[model.rfind(self.wh_library):model.rfind(".mo")]
                     model_list.append(model)
         if len(model_list) == 0:
             print(f'No Models')
@@ -412,9 +473,9 @@ class Create_whitelist(CI_conf_class):
     def _check_whitelist_model(self, model_list):  # check models for creating whitelist
         package_check = self.dymola.openModel(self.wh_lib_path)
         if package_check is True:
-            print(f'Found {self.wh_lib} Library and check models in library {self.wh_lib} \n')
+            print(f'Found {self.wh_library} Library and check models in library {self.wh_library} \n')
         elif package_check is False:
-            print(f'Library path is wrong. Please check path of {self.wh_lib} library path.')
+            print(f'Library path is wrong. Please check path of {self.wh_library} library path.')
             exit(1)
         error_model = []
         error_message = []
@@ -430,7 +491,7 @@ class Create_whitelist(CI_conf_class):
                 error_model.append(model)
                 error_message.append(log)
                 continue
-        self.dymola.savelog(f'{self.wh_lib}-log.txt')
+        self.dymola.savelog(f'{self.wh_library}-log.txt')
         self.dymola.close()
         return error_model, error_message
 
@@ -438,9 +499,15 @@ class Create_whitelist(CI_conf_class):
         if self.wh_library is None:
             print(f'{self.CRED}Error:{self.CEND} Whitelist library is missing!')
             exit(1)
+        else:
+            print(f'Setting: Whitelist library {self.wh_library}')
         if self.library is None:
             print(f'{self.CRED}Error{self.CEND}: Library is missing!')
             exit(1)
+        else:
+            print(f'Setting: Library {self.library}')
+
+
 
     def _check_repo_dir(self):
         if self.repo_dir is None:
@@ -450,7 +517,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Setting: Repository url: {self.repo_dir}')
 
     def _check_git_url(self):
-        if self.git_url is None and self.wh_path is None:
+        if self.git_url is None and self.wh_lib_path is None:
             print(f'{self.CRED}Error:{self.CEND} git url or whitelist path is missing!')
             exit(1)
         if self.git_url is not None:
@@ -462,7 +529,7 @@ class Create_whitelist(CI_conf_class):
         version = self.read_script_version()
         version_check = self._check_whitelist(version)
         if version_check is False:
-            self._write_exit_log(version_check)
+            self._write_exit_log(version_check=version_check)
             model_list = []
             self._check_repo_dir()
             self._check_git_url()
@@ -472,12 +539,13 @@ class Create_whitelist(CI_conf_class):
                                                  library=self.wh_library)
                 Git_Class._clone_repository()
                 model_list = self._get_wh_model(wh_path=self.repo_dir)
-            elif self.wh_path is not None:
-                print(f'Setting: whitelist path library {self.wh_path}')
-                model_list = self._get_wh_model(wh_path=self.wh_path)
+            elif self.wh_lib_path is not None:
+                print(f'Setting: Whitelist path library {self.wh_lib_path}')
+                model_list = self._get_wh_model(wh_path=self.wh_lib_path)
             self._dym_check_lic()
             result = self._check_whitelist_model(model_list=model_list)
             self._write_whitelist(error_model_list=result[0], version=version)
+            self._write_whitelist_errorlog(error_model=result[0], error_message=result[1])
             exit(0)
         else:
             self._write_exit_log(version_check=version_check)
@@ -520,22 +588,20 @@ def _setEnvironmentPath(dymolaversion):
 
 
 if __name__ == '__main__':
-    from validatetest import ValidateTest
-
-    parser = argparse.ArgumentParser(description="Check and Validate single Packages")  # Configure the argument parser
-    check_test_group = parser.add_argument_group("arguments to run check tests")
+    parser = argparse.ArgumentParser(description="Check and validate single packages")  # Configure the argument parser
+    check_test_group = parser.add_argument_group("Arguments to run check tests")
     check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
                                   help="Test only the Modelica package AixLib.Package")
     check_test_group.add_argument("-n", "--number-of-processors", type=int, default=multiprocessing.cpu_count(),
                                   help="Maximum number of processors to be used")
     check_test_group.add_argument("--show-gui", help="show the GUI of the simulator", action="store_true")
     check_test_group.add_argument("-WL", "--whitelist",
-                                  help="Create a WhiteList of IBPSA Library: y: Create WhiteList, n: Don´t create WhiteList",
+                                  help="Create a WhiteList of IBPSA Library.",
                                   action="store_true")
-    check_test_group.add_argument("-SE", "--simulate-examples", help="Check and Simulate Examples in the Package",
+    check_test_group.add_argument("-SE", "--simulate-examples", help="Check and simulate examples in the package",
                                   action="store_true")
     check_test_group.add_argument("-DS", "--dymolaversion", default="2020",
-                                  help="Version of Dymola(Give the number e.g. 2020")
+                                  help="Version of dymola (Give the number e.g. 2020")
     check_test_group.add_argument("-V", "--check-version", default=False, action="store_true")
     check_test_group.add_argument("-CM", "--changedmodel", default=False, action="store_true")
     check_test_group.add_argument("-FW", "--filterwhitelist", default=False, action="store_true")
@@ -577,6 +643,8 @@ if __name__ == '__main__':
                                       library=args.library,
                                       wh_library=args.wh_library,
                                       filterwhitelist=args.filterwhitelist)
+
+
         if args.simulate_examples is True:  # Simulate Models
             CheckModelTest.simulate_example_workflow()
         else:  # Check all Models in a Package

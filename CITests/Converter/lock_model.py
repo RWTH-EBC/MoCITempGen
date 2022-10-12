@@ -1,10 +1,9 @@
-import os
+import os, argparse, sys
 from pathlib import Path
-import argparse
-import sys
-from CI_Configuration.configuration import Config
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
-class Lock_model(Config):
+class Lock_model(CI_conf_class):
 
     def __init__(self,  library, wh_library):
         self.library = library

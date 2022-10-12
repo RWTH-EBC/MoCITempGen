@@ -1,12 +1,8 @@
-import os
-import sys
-import platform
-import multiprocessing
-import argparse
-import time
-from CI_Configuration.configuration import Config
+import os, sys, platform, multiprocessing, argparse, time
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
-class Buildingspy_Regression_Check(Config):
+class Buildingspy_Regression_Check(CI_conf_class):
 
     def __init__(self, package, library, n_pro, tool, batch, show_gui, path):
         self.package = package
@@ -16,12 +12,11 @@ class Buildingspy_Regression_Check(Config):
         self.batch = batch
         self.show_gui = show_gui
         self.path = path
-
         super().__init__()
-
         self.ref_whitelist = f'..{os.sep}{self.ref_whitelist_file}'
         self.exit_file = f'..{os.sep}{self.exit_file}'
         self.ref_file = f'..{os.sep}{self.ref_file}'
+
         import buildingspy.development.regressiontest as u  # Buildingspy
         self.ut = u.Tester(tool=self.tool)
 
@@ -223,9 +218,9 @@ class Buildingspy_Regression_Check(Config):
             return None
 
 
-class Extended_model(Config):
+class Extended_model(CI_conf_class):
 
-    def __init__(self, package, library, dymolaversion, path):
+    def __init__(self, dymola,dymola_exception, package, library, dymolaversion, path):
         self.package = package
         self.library = library
         self.dymolaversion = dymolaversion
@@ -240,15 +235,9 @@ class Extended_model(Config):
             print(f'{self.CRED}Error:{self.CEND} Library is missing! (e.g. AixLib)')
             exit(1)
 
-        from dymola.dymola_interface import DymolaInterface
-        from dymola.dymola_exception import DymolaException
-        print(f'1: Starting Dymola instance')
-        if platform.system() == "Windows":
-            dymola = DymolaInterface()
-        else:
-            dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+
         self.dymola = dymola
-        self.dymola_exception = DymolaException()
+        self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
         librarycheck = self.dymola.openModel(self.path)
         if librarycheck == True:
@@ -458,7 +447,7 @@ class Extended_model(Config):
 
 
 
-class Buildingspy_Validate_test(Config):
+class Buildingspy_Validate_test(CI_conf_class):
 
     def __init__(self, path):
         self.path = path
@@ -582,6 +571,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
+    from dymola.dymola_interface import DymolaInterface
+    from dymola.dymola_exception import DymolaException
+
+    print(f'1: Starting Dymola instance')
+    if platform.system() == "Windows":
+        dymola = DymolaInterface()
+        dymola_exception = DymolaException()
+    else:
+        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+        dymola_exception = DymolaException()
 
     # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --validate-html-only
     if args.validate_html_only:  # Validate the html syntax only, and then exit
@@ -620,7 +619,9 @@ if __name__ == '__main__':
         exit(0)
     else:
         if args.modified_models is False:  # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --single-package Airflow --library AixLib --batch -DS 2019
-            list_reg_model = Extended_model(package=args.single_package,
+            list_reg_model = Extended_model(dymola=dymola,
+                                            dymola_exception=dymola_exception,
+                                            package=args.single_package,
                                             library=args.library,
                                             dymolaversion=args.dymolaversion,
                                             path="package.mo")
@@ -631,7 +632,9 @@ if __name__ == '__main__':
         if args.modified_models is True:
             ref_check._write_reg_list()
             package = args.single_package[args.single_package.rfind(".") + 1:]
-            list_reg_model = Extended_model(package=package,
+            list_reg_model = Extended_model(dymola=dymola,
+                                            dymola_exception=dymola_exception,
+                                            package=package,
                                             library=args.library,
                                             dymolaversion=args.dymolaversion,
                                             path="package.mo")

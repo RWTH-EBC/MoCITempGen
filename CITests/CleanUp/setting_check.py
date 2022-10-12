@@ -1,10 +1,8 @@
-import sys
-import configparser
-import os
-import argparse
-from CI_Configuration.configuration import Config
+import sys, configparser, os, argparse
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
-class Check_Settings(Config):
+class Check_Settings(CI_conf_class):
 
     def __init__(self):
         super().__init__()

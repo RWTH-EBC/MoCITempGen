@@ -1,31 +1,21 @@
-import codecs
-import argparse
-import os
-import sys 
-import platform
-import time
-from CI_Configuration.configuration import Config
+import codecs, argparse, os, sys, platform, time
 
-class StyleCheck(Config):
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
+
+class StyleCheck(CI_conf_class):
 	""" Class to Check the Style of Packages and Models
 	Export a HTML-Log File"""
 	
-	def __init__(self, package, library, dymolaversion, changed_models):
+	def __init__(self,dymola, dymola_exception,  package, library, dymolaversion, changed_models):
 		self.package = package
 		self.library = library
 		self.dymolaversion = dymolaversion
 		self.changed_models = changed_models
 		super().__init__()
 
-		from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
-		from dymola.dymola_exception import DymolaException
-		print(f'1: Starting Dymola instance')
-		if platform.system() == "Windows":
-			dymola = DymolaInterface()
-		else:
-			dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
 		self.dymola = dymola
-		self.dymola_exception = DymolaException()
+		self.dymola_exception = dymola_exception
 		self.dymola.ExecuteCommand(
 			"Advanced.TranslationInCommandLog:=true;")  # Writes all information in the log file, not only the
 
@@ -203,7 +193,19 @@ if  __name__ == '__main__':
 	check_test_group.add_argument("-CM", "--changed_models",default=False, action="store_true")
 	args = parser.parse_args()  # Parse the arguments
 
-	CheckStyleTest = StyleCheck(package=args.single_package,
+	from dymola.dymola_interface import DymolaInterface  # Load modelica python interface
+	from dymola.dymola_exception import DymolaException
+	print(f'1: Starting Dymola instance')
+	if platform.system() == "Windows":
+		dymola = DymolaInterface()
+		dymola_exception = DymolaException()
+	else:
+		dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+		dymola_exception = DymolaException()
+
+	CheckStyleTest = StyleCheck(dymola=dymola,
+								dymola_exception=dymola_exception,
+								package=args.single_package,
 								library=args.path,
 								dymolaversion=args.dymolaversion,
 								changed_models=args.changed_models)

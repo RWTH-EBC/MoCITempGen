@@ -5,10 +5,7 @@
    In the current directory, the subdirectory 'binaries' will also be
    deleted as Dymola 2013 creates this directory when exporting an FMU.
 """
-import os
-import sys
-import shutil
-import fnmatch
+import os, sys, shutil, fnmatch
 
 class CleanModelica(object):
 

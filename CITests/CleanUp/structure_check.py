@@ -1,8 +1,9 @@
-import os
+import os, sys
 from pathlib import Path
-from CI_Configuration.configuration import Config
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
-class Structure_check(Config):
+class Structure_check(CI_conf_class):
     def __init__(self):
         super().__init__()
 
