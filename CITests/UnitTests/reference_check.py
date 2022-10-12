@@ -1,6 +1,8 @@
 import os, sys, platform, multiprocessing, argparse, time
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
+import buildingspy.development.validator as validate
+import buildingspy.development.regressiontest as regression
 
 class Buildingspy_Regression_Check(CI_conf_class):
 
@@ -435,23 +437,10 @@ class Extended_model(CI_conf_class):
                 modelica_list.append(line[line.rfind(self.library):line.rfind(".mo")])
         return modelica_list
 
-
-
-
-
-
-
-
-
-
-
-
-
 class Buildingspy_Validate_test(CI_conf_class):
 
-    def __init__(self, path):
+    def __init__(self, validate, path):
         self.path = path
-        import buildingspy.development.validator as validate
         self.validate = validate
         super().__init__()
 
@@ -571,9 +560,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
+
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
-
     print(f'1: Starting Dymola instance')
     if platform.system() == "Windows":
         dymola = DymolaInterface()
@@ -584,17 +573,16 @@ if __name__ == '__main__':
 
     # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --validate-html-only
     if args.validate_html_only:  # Validate the html syntax only, and then exit
-        Buildingspy_Validate_test(path=args.path)._validate_html()
-
+        Buildingspy_Validate_test(validate=validate, path=args.path)._validate_html()
     # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --validate-experiment-setup
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
-        Buildingspy_Validate_test(path=args.path)._validate_experiment_setup()
+        Buildingspy_Validate_test(validate=validate, path=args.path)._validate_experiment_setup()
     elif args.coverage_only:   # cd AixLib && python ../bin/02_CITests/UnitTests/reference_check.py --coverage-only
         if args.single_package:
             single_package = args.single_package
         else:
             single_package = None
-        Buildingspy_Validate_test(path=args.path)._run_coverage_only(batch=args.batch,
+        Buildingspy_Validate_test(validate=validate, path=args.path)._run_coverage_only(batch=args.batch,
                                                                      tool=args.tool,
                                                                      package=single_package)
 
