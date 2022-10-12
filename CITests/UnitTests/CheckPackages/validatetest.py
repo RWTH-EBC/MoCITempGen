@@ -40,7 +40,7 @@ class ValidateTest(CI_conf_class):
 
         self.dymola = dymola
         self.dymola_exception = dymola_exception
-        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")  # Writes all information in the log file, not only the
+        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")   # Writes all information in the log file, not only the
 
     def _dym_check_lic(self):  # check dymola license
         dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
@@ -59,7 +59,7 @@ class ValidateTest(CI_conf_class):
         print(
             f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
-    ## Check settings (packages, library, path) #######################################################################
+    #  Check settings (packages, library, path)
     def _check_packages(self):
         if self.single_package is None:
             print(f'{self.CRED}Error:{self.CEND} Package is missing!')
@@ -200,21 +200,25 @@ class ValidateTest(CI_conf_class):
         return models
 
     def _get_wh_models(self):  # Return a list with all models from the whitelist
-        wh_file = open(self.wh_model_file, "r")
-        lines = wh_file.readlines()
         wh_list_models = []
-        for line in lines:
-            model = line.lstrip()
-            model = model.strip()
-            model = model.replace("\n", "")
-            if model.find(f'{self.wh_library}.{self.single_package}') > -1:
-                print(f'Dont test {self.wh_library} model: {model}. Model is on the whitelist')
-                wh_list_models.append(model.replace(self.wh_library, self.library))
-            elif model.find(f'{self.library}.{self.single_package}') > -1:
-                print(f'Dont test {self.library} model: {model}. Model is on the whitelist')
-                wh_list_models.append(model)
-        wh_file.close()
-        return wh_list_models
+        try:
+            wh_file = open(self.wh_model_file, "r")
+            lines = wh_file.readlines()
+            for line in lines:
+                model = line.lstrip()
+                model = model.strip()
+                model = model.replace("\n", "")
+                if model.find(f'{self.wh_library}.{self.single_package}') > -1:
+                    print(f'Dont test {self.wh_library} model: {model}. Model is on the whitelist.')
+                    wh_list_models.append(model.replace(self.wh_library, self.library))
+                elif model.find(f'{self.library}.{self.single_package}') > -1:
+                    print(f'Dont test {self.library} model: {model}. Model is on the whitelist.')
+                    wh_list_models.append(model)
+            wh_file.close()
+            return wh_list_models
+        except IOError:
+            print(f'Error: File {self.wh_model_file} does not exist.')
+            return wh_list_models
 
     def _checkmodel(self, model_list):  # Check models and return a Error Log, if the check failed
         print(f'Check models')
