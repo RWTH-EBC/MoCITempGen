@@ -22,7 +22,7 @@ class Git_Repository_Clone(object):
 class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
-    def __init__(self, dymola, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
+    def __init__(self, dymola, dymola_exception, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
                  wh_library, filterwhitelist):
         self.single_package = single_package
         self.number_of_processors = number_of_processors
@@ -38,11 +38,9 @@ class ValidateTest(CI_conf_class):
         super().__init__()
         self.err_log = f'{self.library}{os.sep}{self.library}.{self.single_package}-errorlog.txt'
 
-
         self.dymola = dymola
-        self.dymola_exception = DymolaException()
-        self.dymola.ExecuteCommand(
-            "Advanced.TranslationInCommandLog:=true;")  # Writes all information in the log file, not only the
+        self.dymola_exception = dymola_exception
+        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")  # Writes all information in the log file, not only the
 
     def _dym_check_lic(self):  # check dymola license
         dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
@@ -313,7 +311,7 @@ class ValidateTest(CI_conf_class):
 
 class Create_whitelist(CI_conf_class):
 
-    def __init__(self, dymola, library, wh_library, repo_dir, git_url):
+    def __init__(self, dymola, dymola_exception, library, wh_library, repo_dir, git_url):
         self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
@@ -322,7 +320,7 @@ class Create_whitelist(CI_conf_class):
         super().__init__()
 
         self.dymola = dymola
-        self.dymola_exception = DymolaException()
+        self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand(
             "Advanced.TranslationInCommandLog:=true;")  # ## Writes all information in the log file, not only the
 
@@ -552,11 +550,14 @@ if __name__ == '__main__':
     print(f'1: Starting Dymola instance')
     if platform.system() == "Windows":
         dymola = DymolaInterface()
+        dymola_exception = DymolaException()
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+        dymola_exception = DymolaException()
 
     if args.whitelist is True:  # Write a new WhiteList
         wh = Create_whitelist(dymola=dymola,
+                              dymola_exception=dymola_exception,
                               library=args.library,
                               wh_library=args.wh_library,
                               repo_dir=args.repo_dir,
@@ -564,6 +565,7 @@ if __name__ == '__main__':
         wh.create_wh_workflow()
     else:
         CheckModelTest = ValidateTest(dymola=dymola,
+                                      dymola_exception=dymola_exception,
                                       single_package=args.single_package,
                                       number_of_processors=args.number_of_processors,
                                       show_gui=args.show_gui,
