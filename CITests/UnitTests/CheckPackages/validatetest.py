@@ -18,7 +18,6 @@ class Git_Repository_Clone(object):
             print(f'Clone {self.library} Repo')
             Repo.clone_from(self.git_url, self.repo_dir)
 
-
 class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
@@ -72,10 +71,11 @@ class ValidateTest(CI_conf_class):
         else:
             print(f'Setting: library {self.library}')
 
-    def _library_path_check(self, pack_check):
+    def _library_path_check(self):
+        pack_check = self.dymola.openModel(self.lib_path)
         print(f'Library path: {self.lib_path}')
         if pack_check is True:
-            print(f'Found {self.library} Library and start check model test.\nCheck Package {self.package} \n')
+            print(f'Found {self.library} Library and start check model test.\nCheck Package {self.single_package} \n')
         elif pack_check is False:
             print(f'Library path is wrong. Please check the path of {self.library} library path.')
             exit(1)
@@ -222,8 +222,8 @@ class ValidateTest(CI_conf_class):
 
     def _checkmodel(self, model_list):  # Check models and return a Error Log, if the check failed
         print(f'Check models')
-        pack_check = self.dymola.openModel(self.lib_path)
-        self._library_path_check(pack_check=pack_check)
+
+        self._library_path_check()
         error_model = []
         error_message = []
         for model in model_list:
@@ -251,8 +251,7 @@ class ValidateTest(CI_conf_class):
 
     def _simulate_examples(self, example_list):  # Simulate examples or validations
         print(f'Simulate examples and validations')
-        pack_check = self.dymola.openModel(self.lib_path)
-        self._library_path_check(pack_check=pack_check)
+        self._library_path_check()
         error_model = []
         error_message = []
         if len(example_list) == 0:
