@@ -1,13 +1,8 @@
-import multiprocessing
-import argparse
-import os
-import sys
-import platform
+import multiprocessing, argparse, os, platform, time, glob, sys
 from git import Repo
-import time
-import glob
 from natsort import natsorted
-from CITests.CI_Configuration.configuration import CI_configuration
+sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
 class Git_Repository_Clone(object):
 
@@ -17,6 +12,7 @@ class Git_Repository_Clone(object):
         self.library = library
 
     def _clone_repository(self):  # pull git repo
+
         if os.path.exists(self.repo_dir):
             print(f'{self.library} folder exists already!')
         else:
@@ -24,10 +20,11 @@ class Git_Repository_Clone(object):
             Repo.clone_from(self.git_url, self.repo_dir)
 
 
-class ValidateTest(CI_configuration):
+class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
-    def __init__(self, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library, wh_library, filterwhitelist):
+    def __init__(self, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
+                 wh_library, filterwhitelist):
         self.single_package = single_package
         self.number_of_processors = number_of_processors
         self.show_gui = show_gui
@@ -69,8 +66,8 @@ class ValidateTest(CI_configuration):
                     print(f'There are currently no available Dymola licenses available. Please try again later.')
                     self.dymola.close()
                     exit(1)
-        print(f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
-
+        print(
+            f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
     ## Check settings (packages, library, path) #######################################################################
     def _check_packages(self):
@@ -145,7 +142,8 @@ class ValidateTest(CI_configuration):
         modelica_models = []
         for line in lines:
             if line.rfind(".mo") > -1 and line.find("package") == -1:
-                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find("ReferenceResults") == -1:
+                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
+                        "ReferenceResults") == -1:
                     model_name = line.replace(os.sep, ".")
                     model_name = model_name.replace('/', ".")
                     modelica_models.append(model_name)
@@ -182,12 +180,13 @@ class ValidateTest(CI_configuration):
     def _get_changed_simulate_examples(self):  # list all changed examples in package
         print(f'Test only changed or new models')
         changed_model_file = open(self.ch_file, "r", encoding='utf8',
-                              errors='ignore')
+                                  errors='ignore')
         example_list = []
         lines = changed_model_file.readlines()
         for line in lines:
             if line.rfind(".mo") > -1 and line.find("package") == -1:
-                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find("ReferenceResults") == -1:
+                if line.find(f'{self.library}{os.sep}{self.single_package}') > -1 and line.find(
+                        "ReferenceResults") == -1:
                     model = line.lstrip()
                     model = model.strip().replace("\n", "")
                     model_name = model[model.rfind(self.library):]
@@ -227,7 +226,6 @@ class ValidateTest(CI_configuration):
         wh_file.close()
         return wh_list_models
 
-
     def _checkmodel(self, model_list):  # Check models and return a Error Log, if the check failed
         print(f'Check models')
         pack_check = self.dymola.openModel(self.lib_path)
@@ -240,7 +238,8 @@ class ValidateTest(CI_configuration):
                 print(f'\n {self.green} Successful: {self.CEND} {model} \n')
                 continue
             if result is False:
-                print(f'Check for Model {model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} {model}\nSecond Check Test for model {model}')
+                print(
+                    f'Check for Model {model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} {model}\nSecond Check Test for model {model}')
                 sec_result = self.dymola.checkModel(model)
                 if sec_result is True:
                     print(f'\n {self.green} Successful: {self.CEND} {model} \n')
@@ -272,7 +271,8 @@ class ValidateTest(CI_configuration):
                 if result is True:
                     print(f'\n {self.green}Successful:{self.CEND} {example}\n')
                 if result is False:
-                    print(f'Simulate model {example} {self.CRED} failed! {self.CEND} \n Second check test for model {example}')
+                    print(
+                        f'Simulate model {example} {self.CRED} failed! {self.CEND} \n Second check test for model {example}')
                     sec_result = self.dymola.checkModel(example, simulate=True)
                     if sec_result is True:
                         print(f'\n {self.green} Successful: {self.CEND} {example} \n')
@@ -318,7 +318,8 @@ class ValidateTest(CI_configuration):
         self._write_errorlog(error_model=result[0], error_message=result[1])
         self._check_result(error_model=result[0])
 
-class Create_whitelist(CI_configuration):
+
+class Create_whitelist(CI_conf_class):
 
     def __init__(self, library, wh_library, repo_dir, git_url):
         self.library = library
@@ -345,7 +346,8 @@ class Create_whitelist(CI_configuration):
         wh_file.write(f'\n{version} \n \n')
         for model in error_model_list:
             wh_file.write(f'\n{model} \n \n')
-        print(f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
+        print(
+            f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
         wh_file.close()
 
     def _write_exit_log(self, version_check):  # write entry in exit file
@@ -418,8 +420,8 @@ class Create_whitelist(CI_configuration):
                     print(f'There are currently no available Dymola licenses available. Please try again later.')
                     self.dymola.close()
                     exit(1)
-        print(f'2: Using Dymola port {str(self.dymola._portnumber)}\n{self.green}Dymola License is available{self.CEND}')
-
+        print(
+            f'2: Using Dymola port {str(self.dymola._portnumber)}\n{self.green}Dymola License is available{self.CEND}')
 
     def _check_whitelist_model(self, model_list):  # check models for creating whitelist
         package_check = self.dymola.openModel(self.wh_lib_path)
@@ -507,6 +509,7 @@ def _setEnvironmentVariables(var, value):  # Add to the environment variable 'va
     else:
         os.environ[var] = value
 
+
 def _setEnvironmentPath(dymolaversion):
     if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
         _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
@@ -527,11 +530,13 @@ def _setEnvironmentPath(dymolaversion):
                                         'Library',
                                         'python_interface',
                                         'dymola.egg'))
-    print(f'operating system {platform.system()}')
+    print(f'Operating system {platform.system()}')
     sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
+
 
 if __name__ == '__main__':
     from validatetest import ValidateTest
+
     parser = argparse.ArgumentParser(description="Check and Validate single Packages")  # Configure the argument parser
     check_test_group = parser.add_argument_group("arguments to run check tests")
     check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
@@ -552,12 +557,13 @@ if __name__ == '__main__':
     check_test_group.add_argument("-l", "--library", default="AixLib", help="Library to test")
     check_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
     check_test_group.add_argument("--repo-dir", help="Library to test")
-    check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
+    check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
+                                  help="url repository")
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
 
-
+    '''
     if args.whitelist is True:  # Write a new WhiteList
         wh = Create_whitelist(library=args.library,
                               wh_library=args.wh_library,
@@ -577,3 +583,4 @@ if __name__ == '__main__':
             CheckModelTest.simulate_example_workflow()
         else:  # Check all Models in a Package
             CheckModelTest.check_model_workflow()
+        '''
