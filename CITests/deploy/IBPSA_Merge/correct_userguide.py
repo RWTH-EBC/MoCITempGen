@@ -1,4 +1,6 @@
-import os, argparse
+import argparse
+import os
+
 
 def folder_userguide(aixlib_dir):
 	for root, dirs, files in os.walk(aixlib_dir):

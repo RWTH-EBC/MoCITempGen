@@ -1,7 +1,5 @@
-import numpy as np
-import sys, difflib, os, shutil, pathlib, glob
+import sys,  os, shutil, pathlib, glob
 from git import Repo
-from shutil import copyfile
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 

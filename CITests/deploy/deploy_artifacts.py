@@ -1,6 +1,12 @@
-import os, codecs, sys, shutil, argparse, glob
+import argparse
+import codecs
+import os
+import shutil
+import sys
+
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
+
 
 class Deploy_Artifacts(CI_conf_class):
 
@@ -31,14 +37,16 @@ class Deploy_Artifacts(CI_conf_class):
         for line in lines:
             if line.find("txt") > -1:
                 line = line.strip()
-                updated_ref.append(f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola{os.sep}{line.strip()}')
+                updated_ref.append(
+                    f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola{os.sep}{line.strip()}')
                 continue
             else:
                 continue
         updated_file.close()
         return updated_ref
 
-    def copy_txt(self, changed_ref):  # Copy reference results from AixLib\Resources\ReferenceResults\Dymola\* to Referencefiles\\*
+    def copy_txt(self,
+                 changed_ref):  # Copy reference results from AixLib\Resources\ReferenceResults\Dymola\* to Referencefiles\\*
         if os.path.exists(self.folder) is False:
             os.mkdir(self.folder)
         else:
@@ -66,7 +74,6 @@ if __name__ == '__main__':
                                  help="Plot new models with new created reference files",
                                  action="store_true")
     args = parser.parse_args()
-    from deploy_artifacts import Deploy_Artifacts
 
     if args.ref is True:
         ref_artifact = Deploy_Artifacts(library=args.library)

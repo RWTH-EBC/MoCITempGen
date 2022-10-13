@@ -1,7 +1,14 @@
-import os, io, argparse, shutil, sys
+import argparse
+import io
+import os
+import shutil
+import sys
+
 from git import Repo
+
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
+
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -84,7 +91,8 @@ class HTML_Tidy(CI_conf_class):
                     self, htmlList=htmlList, substitutions_dict={'\\"': '"'})
                 document_corr, errors = HTML_Tidy._htmlCorrection(self, htmlStr)
                 docCorrStr = HTML_Tidy.number_print_List(self, document_corr.split('\n'), sep='\n')
-                if len(errors) > 0 and errors.find("Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
+                if len(errors) > 0 and errors.find(
+                        "Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
                     print('\n' + "----" + model + "----")
                     print("\n-------- HTML Code --------")
                     print(f"\n{HTML_Tidy.number_print_List(self, htmlList)}")
@@ -95,7 +103,6 @@ class HTML_Tidy(CI_conf_class):
                     continue
                 else:
                     continue
-
         if self.log:
             file = HTML_Tidy._return_logfile(self, errMsg)
             print("##########################################################")
@@ -363,8 +370,6 @@ class HTML_Tidy(CI_conf_class):
             self, theString=htmlCorrect, substitutions_dict=substitutions_dict)
         return document_corr, errors
 
-
-
     def correct_table_summary(self, line, CloseFound):  # delete Summary in table and add <caption> Text </caption>
         if CloseFound == True:
             tableTag = line.encode("utf-8").find(b"<table")
@@ -576,8 +581,6 @@ if __name__ == '__main__':
     parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
 
     args = parser.parse_args()
-    from html_tidy_errors import HTML_Tidy
-
     HTML_Check = HTML_Tidy(package=args.single_package,
                            correct_overwrite=args.correct_overwrite,
                            correct_backup=args.correct_backup,
@@ -609,8 +612,6 @@ if __name__ == '__main__':
         print("Print the Correct HTML Code")
         HTML_Check.run_files()
     elif args.WhiteList is True:
-        from html_tidy_errors import HTML_whitelist
-
         whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
         print(f'Create a whitelist of {args.wh_library} Library')
         whitelist.create_whitelist()

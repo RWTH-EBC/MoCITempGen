@@ -7,29 +7,31 @@ class CI_conf_class(object):
         Dont change the self.<name>. But you can change the paths and file name
         '''
         # Files
-        self.wh_model_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
-        self.ref_whitelist_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}reference_check_whitelist.txt'
-        self.wh_html_file = f'dymola-ci-tests{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
+        self.ci_dir = f'dymola-ci-tests'
 
-        self.show_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}show_ref.txt'
-        self.update_ref_file = f'dymola-ci-tests{os.sep}interact_CI{os.sep}update_ref.txt'
+        self.wh_model_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
+        self.ref_whitelist_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}reference_check_whitelist.txt'
+        self.wh_html_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
 
-        self.chart_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}google_chart.txt'
-        self.index_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}index.txt'
-        self.layout_temp_file = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates{os.sep}layout_index.txt'
+        self.show_ref_file = f'{self.ci_dir}{os.sep}interact_CI{os.sep}show_ref.txt'
+        self.update_ref_file = f'{self.ci_dir}{os.sep}interact_CI{os.sep}update_ref.txt'
 
-        self.exit_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}exit.sh'
-        self.ref_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_reference_list.txt'
-        self.ch_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_changed_model_list.txt'
-        self.new_ref_file = f'dymola-ci-tests{os.sep}Configfiles{os.sep}ci_new_created_reference.txt'
+        self.chart_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}google_chart.txt'
+        self.index_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}index.txt'
+        self.layout_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}layout_index.txt'
+
+        self.exit_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}exit.sh'
+        self.ref_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_reference_list.txt'
+        self.ch_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_changed_model_list.txt'
+        self.new_ref_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_new_created_reference.txt'
 
         # Folders
-        self.ci_whitelist_dir = f'dymola-ci-tests{os.sep}ci_whitelist'
-        self.interact_ci_dir = f'dymola-ci-tests{os.sep}interact_CI'
-        self.config_dir = f'dymola-ci-tests{os.sep}Configfiles'
-        self.chart_temp_dir = f'dymola-ci-tests{os.sep}templates{os.sep}google_templates'
-        self.artifacts_dir = f'dymola-ci-tests{os.sep}templates{os.sep}artifacts'
-        self.chart_dir = f'dymola-ci-tests{os.sep}templates{os.sep}charts'  # path for layout index
+        self.ci_whitelist_dir = f'{self.ci_dir}{os.sep}ci_whitelist'
+        self.interact_ci_dir = f'{self.ci_dir}{os.sep}interact_CI'
+        self.config_dir = f'{self.ci_dir}{os.sep}Configfiles'
+        self.chart_temp_dir = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates'
+        self.artifacts_dir = f'{self.ci_dir}{os.sep}templates{os.sep}artifacts'
+        self.chart_dir = f'{self.ci_dir}{os.sep}templates{os.sep}charts'  # path for layout index
         self.ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
 

@@ -1,36 +1,29 @@
-import matplotlib.pyplot as plt
-from matplotlib.widgets import CheckButtons
-import numpy as np
-import sys, difflib, os, shutil
-
-from git import Repo
-from shutil import copyfile
-
-import pathlib
-import glob
-import pandas as pd
 import argparse
+import os
+import shutil
+import sys
+import pandas as pd
+from mako.template import Template
+
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 
 class Plot_Charts(CI_conf_class):
 
-    def __init__(self, package, library):
+    def __init__(self, template, package, library):
         self.package = package
         self.library = library
+        self.template = template
         super().__init__()
-
         self.f_log = f'{self.library}{os.sep}unitTests-dymola.log'  # path for unitTest-dymola.log, important for errors
         self.csv_file = f'reference.csv'
         self.test_csv = f'test.csv'
-
         self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'  # path for every single package
         self.funnel_path = f'{self.library}{os.sep}funnel_comp'
         self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
         self.layout_html_file = f'{self.chart_dir}{os.sep}index.html'
-
 
     def _read_show_reference(self):
         if os.path.isfile(self.show_ref_file) is False:
@@ -38,9 +31,9 @@ class Plot_Charts(CI_conf_class):
             exit(0)
         else:
             print(f'Plot results from file {self.show_ref_file}')
+        ref_list = []
         file = open(self.show_ref_file, "r")
         lines = file.readlines()
-        ref_list = []
         for line in lines:
             if len(line) == 0:
                 continue
@@ -49,13 +42,14 @@ class Plot_Charts(CI_conf_class):
                 continue
         file.close()
         if len(ref_list) == 0:
-            print(f'No reference files in file {self.show_ref_file}. Please add here your reference files you want to update')
+            print(f'No reference files in file {self.show_ref_file}. Please add here your reference files you want to '
+                  f'update')
             exit(0)
-        return ref_list
+        else:
+            return ref_list
 
     def _prepare_data(self, results):  # prepare data from reference results(.txt)
         distriction_values = results[0]  # Value Number with Legend
-        distriction_time = results[1]  # Value time with time sequence
         X_Axis = results[3]  # Number value
         time_list = []
         var_list = []
@@ -78,42 +72,38 @@ class Plot_Charts(CI_conf_class):
             value_list.append("[" + a + "]")
         value_list = map(str, (value_list))
         return value_list
-    #def calculate_time_interval(self):
 
-
-    def _read_data(self, ref_file):  # Read Reference results in AixLib\Resources\ReferenceResults\Dymola\${modelname}.txt
+    def _read_data(self, ref_file):  # Read Reference results in AixLib\Resources\ReferenceResults\Dymola\${
+        # modelname}.txt
         legend_List = []
         value_list = []
         distriction_values = {}
         time_interval_list = []
         for line in open(ref_file, 'r'):
             current_value = []
-            if line.find("last-generated=") > -1:
+            if line.find("last-generated=") > -1 or line.find("statistics-simulation=") > -1 or line.find("statistics-initialization=") > -1:
                 continue
-            if line.find("statistics-simulation=") > -1:
-                continue
-            if line.find("statistics-initialization=") > -1:
-                continue
-            if line.find("time=") > -1:
+            elif line.find("time=") > -1:
                 time_int = line.split("=")[1]
                 time_int = time_int.split(",")
                 continue
-            values = line.split("=")
-            if len(values) < 2:
+            if line.find("=") > -1:
+                values = line.split("=")
+                if len(values) < 2:
+                    continue
+                legend = values[0]
+                numbers = values[1]
+                time_interval_steps = len(numbers.split(","))
+                distriction_values[legend] = numbers
+                legend_List.append(legend)
+                number = numbers.split(",")
+                for n in number:
+                    value = n.replace("[", "").lstrip()
+                    value = value.replace("]", "")
+                    value = float(value)
+                    current_value.append(value)
+                value_list.append(current_value)
                 continue
-            legend = values[0]
-            numbers = values[1]
-            time_interval_steps = len(numbers.split(","))
-            distriction_values[legend] = numbers
-            legend_List.append(legend)
-            number = numbers.split(",")
-            for n in number:
-                value = n.replace("[", "").lstrip()
-                value = value.replace("]", "")
-                value = float(value)
-                current_value.append(value)
-            value_list.append(current_value)
-            continue
         first_time_interval = float((time_int[0].replace("[", "").lstrip()))
         last_time_interval = float((time_int[len(time_int)-1].replace("]", "").lstrip()))
         time_interval = last_time_interval/time_interval_steps
@@ -166,7 +156,6 @@ class Plot_Charts(CI_conf_class):
         return ref_list
 
     def _get_values(self, lines):
-        time_list = []
         measure_list = []
         for line in lines:  # searches for values and time intervals
             if line.find("last-generated=") > -1:
@@ -191,7 +180,6 @@ class Plot_Charts(CI_conf_class):
         return time_str, measure_list, measure_len
 
     def _get_time_int(self, time_list, measure_len):
-
         time_val = time_list.split(":")[1]
         time_beg = time_val.split(",")[0]
         time_end = time_val.split(",")[1]
@@ -223,26 +211,28 @@ class Plot_Charts(CI_conf_class):
         return model_list
 
     def _read_unitTest_log(self):  # Read unitTest_log from regressionTest, write variable and modelname with difference
-        log_file = open(self.f_log, "r")
-        lines = log_file.readlines()
-        model_var_list = []
-        for line in lines:
-            if line.find("*** Warning:") > -1:
-                if line.find(".mat") > -1:
-                    model = line[line.find(("Warning:")) + 9:line.find(".mat")]  # modelname
-                    var = line[line.find((".mat:")) + 5:line.find("exceeds ")].lstrip()  # variable name
-                    model_var_list.append(f'{model}:{var}')
-                if line.find("*** Warning: Numerical Jacobian in 'RunScript") > -1 and line.find(".mos") > -1:
-                    model = line[line.rfind(os.sep)+1:line.find(".mos")].lstrip()
-                    var = ""
-                    model_var_list.append(f'{model}:{var}')
-                if line.find("*** Warning: Failed to interpret experiment annotation in 'RunScript") > -1 and line.find(".mos") > -1:
-                    model = line[line.rfind(os.sep)+1:line.find(".mos")].lstrip()
-
-                    var = ""
-                    model_var_list.append(f'{model}:{var}')
-
-        return model_var_list
+        try:
+            log_file = open(self.f_log, "r")
+            lines = log_file.readlines()
+            model_var_list = []
+            for line in lines:
+                if line.find("*** Warning:") > -1:
+                    if line.find(".mat") > -1:
+                        model = line[line.find(("Warning:")) + 9:line.find(".mat")]  # modelname
+                        var = line[line.find((".mat:")) + 5:line.find("exceeds ")].lstrip()  # variable name
+                        model_var_list.append(f'{model}:{var}')
+                    if line.find("*** Warning: Numerical Jacobian in 'RunScript") > -1 and line.find(".mos") > -1:
+                        model = line[line.rfind(os.sep)+1:line.find(".mos")].lstrip()
+                        var = ""
+                        model_var_list.append(f'{model}:{var}')
+                    if line.find("*** Warning: Failed to interpret experiment annotation in 'RunScript") > -1 and line.find(".mos") > -1:
+                        model = line[line.rfind(os.sep)+1:line.find(".mos")].lstrip()
+                        var = ""
+                        model_var_list.append(f'{model}:{var}')
+            return model_var_list
+        except IOError:
+            print(f'Error: File {self.f_log} does not exist.')
+            exit(1)
 
     def _get_ref_file(self, model):
         for file in os.listdir(self.ref_path):
@@ -276,7 +266,6 @@ class Plot_Charts(CI_conf_class):
             e_list = []
             for i in range(0, len(e)):
                 e_list.append((e[i][1]))
-
             result = zip(d, e_list)
             result_set = list(result)
             value_list = []
@@ -297,12 +286,10 @@ class Plot_Charts(CI_conf_class):
         else:
             print(f'Search for results in {self.funnel_path}')
         if os.path.isdir(self.temp_chart_path) is False:
-            if os.path.isdir(self.chart_dir) is False:
-                os.mkdir(self.chart_dir)
             os.mkdir(self.temp_chart_path)
             print(f'Save plot in {self.temp_chart_path}')
-        else:
-            print(f'Save plot in {self.temp_chart_path}')
+        if os.path.isdir(self.chart_dir) is False:
+            os.mkdir(self.chart_dir)
 
     def _get_var(self, model):
         folder = os.listdir(f'{self.funnel_path}')
@@ -322,19 +309,18 @@ class Plot_Charts(CI_conf_class):
         return funnel_list
 
     def _mako_line_html_chart(self, model, var):  # Load and read the templates, write variables in the templates
-        from mako.template import Template
         if var == "":
             path_list = os.listdir((f'{self.library}{os.sep}funnel_comp'.strip()))
             for file in path_list:
                 if file[:file.find(".mat")] == model:
-                    path_name = (f'{self.library}{os.sep}funnel_comp{os.sep}{file}'.strip())
+                    path_name = f'{self.library}{os.sep}funnel_comp{os.sep}{file}'.strip()
                     var = file[file.find(".mat") + 5:]
                     if os.path.isdir(path_name) is False:
                         print(f'Cant find folder: {self.CRED}{model}{self.CEND} with variable {self.CRED}{var}{self.CEND}')
                     else:
                         print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
-                        value = Plot_Charts._read_csv_funnel(self, path_name)
-                        mytemplate = Template(filename=self.chart_temp_file)  # Render Template
+                        value = self._read_csv_funnel(url=path_name)
+                        mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
                         hmtl_chart = mytemplate.render(values=value, var=[f'{var}_ref', var], model=model,
                                                        title=f'{model}.mat_{var}')
                         file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
@@ -346,8 +332,8 @@ class Plot_Charts(CI_conf_class):
                 print(f'Cant find folder: {self.CRED}{model}{self.CEND} with variable {self.CRED}{var}{self.CEND}')
             else:
                 print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
-                value = Plot_Charts._read_csv_funnel(self, path_name)
-                mytemplate = Template(filename=self.chart_temp_file)  # Render Template
+                value = self._read_csv_funnel(url=path_name)
+                mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
                 hmtl_chart = mytemplate.render(values=value, var=[f'{var}_ref', var], model=model,
                                                title=f'{model}.mat_{var}')
                 file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
@@ -355,30 +341,25 @@ class Plot_Charts(CI_conf_class):
                 file_tmp.close()
 
     def _mako_line_html_new_chart(self, ref_file, value_list, legend_List):  # Load and read the templates, write variables in the templates
-        from mako.template import Template
         if os.path.isfile(ref_file) is False:
             print(f'Cant find folder: {self.CRED}{ref_file[ref_file.rfind(os.sep)+1:]}{self.CEND} with variables: {self.CRED}{legend_List}{self.CEND}')
         else:
             print(f'Plot model: {self.green}{ref_file[ref_file.rfind(os.sep)+1:]}{self.CEND} with variables:\n{self.green}{legend_List}{self.CEND}\n')
-            mytemplate = Template(filename=self.chart_temp_file)  # Render Template
+            mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
             hmtl_chart = mytemplate.render(values=value_list, var=legend_List, model=ref_file, title=ref_file)
             file_tmp = open(f'{self.temp_chart_path}{os.sep}{ref_file[ref_file.rfind(os.sep):].replace(".txt", ".html")}', "w")
             file_tmp.write(hmtl_chart)
             file_tmp.close()
 
     def _mako_line_ref_chart(self, model, var):  # Load and read the templates, write variables in the templates
-        from mako.template import Template
-
         path_name = (f'{self.library}{os.sep}funnel_comp{os.sep}{model}.mat_{var}'.strip())
-
         folder = os.path.isdir(path_name)
         if folder is False:
             print(f'Cant find folder: {self.CRED}{model}{self.CEND} with variable {self.CRED}{var}{self.CEND}')
         else:
             print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
-            value = Plot_Charts._read_csv_funnel(self, path_name)
-
-            mytemplate = Template(filename=self.chart_temp_file)  # Render Template
+            value = self._read_csv_funnel(url=path_name)
+            mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
             hmtl_chart = mytemplate.render(values=value, var=[f'{var}_ref', var], model=model,
                                            title=f'{model}.mat_{var}')
             file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
@@ -386,13 +367,11 @@ class Plot_Charts(CI_conf_class):
             file_tmp.close()
 
     def _create_index_layout(self):  # Create a index layout from a template
-        from mako.template import Template
         html_file_list = []
         for file in os.listdir(self.temp_chart_path):
-            print(file)
             if file.endswith(".html") and file != "index.html":
                 html_file_list.append(file)
-        mytemplate = Template(filename=self.index_temp_file)
+        mytemplate = self.template(filename=self.index_temp_file)
         if len(html_file_list) == 0:
             print(f'No html files')
             os.rmdir(self.temp_chart_path)
@@ -411,9 +390,7 @@ class Plot_Charts(CI_conf_class):
                 continue
             else:
                 package_list.append(folder)
-
-        from mako.template import Template
-        mytemplate = Template(filename=self.layout_temp_file)
+        mytemplate = self.template(filename=self.layout_temp_file)
         if len(package_list) == 0:
             print(f'No html files')
             exit(0)
@@ -446,7 +423,6 @@ class Plot_Charts(CI_conf_class):
             print(f'Directonary {self.chart_dir} does not exist.')
         else:
             folder_list = os.listdir(self.chart_dir)
-            print(folder_list)
             for folder in folder_list:
                 if folder.find(".html") > -1:
                     os.remove(f'{self.chart_dir}{os.sep}{folder}')
@@ -454,14 +430,21 @@ class Plot_Charts(CI_conf_class):
                 else:
                     shutil.rmtree(f'{self.chart_dir}{os.sep}{folder}')
 
+    def _check_setting(self):
+        if self.library is None:
+            print(f'Please set a library (e.g. --library AixLib')
+            exit(0)
+        else:
+            print(f'Setting library: {self.library}')
+        if self.single_package is None:
+            print(f'Please set a package (e.g. --single-package Airflow)')
+            exit(0)
+        else:
+            print(f'Setting package: {self.single_package}\n')
 
 if __name__ == '__main__':
-    green = "\033[0;32m"  # Set colors
-    CRED = '\033[91m'
-    CEND = '\033[0m'
     parser = argparse.ArgumentParser(description='Plot diagramms')  # Initialize a Parser
     unit_test_group = parser.add_argument_group("arguments to plot diagrams")
-
     unit_test_group.add_argument("--line-html",
                                  help='plot a google html chart in line form',
                                  action="store_true")
@@ -495,7 +478,6 @@ if __name__ == '__main__':
     unit_test_group.add_argument("--show-package",
                                  help='Plot only updated models',
                                  action="store_true")
-
     unit_test_group.add_argument('-s', "--single-package",
                                  metavar="Modelica.Package",
                                  help="Test only the Modelica package Modelica.Package")
@@ -506,23 +488,9 @@ if __name__ == '__main__':
     unit_test_group.add_argument('-ref', "--ref-txt",
                                  help="Take the datas from reference datas",
                                  action="store_true")
-
     args = parser.parse_args()  # Parse the arguments
-    from google_charts import Plot_Charts
-    charts = Plot_Charts(package=args.single_package, library=args.library)
-
-
-    if args.library is None:
-        print(f'Please set a library (e.g. --library AixLib')
-        exit(0)
-    else:
-        print(f'Setting library: {args.library}')
-    if args.single_package is None:
-        print(f'Please set a package (e.g. --single-package Airflow)')
-        exit(0)
-    else:
-        print(f'Setting package: {args.single_package}\n')
-
+    charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)
+    charts._check_setting()
     if args.line_html is True:  # Create Line chart html
         charts._delete_folder()
         if args.error is True:  # Plot all data with an error
@@ -530,63 +498,51 @@ if __name__ == '__main__':
             model_var_list = charts._read_unitTest_log()
             charts._check_folder_path()
             print(f'Plot line chart with different reference results.\n')
-            print(model_var_list)
             for model_var in model_var_list:
                 list = model_var.split(":")
                 model = list[0]
                 var = list[1]
                 if args.funnel_comp is True:  # Data from funnel comp
-                    charts._mako_line_html_chart(model, var)
+                    charts._mako_line_html_chart(model=model, var=var)
                 if args.ref_txt is True:  # Data from reference files
-                    ref_file = charts._get_ref_file(model)
+                    ref_file = charts._get_ref_file(model=model)
                     if ref_file is None:
                         print(f'Referencefile for model {model} does not exist.')
                         continue
                     else:
-                        lines = charts._get_lines(ref_file)
-                        result = charts._get_values(lines)
-                        time_list = result[0]
+                        lines = charts._get_lines(ref_file=ref_file)
+                        result = charts._get_values(lines=lines)
                         measure_list = result[1]
-                        measure_len = result[2]
-                        time_list = charts._get_time_int(time_list, measure_len)
-                        charts._mako_line_ref_chart(model, var)
+                        time_list = charts._get_time_int(time_list=result[0], measure_len=result[2])
+                        charts._mako_line_ref_chart(model=model, var=var)
             charts._create_index_layout()
             charts._create_layout()
-
         if args.new_ref is True:  # python bin/02_CITests/Converter/google_charts.py --line-html --new-ref --single-package AixLib --library AixLib
             charts._check_folder_path()
             ref_list = charts._get_new_reference_files()
-            print(f'\n\n')
             for ref_file in ref_list:
                 if os.path.isfile(ref_file) is False:
                     print(f'File {ref_file} does not exist.')
                     continue
                 else:
                     print(f'\nCreate plots for reference result {ref_file}')
-                    results = charts._read_data(ref_file)
-                    value_list = results[0]
-                    legend_List = results[1]
-                    charts._mako_line_html_new_chart(ref_file, value_list, legend_List)
+                    results = charts._read_data(ref_file=ref_file)
+                    charts._mako_line_html_new_chart(ref_file=ref_file, value_list=results[0], legend_List=results[1])
             charts._create_index_layout()
             charts._create_layout()
-
         if args.update_ref is True:  # python bin/02_CITests/Converter/google_charts.py --line-html --update-ref --single-package AixLib --library AixLib
             charts._check_folder_path()
             ref_list = charts._get_updated_reference_files()
-            print(f'\n\n')
             for ref_file in ref_list:
                 if os.path.isfile(ref_file) is False:
                     print(f'File {ref_file} does not exist.')
                     continue
                 else:
                     print(f'\nCreate plots for reference result {ref_file}')
-                    results = charts._read_data(ref_file)
-                    value_list = results[0]
-                    legend_List = results[1]
-                    charts._mako_line_html_new_chart(ref_file, value_list, legend_List)
+                    results = charts._read_data(ref_file=ref_file)
+                    charts._mako_line_html_new_chart(ref_file=ref_file, value_list=results[0], legend_List=results[1])
             charts._create_index_layout()
             charts._create_layout()
-
         if args.show_ref is True:  # python bin/02_CITests/Converter/google_charts.py --line-html --show-ref --single-package AixLib --library AixLib
             charts._check_folder_path()
             ref_list = charts._read_show_reference()
@@ -597,14 +553,10 @@ if __name__ == '__main__':
                     continue
                 else:
                     print(f'\nCreate plots for reference result {ref_file}')
-                    results = charts._read_data(ref_file)
-                    value_list = results[0]
-                    legend_List = results[1]
-
-                    charts._mako_line_html_new_chart(ref_file, value_list, legend_List)
+                    results = charts._read_data(ref_file=ref_file)
+                    charts._mako_line_html_new_chart(ref_file=ref_file, value_list=results[0], legend_List=results[1])
             charts._create_index_layout()
             charts._create_layout()
-
         if args.show_package is True:  # python bin/02_CITests/Converter/google_charts.py --line-html --show-package --funnel-comp --single-package ThermalZone
             charts._check_folder_path()
             folder = charts._get_funnel_comp()
@@ -612,7 +564,7 @@ if __name__ == '__main__':
                 model = ref[:ref.find(".mat")]
                 var = ref[ref.rfind(".mat") + 5:]
                 if args.funnel_comp is True:  # Data from funnel comp
-                    charts._mako_line_html_chart(model, var)
+                    charts._mako_line_html_chart(model=model, var=var)
             charts._create_index_layout()
             charts._create_layout()
     if args.create_layout is True:

@@ -5,7 +5,6 @@ import os
 import platform
 import sys
 import time
-
 from git import Repo
 from natsort import natsorted
 
@@ -136,8 +135,8 @@ class ValidateTest(CI_conf_class):
             return model_list
 
     def _get_changed_models(self):
-        print(f'Test only changed or new models')
         try:
+            print(f'Test only changed or new models')
             changed_model_file = open(self.ch_file, "r", encoding='utf8')
             lines = changed_model_file.readlines()
             modelica_models = []
