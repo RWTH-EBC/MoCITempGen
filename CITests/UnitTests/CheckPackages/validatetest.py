@@ -394,11 +394,11 @@ class Create_whitelist(CI_conf_class):
             return wh_list_models
 
     def _check_folder_structure(self):
-        folder_list = [self.config_dir,self.ci_whitelist_dir  ]
+        folder_list = [self.config_dir, self.ci_whitelist_dir]
         for folder in folder_list:
             if not os.path.exists(folder):
                 print(f'Create path: {folder}')
-                os.makedirs(path)
+                os.makedirs(folder)
             else:
                 print(f'Path "{folder}" exist.')
 
