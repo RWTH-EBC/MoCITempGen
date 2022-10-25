@@ -284,28 +284,26 @@ class ValidateTest(CI_conf_class):
             return error_model, error_message
 
     def _simulate_examples(self, example_list):  # Simulate examples or validations
-        print(f'Simulate examples and validations')
-        #self._library_path_check()
+        print(f'\n\nSimulate examples and validations')
+        self._library_path_check()
         error_model = []
         error_message = []
-        #print(example_list)
         if example_list is None or len(example_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Found no examples in {self.single_package}.')
             exit(0)
         else:
             for example in example_list:
-                print(f'Simulate model: {example}')
+                print(f'        Simulate model: {example}')
                 result = self.dymola.checkModel(example, simulate=True)
                 if result is True:
-                    print(f'\n {self.green}Successful:{self.CEND} {example}\n')
+                    print(f'\n      {self.green}Successful:{self.CEND} {example}\n')
                 if result is False:
-                    print(
-                        f'Simulate model {example} {self.CRED} failed! {self.CEND} \n Second check test for model {example}')
+                    print(f'\n      Simulate model {example} {self.CRED} failed!{self.CEND}\n      Second check test for model {example}')
                     sec_result = self.dymola.checkModel(example, simulate=True)
                     if sec_result is True:
-                        print(f'\n {self.green} Successful: {self.CEND} {example} \n')
+                        print(f'\n      {self.green}Successful:{self.CEND} {example}\n')
                     if sec_result is False:
-                        print(f'\n {self.CRED} Error: {self.CEND} {example}\n')
+                        print(f'\n      {self.CRED}Error: {self.CEND} {example}\n')
                         log = self.dymola.getLastError()
                         print(f'{log}')
                         error_model.append(example)
