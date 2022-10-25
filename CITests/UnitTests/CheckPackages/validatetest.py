@@ -106,8 +106,7 @@ class ValidateTest(CI_conf_class):
             exit(1)
 
     ## Write logs (error logs)
-    def _write_errorlog(self, error_model,
-                        error_message):  # Write a Error log with all models, that don´t pass the check
+    def _write_errorlog(self, error_model, error_message):  # Write a Error log with all models, that don´t pass the check
         try:
             error_log = open(self.err_log, "w")
             for model, message in zip(error_model, error_message):
@@ -616,8 +615,8 @@ if __name__ == '__main__':
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
-    # Load modelica python interface
 
+    # Load modelica python interface
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
     print(f'1: Starting Dymola instance')
