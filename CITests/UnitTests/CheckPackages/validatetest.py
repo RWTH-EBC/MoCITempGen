@@ -27,7 +27,6 @@ class Git_Repository_Clone(object):
 
 class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
-
     def __init__(self, dymola, dymola_exception, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
                  wh_library, filterwhitelist):
         self.single_package = single_package
@@ -42,6 +41,7 @@ class ValidateTest(CI_conf_class):
         self.root_package = f'{self.library}{os.sep}{self.single_package}'
         self.err_log = f'{self.library}{os.sep}{self.library}.{self.single_package}-errorlog.txt'
         super().__init__()
+
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")   # Writes all information in the log file, not only the
@@ -178,8 +178,13 @@ class ValidateTest(CI_conf_class):
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mo") and file != "package.mo":
                     example = self._get_icon_example(filepath=filepath)
-                    example_list.append(example)
-        if len(example_list) == 0:
+                    if example is None:
+                        print(f'Model {filepath} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
+                        continue
+                    else:
+                        example_list.append(example)
+                        continue
+        if example_list is None or len(example_list) == 0:
             print(f'No models in package {self.single_package}')
             exit(0)
         else:
@@ -280,10 +285,11 @@ class ValidateTest(CI_conf_class):
 
     def _simulate_examples(self, example_list):  # Simulate examples or validations
         print(f'Simulate examples and validations')
-        self._library_path_check()
+        #self._library_path_check()
         error_model = []
         error_message = []
-        if len(example_list) == 0:
+        #print(example_list)
+        if example_list is None or len(example_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Found no examples in {self.single_package}.')
             exit(0)
         else:
@@ -613,6 +619,7 @@ if __name__ == '__main__':
     args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
     # Load modelica python interface
+
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
     print(f'1: Starting Dymola instance')
