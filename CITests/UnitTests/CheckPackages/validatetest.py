@@ -428,17 +428,17 @@ class Create_whitelist(CI_conf_class):
             return version
 
     def _check_fileexist(self):
-        if os.path.exists(self.wh_file):
-            print(f'Whitelist does exist. Update the whitelist under {self.wh_file}')
+        if os.path.exists(self.wh_html_file):
+            print(f'Whitelist does exist. Update the whitelist under {self.wh_html_file}')
         else:
-            print(f'Whitelist does not exist. Create a new one under {self.wh_file}')
-            file = open(self.wh_file, "w+")
+            print(f'Whitelist does not exist. Create a new one under {self.wh_html_file}')
+            file = open(self.wh_html_file, "w+")
             file.close()
 
     def _check_whitelist(self,
                          version):  # Write a new Whitelist with all models in IBPSA Library of those models who have not passed the Check Test
         try:
-            vfile = open(self.wh_file, "r")  # Read the last version of whitelist
+            vfile = open(self.wh_html_file, "r")  # Read the last version of whitelist
             lines = vfile.readlines()
             version_check = False
             for line in lines:
@@ -449,7 +449,7 @@ class Create_whitelist(CI_conf_class):
             vfile.close()
             return version_check
         except IOError:
-            print(f'Error: File {self.wh_file} does not exist.')
+            print(f'Error: File {self.wh_html_file} does not exist.')
             return wh_list_models
 
     def _get_wh_model(self, wh_path):
