@@ -253,17 +253,22 @@ class HTML_Tidy(CI_conf_class):
             elif line.find("Warning") > -1:
                 err_list.append(line)
         log_file.close()
-        exit_file = open(self.exit_file, "w")
-        if len(err_list) > 0:
-            print("Syntax Error: Check HTML-logfile")
-            exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 1")
-            exit_file.close()
-            var = 1
-        else:
-            print("HTML Check was successful!")
-            exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 0")
-            exit_file.close()
-            var = 0
+        try:
+            self._create_folder()
+            exit_file = open(self.exit_file, "w")
+            if len(err_list) > 0:
+                print("Syntax Error: Check HTML-logfile")
+                exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 1")
+                exit_file.close()
+                var = 1
+            else:
+                print("HTML Check was successful!")
+                exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 0")
+                exit_file.close()
+                var = 0
+        except IOError:
+            print(f'Error: File {self.exit_file} does not exist.')
+            exit(0)
         return var
 
     def _CheckFile(self, moFile):
@@ -534,6 +539,13 @@ class HTML_Tidy(CI_conf_class):
         for model in model_whitelist:
             library_list.remove(model)
         return library_list
+
+    def _create_folder(self):
+        try:
+            if not os.path.exists(self.config_dir):
+                os.makedirs(self.config_dir)
+        except FileExistsError:
+            pass
 
 
 class HTML_whitelist(CI_conf_class):
