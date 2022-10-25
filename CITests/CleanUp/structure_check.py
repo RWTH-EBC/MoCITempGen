@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import argparse
 
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
@@ -30,8 +31,29 @@ class Structure_check(CI_conf_class):
                 print(f'File: {file} does not exist and will be new created.')
                 file_check.touch(exist_ok=True)
 
+    # Set unique folder
+    # Set User CI folder und files
+    # Set only for CI necessary files, dir: build in ci
+    def _create_folder(self, path):
+        try:
+            if not os.path.exists(path):
+                print(f'Create path: {path}')
+                os.makedirs(path)
+            else:
+                print(f'Path "{path}" exist.')
+        except FileExistsError:
+            print(f'Find no folder')
+            pass
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Config files for the CI")  # Configure the argument parser
+    check_test_group = parser.add_argument_group("Arguments to build the CI structure")
+    check_test_group.add_argument("--config-dir", default=False, action="store_true")
+    check_test_group.add_argument("--create-path", default=False, action="store_true")
+    args = parser.parse_args()  # Parse the arguments
     check = Structure_check()
+    if args.create_path is True:
+        if args.config_dir is True:
+            conf._create_folder(path=conf.config_dir)
     check.check_ci_folder()
     check.check_ci_files()

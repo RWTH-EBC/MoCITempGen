@@ -366,6 +366,8 @@ class Create_whitelist(CI_conf_class):
         self.dymola.ExecuteCommand(
             "Advanced.TranslationInCommandLog:=true;")  # ## Writes all information in the log file, not only the
 
+
+
     def _write_whitelist_errorlog(self, error_model,
                         error_message):  # Write a Error log with all models, that don´t pass the check
         try:
@@ -390,6 +392,15 @@ class Create_whitelist(CI_conf_class):
         except IOError:
             print(f'Error: File {self.wh_model_file} does not exist.')
             return wh_list_models
+
+    def _check_folder_structure(self):
+        folder_list = [self.config_dir,self.ci_whitelist_dir  ]
+        for folder in folder_list:
+            if not os.path.exists(folder):
+                print(f'Create path: {folder}')
+                os.makedirs(path)
+            else:
+                print(f'Path "{folder}" exist.')
 
     def _write_exit_log(self, version_check):  # write entry in exit file
         try:
@@ -526,6 +537,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Setting: whitelist git url library {self.git_url}')
 
     def create_wh_workflow(self):
+        self._check_folder_structure()
         self._check_library()
         self._check_fileexist()
         version = self.read_script_version()

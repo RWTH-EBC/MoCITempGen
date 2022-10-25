@@ -70,13 +70,7 @@ class CI_conf_class(object):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Config files for the CI")  # Configure the argument parser
-    check_test_group = parser.add_argument_group("Arguments to build the CI structure")
-    check_test_group.add_argument("--config-dir", default=False, action="store_true")
-    check_test_group.add_argument("--create-path", default=False, action="store_true")
-    args = parser.parse_args()  # Parse the arguments
+
     conf = CI_conf_class()
-    if args.create_path is True:
-        if args.config_dir is True:
-            conf._create_folder(path=conf.config_dir)
+
     # conf.return_file_list()
