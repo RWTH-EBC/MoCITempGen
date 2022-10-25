@@ -500,25 +500,29 @@ class HTML_Tidy(CI_conf_class):
         return line, CloseFound
 
     def _list_all_model(self):  # List library and whitelist models
-        rootdir = self.package.replace(".", os.sep)
-        library_list = []
-        file = open(self.html_wh_file, "r")
-        lines = file.readlines()
-        wh_library_list = []
-        for line in lines:
-            if line.find(".mo") > -1:
-                line = line.replace(self.wh_library, self.library)
-                line = line.replace("\n", "")
-                wh_library_list.append(line)
-        file.close()
-        for subdir, dirs, files in os.walk(rootdir):  # Return library models
-            for file in files:
-                filepath = subdir + os.sep + file
-                if filepath.endswith(".mo"):
-                    model = filepath.replace(os.sep, ".")
-                    model = model[model.rfind(self.library):]
-                    library_list.append(model)
-        return library_list, wh_library_list
+        try:
+            rootdir = self.package.replace(".", os.sep)
+            library_list = []
+            file = open(self.wh_html_file, "r")
+            lines = file.readlines()
+            wh_library_list = []
+            for line in lines:
+                if line.find(".mo") > -1:
+                    line = line.replace(self.wh_library, self.library)
+                    line = line.replace("\n", "")
+                    wh_library_list.append(line)
+            file.close()
+            for subdir, dirs, files in os.walk(rootdir):  # Return library models
+                for file in files:
+                    filepath = subdir + os.sep + file
+                    if filepath.endswith(".mo"):
+                        model = filepath.replace(os.sep, ".")
+                        model = model[model.rfind(self.library):]
+                        library_list.append(model)
+            return library_list, wh_library_list
+        except IOError:
+            print(f'Error: File {self.wh_html_file} does not exist.')
+            exit(0)
 
     def _ListAixLibModel(self):  # Remove whitelist models and list all library model
         library_list, wh_library_list = HTML_Tidy._list_all_model(self)
@@ -549,7 +553,7 @@ class HTML_whitelist(CI_conf_class):
                     model = filepath.replace(os.sep, ".")
                     model = model[model.rfind(self.wh_library):model.rfind(".mo")]
                     model_list.append(model)
-        file = open(self.html_wh_file, "w")
+        file = open(self.wh_html_file, "w")
         for model in model_list:
             file.write("\n" + model + ".mo" + "\n")
         file.close()
@@ -557,7 +561,7 @@ class HTML_whitelist(CI_conf_class):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Run HTML correction on files, print found errors or backup old files')  # Configure the argument parser
+        description='Run HTML correction on files, print found errors or backup old files')
     parser.add_argument("--correct-overwrite", action="store_true", default=False,
                         help="correct html code in modelica files and overwrite old files")
     parser.add_argument("--correct-backup", action="store_true", default=False,
@@ -579,6 +583,7 @@ if __name__ == '__main__':
     parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
     parser.add_argument("--wh_library", default="IBPSA", help="Library on whitelist")
     parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
+    parser.add_argument("--filter", default=False, action="store_true")
 
     args = parser.parse_args()
     HTML_Check = HTML_Tidy(package=args.single_package,
