@@ -7,34 +7,38 @@ class CI_conf_class(object):
         '''
         Dont change the self.<name>. But you can change the paths and file name
         '''
-        # Files
-        self.ci_dir = f'dymola-ci-tests'
+        self.dymola_ci_test_dir = f'dymola-ci-tests'
+        # [Whitelist_files]
+        self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}ci_whitelist'
+        self.wh_model_file = f'{self.wh_ci_dir}{os.sep}ci_model_whitelist.txt'
+        self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
+        self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
 
-        self.wh_model_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}model_whitelist.txt'
-        self.ref_whitelist_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}reference_check_whitelist.txt'
-        self.wh_html_file = f'{self.ci_dir}{os.sep}ci_whitelist{os.sep}html_whitelist.txt'
+        # [Config_files]
+        self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}Configfiles'
+        self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}exit.sh'
+        self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_ref_file.txt'
+        self.config_ci_new_create_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_created_reference.txt'
+        self.config_ci_changed_file = f'{self.config_ci_dir}{os.sep}ci_changed_model_list.txt'
+        self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}ci_reference_list.txt'
+        self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}EOF.sh'
 
-        self.show_ref_file = f'{self.ci_dir}{os.sep}interact_CI{os.sep}show_ref.txt'
-        self.update_ref_file = f'{self.ci_dir}{os.sep}interact_CI{os.sep}update_ref.txt'
+        # [templates for plots]
+        self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}charts'
+        self.temp_chart_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}google_templates'
+        self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}google_chart.txt'
+        self.temp_index_file = f'{self.temp_chart_dir}{os.sep}index.txt'
+        self.temp_layout_file = f'{self.temp_chart_dir}{os.sep}layout_index.txt'
 
-        self.chart_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}google_chart.txt'
-        self.index_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}index.txt'
-        self.layout_temp_file = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates{os.sep}layout_index.txt'
+        # [interact ci lists]
+        self.ci_interact_dir = f'{self.dymola_ci_test_dir}{os.sep}interact_CI'
+        self.ci_interact_show_ref_file = f'{self.ci_interact_dir}{os.sep}show_ref.txt'
+        self.ci_interact_update_ref_file = f'{self.ci_interact_dir}{os.sep}update_ref.txt'
 
-        self.exit_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}exit.sh'
-        self.ref_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_reference_list.txt'
-        self.ch_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_changed_model_list.txt'
-        self.new_ref_file = f'{self.ci_dir}{os.sep}Configfiles{os.sep}ci_new_created_reference.txt'
-
-        # Folders
-        self.ci_whitelist_dir = f'{self.ci_dir}{os.sep}ci_whitelist'
-        self.interact_ci_dir = f'{self.ci_dir}{os.sep}interact_CI'
-        self.config_dir = f'{self.ci_dir}{os.sep}Configfiles'
-        self.chart_temp_dir = f'{self.ci_dir}{os.sep}templates{os.sep}google_templates'
-        self.artifacts_dir = f'{self.ci_dir}{os.sep}templates{os.sep}artifacts'
-        self.chart_dir = f'{self.ci_dir}{os.sep}templates{os.sep}charts'  # path for layout index
-        self.ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
-        self.resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
+        # [Folder]
+        self.artifacts_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}artifacts'
+        self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
+        self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
 
         # Color
         self.CRED = '\033[91m'  # Colors

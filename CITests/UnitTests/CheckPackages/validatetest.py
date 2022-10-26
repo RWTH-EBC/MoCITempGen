@@ -14,6 +14,13 @@ from configuration import CI_conf_class
 class Git_Repository_Clone(object):
 
     def __init__(self, repo_dir, git_url, library):
+        """
+
+        Args:
+            repo_dir ():
+            git_url ():
+            library ():
+        """
         self.repo_dir = repo_dir
         self.git_url = git_url
         self.library = library
@@ -29,6 +36,20 @@ class ValidateTest(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
     def __init__(self, dymola, dymola_exception, single_package, number_of_processors, show_gui, simulate_examples, changedmodel, library,
                  wh_library, filterwhitelist):
+        """
+
+        Args:
+            dymola ():
+            dymola_exception ():
+            single_package ():
+            number_of_processors ():
+            show_gui ():
+            simulate_examples ():
+            changedmodel ():
+            library ():
+            wh_library ():
+            filterwhitelist ():
+        """
         self.single_package = single_package
         self.number_of_processors = number_of_processors
         self.show_gui = show_gui
@@ -119,6 +140,11 @@ class ValidateTest(CI_conf_class):
 
     ## Get Models to check or simulate
     def _get_model(self):  # list all models in package
+        """
+
+        Returns:
+
+        """
         model_list = []
         for subdir, dirs, files in os.walk(self.root_package):
             for file in files:
@@ -354,6 +380,16 @@ class ValidateTest(CI_conf_class):
 class Create_whitelist(CI_conf_class):
 
     def __init__(self, dymola, dymola_exception, library, wh_library, repo_dir, git_url):
+        """
+
+        Args:
+            dymola ():
+            dymola_exception ():
+            library ():
+            wh_library ():
+            repo_dir ():
+            git_url ():
+        """
         self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
@@ -394,7 +430,7 @@ class Create_whitelist(CI_conf_class):
             return wh_list_models
 
     def _check_folder_structure(self):
-        folder_list = [self.config_dir, self.ci_whitelist_dir]
+        folder_list = [self.config_ci_dir, self.wh_ci_dir]
         for folder in folder_list:
             if not os.path.exists(folder):
                 print(f'Create path: {folder}')
@@ -404,7 +440,7 @@ class Create_whitelist(CI_conf_class):
 
     def _write_exit_log(self, version_check):  # write entry in exit file
         try:
-            exit = open(self.exit_file, "w")
+            exit = open(self.config_ci_exit_file, "w")
             if version_check is False:
                 exit.write(f'FAIL')
             else:
