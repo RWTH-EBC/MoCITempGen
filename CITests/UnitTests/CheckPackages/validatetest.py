@@ -162,7 +162,7 @@ class ValidateTest(CI_conf_class):
     def _get_changed_models(self):
         try:
             print(f'Test only changed or new models')
-            changed_model_file = open(self.ch_file, "r", encoding='utf8')
+            changed_model_file = open(self.config_ci_changed_file, "r", encoding='utf8')
             lines = changed_model_file.readlines()
             modelica_models = []
             for line in lines:
@@ -179,7 +179,7 @@ class ValidateTest(CI_conf_class):
             changed_model_file.close()
             return modelica_models
         except IOError:
-            print(f'Error: File {self.ch_file} does not exist.')
+            print(f'Error: File {self.config_ci_changed_file} does not exist.')
             exit(0)
 
     def _get_icon_example(self, filepath):
@@ -219,7 +219,7 @@ class ValidateTest(CI_conf_class):
         print(f'Test only changed or new models')
         example_list = []
         try:
-            changed_model_file = open(self.ch_file, "r", encoding='utf8',
+            changed_model_file = open(self.config_ci_changed_file, "r", encoding='utf8',
                                       errors='ignore')
             lines = changed_model_file.readlines()
             for line in lines:
@@ -238,7 +238,7 @@ class ValidateTest(CI_conf_class):
             else:
                 return example_list
         except IOError:
-            print(f'Error: File {self.ch_file} does not exist.')
+            print(f'Error: File {self.config_ci_changed_file} does not exist.')
             exit(1)
 
     def _filter_wh_models(self, models, wh_list):
