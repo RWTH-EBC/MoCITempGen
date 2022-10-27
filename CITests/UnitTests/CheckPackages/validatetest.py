@@ -17,15 +17,15 @@ class Git_Repository_Clone(object):
     def __init__(self, repo_dir, git_url):
         """
         Args:
-            repo_dir ():  Folder of the cloned project
-            git_url (): Git url of the cloned project
+            repo_dir ():  Folder of the cloned project.
+            git_url (): Git url of the cloned project.
         """
         self.repo_dir = repo_dir
         self.git_url = git_url
 
     def _clone_repository(self):   
         """
-        pull git repo
+        Pull git repository.
         """
         if os.path.exists(self.repo_dir):
             print(f'{self.repo_dir} folder already exists.')
@@ -402,11 +402,13 @@ class ValidateTest(CI_conf_class):
         """
         self._check_packages()
         self._dym_check_lic()
-
-        self._create_workflow()
         if self.changedmodel is True:
+            CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir])
+            CI_conf_class()._check_ci_file_structure(file_list=[self.config_ci_changed_file])
             model_list = self._get_changed_models()
         elif self.filterwhitelist is True:
+            CI_conf_class()._check_ci_folder_structure(folder_list=[self.wh_ci_dir])
+            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file])
             self._whitelist_library_check()
             wh_list = self._get_wh_models()
             models = self._get_model()
@@ -430,8 +432,12 @@ class ValidateTest(CI_conf_class):
         self._check_packages()
         self._dym_check_lic()
         if self.changedmodel is True:
+            CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir])
+            CI_conf_class()._check_ci_file_structure(file_list=[self.config_ci_changed_file])
             simulate_example_list = self._get_changed_simulate_examples()
         elif self.filterwhitelist is True:
+            CI_conf_class()._check_ci_folder_structure(folder_list=[self.wh_ci_dir])
+            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file])
             self._whitelist_library_check()
             wh_list = self._get_wh_models()
             models = self._get_simulate_examples()
@@ -506,18 +512,6 @@ class Create_whitelist(CI_conf_class):
             print(f'Error: File {self.wh_model_file} does not exist.')
             exit(1)
 
-    def _check_folder_structure(self):
-        """
-        Check settings for CI.
-        """
-        folder_list = [self.config_ci_dir, self.wh_ci_dir]
-        for folder in folder_list:
-            if not os.path.exists(folder):
-                print(f'Create path: {folder}')
-                os.makedirs(folder)
-            else:
-                print(f'Path "{folder}" exist.')
-
     def _write_exit_log(self, version_check):
         """
         Write entry in exit file. Necessary for CI templates-
@@ -532,7 +526,7 @@ class Create_whitelist(CI_conf_class):
                 exit_file.write(f'successful')
             exit_file.close()
         except IOError:
-            print(f'Error: File {self.exit_file} does not exist.')
+            print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(1)
 
     def read_script_version(self):
@@ -646,25 +640,6 @@ class Create_whitelist(CI_conf_class):
         self.dymola.close()
         return error_model_message_dic
 
-    def _check_ci_structure(self):
-        """
-        Check CI Structure
-        """
-        folder_list = [self.config_ci_dir, self.wh_ci_dir]
-        for folder in folder_list:
-            if not os.path.exists(folder):
-                print(f'Create path: {folder}')
-                os.makedirs(folder)
-            else:
-                print(f'Path "{folder}" exist.')
-
-        if os.path.exists(self.wh_model_file):
-            print(f'Whitelist does exist. Update the whitelist under {self.wh_model_file}')
-        else:
-            print(f'Whitelist does not exist. Create a new one under {self.wh_model_file}')
-            file = open(self.wh_model_file, "w+")
-            file.close()
-
     def _check_ci_var_settings(self):
         """
         Check CI variables
@@ -696,7 +671,8 @@ class Create_whitelist(CI_conf_class):
         """
         Workflow for creating the whitelist based on a library.
         """
-        self._check_ci_structure()
+        CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
+        CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file, self.config_ci_exit_file])
         self._check_ci_var_settings()
         version = self.read_script_version()
         version_check = self._check_whitelist_version(version)
@@ -780,7 +756,6 @@ if __name__ == '__main__':
                                   action="store_true")
     check_test_group.add_argument("-DS", "--dymolaversion", default="2020",
                                   help="Version of dymola (Give the number e.g. 2020")
-    check_test_group.add_argument("-V", "--check-version", default=False, action="store_true")
     check_test_group.add_argument("-CM", "--changedmodel", default=False, action="store_true")
     check_test_group.add_argument("-FW", "--filterwhitelist", default=False, action="store_true")
     check_test_group.add_argument("-l", "--library", default="AixLib", help="Library to test")
@@ -789,9 +764,8 @@ if __name__ == '__main__':
     check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                                   help="url repository")
     check_test_group.add_argument("--wh-path", help="path of white library")
-    args = parser.parse_args()  # Parse the arguments
+    args = parser.parse_args()
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
-
     from dymola.dymola_interface import DymolaInterface  # Load dymola_python interface
     from dymola.dymola_exception import DymolaException  # Load dymola_python exception
     print(f'1: Starting Dymola instance')

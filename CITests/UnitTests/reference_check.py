@@ -4,16 +4,25 @@ import os
 import platform
 import sys
 import time
-
-sys.path.append('../Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
-
+sys.path.append('../Dymola_python_tests/CITests/CI_Configuration')
+from configuration import CI_conf_class
 
 class Buildingspy_Regression_Check(CI_conf_class):
 
     def __init__(self, buildingspy_regression, package, library, n_pro, tool, batch, show_gui, path):
+        """
+        Args:
+            buildingspy_regression (): library buildingspy: use for regression tests
+            package (): package to be checked
+            library (): library to be checked
+            n_pro (): number of processors
+            tool (): dymola or Openmodelica
+            batch (): boolean: - False: interactive with script (e.g. generate new regressiontests) - True: No interactive with script
+            show_gui (): show_gui (): True - show dymola, false - dymola hidden.
+            path (): Path where top-level package.mo of the library is located
+        """
         self.package = package
         self.library = library
         self.n_pro = n_pro
@@ -22,14 +31,17 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.show_gui = show_gui
         self.path = path
         super().__init__()
-        self.ref_whitelist = f'..{os.sep}{self.ref_whitelist_file}'
-        self.exit_file = f'..{os.sep}{self.exit_file}'
-        self.ref_file = f'..{os.sep}{self.ref_file}'
-
+        self.ref_whitelist = f'..{os.sep}{self.wh_ref_file}'
+        self.config_ci_exit_file = f'..{os.sep}{self.config_ci_exit_file}'
+        self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
-    @property
-    def _get_mos_scripts(self):  # obtain mos scripts that are feasible for regression testing
+    def _get_mos_scripts(self):
+        """
+        Obtain mos scripts that are feasible for regression testing
+        Returns:
+            mos_list (): return a list with .mos script that are feasible for regression testing
+        """
         mos_list = []
         for subdir, dirs, files in os.walk(self.resource_dir):
             for file in files:
@@ -53,19 +65,27 @@ class Buildingspy_Regression_Check(CI_conf_class):
         else:
             return mos_list
 
-    def _write_regression_list(self):  # writes a list for feasible regression tests
+    def _write_regression_list(self):
+        """
+        Writes a list for feasible regression tests.
+        """
         mos_list = self._get_mos_scripts
         try:
-            wh_file = open(self.ref_file, "w")
+            wh_file = open(self.config_ci_ref_file, "w")
             for mos in mos_list:
                 wh_file.write(f'\n{mos}\n')
             wh_file.close()
             exit(0)
         except IOError:
-            print(f'Error: File {self.ref_file} does not exist.')
+            print(f'Error: File {self.config_ci_ref_file} does not exist.')
             exit(0)
 
-    def _get_check_ref(self):  # give a reference list
+    def _get_check_ref(self):
+        """
+        Give a reference list.
+        Returns:
+            ref_list(): return a list of reference_result files
+        """
         ref_list = []
         for subdir, dirs, files in os.walk(self.ref_results_dir):
             for file in files:
@@ -81,7 +101,12 @@ class Buildingspy_Regression_Check(CI_conf_class):
         else:
             return ref_list
 
-    def _delte_ref_file(self, ref_list):  # delete reference files
+    def _delte_ref_file(self, ref_list):
+        """
+        Delete reference files.
+        Args:
+            ref_list (): list of reference_result files
+        """
         ref_dir = f'{self.library}{os.sep}{self.ref_results_dir}'
         for ref in ref_list:
             print(f'Update reference file: {ref_dir}{os.sep}{ref}\n')
@@ -90,18 +115,14 @@ class Buildingspy_Regression_Check(CI_conf_class):
             else:
                 print(f'File {ref_dir}{os.sep}{ref} does not exist\n')
 
-    def _get_ref_package(self, mos_list):  # reproduces packages in which reference results are missing
-        package_list = []
-        if mos_list is not None:
-            for mos in mos_list:
-                package_list.append(mos)
-        for package in package_list:
-            print(f'{self.CRED}No Reference result for Model:{self.CRED} {package}')
-        return package_list
-
     def _get_whitelist_package(self):  # get and filter package from reference whitelist
+        """
+
+        Returns:
+
+        """
         try:
-            ref_wh = open(self.ref_whitelist_file, "r")
+            ref_wh = open(self.wh_ref_file, "r")
             lines = ref_wh.readlines()
             wh_list = []
             for line in lines:
@@ -116,10 +137,19 @@ class Buildingspy_Regression_Check(CI_conf_class):
                     f'on the whitelist')
             return wh_list
         except IOError:
-            print(f'Error: File {self.ref_whitelist_file} does not exist.')
+            print(f'Error: File {self.wh_ref_file} does not exist.')
             exit(0)
 
-    def _compare_ref_mos(self, mos_script_list, reference_list):  # compares if both files existed
+    def _compare_ref_mos(self, mos_script_list, reference_list):
+        """
+        compares if both files exists
+        Args:
+            mos_script_list ():
+            reference_list ():
+
+        Returns:
+
+        """
         err_list = []
         for mos in mos_script_list:
             for ref in reference_list:
@@ -128,9 +158,20 @@ class Buildingspy_Regression_Check(CI_conf_class):
                     break
         for err in err_list:
             mos_script_list.remove(err)  # remove all mos script for that a ref file exists
+        for package in mos_script_list:
+            print(f'{self.CRED}No Reference result for Model:{self.CRED} {package}')
         return mos_script_list
 
-    def _compare_wh_mos(self, package_list, wh_list):  # filter model from whitelist
+        return mos_script_list
+
+    def _compare_wh_mos(self, package_list, wh_list):
+        """
+        Filter model from whitelist.
+        Args:
+            package_list ():
+            wh_list ():
+        Returns:
+        """
         err_list = []
         for package in package_list:
             for wh_package in wh_list:
@@ -146,14 +187,16 @@ class Buildingspy_Regression_Check(CI_conf_class):
         return package_list
 
     def _create_reference_results(self):  # creates reference file that does not yet exist
+        """
+
+        """
         self.ut.batchMode(False)
         self.ut.setLibraryRoot(self.path)
         mos_script_list = self._get_mos_scripts  # Mos Scripts
         reference_list = self._get_check_ref()  # Reference files
         mos_list = self._compare_ref_mos(mos_script_list=mos_script_list, reference_list=reference_list)
-        package_list = self._get_ref_package(mos_list=mos_list)
         wh_list = self._get_whitelist_package()
-        model_list = self._compare_wh_mos(package_list=package_list, wh_list=wh_list)
+        model_list = self._compare_wh_mos(package_list=mos_list, wh_list=wh_list)
         model_list = list(set(model_list))
         package_list = []
         for model in model_list:
@@ -179,17 +222,28 @@ class Buildingspy_Regression_Check(CI_conf_class):
             self._write_exit_file()
 
     def _write_exit_file(self):
+        """
+
+        """
         try:
-            ex_file = open(self.exit_file, "w")
+            ex_file = open(self.config_ci_exit_file, "w")
             ex_file.write("#!/bin/bash" + "\n" + "\n" + "exit 0")
             ex_file.close()
             print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
             exit(0)
         except IOError:
-            print(f'Error: File {self.exit_file} does not exist.')
+            print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(0)
 
     def _get_update_package(self, ref_list):
+        """
+
+        Args:
+            ref_list ():
+
+        Returns:
+
+        """
         ref_package_list = []
         for ref in ref_list:
             if ref.rfind("Validation") > -1:
@@ -200,6 +254,11 @@ class Buildingspy_Regression_Check(CI_conf_class):
         return ref_package_list
 
     def _get_update_ref(self):  # get a model to update
+        """
+
+        Returns:
+
+        """
         try:
             file = open(f'..{os.sep}{self.update_ref_file}', "r")
             lines = file.readlines()
@@ -220,6 +279,11 @@ class Buildingspy_Regression_Check(CI_conf_class):
             exit(0)
 
     def _update_ref(self, package_list):  # Update reference results
+        """
+
+        Args:
+            package_list ():
+        """
         self.ut.batchMode(False)
         self.ut.setLibraryRoot(self.path)
         self.ut.setNumberOfThreads(self.n_pro)
@@ -234,6 +298,14 @@ class Buildingspy_Regression_Check(CI_conf_class):
                 continue
 
     def _check_regression_test(self, package):  # start regression test for a package
+        """
+
+        Args:
+            package ():
+
+        Returns:
+
+        """
         print(f'Check package: {package}')
         if package is None:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
@@ -260,6 +332,16 @@ class Buildingspy_Regression_Check(CI_conf_class):
 class Extended_model(CI_conf_class):
 
     def __init__(self, dymola, dymola_exception, package, library, dymolaversion, path):
+        """
+
+        Args:
+            dymola ():
+            dymola_exception ():
+            package ():
+            library ():
+            dymolaversion ():
+            path ():
+        """
         self.package = package
         self.library = library
         self.dymolaversion = dymolaversion
@@ -277,6 +359,9 @@ class Extended_model(CI_conf_class):
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
     def _library_check(self):
+        """
+
+        """
         librarycheck = self.dymola.openModel(self.path)
         if librarycheck is True:
             print(f'Found {self.library} Library. Start regression test.')
@@ -284,7 +369,10 @@ class Extended_model(CI_conf_class):
             print(f'Library Path is wrong. Please Check Path of {self.library} Library Path')
             exit(1)
 
-    def _dym_check_lic(self):  # check dymola license
+    def _dym_check_lic(self):
+        """
+        check dymola license.
+        """
         dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
         lic_counter = 0
         while dym_sta_lic_available is False:
@@ -302,6 +390,11 @@ class Extended_model(CI_conf_class):
             f'2: Using Dymola port   {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
     def _ref_response(self, error_list):
+        """
+
+        Args:
+            error_list ():
+        """
         if len(error_list) > 0:
             print(f'{self.CRED} Regression test failed{self.CEND}')
             print(f'The following packages{self.CRED} failed: {self.CEND}')
@@ -313,6 +406,15 @@ class Extended_model(CI_conf_class):
             exit(0)
 
     def _compare_reg_model(self, modelica_list, mo_list):
+        """
+
+        Args:
+            modelica_list ():
+            mo_list ():
+
+        Returns:
+
+        """
         reg_list = []
         for model in modelica_list:
             for mo in mo_list:
@@ -321,8 +423,13 @@ class Extended_model(CI_conf_class):
         return reg_list
 
     def _get_ref_model(self):
+        """
+
+        Returns:
+
+        """
         mo_list = []
-        ref_file = open(self.ref_file, "r")
+        ref_file = open(self.config_ci_ref_file, "r")
         lines = ref_file.readlines()
         for line in lines:
             if line.find(self.package) > -1:
@@ -331,12 +438,25 @@ class Extended_model(CI_conf_class):
         return mo_list
 
     def _get_lines(self):  # get lines from reference whitelist
+        """
+
+        Returns:
+
+        """
         changed_models = open(self.ch_file, "r", encoding='utf8')
         lines = changed_models.readlines()
         changed_models.close()
         return lines
 
     def _get_usedmodel(self, mo_list):  # get a list with all used models of regression models
+        """
+
+        Args:
+            mo_list ():
+
+        Returns:
+
+        """
         model_list = []
         lines = Extended_model._get_lines(self)
         if len(mo_list) > 0:
@@ -389,7 +509,16 @@ class Extended_model(CI_conf_class):
             model_list = list(set(model_list))
             return model_list
 
-    def get_changed_used_model(self, lines, model_list):  # return all used models, that changed
+    def get_changed_used_model(self, lines, model_list):
+        """
+        return all used models, that changed
+        Args:
+            lines ():
+            model_list ():
+
+        Returns:
+
+        """
         ch_model_list = []
         for line in lines:
             for model in model_list:
@@ -398,7 +527,18 @@ class Extended_model(CI_conf_class):
         return ch_model_list
 
     def _insert_list(self, ref_list, mos_list, modelica_list,
-                     ch_model_list):  # return models, scripts, reference results and used models, that changed
+                     ch_model_list):
+        """
+        return models, scripts, reference results and used models, that changed
+        Args:
+            ref_list ():
+            mos_list ():
+            modelica_list ():
+            ch_model_list ():
+
+        Returns:
+
+        """
         changed_list = []
         if ref_list is not None:
             for ref in ref_list:
@@ -420,6 +560,11 @@ class Extended_model(CI_conf_class):
         return changed_list
 
     def _get_changed_regression_models(self):
+        """
+
+        Returns:
+
+        """
         lines = self._get_lines()  # string change ref file
         ref_list = self._get_ref(lines=lines)  # get reference files from ref file
         mos_list = self._get_mos(lines=lines)  # get mos script from ref file
@@ -439,6 +584,14 @@ class Extended_model(CI_conf_class):
             return changed_list
 
     def _get_ref(self, lines):  # return all reference results, that changed
+        """
+
+        Args:
+            lines ():
+
+        Returns:
+
+        """
         ref_list = []
         for line in lines:
             if line.rfind(".txt") > -1 and line.rfind("ReferenceResults") > -1 and line.find(
@@ -451,6 +604,14 @@ class Extended_model(CI_conf_class):
         return ref_list
 
     def _get_mos(self, lines):  # return all mos script, that changed
+        """
+
+        Args:
+            lines ():
+
+        Returns:
+
+        """
         mos_list = []
         for line in lines:
             if line.rfind(".mos") > -1 and line.rfind("Scripts") > -1 and line.find(".package") == -1 and line.rfind(
@@ -462,6 +623,14 @@ class Extended_model(CI_conf_class):
         return mos_list
 
     def _get_mo(self, lines):  # return all models, that changed
+        """
+
+        Args:
+            lines ():
+
+        Returns:
+
+        """
         modelica_list = []
         for line in lines:
             if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind(
@@ -477,11 +646,20 @@ class Extended_model(CI_conf_class):
 class Buildingspy_Validate_test(CI_conf_class):
 
     def __init__(self, validate, path):
+        """
+
+        Args:
+            validate ():
+            path ():
+        """
         self.path = path
         self.validate = validate
         super().__init__()
 
-    def _validate_html(self):  # validate the html syntax
+    def _validate_html(self):
+        """
+        validate the html syntax only
+        """
         val = self.validate.Validator()
         errMsg = val.validateHTMLInPackage(self.path)
         n_msg = len(errMsg)
@@ -496,12 +674,23 @@ class Buildingspy_Validate_test(CI_conf_class):
             print(f'{self.CRED}html check failed.{self.CEND}')
             exit(1)
 
-    def _validate_experiment_setup(self):  # validate regression test setup
+    def _validate_experiment_setup(self):
+        """
+        validate regression test setup
+        """
         val = self.validate.Validator()
         retVal = val.validateExperimentSetup(self.path)
         exit(retVal)
 
-    def _run_coverage_only(self, buildingspy_regression, batch, tool, package):  # Specifies which models are tested
+    def _run_coverage_only(self, buildingspy_regression, batch, tool, package):
+        """
+        Specifies which models are tested
+        Args:
+            buildingspy_regression (): library buildingspy: use for regression tests
+            batch (): boolean: - False: interactive with script (e.g. generate new regressiontests) - True: No interactive with script
+            tool (): dymola or Openmodelica
+            package (): package to be checked
+        """
         ut = buildingspy_regression.Tester(tool=tool)
         ut.batchMode(batch)
         ut.setLibraryRoot(self.path)
@@ -512,6 +701,12 @@ class Buildingspy_Validate_test(CI_conf_class):
 
 
 def _setEnvironmentVariables(var, value):  # Add to the environment variable `var` the value `value`
+    """
+
+    Args:
+        var ():
+        value ():
+    """
     if var in os.environ:
         if platform.system() == "Windows":
             os.environ[var] = value + ";" + os.environ[var]
@@ -522,6 +717,11 @@ def _setEnvironmentVariables(var, value):  # Add to the environment variable `va
 
 
 def _setEnvironmentPath(dymolaversion):
+    """
+
+    Args:
+        dymolaversion ():
+    """
     if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
         _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
         sys.path.insert(0, os.path.join('C:\\',
@@ -543,9 +743,6 @@ def _setEnvironmentPath(dymolaversion):
                                         'dymola.egg'))
     print(f'operating system {platform.system()}')
     sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
-    # The path to buildingspy must be added to sys.path to work on Linux.
-    # If only added to os.environ, the Python interpreter won't find buildingspy
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run the unit tests or the html validation only.')
@@ -602,7 +799,7 @@ if __name__ == '__main__':
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
 
-    if args.validate_html_only:  # Validate the html syntax only, and then exit
+    if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate, path=args.path)._validate_html()
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
         Buildingspy_Validate_test(validate=validate, path=args.path)._validate_experiment_setup()

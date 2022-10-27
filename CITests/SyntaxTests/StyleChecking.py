@@ -13,6 +13,16 @@ class StyleCheck(CI_conf_class):
 	Export a HTML-Log File"""
 	
 	def __init__(self, dymola, dymola_exception,  package, library, dymolaversion, changed_models):
+		"""
+
+		Args:
+			dymola ():
+			dymola_exception ():
+			package ():
+			library ():
+			dymolaversion ():
+			changed_models ():
+		"""
 		self.package = package
 		self.library = library
 		self.dymolaversion = dymolaversion
@@ -25,6 +35,9 @@ class StyleCheck(CI_conf_class):
 			"Advanced.TranslationInCommandLog:=true;")  # Writes all information in the log file, not only the
 
 	def _dym_check_lic(self):  # check the license
+		"""
+
+		"""
 		dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
 		lic_counter = 0
 		while dym_sta_lic_available is False:
@@ -41,6 +54,9 @@ class StyleCheck(CI_conf_class):
 		print(f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
 	def _check_library(self):
+		"""
+
+		"""
 		library_check = self.dymola.openModel(self.library)  # Load AixLib
 		if library_check == True:
 			print(f'Found {self.library} library and start style check')
@@ -49,6 +65,9 @@ class StyleCheck(CI_conf_class):
 			exit(1)
 
 	def _set_library_modelmanagement(self):
+		"""
+
+		"""
 		if platform.system() == "Windows":  # Load ModelManagement
 			self.dymola.ExecuteCommand(
 				'cd("C:\Program Files\Dymola ' + self.dymolaversion + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
@@ -57,6 +76,11 @@ class StyleCheck(CI_conf_class):
 				'cd("/opt/dymola-' + self.dymolaversion + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
 
 	def _style_check(self):
+		"""
+
+		Returns:
+
+		"""
 		print(f'Start Style Check. Check package or model: {self.package}')  # Start CheckLibrary in ModelManagement
 		self._check_library()
 		self._set_library_modelmanagement()
@@ -66,6 +90,14 @@ class StyleCheck(CI_conf_class):
 		return logfile
 
 	def _changed_style_check(self, model_list):
+		"""
+
+		Args:
+			model_list ():
+
+		Returns:
+
+		"""
 		self._check_library()
 		self._set_library_modelmanagement()
 		if len(model_list) > 100:
@@ -92,6 +124,11 @@ class StyleCheck(CI_conf_class):
 		return logfile
 
 	def _sort_mo_models(self):
+		"""
+
+		Returns:
+
+		"""
 		try:
 			model_list = []
 			changed_file = codecs.open(self.ch_file, "r", encoding='utf8')
@@ -112,6 +149,11 @@ class StyleCheck(CI_conf_class):
 			exit(0)
 
 	def _Style_Check_Log(self, inputfile):
+		"""
+
+		Args:
+			inputfile ():
+		"""
 		outputfile = inputfile.replace("_StyleCheckLog.html", "_StyleErrorLog.html")
 		log_file = codecs.open(inputfile, "r", encoding='utf8')
 		error_log = codecs.open(outputfile, "w", encoding='utf8')
@@ -137,6 +179,12 @@ class StyleCheck(CI_conf_class):
 			exit(1)
 
 def _setEnvironmentVariables(var,value):  # Add to the environemtn variable 'var' the value 'value'
+	"""
+
+	Args:
+		var ():
+		value ():
+	"""
 	if var in os.environ:
 		if platform.system() == "Windows":
 			os.environ[var] = value + ";" + os.environ[var]
@@ -146,6 +194,11 @@ def _setEnvironmentVariables(var,value):  # Add to the environemtn variable 'var
 		os.environ[var] = value	
 
 def _setEnvironmentPath(dymolaversion):
+	"""
+
+	Args:
+		dymolaversion ():
+	"""
 	if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
 		_setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
 		sys.path.insert(0, os.path.join('C:\\',
@@ -173,10 +226,10 @@ def _setEnvironmentPath(dymolaversion):
 if  __name__ == '__main__':
 	parser = argparse.ArgumentParser(description = "Check the Style of Packages")  # Configure the argument parser
 	check_test_group = parser.add_argument_group("arguments to run check tests")
-	check_test_group.add_argument('-s',"--single-package",metavar="AixLib.Package", help="Test only the Modelica package AixLib.Package")
-	check_test_group.add_argument("-p","--path", default=".", help = "Path where top-level package.mo of the library is located")
-	check_test_group.add_argument("-DS", "--dymolaversion",default="2020", help="Version of Dymola(Give the number e.g. 2020")
-	check_test_group.add_argument("-CM", "--changed_models",default=False, action="store_true")
+	check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package", help="Test only the Modelica package AixLib.Package")
+	check_test_group.add_argument("-p", "--path", default=".", help = "Path where top-level package.mo of the library is located")
+	check_test_group.add_argument("-DS", "--dymolaversion", default="2020", help="Version of Dymola(Give the number e.g. 2020")
+	check_test_group.add_argument("-CM", "--changed_models", default=False, action="store_true")
 	args = parser.parse_args()  # Parse the arguments
 	_setEnvironmentPath(dymolaversion=args.dymolaversion)
 
