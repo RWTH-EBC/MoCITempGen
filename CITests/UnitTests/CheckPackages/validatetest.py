@@ -222,7 +222,7 @@ class ValidateTest(CI_conf_class):
             print(f'Error: File {filepath} does not exist.')
             exit(0)
 
-    def _get_simulate_examples(self):  # list all examples in package
+    def _get_simulate_examples(self):
         """
         Returns: return example list that have the string extends Modelica.Icons.Examples
         """
@@ -454,7 +454,7 @@ class ValidateTest(CI_conf_class):
 
 class Create_whitelist(CI_conf_class):
 
-    def __init__(self, dymola, dymola_exception, library, wh_library, repo_dir, git_url):
+    def __init__(self, dymola, dymola_exception, library, wh_library, repo_dir, git_url, simulate_examples):
         """
         The class creates a whitelist of faulty models based on wh_library.
         Args:
@@ -469,6 +469,7 @@ class Create_whitelist(CI_conf_class):
         self.wh_library = wh_library
         self.repo_dir = repo_dir
         self.git_url = git_url
+        self.simulate_examples = simulate_examples
         self.wh_lib_path = f'{self.wh_library}{os.sep}{self.wh_library}{os.sep}package.mo'
         self.err_log = f'{self.wh_library}{os.sep}{self.wh_library}-errorlog.txt'
         super().__init__()
@@ -493,7 +494,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Error: File {self.err_log} does not exist.')
             exit(1)
 
-    def _write_whitelist(self, error_model_message_dic, version):
+    def _write_whitelist(self, error_model_message_dic, version, wh_file):
         """
         Write a new whitelist.
         Args:
@@ -501,7 +502,7 @@ class Create_whitelist(CI_conf_class):
             version (): version number of whitelist based on the latest Aixlib conversion script.
         """
         try:
-            wh_file = open(self.wh_model_file, "w")
+            wh_file = open(wh_file, "w")
             wh_file.write(f'\n{version} \n \n')
             for model in error_model_message_dic:
                 wh_file.write(f'\n{model} \n \n')
@@ -509,7 +510,7 @@ class Create_whitelist(CI_conf_class):
                 f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
             wh_file.close()
         except IOError:
-            print(f'Error: File {self.wh_model_file} does not exist.')
+            print(f'Error: File {wh_file} does not exist.')
             exit(1)
 
     def _write_exit_log(self, version_check):
@@ -546,7 +547,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Latest {self.library} version: {version}')
             return version
 
-    def _check_whitelist_version(self, version):
+    def _check_whitelist_version(self, version, wh_file):
         """
         Check the latest whitelist version with the latest version of Aixlib conversion script.
         Args:
@@ -555,7 +556,7 @@ class Create_whitelist(CI_conf_class):
             version_check (): Boolean - return true, if the whitelist version is equal to Aixlib conversion script version
         """
         try:
-            vfile = open(self.wh_model_file, "r")  # Read the last version of whitelist
+            vfile = open(wh_file, "r")  # Read the last version of whitelist
             lines = vfile.readlines()
             version_check = False
             for line in lines:
@@ -566,8 +567,55 @@ class Create_whitelist(CI_conf_class):
             vfile.close()
             return version_check
         except IOError:
-            print(f'Error: File {self.wh_model_file} does not exist.')
+            print(f'Error: File {wh_file} does not exist.')
             exit(1)
+
+    def _get_icon_example(self, filepath):
+        """
+        Args:
+            filepath (): file of a dymola model
+
+        Returns:
+            example: return examples that have the string extends Modelica.Icons.Examples
+        """
+        try:
+            ex_file = open(filepath, "r", encoding='utf8', errors='ignore')
+            lines = ex_file.readlines()
+            for line in lines:
+                if line.find("extends") > -1 and line.find("Modelica.Icons.Example") > -1:
+                    example = filepath.replace(os.sep, ".")
+                    example = example[example.rfind(self.library):example.rfind(".mo")]
+                    ex_file.close()
+                    return example
+        except IOError:
+            print(f'Error: File {filepath} does not exist.')
+            exit(0)
+
+    def _get_wh_examples(self):
+        """
+            Args:
+                wh_path (): whitelist library path
+            Returns:
+                model_list (): return a list with models to check
+        """
+        example_list = []
+        for subdir, dirs, files in os.walk(self.root_package):
+            for file in files:
+                filepath = subdir + os.sep + file
+                if filepath.endswith(".mo") and file != "package.mo":
+                    example = self._get_icon_example(filepath=filepath)
+                    if example is None:
+                        print(
+                            f'Model {filepath} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
+                        continue
+                    else:
+                        example_list.append(example)
+                        continue
+        if example_list is None or len(example_list) == 0:
+            print(f'No models in package {self.single_package}')
+            exit(0)
+        else:
+            return example_list
 
     def _get_wh_model(self, wh_path):
         """
@@ -626,7 +674,11 @@ class Create_whitelist(CI_conf_class):
             exit(1)
         error_model_message_dic = {}
         for model in model_list:
-            result = self.dymola.checkModel(model)
+            if self.simulate_examples is True:
+                result = self.dymola.checkModel(model, simulate=True)
+            else:
+                result = self.dymola.checkModel(model)
+
             if result is True:
                 print(f'\n{self.green}Successful:{self.CEND} {model}\n')
                 continue
@@ -672,28 +724,52 @@ class Create_whitelist(CI_conf_class):
         Workflow for creating the whitelist based on a library.
         """
         CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
-        CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file, self.config_ci_exit_file])
         self._check_ci_var_settings()
-        version = self.read_script_version()
-        version_check = self._check_whitelist_version(version)
-        self._write_exit_log(version_check=version_check)
-        if version_check is False:
-            model_list = []
-            if self.git_url is not None:
-                Git_Class = Git_Repository_Clone(repo_dir=self.repo_dir,
-                                                 git_url=self.git_url)
-                Git_Class._clone_repository()
-                model_list = self._get_wh_model(wh_path=self.repo_dir)
-            elif self.wh_lib_path is not None:
-                print(f'Setting: Whitelist path library {self.wh_lib_path}')
-                model_list = self._get_wh_model(wh_path=self.wh_lib_path)
-            self._dym_check_lic()
-            error_model_message_dic = self._check_whitelist_model(model_list=model_list)
-            self._write_whitelist(error_model_message_dic=error_model_message_dic, version=version)
-            self._write_whitelist_errorlog(error_model_message_dic=error_model_message_dic)
-            exit(0)
+        if self.simulate_examples is False:
+            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file, self.config_ci_exit_file])
+
+            version = self.read_script_version()
+            version_check = self._check_whitelist_version(version=version, wh_file=self.wh_model_file)
+            self._write_exit_log(version_check=version_check)
+            if version_check is False:
+                model_list = []
+                if self.git_url is not None:
+                    Git_Class = Git_Repository_Clone(repo_dir=self.repo_dir,
+                                                     git_url=self.git_url)
+                    Git_Class._clone_repository()
+                    model_list = self._get_wh_model(wh_path=self.repo_dir)
+                elif self.wh_lib_path is not None:
+                    print(f'Setting: Whitelist path library {self.wh_lib_path}')
+                    model_list = self._get_wh_model(wh_path=self.wh_lib_path)
+                self._dym_check_lic()
+                error_model_message_dic = self._check_whitelist_model(model_list=model_list)
+                self._write_whitelist(error_model_message_dic=error_model_message_dic, version=version, wh_file=self.wh_model_file)
+                self._write_whitelist_errorlog(error_model_message_dic=error_model_message_dic)
+                exit(0)
+            else:
+                exit(0)
         else:
-            exit(0)
+            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_simulate_file, self.config_ci_exit_file])
+            version = self.read_script_version()
+            version_check = self._check_whitelist_version(version=version, wh_file=self.wh_simulate_file)
+            self._write_exit_log(version_check=version_check)
+            if version_check is False:
+                model_list = []
+                if self.git_url is not None:
+                    Git_Class = Git_Repository_Clone(repo_dir=self.repo_dir,
+                                                     git_url=self.git_url)
+                    Git_Class._clone_repository()
+                    model_list = self._get_wh_examples(wh_path=self.repo_dir)
+                elif self.wh_lib_path is not None:
+                    print(f'Setting: Whitelist path library {self.wh_lib_path}')
+                    model_list = self._get_wh_examples(wh_path=self.wh_lib_path)
+                self._dym_check_lic()
+                error_model_message_dic = self._check_whitelist_model(model_list=model_list)
+                self._write_whitelist(error_model_message_dic=error_model_message_dic, version=version, wh_file=self.wh_simulate_file)
+                self._write_whitelist_errorlog(error_model_message_dic=error_model_message_dic)
+                exit(0)
+            else:
+                exit(0)
 
 
 
@@ -781,7 +857,8 @@ if __name__ == '__main__':
                               library=args.library,
                               wh_library=args.wh_library,
                               repo_dir=args.repo_dir,
-                              git_url=args.git_url)
+                              git_url=args.git_url,
+                              simulate_examples=args.simulate_examples)
         wh.create_wh_workflow()
     else:
         CheckModelTest = ValidateTest(dymola=dymola,
