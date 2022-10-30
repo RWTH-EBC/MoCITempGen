@@ -473,6 +473,7 @@ class Create_whitelist(CI_conf_class):
         self.wh_lib_path = f'{self.wh_library}{os.sep}{self.wh_library}{os.sep}package.mo'
         self.err_log = f'{self.wh_library}{os.sep}{self.wh_library}-errorlog.txt'
         super().__init__()
+
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand(
@@ -584,7 +585,7 @@ class Create_whitelist(CI_conf_class):
             for line in lines:
                 if line.find("extends") > -1 and line.find("Modelica.Icons.Example") > -1:
                     example = filepath.replace(os.sep, ".")
-                    example = example[example.rfind(self.library):example.rfind(".mo")]
+                    example = example[example.rfind(self.wh_library):example.rfind(".mo")]
                     ex_file.close()
                     return example
         except IOError:
@@ -603,13 +604,13 @@ class Create_whitelist(CI_conf_class):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mo") and file != "package.mo":
-                    example = self._get_icon_example(filepath=filepath)
-                    if example is None:
+                    example_test = self._get_icon_example(filepath=filepath)
+                    if example_test is None:
                         print(
                             f'Model {filepath} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
                         continue
                     else:
-                        example_list.append(example)
+                        example_list.append(example_test)
                         continue
         if example_list is None or len(example_list) == 0:
             print(f'No models in package {self.single_package}')
@@ -767,7 +768,8 @@ class Create_whitelist(CI_conf_class):
                 elif self.wh_lib_path is not None:
                     print(f'Setting: Whitelist path library {self.wh_lib_path}')
                     model_list = self._get_wh_examples(wh_path=self.wh_lib_path)
-                self._dym_check_lic()
+                #self._dym_check_lic()
+
                 error_model_message_dic = self._check_whitelist_model(model_list=model_list)
                 self._write_whitelist(error_model_message_dic=error_model_message_dic, version=version, wh_file=self.wh_simulate_file)
                 self._write_whitelist_errorlog(error_model_message_dic=error_model_message_dic)
@@ -846,6 +848,7 @@ if __name__ == '__main__':
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()
     _setEnvironmentPath(dymolaversion=args.dymolaversion)
+
     from dymola.dymola_interface import DymolaInterface  # Load dymola_python interface
     from dymola.dymola_exception import DymolaException  # Load dymola_python exception
     print(f'1: Starting Dymola instance')
@@ -855,6 +858,7 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+
     if args.whitelist is True:  # Write a new whiteList
         wh = Create_whitelist(dymola=dymola,
                               dymola_exception=dymola_exception,
