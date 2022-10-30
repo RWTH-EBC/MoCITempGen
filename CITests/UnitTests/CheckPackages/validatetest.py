@@ -296,7 +296,7 @@ class ValidateTest(CI_conf_class):
                 models.remove(example)
             return models
 
-    def _get_wh_models(self):  # Return a list with all models from the whitelist
+    def _get_wh_models(self):
         """
         Returns: return models who are on the whitelist
         """
@@ -591,7 +591,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Error: File {filepath} does not exist.')
             exit(0)
 
-    def _get_wh_examples(self):
+    def _get_wh_examples(self, wh_path):
         """
             Args:
                 wh_path (): whitelist library path
@@ -599,7 +599,7 @@ class Create_whitelist(CI_conf_class):
                 model_list (): return a list with models to check
         """
         example_list = []
-        for subdir, dirs, files in os.walk(self.root_package):
+        for subdir, dirs, files in os.walk(wh_path):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mo") and file != "package.mo":
@@ -727,7 +727,6 @@ class Create_whitelist(CI_conf_class):
         self._check_ci_var_settings()
         if self.simulate_examples is False:
             CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file, self.config_ci_exit_file])
-
             version = self.read_script_version()
             version_check = self._check_whitelist_version(version=version, wh_file=self.wh_model_file)
             self._write_exit_log(version_check=version_check)
