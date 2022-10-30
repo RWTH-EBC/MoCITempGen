@@ -673,6 +673,11 @@ class Create_whitelist(CI_conf_class):
             print(f'Library path is wrong. Please check path of {self.wh_library} library path.')
             exit(1)
         error_model_message_dic = {}
+
+        if model_list is None or len(model_list) == 0:
+            print(f'{self.CRED}Error:{self.CEND} Found no models')
+            exit(0)
+
         for model in model_list:
             if self.simulate_examples is True:
                 result = self.dymola.checkModel(model, simulate=True)
