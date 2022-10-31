@@ -133,7 +133,7 @@ class ValidateTest(CI_conf_class):
             exit(0)
         if len(error_model_message_dic) > 0:
             print(f'Test {self.CRED}failed!{self.CEND}')
-            for model in error_model:
+            for model in error_model_message_dic:
                 print(f'{self.CRED}Error:{self.CEND} Check Model {model}')
             exit(1)
         if error_model_message_dic is None:
@@ -296,13 +296,13 @@ class ValidateTest(CI_conf_class):
                 models.remove(example)
             return models
 
-    def _get_wh_models(self):
+    def _get_wh_models(self, wh_file):
         """
         Returns: return models who are on the whitelist
         """
         wh_list_models = []
         try:
-            wh_file = open(self.wh_model_file, "r")
+            wh_file = open(wh_file, "r")
             lines = wh_file.readlines()
             for line in lines:
                 model = line.lstrip()
@@ -410,7 +410,7 @@ class ValidateTest(CI_conf_class):
             CI_conf_class()._check_ci_folder_structure(folder_list=[self.wh_ci_dir])
             CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file])
             self._whitelist_library_check()
-            wh_list = self._get_wh_models()
+            wh_list = self._get_wh_models(wh_file=self.wh_model_file)
             models = self._get_model()
             model_list = self._filter_wh_models(models=models, wh_list=wh_list)
         else:
@@ -437,9 +437,9 @@ class ValidateTest(CI_conf_class):
             simulate_example_list = self._get_changed_simulate_examples()
         elif self.filterwhitelist is True:
             CI_conf_class()._check_ci_folder_structure(folder_list=[self.wh_ci_dir])
-            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_model_file])
+            CI_conf_class()._check_ci_file_structure(file_list=[self.wh_simulate_file])
             self._whitelist_library_check()
-            wh_list = self._get_wh_models()
+            wh_list = self._get_wh_models(wh_file=self.wh_simulate_file)
             models = self._get_simulate_examples()
             simulate_example_list = self._filter_wh_models(models=models, wh_list=wh_list)
         else:
@@ -727,7 +727,7 @@ class Create_whitelist(CI_conf_class):
 
     def create_wh_workflow(self):
         """
-        Workflow for creating the whitelist based on a library.
+        Workflow for creating the whitelist based on a whitelist-library.
         """
         CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
         self._check_ci_var_settings()
@@ -768,8 +768,7 @@ class Create_whitelist(CI_conf_class):
                 elif self.wh_lib_path is not None:
                     print(f'Setting: Whitelist path library {self.wh_lib_path}')
                     model_list = self._get_wh_examples(wh_path=self.wh_lib_path)
-                #self._dym_check_lic()
-
+                self._dym_check_lic()
                 error_model_message_dic = self._check_whitelist_model(model_list=model_list)
                 self._write_whitelist(error_model_message_dic=error_model_message_dic, version=version, wh_file=self.wh_simulate_file)
                 self._write_whitelist_errorlog(error_model_message_dic=error_model_message_dic)
