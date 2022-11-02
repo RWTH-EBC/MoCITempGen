@@ -396,7 +396,7 @@ class get_modelica_models(CI_conf_class):
                 model = model.strip().replace("\n", "")
                 if model.find(f'{wh_library}.{single_package}') > -1:
                     print(f'Dont test {wh_library} model: {model}. Model is on the whitelist.')
-                    wh_list_models.append(model.replace(wh_library, self.library))
+                    wh_list_models.append(model.replace(wh_library, library))
                 elif model.find(f'{library}.{single_package}') > -1:
                     print(f'Dont test {library} model: {model}. Model is on the whitelist.')
                     wh_list_models.append(model)
