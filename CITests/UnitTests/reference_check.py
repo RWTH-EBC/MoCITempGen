@@ -36,13 +36,16 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
-    def _write_exit_file(self):
+    def _write_exit_file(self, err_list):
         """
 
         """
         try:
             ex_file = open(self.config_ci_exit_file, "w")
-            ex_file.write(f'successful')
+            if len(err_list) == 0:
+                ex_file.write(f'successful')
+            else:
+                ex_file.write(f'FAIL')
             ex_file.close()
             print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
             exit(0)
@@ -50,12 +53,14 @@ class Buildingspy_Regression_Check(CI_conf_class):
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(0)
 
-    def check_regression_test(self, package_list):  # start regression test for a package
+    def check_regression_test(self, package_list):
         """
+        start regression test for a package
         Args:
             package_list ():
         Returns:
         """
+        print(f'Start regressiontest for {package_list}')
         if package_list is None or len(package_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
             exit(1)
@@ -87,7 +92,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
                             print(f'{self.green} Regression test for model {package} was successful {self.CEND}')
                             continue
             else:
-                self._write_exit_file()
+                self._write_exit_file(err_list=err_list)
         if len(err_list) > 0:
             print(f'{self.CRED} Regression test failed{self.CEND}')
             print(f'The following packages{self.CRED} failed: {self.CEND}')
