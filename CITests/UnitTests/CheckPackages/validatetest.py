@@ -23,7 +23,7 @@ class Git_Repository_Clone(object):
         self.repo_dir = repo_dir
         self.git_url = git_url
 
-    def _clone_repository(self):   
+    def clone_repository(self):
         """
         Pull git repository.
         """
@@ -153,32 +153,33 @@ class ValidateTest(CI_conf_class):
             filterwhitelist: boolean - true  Filter model on whitelist
         """
         self._check_packages()
-        python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception)._dym_check_lic()
+        python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
+        conf = CI_conf_class()
         if self.changedmodel is True:
-            CI_conf_class()._check_ci_folder_structure(folder_list= [self.config_ci_dir])
-            CI_conf_class()._check_ci_file_structure(file_list=[self.config_ci_changed_file])
-            model_list = modelica_model._get_changed_models(model_file=self.config_ci_changed_file, library=self.library, single_package=self.single_package)
+            conf.check_ci_folder_structure(folder_list= [self.config_ci_dir])
+            conf.check_ci_file_structure(file_list=[self.config_ci_changed_file])
+            model_list = modelica_model.get_changed_models(model_file=self.config_ci_changed_file, library=self.library, single_package=self.single_package)
         elif self.filterwhitelist is True:
-            CI_conf_class()._check_ci_folder_structure(folder_list=[self.wh_ci_dir])
+            conf().check_ci_folder_structure(folder_list=[self.wh_ci_dir])
             if self.simulate_examples is True:
                 file_list = [self.wh_simulate_file]
                 ci_wh_file = self.wh_simulate_file
             else:
                 file_list = [self.wh_model_file]
                 ci_wh_file = self.wh_model_file
-            CI_conf_class()._check_ci_file_structure(file_list=file_list)
-            wh_list_models = modelica_model._get_wh_models(wh_file=ci_wh_file)
-            model_list = modelica_model._get_models(wh_path=self.root_package, library=self.library)
-            model_list = modelica_model._filter_wh_models(models=model_list, wh_list=wh_list_models)
+            conf.check_ci_file_structure(file_list=file_list)
+            wh_list_models = modelica_model.get_wh_models(wh_file=ci_wh_file,  wh_library=self.wh_library, library=self.library, single_package=self.single_package)
+            model_list = modelica_model.get_models(wh_path=self.root_package, library=self.library)
+            model_list = modelica_model.filter_wh_models(models=model_list, wh_list=wh_list_models)
         else:
-            model_list =  modelica_model._get_models(wh_path=self.root_package, library=self.library)
+            model_list = modelica_model.get_models(wh_path=self.root_package, library=self.library)
         if len(model_list) == 0:
             print(f'Find no models in package {self.single_package}')
             exit(0)
         else:
             error_model_message_dic = self._checkmodel(model_list=model_list)
-            modelica_model._check_result(error_model_message_dic=error_model_message_dic)
+            modelica_model.check_result(error_model_message_dic=error_model_message_dic)
 
 class Create_whitelist(CI_conf_class):
 
@@ -225,7 +226,7 @@ class Create_whitelist(CI_conf_class):
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(1)
 
-    def read_script_version(self):
+    def _read_script_version(self):
         """
         Returns:
             version (): return the latest version number of aixlib conversion script.
@@ -345,7 +346,8 @@ class Create_whitelist(CI_conf_class):
         """
         Workflow for creating the whitelist based on a whitelist-library.
         """
-        CI_conf_class()._check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
+        conf = CI_conf_class()
+        conf.check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
         self._check_argument_settings()
         if self.simulate_examples is True:
             file_list = [self.wh_simulate_file, self.config_ci_exit_file]
@@ -353,23 +355,22 @@ class Create_whitelist(CI_conf_class):
         else:  # Check models
             file_list = [self.wh_model_file, self.config_ci_exit_file]
             wh_file = self.wh_model_file
-        CI_conf_class()._check_ci_file_structure(file_list=file_list)
-        version = self.read_script_version()
+        conf.check_ci_file_structure(file_list=file_list)
+        version = self._read_script_version()
         version_check = self._check_whitelist_version(version=version, wh_file=wh_file)
         self._write_exit_log(version_check=version_check)
         if version_check is False:
             modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
             model_list = []
             if self.git_url is not None:
-                Git_Class = Git_Repository_Clone(repo_dir=self.repo_dir, git_url=self.git_url)
-                Git_Class._clone_repository()
-                model_list = modelica_model._get_models(wh_path=self.repo_dir, library=self.wh_library)
+                Git_Repository_Clone(repo_dir=self.repo_dir, git_url=self.git_url).clone_repository()
+                model_list = modelica_model.get_models(wh_path=self.repo_dir, library=self.wh_library)
             elif self.wh_lib_path is not None:
                 print(f'Setting: Whitelist path library {self.wh_lib_path}')
-                model_list = modelica_model._get_models(wh_path=self.wh_lib_path, library=self.wh_library)
-            python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception)._dym_check_lic()
+                model_list = modelica_model.get_models(wh_path=self.wh_lib_path, library=self.wh_library)
+            python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
             error_model_message_dic = self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
-            modelica_model._check_result(error_model_message_dic=error_model_message_dic)
+            modelica_model.check_result(error_model_message_dic=error_model_message_dic)
             exit(0)
         else:
             exit(0)
@@ -382,7 +383,7 @@ class get_modelica_models(CI_conf_class):
         self.simulate_examples = simulate_examples
 
 
-    def _get_wh_models(self, wh_file):
+    def get_wh_models(self, wh_file, wh_library, library, single_package):
         """
         Returns: return models who are on the whitelist
         """
@@ -393,19 +394,19 @@ class get_modelica_models(CI_conf_class):
             for line in lines:
                 model = line.lstrip()
                 model = model.strip().replace("\n", "")
-                if model.find(f'{self.wh_library}.{self.single_package}') > -1:
-                    print(f'Dont test {self.wh_library} model: {model}. Model is on the whitelist.')
-                    wh_list_models.append(model.replace(self.wh_library, self.library))
-                elif model.find(f'{self.library}.{self.single_package}') > -1:
-                    print(f'Dont test {self.library} model: {model}. Model is on the whitelist.')
+                if model.find(f'{wh_library}.{single_package}') > -1:
+                    print(f'Dont test {wh_library} model: {model}. Model is on the whitelist.')
+                    wh_list_models.append(model.replace(wh_library, self.library))
+                elif model.find(f'{library}.{single_package}') > -1:
+                    print(f'Dont test {library} model: {model}. Model is on the whitelist.')
                     wh_list_models.append(model)
             wh_file.close()
             return wh_list_models
         except IOError:
-            print(f'Error: File {self.wh_model_file} does not exist.')
+            print(f'Error: File {wh_file} does not exist.')
             return wh_list_models
 
-    def _filter_wh_models(self, models, wh_list):
+    def filter_wh_models(self, models, wh_list):
         """
         Args:
             models (): models from library.
@@ -415,7 +416,7 @@ class get_modelica_models(CI_conf_class):
         """
         wh_list_mo = []
         if len(models) == 0:
-            print(f'No examples models in package: {self.single_package}')
+            print(f'No examples models in package: {single_package}')
             exit(0)
         else:
             for element in models:
@@ -432,7 +433,6 @@ class get_modelica_models(CI_conf_class):
         Args:
             filepath (): file of a dymola model.
             library (): library to test.
-
         Returns:
             example: return examples that have the string extends Modelica.Icons.Examples
         """
@@ -449,7 +449,7 @@ class get_modelica_models(CI_conf_class):
             print(f'Error: File {filepath} does not exist.')
             exit(0)
 
-    def _get_changed_models(self, model_file, library, single_package):
+    def get_changed_models(self, model_file, library, single_package):
         """
         Returns: return a list with changed models
         """
@@ -487,7 +487,7 @@ class get_modelica_models(CI_conf_class):
             exit(0)
 
 
-    def _get_models(self, wh_path, library):
+    def get_models(self, wh_path, library):
         """
             Args:
                 wh_path (): whitelist library or library path.
@@ -514,12 +514,12 @@ class get_modelica_models(CI_conf_class):
                         model = model[model.rfind(library):model.rfind(".mo")]
                         model_list.append(model)
         if model_list is None or len(model_list) == 0:
-            print(f'No models in package {self.single_package}')
+            print(f'No models in package {wh_path}')
             exit(0)
         else:
             return model_list
 
-    def _check_result(self, error_model_message_dic):
+    def check_result(self, error_model_message_dic):
         """
         Args:
             error_model_message_dic ():  Dictionary with models and its error message.
@@ -545,7 +545,7 @@ class python_dymola_interface(CI_conf_class):
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
-    def _dym_check_lic(self):
+    def dym_check_lic(self):
         """
             Check dymola license.
         """
@@ -565,7 +565,7 @@ class python_dymola_interface(CI_conf_class):
         print(
             f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
-def _setEnvironmentVariables(var, value):  # Add to the environment variable 'var' the value 'value'
+def _setEnvironmentVariables(var, value):
     """
     Args:
         var ():

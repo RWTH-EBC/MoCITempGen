@@ -57,7 +57,7 @@ class CI_conf_class(object):
                 dir_list.append(dir_dic[dir])
         return dir_list
 
-    def _check_ci_folder_structure(self, folder_list):
+    def check_ci_folder_structure(self, folder_list):
         """
         Check CI Structure
         """
@@ -68,7 +68,7 @@ class CI_conf_class(object):
             else:
                 print(f'Path "{folder}" exist.')
 
-    def _check_ci_file_structure(self, file_list):
+    def check_ci_file_structure(self, file_list):
         for file in file_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
@@ -77,7 +77,7 @@ class CI_conf_class(object):
                 write_file = open(file, "w+")
                 write_file.close()
 
-    def _create_folder(self, path):
+    def create_folder(self, path):
         try:
             if not os.path.exists(path):
                 print(f'Create path: {path}')
