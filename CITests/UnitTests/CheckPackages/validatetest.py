@@ -37,8 +37,8 @@ class Git_Repository_Clone(object):
 
 class ValidateTest(CI_conf_class):
     def __init__(self, dymola, dymola_exception, single_package, number_of_processors, show_gui, simulate_examples,
-                 changedmodel, library,
-                 wh_library, filterwhitelist):
+                 changed_model, library,
+                 wh_library, filter_whitelist):
         """
         The class check or simulate models. Return a error-log. Can filter models from a whitelist
         Args:
@@ -48,19 +48,19 @@ class ValidateTest(CI_conf_class):
             number_of_processors (): processors number.
             show_gui (): True - show dymola, false - dymola hidden.
             simulate_examples (): boolean - true: simulate examples
-            changedmodel (): boolean - true: check or simulate only models in a commit .
+            changed_model (): boolean - true: check or simulate only models in a commit .
             library (): library to test.
             wh_library (): whitelist library, filter failed models with a whitelist.
-            filterwhitelist (): boolean - true: filter models from a whitelist.
+            filter_whitelist (): boolean - true: filter models from a whitelist.
         """
         self.single_package = single_package
         self.number_of_processors = number_of_processors
         self.show_gui = show_gui
         self.simulate_examples = simulate_examples
-        self.changedmodel = changedmodel
+        self.changed_model = changed_model
         self.library = library
         self.wh_library = wh_library
-        self.filterwhitelist = filterwhitelist
+        self.filter_whitelist = filter_whitelist
         self.lib_path = f'{self.library}{os.sep}package.mo'
         self.root_package = f'{self.library}{os.sep}{self.single_package}'
         self.err_log = f'{self.library}{os.sep}{self.library}.{self.single_package}-errorlog.txt'
@@ -149,18 +149,18 @@ class ValidateTest(CI_conf_class):
     def check_model_workflow(self):
         """
         Check models in package.
-            changedmodel: boolean - true: Test only changed or new models
-            filterwhitelist: boolean - true  Filter model on whitelist
+            changed_model: boolean - true: Test only changed or new models
+            filter_whitelist: boolean - true  Filter model on whitelist
         """
         self._check_packages()
         python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
         conf = CI_conf_class()
-        if self.changedmodel is True:
+        if self.changed_model is True:
             conf.check_ci_folder_structure(folder_list= [self.config_ci_dir])
             conf.check_ci_file_structure(file_list=[self.config_ci_changed_file])
             model_list = modelica_model.get_changed_models(model_file=self.config_ci_changed_file, library=self.library, single_package=self.single_package)
-        elif self.filterwhitelist is True:
+        elif self.filter_whitelist is True:
             conf.check_ci_folder_structure(folder_list=[self.wh_ci_dir])
             if self.simulate_examples is True:
                 file_list = [self.wh_simulate_file]
@@ -243,7 +243,8 @@ class Create_whitelist(CI_conf_class):
             print(f'Latest {self.library} version: {version}')
             return version
 
-    def _check_whitelist_version(self, version, wh_file):
+    @staticmethod
+    def _check_whitelist_version(version, wh_file):
         """
         Check the latest whitelist version with the latest version of Aixlib conversion script.
         Args:
@@ -369,8 +370,7 @@ class Create_whitelist(CI_conf_class):
                 print(f'Setting: Whitelist path library {self.wh_lib_path}')
                 model_list = modelica_model.get_models(wh_path=self.wh_lib_path, library=self.wh_library)
             python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
-            error_model_message_dic = self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
-            modelica_model.check_result(error_model_message_dic=error_model_message_dic)
+            self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
             exit(0)
         else:
             exit(0)
@@ -383,7 +383,8 @@ class get_modelica_models(CI_conf_class):
         self.simulate_examples = simulate_examples
 
 
-    def get_wh_models(self, wh_file, wh_library, library, single_package):
+    @staticmethod
+    def get_wh_models(wh_file, wh_library, library, single_package):
         """
         Returns: return models who are on the whitelist
         """
@@ -406,7 +407,8 @@ class get_modelica_models(CI_conf_class):
             print(f'Error: File {wh_file} does not exist.')
             return wh_list_models
 
-    def filter_wh_models(self, models, wh_list):
+    @staticmethod
+    def filter_wh_models(models, wh_list):
         """
         Args:
             models (): models from library.
@@ -428,7 +430,8 @@ class get_modelica_models(CI_conf_class):
                 models.remove(example)
             return models
 
-    def _get_icon_example(self, filepath, library):
+    @staticmethod
+    def _get_icon_example(filepath, library):
         """
         Args:
             filepath (): file of a dymola model.
@@ -622,18 +625,18 @@ if __name__ == '__main__':
                                   action="store_true")
     check_test_group.add_argument("-SE", "--simulate-examples", help="Check and simulate examples in the package",
                                   action="store_true")
-    check_test_group.add_argument("-DS", "--dymolaversion", default="2020",
+    check_test_group.add_argument("-DS", "--dymola-version", default="2020",
                                   help="Version of dymola (Give the number e.g. 2020")
-    check_test_group.add_argument("-CM", "--changedmodel", default=False, action="store_true")
+    check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
     check_test_group.add_argument("-FW", "--filterwhitelist", default=False, action="store_true")
     check_test_group.add_argument("-l", "--library", default="AixLib", help="Library to test")
-    check_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
+    check_test_group.add_argument("-wh-l", "--wh-library", default="IBPSA", help="Whitelist library to test")
     check_test_group.add_argument("--repo-dir", help="Library to test")
     check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
-                                  help="url repository")
+                                  help="url repository of whitelist library")
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()
-    _setEnvironmentPath(dymolaversion=args.dymolaversion)
+    _setEnvironmentPath(dymolaversion=args.dymola_version)
 
     from dymola.dymola_interface import DymolaInterface  # Load dymola_python interface
     from dymola.dymola_exception import DymolaException  # Load dymola_python exception
@@ -661,8 +664,8 @@ if __name__ == '__main__':
                                       number_of_processors=args.number_of_processors,
                                       show_gui=args.show_gui,
                                       simulate_examples=args.simulate_examples,
-                                      changedmodel=args.changedmodel,
+                                      changed_model=args.changed_model,
                                       library=args.library,
                                       wh_library=args.wh_library,
-                                      filterwhitelist=args.filterwhitelist)
+                                      filter_whitelist=args.filter_whitelist)
         CheckModelTest.check_model_workflow()
