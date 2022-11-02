@@ -178,7 +178,7 @@ class ValidateTest(CI_conf_class):
             exit(0)
         else:
             error_model_message_dic = self._checkmodel(model_list=model_list)
-            modelica_model.check_result(error_model_message_dic=error_model_message_dic)
+            modelica_model._check_result(error_model_message_dic=error_model_message_dic)
 
 class Create_whitelist(CI_conf_class):
 
@@ -492,7 +492,6 @@ class get_modelica_models(CI_conf_class):
             Args:
                 wh_path (): whitelist library or library path.
                 library (): library to test.
-
             Returns:
                 model_list (): return a list with models to check.
         """
