@@ -315,10 +315,10 @@ class python_dymola_interface(CI_conf_class):
         """
 
         """
-        librarycheck = self.dymola.openModel(path)
-        if librarycheck is True:
+        library_check = self.dymola.openModel(path)
+        if library_check is True:
             print(f'Found {library} Library. Start regression test.')
-        elif librarycheck is False:
+        elif library_check is False:
             print(f'Library Path is wrong. Please Check Path of {library} Library Path')
             exit(1)
 
