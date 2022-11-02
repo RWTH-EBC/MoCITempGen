@@ -169,10 +169,10 @@ class ValidateTest(CI_conf_class):
                 ci_wh_file = self.wh_model_file
             CI_conf_class()._check_ci_file_structure(file_list=file_list)
             wh_list_models = modelica_model._get_wh_models(wh_file=ci_wh_file)
-            model_list = modelica_model._get_models(wh_path=self.root_package, library=self.library, simulate_examples=self.simulate_examples)
+            model_list = modelica_model._get_models(wh_path=self.root_package, library=self.library)
             model_list = modelica_model._filter_wh_models(models=model_list, wh_list=wh_list_models)
         else:
-            model_list =  modelica_model._get_models(wh_path=self.root_package, library=self.library, simulate_examples=self.simulate_examples)
+            model_list =  modelica_model._get_models(wh_path=self.root_package, library=self.library)
         if len(model_list) == 0:
             print(f'Find no models in package {self.single_package}')
             exit(0)
@@ -359,13 +359,14 @@ class Create_whitelist(CI_conf_class):
         self._write_exit_log(version_check=version_check)
         if version_check is False:
             modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
+            model_list = []
             if self.git_url is not None:
                 Git_Class = Git_Repository_Clone(repo_dir=self.repo_dir, git_url=self.git_url)
                 Git_Class._clone_repository()
-                model_list = modelica_model._get_models(wh_path=self.repo_dir, library=self.wh_library, simulate_examples=self.simulate_examples)
+                model_list = modelica_model._get_models(wh_path=self.repo_dir, library=self.wh_library)
             elif self.wh_lib_path is not None:
                 print(f'Setting: Whitelist path library {self.wh_lib_path}')
-                model_list = modelica_model._get_models(wh_path=self.wh_lib_path, library=self.wh_library, simulate_examples=self.simulate_examples)
+                model_list = modelica_model._get_models(wh_path=self.wh_lib_path, library=self.wh_library)
             python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception)._dym_check_lic()
             error_model_message_dic = self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
             modelica_model._check_result(error_model_message_dic=error_model_message_dic)
@@ -376,8 +377,8 @@ class Create_whitelist(CI_conf_class):
 
 class get_modelica_models(CI_conf_class):
 
-    def __init__(self):
-        super().__init__(self, simulate_examples)
+    def __init__(self, simulate_examples):
+        super().__init__()
         self.simulate_examples = simulate_examples
 
 
@@ -491,7 +492,7 @@ class get_modelica_models(CI_conf_class):
             Args:
                 wh_path (): whitelist library or library path.
                 library (): library to test.
-                simulate_examples (): boolean - true: simulate examples
+
             Returns:
                 model_list (): return a list with models to check.
         """
