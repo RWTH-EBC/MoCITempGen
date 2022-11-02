@@ -628,7 +628,7 @@ if __name__ == '__main__':
     check_test_group.add_argument("-DS", "--dymola-version", default="2020",
                                   help="Version of dymola (Give the number e.g. 2020")
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
-    check_test_group.add_argument("-FW", "--filterwhitelist", default=False, action="store_true")
+    check_test_group.add_argument("-FW", "--filter-whitelist", default=False, action="store_true")
     check_test_group.add_argument("-l", "--library", default="AixLib", help="Library to test")
     check_test_group.add_argument("-wh-l", "--wh-library", default="IBPSA", help="Whitelist library to test")
     check_test_group.add_argument("--repo-dir", help="Library to test")
