@@ -583,17 +583,17 @@ def _setEnvironmentVariables(var, value):
         os.environ[var] = value
 
 
-def _setEnvironmentPath(dymolaversion):
+def _setEnvironmentPath(dymola_version):
     """
     Args:
-        dymolaversion (): Version von dymola-docker image (e.g. 2022)
+        dymola_version (): Version von dymola-docker image (e.g. 2022)
     Set path of python dymola interface for windows or linux
     """
     if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
         _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
         sys.path.insert(0, os.path.join('C:\\',
                                         'Program Files',
-                                        'Dymola ' + dymolaversion,
+                                        'Dymola ' + dymola_version,
                                         'Modelica',
                                         'Library',
                                         'python_interface',
@@ -603,7 +603,7 @@ def _setEnvironmentPath(dymolaversion):
                                  os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
                                  os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
         sys.path.insert(0, os.path.join('opt',
-                                        'dymola-' + dymolaversion + '-x86_64',
+                                        'dymola-' + dymola_version + '-x86_64',
                                         'Modelica',
                                         'Library',
                                         'python_interface',
@@ -636,7 +636,7 @@ if __name__ == '__main__':
                                   help="url repository of whitelist library")
     check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()
-    _setEnvironmentPath(dymolaversion=args.dymola_version)
+    _setEnvironmentPath(dymola_version=args.dymola_version)
 
     from dymola.dymola_interface import DymolaInterface  # Load dymola_python interface
     from dymola.dymola_exception import DymolaException  # Load dymola_python exception
