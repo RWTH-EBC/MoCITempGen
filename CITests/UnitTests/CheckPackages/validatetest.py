@@ -161,7 +161,7 @@ class ValidateTest(CI_conf_class):
             conf.check_ci_file_structure(file_list=[self.config_ci_changed_file])
             model_list = modelica_model.get_changed_models(model_file=self.config_ci_changed_file, library=self.library, single_package=self.single_package)
         elif self.filterwhitelist is True:
-            conf().check_ci_folder_structure(folder_list=[self.wh_ci_dir])
+            conf.check_ci_folder_structure(folder_list=[self.wh_ci_dir])
             if self.simulate_examples is True:
                 file_list = [self.wh_simulate_file]
                 ci_wh_file = self.wh_simulate_file
