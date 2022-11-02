@@ -71,7 +71,7 @@ class CI_conf_class(object):
     def _check_ci_file_structure(self, file_list):
         for file in file_list:
             if os.path.exists(file):
-                print(f'{file} does exist. Update the file under {file}')
+                print(f'{file} does exist.')
             else:
                 print(f'{file} does not exist. Create a new one under {file}')
                 write_file = open(file, "w+")
