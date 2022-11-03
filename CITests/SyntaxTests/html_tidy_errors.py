@@ -274,7 +274,7 @@ class HTML_Tidy(CI_conf_class):
                 var = 0
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
-            exit(0)
+            exit(1)
         return var
 
     def _CheckFile(self, moFile):
@@ -600,7 +600,6 @@ class HTML_Tidy(CI_conf_class):
             return library_list, wh_library_list
         except IOError:
             print(f'Error: File {self.wh_html_file} does not exist.')
-            exit(0)
 
     def _ListAixLibModel(self):  # Remove whitelist models and list all library model
         library_list, wh_library_list = HTML_Tidy._list_all_model(self)

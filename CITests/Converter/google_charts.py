@@ -350,7 +350,7 @@ class Plot_Charts(CI_conf_class):
                     else:
                         print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                         value = self._read_csv_funnel(url=path_name)
-                        my_template = self.template(filename=self.chart_temp_file)  # Render Template
+                        my_template = self.template(filename=self.temp_chart_file)
                         html_chart = my_template.render(values=value,
                                                         var=[f'{var}_ref', var],
                                                         model=model,
@@ -388,7 +388,7 @@ class Plot_Charts(CI_conf_class):
         else:
             print(
                 f'Plot model: {self.green}{reference_file[reference_file.rfind(os.sep) + 1:]}{self.CEND} with variables:\n{self.green}{legend_list}{self.CEND}\n')
-            my_template = self.template(filename=self.chart_temp_file)
+            my_template = self.template(filename=self.temp_chart_file)
             html_chart = my_template.render(values=value_list,
                                             var=legend_list,
                                             model=reference_file,
@@ -412,7 +412,7 @@ class Plot_Charts(CI_conf_class):
         else:
             print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
             value = self._read_csv_funnel(url=path_name)
-            my_template = self.template(filename=self.chart_temp_file)
+            my_template = self.template(filename=self.temp_chart_file)
             html_chart = my_template.render(values=value,
                                             var=[f'{var}_ref', var],
                                             model=model,
