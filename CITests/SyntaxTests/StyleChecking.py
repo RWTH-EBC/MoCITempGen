@@ -16,12 +16,12 @@ class StyleCheck(CI_conf_class):
         Class to Check the style of packages and models.
         Export HTML-Log File.
         Args:
-            dymola ():
-            dymola_exception ():
-            package ():
-            library ():
-            dymola_version ():
-            changed_models ():
+            dymola (): dymola_python interface class
+            dymola_exception (): dymola_exception class
+            package (): package to test
+            library (): library to test
+            dymola_version (): dymola version (e.g. 2022)
+            changed_models (): boolean - True: Check only changed models, False: Check library
         """
         self.package = package
         self.library = library
@@ -74,19 +74,37 @@ class StyleCheck(CI_conf_class):
             self.dymola.ExecuteCommand(
                 'cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
 
-    def style_check(self):
+    def style_check(self, models_list):
         """
         Start CheckLibrary in ModelManagement
         Returns:
         """
-        print(f'Start Style Check. Check package or model: {self.package}')
+        print(f'Start Style Check. Check package or model: {models_list}')
         self._check_library()
         self._set_library_model_management()
-        self.dymola.ExecuteCommand(
-            'ModelManagement.Check.checkLibrary(false, false, false, true, "' + self.package + '", translationStructure=false);')
-        log_file = self.library.replace("package.mo", self.package + "_StyleCheckLog.html")
+        if len(models_list) == 1 or len(models_list) > 100:
+            self.dymola.ExecuteCommand('ModelManagement.Check.checkLibrary(false, false, false, true, "' + self.package + '", translationStructure=false);')
+            log_file = self.library.replace("package.mo", self.package + "_StyleCheckLog.html")
+        else:
+            changed_model_list = []
+            path = self.library.replace("package.mo", "")
+            for model in models_list:
+                print(f'Check package or model {model}')
+                self.dymola.ExecuteCommand('ModelManagement.Check.checkLibrary(false, false, false, true, "' + model + '", translationStructure=false);')
+                log = codecs.open(f'{path}{model}_StyleCheckLog.html', "r", encoding='utf8')
+                for line in log:
+                    changed_model_list.append(line)
+                log.close()
+                os.remove(f'{path}{model}_StyleCheckLog.html')
+            all_logs = codecs.open(f'{path}ChangedModels_StyleCheckLog.html', "w", encoding='utf8')
+            for model in changed_model_list:
+                all_logs.write(model)
+            all_logs.close()
+            log_file = f'{path}ChangedModels_StyleCheckLog.html'
+
         self.dymola.close()
         return log_file
+
 
     def changed_style_check(self, models_list):
         """
@@ -126,9 +144,7 @@ class StyleCheck(CI_conf_class):
 
     def sort_mo_models(self):
         """
-
         Returns:
-
         """
         try:
             models_list = []
@@ -224,7 +240,6 @@ def _setEnvironmentPath(dymola_version):
     sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
 
 
-#
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Check the Style of Packages")
     check_test_group = parser.add_argument_group("arguments to run check tests")
@@ -255,10 +270,8 @@ if __name__ == '__main__':
                             changed_models=args.changed_models)
     CheckStyle.dym_check_lic()
     if args.changed_models is False:
-        logfile = CheckStyle.style_check()
-
+        model_list = [args.single_package]
     if args.changed_models is True:
         model_list = CheckStyle.sort_mo_models()
-        logfile = CheckStyle.changed_style_check(models_list=model_list)
-
+    logfile = CheckStyle.style_check(models_list=model_list)
     CheckStyle.Style_Check_Log(inputfile=logfile)

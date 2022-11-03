@@ -30,7 +30,7 @@ class Plot_Charts(CI_conf_class):
         self.funnel_path = f'{self.library}{os.sep}funnel_comp'
         self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
-        self.layout_html_file = f'{self.chart_dir}{os.sep}index.html'
+
 
     @staticmethod
     def _check_ref_file(reference_file_list):
@@ -441,23 +441,23 @@ class Plot_Charts(CI_conf_class):
             file_tmp.close()
             print(f'Create html file with reference results.')
 
-    def create_layout(self):
+    def create_layout(self, temp_dir, layout_html_file):
         """
-        Creates a layout index that has all links to the subordinate index files
+        Creates a layout index that has all links to the subordinate index files.
         """
         package_list = []
-        for folders in os.listdir(self.chart_dir):
+        for folders in os.listdir(temp_dir):
             if folders == "style.css" or folders == "index.html":
                 continue
             else:
                 package_list.append(folders)
-        my_template = self.template(filename=self.temp_layout_file)
         if len(package_list) == 0:
             print(f'No html files')
             exit(0)
         else:
+            my_template = self.template(filename=self.temp_layout_file)
             html_chart = my_template.render(single_package=package_list)
-            file_tmp = open(self.layout_html_file, "w")
+            file_tmp = open(layout_html_file, "w")
             file_tmp.write(html_chart)
             file_tmp.close()
 
@@ -563,7 +563,6 @@ if __name__ == '__main__':
     print(f'\n\n\n')
     conf.check_ci_folder_structure(folder_list=[conf.chart_dir, conf.temp_chart_dir])
     conf.check_ci_file_structure(file_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
-
     charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)
     if args.line_html is True:
         charts.check_setting()
@@ -604,6 +603,6 @@ if __name__ == '__main__':
                     charts.mako_line_html_chart(model=ref[:ref.find(".mat")], var=ref[ref.rfind(".mat") + 5:])
             pass
         charts.create_index_layout()
-        charts.create_layout()
+        charts.create_layout(temp_dir=conf.chart_dir, layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
     if args.create_layout is True:
-        charts.create_layout()
+        charts.create_layout(temp_dir=f'data{os.sep}plots', layout_html_file=f'data{os.sep}plots{os.sep}index.html')
