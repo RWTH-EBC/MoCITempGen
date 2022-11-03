@@ -5,7 +5,7 @@ class CI_conf_class(object):
 
     def __init__(self):
         """
-        Dont change the self.<name>. But you can change the paths and file name
+        Don't change the self.<name>. But you can change the paths and file name
         """
         self.dymola_ci_test_dir = f'dymola-ci-tests'
         self.dymola_python_test_dir = f'Dymola_python_tests'
@@ -45,12 +45,12 @@ class CI_conf_class(object):
 
     @staticmethod
     def return_file_list():
-        file_list = []
+        files_list = []
         file_dic = (vars(CI_conf_class()))
         for file in file_dic:
             if file.find("_file") > -1:
-                file_list.append(file_dic[file])
-        return file_list
+                files_list.append(file_dic[file])
+        return files_list
 
     @staticmethod
     def return_file_dir():
@@ -62,25 +62,27 @@ class CI_conf_class(object):
         return dir_list
 
     @staticmethod
-    def check_ci_folder_structure(folder_list):
+    def check_ci_folder_structure(folders_list):
         """
         Check CI Structure
         """
-        for folder in folder_list:
+        for folder in folders_list:
             if not os.path.exists(folder):
                 print(f'Create path: {folder}')
                 os.makedirs(folder)
             else:
                 print(f'Path "{folder}" exist.')
 
-    @staticmethod
-    def check_ci_file_structure(file_list):
+
+    def check_ci_file_structure(self, file_list):
         for file in file_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
             else:
                 print(f'File {file} does not exist. Create a new one under {file}')
                 write_file = open(file, "w+")
+                if file is self.config_ci_eof_file:
+                    write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
                 write_file.close()
 
     @staticmethod
@@ -97,13 +99,15 @@ class CI_conf_class(object):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Set files or directionaries")
+    parser = argparse.ArgumentParser(description="Set files or dictionaries")
     check_test_group = parser.add_argument_group("Arguments to build files or folders")
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
     check_test_group.add_argument("--ci-interactive", default=False, action="store_true")
 
     args = parser.parse_args()
     conf = CI_conf_class()
+    folder_list = []
+    file_list = []
     if args.changed_model is True:
         folder_list = [conf.config_ci_dir]
         file_list = [conf.config_ci_changed_file]
@@ -115,7 +119,7 @@ if __name__ == '__main__':
 
 
 
-    conf.check_ci_folder_structure(folder_list=folder_list)
+    conf.check_ci_folder_structure(folders_list=folder_list)
     conf.check_ci_file_structure(file_list=file_list)
 
 

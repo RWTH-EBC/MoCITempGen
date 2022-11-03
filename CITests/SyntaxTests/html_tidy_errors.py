@@ -255,7 +255,7 @@ class HTML_Tidy(CI_conf_class):
         log_file.close()
         try:
             self._create_folder()
-            exit_file = open(self.exit_file, "w")
+            exit_file = open(self.config_ci_exit_file, "w")
             if len(err_list) > 0:
                 print("Syntax Error: Check HTML-logfile")
                 exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 1")
@@ -267,7 +267,7 @@ class HTML_Tidy(CI_conf_class):
                 exit_file.close()
                 var = 0
         except IOError:
-            print(f'Error: File {self.exit_file} does not exist.')
+            print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(0)
         return var
 
@@ -360,6 +360,14 @@ class HTML_Tidy(CI_conf_class):
         return document_corr_img, errors_string
 
     def _htmlCorrection(self, htmlCode):
+        """
+
+        Args:
+            htmlCode ():
+
+        Returns:
+
+        """
         substitutions_dict: dict = {'"': '\\"', '<br>': '<br/>', '<br/>': '<br/>'}
         htmlList = htmlCode
         htmlStr = HTML_Tidy.join_body(self, htmlList=htmlList, substitutions_dict={'\\"': '"'})
@@ -375,7 +383,16 @@ class HTML_Tidy(CI_conf_class):
             self, theString=htmlCorrect, substitutions_dict=substitutions_dict)
         return document_corr, errors
 
-    def correct_table_summary(self, line, CloseFound):  # delete Summary in table and add <caption> Text </caption>
+    def correct_table_summary(self, line, CloseFound):
+        """
+        delete Summary in table and add <caption> Text </caption>
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         if CloseFound == True:
             tableTag = line.encode("utf-8").find(b"<table")
             sumTag = line.encode("utf-8").find(b"summary")
@@ -386,7 +403,16 @@ class HTML_Tidy(CI_conf_class):
                 line = (line.replace('">', '</caption>', 1))
         return line, CloseFound
 
-    def correct_th_align(self, line, CloseFound):  # Correct algin with th and replace style="text-align"
+    def correct_th_align(self, line, CloseFound):
+        """
+        Correct algin with th and replace style="text-align"
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         if CloseFound == True:
             alignTag = line.encode("utf-8").find(b"align")
             thTag = line.encode("utf-8").find(b"th")
@@ -395,7 +421,16 @@ class HTML_Tidy(CI_conf_class):
                 line = (line.replace('\\', ''))
         return line, CloseFound
 
-    def correct_p_align(self, line, CloseFound):  # Correct align in p and replace style="text-align"
+    def correct_p_align(self, line, CloseFound):
+        """
+        Correct align in p and replace style="text-align"
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         # Wrong: <p style="text-align:center;">
         # Correct: <p style="text-align:center;">
         # Correct: <p style="text-align:center;font-style:italic;color:blue;">k = c<sub>p</sub>/c<sub>v</sub> </p>
@@ -434,7 +469,16 @@ class HTML_Tidy(CI_conf_class):
                     line = (line[:pTag + 3] + tline + line[closetag + 1:])
         return line, CloseFound
 
-    def correct_font(self, line, CloseFound):  # Replace font to style für html5
+    def correct_font(self, line, CloseFound):
+        """
+        Replace font to style für html5
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         if CloseFound == True:
             styleTag_1 = line.encode("utf-8").find(b"style=")
             styleTag_2 = line.encode("utf-8").find(b"color")
@@ -461,7 +505,16 @@ class HTML_Tidy(CI_conf_class):
                        line[rfontTag:].replace('</font>', '</span>')
         return line, CloseFound
 
-    def correct_img_atr(self, line, CloseFound):  # Correct img and check for missing alt attributed
+    def correct_img_atr(self, line, CloseFound):
+        """
+        Correct img and check for missing alt attributed
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         if CloseFound == True:
             imgTag = line.encode("utf-8").find(b"img")
             if imgTag > -1:
@@ -494,7 +547,16 @@ class HTML_Tidy(CI_conf_class):
                 line = line
         return line, CloseFound
 
-    def delete_html_revision(self, line, CloseFound):  # Delete revsion
+    def delete_html_revision(self, line, CloseFound):
+        """
+        Delete revsion
+        Args:
+            line ():
+            CloseFound ():
+
+        Returns:
+
+        """
         if CloseFound == True:
             htmlTag = line.encode("utf-8").find(b"</html>")
             htmlCloseTag = line.encode("utf-8").find(b"<html>")
@@ -504,7 +566,12 @@ class HTML_Tidy(CI_conf_class):
                     line = ""
         return line, CloseFound
 
-    def _list_all_model(self):  # List library and whitelist models
+    def _list_all_model(self):
+        """
+         List library and whitelist models
+        Returns:
+
+        """
         try:
             rootdir = self.package.replace(".", os.sep)
             library_list = []

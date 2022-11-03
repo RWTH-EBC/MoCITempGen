@@ -269,6 +269,7 @@ if __name__ == '__main__':
                             dymola_version=args.dymola_version,
                             changed_models=args.changed_models)
     CheckStyle.dym_check_lic()
+    model_list = []
     if args.changed_models is False:
         model_list = [args.single_package]
     if args.changed_models is True:

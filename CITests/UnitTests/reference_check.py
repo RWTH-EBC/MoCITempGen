@@ -114,6 +114,21 @@ class Ref_model(CI_conf_class):
         super().__init__()
         self.library = library
 
+
+    def delte_ref_file(self, ref_list):
+        """
+        Delete reference files.
+        Args:
+            ref_list (): list of reference_result files
+        """
+        ref_dir = f'{self.library}{os.sep}{self.library_ref_results_dir}'
+        for ref in ref_list:
+            print(f'Update reference file: {ref_dir}{os.sep}{ref}\n')
+            if os.path.exists(f'..{os.sep}{ref_dir}{os.sep}{ref}') is True:
+                os.remove(f'..{os.sep}{ref_dir}{os.sep}{ref}')
+            else:
+                print(f'File {ref_dir}{os.sep}{ref} does not exist\n')
+
     def _compare_wh_mos(self, package_list, wh_list):
         """
         Filter model from whitelist.
@@ -506,21 +521,6 @@ class Extended_model(CI_conf_class):
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
             exit(1)
-
-    def delte_ref_file(self, ref_list):
-        """
-        Delete reference files.
-        Args:
-            ref_list (): list of reference_result files
-        """
-        ref_dir = f'{self.library}{os.sep}{self.library_ref_results_dir}'
-        for ref in ref_list:
-            print(f'Update reference file: {ref_dir}{os.sep}{ref}\n')
-            if os.path.exists(f'..{os.sep}{ref_dir}{os.sep}{ref}') is True:
-                os.remove(f'..{os.sep}{ref_dir}{os.sep}{ref}')
-            else:
-                print(f'File {ref_dir}{os.sep}{ref} does not exist\n')
-
 
 class Buildingspy_Validate_test(CI_conf_class):
 
