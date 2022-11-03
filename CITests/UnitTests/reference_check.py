@@ -716,11 +716,11 @@ if __name__ == '__main__':
             package_list = ref_model.get_update_package(ref_list=ref_list)
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
-        '''
         else:
             if args.modified_models is False:
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
+            '''
             elif args.modified_models is True:
                 conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
                 conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file])
