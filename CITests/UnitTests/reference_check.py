@@ -47,7 +47,6 @@ class Buildingspy_Regression_Check(CI_conf_class):
             else:
                 ex_file.write(f'FAIL')
             ex_file.close()
-            #print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(1)
@@ -69,10 +68,12 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.ut.pedanticModelica(False)
         self.ut.showGUI(self.show_gui)
         err_list = []
+        new_ref_list = []
         if package_list is not None:
             if len(package_list) > 0:
                 for package in package_list:
                     if self.batch is False:
+                        new_ref_list.append(package)
                         print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
                     else:
                         print(f'{self.green}Regression test for package:{self.CEND} {package}')
@@ -93,8 +94,11 @@ class Buildingspy_Regression_Check(CI_conf_class):
                         else:
                             print(f'{self.green}Regression test for model {package} was successful {self.CEND}')
                             continue
-
-        self._write_exit_file(err_list=err_list)
+        if self.batch is False:
+            exit_list = new_ref_list
+        else:
+            exit_list = err_list
+        self._write_exit_file(err_list=exit_list)
         if len(err_list) > 0:
             print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
             for error in err_list:
