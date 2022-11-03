@@ -701,7 +701,7 @@ if __name__ == '__main__':
                                                  batch=args.batch,
                                                  show_gui=args.show_gui,
                                                  path=args.path)
-        '''
+
         conf = CI_conf_class()
         ref_model = Ref_model(library=args.library)
         if args.ref_list:
@@ -716,6 +716,7 @@ if __name__ == '__main__':
             package_list = ref_model.get_update_package(ref_list=ref_list)
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
+        '''
         else:
             if args.modified_models is False:
                 val = ref_check.check_regression_test(package_list=[args.single_package])
