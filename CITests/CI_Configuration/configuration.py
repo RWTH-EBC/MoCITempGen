@@ -74,8 +74,8 @@ class CI_conf_class(object):
                 print(f'Path "{folder}" exist.')
 
 
-    def check_ci_file_structure(self, file_list):
-        for file in file_list:
+    def check_ci_file_structure(self, files_list):
+        for file in files_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
             else:
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 
 
     conf.check_ci_folder_structure(folders_list=folder_list)
-    conf.check_ci_file_structure(file_list=file_list)
+    conf.check_ci_file_structure(files_list=file_list)
 
 
 

@@ -561,8 +561,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     conf = CI_conf_class()
     print(f'\n\n\n')
-    conf.check_ci_folder_structure(folder_list=[conf.chart_dir, conf.temp_chart_dir])
-    conf.check_ci_file_structure(file_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
+    conf.check_ci_folder_structure(folders_list=[conf.chart_dir, conf.temp_chart_dir])
+    conf.check_ci_file_structure(files_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
     charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)
     if args.line_html is True:
         charts.check_setting()

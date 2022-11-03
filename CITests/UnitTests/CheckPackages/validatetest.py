@@ -157,18 +157,18 @@ class ValidateTest(CI_conf_class):
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
         conf = CI_conf_class()
         if self.changed_model is True:
-            conf.check_ci_folder_structure(folder_list= [self.config_ci_dir])
-            conf.check_ci_file_structure(file_list=[self.config_ci_changed_file])
+            conf.check_ci_folder_structure(folders_list= [self.config_ci_dir])
+            conf.check_ci_file_structure(files_list=[self.config_ci_changed_file])
             model_list = modelica_model.get_changed_models(model_file=self.config_ci_changed_file, library=self.library, single_package=self.single_package)
         elif self.filter_whitelist is True:
-            conf.check_ci_folder_structure(folder_list=[self.wh_ci_dir])
+            conf.check_ci_folder_structure(folders_list=[self.wh_ci_dir])
             if self.simulate_examples is True:
                 file_list = [self.wh_simulate_file]
                 ci_wh_file = self.wh_simulate_file
             else:
                 file_list = [self.wh_model_file]
                 ci_wh_file = self.wh_model_file
-            conf.check_ci_file_structure(file_list=file_list)
+            conf.check_ci_file_structure(files_list=file_list)
             wh_list_models = modelica_model.get_wh_models(wh_file=ci_wh_file,  wh_library=self.wh_library, library=self.library, single_package=self.single_package)
             model_list = modelica_model.get_models(wh_path=self.root_package, library=self.library)
             model_list = modelica_model.filter_wh_models(models=model_list, wh_list=wh_list_models)
@@ -349,7 +349,7 @@ class Create_whitelist(CI_conf_class):
         Workflow for creating the whitelist based on a whitelist-library.
         """
         conf = CI_conf_class()
-        conf.check_ci_folder_structure(folder_list=[self.config_ci_dir, self.wh_ci_dir])
+        conf.check_ci_folder_structure(folders_list=[self.config_ci_dir, self.wh_ci_dir])
         self._check_argument_settings()
         if self.simulate_examples is True:
             file_list = [self.wh_simulate_file, self.config_ci_exit_file]
@@ -357,7 +357,7 @@ class Create_whitelist(CI_conf_class):
         else:  # Check models
             file_list = [self.wh_model_file, self.config_ci_exit_file]
             wh_file = self.wh_model_file
-        conf.check_ci_file_structure(file_list=file_list)
+        conf.check_ci_file_structure(files_list=file_list)
         version = self._read_script_version()
         version_check = self._check_whitelist_version(version=version, wh_file=wh_file)
         self._write_exit_log(version_check=version_check)
