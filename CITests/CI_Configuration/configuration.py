@@ -8,6 +8,7 @@ class CI_conf_class(object):
         Dont change the self.<name>. But you can change the paths and file name
         """
         self.dymola_ci_test_dir = f'dymola-ci-tests'
+        self.dymola_python_test_dir = f'Dymola_python_tests'
         # [Whitelist_files]
         self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}ci_whitelist'
         self.wh_model_file = f'{self.wh_ci_dir}{os.sep}ci_model_whitelist.txt'
@@ -23,8 +24,9 @@ class CI_conf_class(object):
         self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}ci_reference_list.txt'
         self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}EOF.sh'
         # [templates for plots]
-        self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}charts'
-        self.temp_chart_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}google_templates'
+
+        self.chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}charts'
+        self.temp_chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}google_templates'
         self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}google_chart.txt'
         self.temp_index_file = f'{self.temp_chart_dir}{os.sep}index.txt'
         self.temp_layout_file = f'{self.temp_chart_dir}{os.sep}layout_index.txt'
