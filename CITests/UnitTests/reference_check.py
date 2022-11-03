@@ -315,15 +315,15 @@ class python_dymola_interface(CI_conf_class):
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
-    def library_check(self, path, library):
+    def library_check(self, library):
+        """
         """
 
-        """
-        library_check = self.dymola.openModel(path)
+        library_check = self.dymola.openModel("package.mo")
         if library_check is True:
-            print(f'Found {library} Library. Start regression test.')
+            print(f'Found {library}{os.sep}package.mo Library. Start regression test.')
         elif library_check is False:
-            print(f'Library Path is wrong. Please Check Path of {library} Library Path')
+            print(f'Library Path "{library}{os.sep}package.mo" is wrong. Please Check Path of {library} Library Path')
             exit(1)
 
     def dym_check_lic(self):
@@ -600,11 +600,11 @@ def _setEnvironmentVariables(var, value):  # Add to the environment variable `va
 
 def _setEnvironmentPath(dymola_version):
     """
-
+    Checks the Operating System, Important for the Python-Dymola Interface
     Args:
         dymola_version ():
     """
-    if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
+    if platform.system() == "Windows":
         _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
         sys.path.insert(0, os.path.join('C:\\',
                                         'Program Files',
@@ -680,7 +680,11 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+    dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
+    dym_interface.library_check(library=args.library)
+    dym_interface.dym_check_lic()
 
+    '''
     if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate, path=args.path).validate_html()
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
@@ -700,9 +704,9 @@ if __name__ == '__main__':
                                                  show_gui=args.show_gui,
                                                  path=args.path)
         dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
-        dym_interface.library_check(path=args.path, library=args.library)
+        dym_interface.library_check(library=args.library)
         dym_interface.dym_check_lic()
-
+        conf = CI_conf_class()
         ref_model = Ref_model(library=args.library)
         if args.ref_list:
             ref_model.write_regression_list()
@@ -718,10 +722,11 @@ if __name__ == '__main__':
             exit(val)
         else:
             if args.modified_models is False:
-
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
             elif args.modified_models is True:
+                conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
+                conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file])
                 ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
@@ -733,3 +738,4 @@ if __name__ == '__main__':
                 package_list = list_reg_model.get_changed_regression_models()
                 val = ref_check.check_regression_test(package_list=package_list)
                 exit(val)
+    '''
