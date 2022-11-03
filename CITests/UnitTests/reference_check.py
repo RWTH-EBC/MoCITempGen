@@ -735,7 +735,6 @@ if __name__ == '__main__':
         # Start regression test
         if len(package_list) > 0 or package_list is not None:
             val = ref_check.check_regression_test(package_list=package_list)
-            print(val)
             exit(val)
 
 
