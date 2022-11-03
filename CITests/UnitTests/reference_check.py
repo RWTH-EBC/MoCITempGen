@@ -47,7 +47,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             else:
                 ex_file.write(f'FAIL')
             ex_file.close()
-            print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
+            #print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
             exit(1)
@@ -91,16 +91,14 @@ class Buildingspy_Regression_Check(CI_conf_class):
                             print(f'{self.green}New reference results in package: {self.CEND} {package}\n')
                             continue
                         else:
-                            print(f'{self.green} Regression test for model {package} was successful {self.CEND}')
+                            print(f'{self.green}Regression test for model {package} was successful {self.CEND}')
                             continue
 
-        print(err_list)
         self._write_exit_file(err_list=err_list)
         if len(err_list) > 0:
-            print(f'{self.CRED}Regression test failed{self.CEND}')
-            print(f'The following packages{self.CRED} failed: {self.CEND}')
+            print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
             for error in err_list:
-                print(f'{self.CRED}Error:{self.CEND} {error}')
+                print(f'{self.CRED}     Error:{self.CEND} {error}')
             return 1
         else:
             print(f'{self.green}Regression test was successful {self.CEND}')

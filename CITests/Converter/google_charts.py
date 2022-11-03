@@ -179,7 +179,8 @@ class Plot_Charts(CI_conf_class):
                         measure_list.append(f'{legend}:{measures}')
         return time_str, measure_list, measure_len
 
-    def _get_time_int(self, time_list, measure_len):
+    @staticmethod
+    def _get_time_int(time_list, measure_len):
         time_val = time_list.split(":")[1]
         time_beg = time_val.split(",")[0]
         time_end = time_val.split(",")[1]
@@ -192,7 +193,8 @@ class Plot_Charts(CI_conf_class):
             time_num = time_num + tim_seq
         return time_list
 
-    def _createFolder(self, directory):
+    @staticmethod
+    def _createFolder(directory):
         try:
             if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -359,8 +361,8 @@ class Plot_Charts(CI_conf_class):
         else:
             print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
             value = self._read_csv_funnel(url=path_name)
-            mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
-            hmtl_chart = mytemplate.render(values=value, var=[f'{var}_ref', var], model=model,
+            my_template = self.template(filename=self.chart_temp_file)
+            hmtl_chart = my_template.render(values=value, var=[f'{var}_ref', var], model=model,
                                            title=f'{model}.mat_{var}')
             file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
             file_tmp.write(hmtl_chart)
@@ -390,12 +392,12 @@ class Plot_Charts(CI_conf_class):
                 continue
             else:
                 package_list.append(folder)
-        mytemplate = self.template(filename=self.layout_temp_file)
+        my_template = self.template(filename=self.layout_temp_file)
         if len(package_list) == 0:
             print(f'No html files')
             exit(0)
         else:
-            hmtl_chart = mytemplate.render(single_package=package_list)
+            hmtl_chart = my_template.render(single_package=package_list)
             file_tmp = open(self.layout_html_file, "w")
             file_tmp.write(hmtl_chart)
             file_tmp.close()
@@ -430,17 +432,17 @@ class Plot_Charts(CI_conf_class):
                 else:
                     shutil.rmtree(f'{self.chart_dir}{os.sep}{folder}')
 
-    def _check_setting(self):
+    def check_setting(self):
         if self.library is None:
             print(f'Please set a library (e.g. --library AixLib')
             exit(0)
         else:
             print(f'Setting library: {self.library}')
-        if self.single_package is None:
+        if self.package is None:
             print(f'Please set a package (e.g. --single-package Airflow)')
             exit(0)
         else:
-            print(f'Setting package: {self.single_package}\n')
+            print(f'Setting package: {self.package}\n')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Plot diagramms')  # Initialize a Parser
@@ -490,7 +492,7 @@ if __name__ == '__main__':
                                  action="store_true")
     args = parser.parse_args()  # Parse the arguments
     charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)
-    charts._check_setting()
+    charts.check_setting()
     if args.line_html is True:  # Create Line chart html
         charts._delete_folder()
         if args.error is True:  # Plot all data with an error
