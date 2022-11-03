@@ -113,7 +113,7 @@ if __name__ == '__main__':
         pass
     if args.ci_interactive is True:
         folder_list = [conf.config_ci_dir]
-        file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file]
+        file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file, conf.ci_interact_update_ref_file, conf.ci_interact_show_ref_file]
         pass
 
 
