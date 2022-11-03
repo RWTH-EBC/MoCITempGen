@@ -24,7 +24,6 @@ class CI_conf_class(object):
         self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}ci_reference_list.txt'
         self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}EOF.sh'
         # [templates for plots]
-
         self.chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}charts'
         self.temp_chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}google_templates'
         self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}google_chart.txt'
