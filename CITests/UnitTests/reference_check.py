@@ -300,7 +300,7 @@ class Ref_model(CI_conf_class):
             mos_list (): return a list with .mos script that are feasible for regression testing
         """
         mos_list = []
-        for subdir, dirs, files in os.walk(self.library_ref_results_dir):
+        for subdir, dirs, files in os.walk(self.library_resource_dir):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mos"):
@@ -317,7 +317,7 @@ class Ref_model(CI_conf_class):
                     infile.close()
                     continue
         if len(mos_list) == 0:
-            print(f'No feasible mos script for regression test in {self.library_ref_results_dir}.')
+            print(f'No feasible mos script for regression test in {self.library_resource_dir}.')
 
         else:
             return mos_list
