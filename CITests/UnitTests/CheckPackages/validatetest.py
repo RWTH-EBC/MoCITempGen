@@ -473,7 +473,7 @@ class get_modelica_models(CI_conf_class):
                                     f'Model {model_name} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
                                 continue
                             else:
-                                model_list.append(example_test)
+                                modelica_models.append(example_test)
                                 continue
                         else:
                             model_name = line[line.rfind(library):line.rfind('.mo')]
