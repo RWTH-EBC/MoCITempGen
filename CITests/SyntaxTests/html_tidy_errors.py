@@ -62,7 +62,12 @@ class HTML_Tidy(CI_conf_class):
         self.wh_library = wh_library
         super().__init__()
 
-    def run_files(self):  # Make sure that the parameter rootDir points to a Modelica package.
+    def run_files(self):
+        """
+        Make sure that the parameter rootDir points to a Modelica package.
+        Returns:
+
+        """
         rootDir = self.package.replace(".", os.sep)
         topPackage = os.path.join(rootDir, "package.mo")
         errMsg = list()
@@ -111,7 +116,8 @@ class HTML_Tidy(CI_conf_class):
             return var
 
     def number_print_List(self, htmlList: list, sep: str = '') -> None:
-        """Print a list of strings with line numbers
+        """
+        Print a list of strings with line numbers
 		Should be extended by a feature to highlight a given set of line
 		numbers. This can help the reader to quickly identify the lines
 		with errors.
@@ -665,6 +671,9 @@ if __name__ == '__main__':
     parser.add_argument("--filter", default=False, action="store_true")
 
     args = parser.parse_args()
+    conf = CI_conf_class()
+    conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
+    conf.check_ci_file_structure(file_list=[conf.config_ci_exit_file])
     HTML_Check = HTML_Tidy(package=args.single_package,
                            correct_overwrite=args.correct_overwrite,
                            correct_backup=args.correct_backup,
