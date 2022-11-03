@@ -40,7 +40,7 @@ class ValidateTest(CI_conf_class):
                  changed_model, library,
                  wh_library, filter_whitelist):
         """
-        The class check or simulate models. Return a error-log. Can filter models from a whitelist
+        The class check or simulate models. Return an error-log. Can filter models from a whitelist
         Args:
             dymola (): python_dymola_interface class.
             dymola_exception (): python_dymola_exception class.
@@ -86,7 +86,7 @@ class ValidateTest(CI_conf_class):
 
     def _library_path_check(self):
         """
-        Open library in dymola and and checks if the library was opened correctly.
+        Open library in dymola and  checks if the library was opened correctly.
         """
         pack_check = self.dymola.openModel(self.lib_path)
         print(f'Library path: {self.lib_path}')
@@ -96,9 +96,9 @@ class ValidateTest(CI_conf_class):
             print(f'Library path is wrong. Please check the path of {self.library} library path.')
             exit(1)
 
-    def _checkmodel(self, model_list):
+    def _check_model(self, model_list):
         """
-        Check models and return a Error Log, if the check failed
+        Check models and return an error log, if the check failed
         Args:
             model_list (): list of models to be checked
         Returns:
@@ -178,7 +178,7 @@ class ValidateTest(CI_conf_class):
             print(f'Find no models in package {self.single_package}')
             exit(0)
         else:
-            error_model_message_dic = self._checkmodel(model_list=model_list)
+            error_model_message_dic = self._check_model(model_list=model_list)
             modelica_model.check_result(error_model_message_dic=error_model_message_dic)
 
 class Create_whitelist(CI_conf_class):
@@ -247,21 +247,22 @@ class Create_whitelist(CI_conf_class):
     def _check_whitelist_version(version, wh_file):
         """
         Check the latest whitelist version with the latest version of Aixlib conversion script.
+        Read the last version of whitelist-
         Args:
             version (): Latest version number of aixlib conversion script.
         Returns:
             version_check (): Boolean - return true, if the whitelist version is equal to Aixlib conversion script version
         """
         try:
-            vfile = open(wh_file, "r")  # Read the last version of whitelist
-            lines = vfile.readlines()
+            version_file = open(wh_file, "r")
+            lines = version_file.readlines()
             version_check = False
             for line in lines:
                 line = line.strip()
                 if line.strip("\n") == version.strip("\n"):
                     print(f'Whitelist is on version {version}. The whitelist is already up to date')
                     version_check = True
-            vfile.close()
+            version_file.close()
             return version_check
         except IOError:
             print(f'Error: File {wh_file} does not exist.')
@@ -290,7 +291,7 @@ class Create_whitelist(CI_conf_class):
         try:
             wh_file = open(wh_file, "w")
             error_log = open(self.err_log, "w")
-            print(f'Write new writelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
+            print(f'Write new whitelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
             wh_file.write(f'\n{version} \n \n')
             for model in model_list:
                 if self.simulate_examples is True:

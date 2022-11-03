@@ -13,7 +13,12 @@ class Lock_model(CI_conf_class):
         self.wh_library = wh_library
         super().__init__()
 
-    def _read_wh(self):  # Read whitelist and return a list
+    def _read_wh(self):
+        """
+        Read whitelist and return a list
+        Returns:
+
+        """
         try:
             wh = open(self.wh_html_file, "r")
             wl_lines = wh.readlines()
@@ -23,7 +28,15 @@ class Lock_model(CI_conf_class):
             print(f'Error: File {self.wh_html_file} does not exist.')
             exit(1)
 
-    def _sort_list(self, wl_lines):  # Sort List of models
+    def _sort_list(self, wl_lines):
+        """
+        Sort List of models
+        Args:
+            wl_lines ():
+
+        Returns:
+
+        """
         model_list = []
         for line in wl_lines:
             if len(line) == 1 or line.find("package.mo") > -1 or line.find("package.order") > -1 or line.find("UsersGuide") > -1:
@@ -35,7 +48,15 @@ class Lock_model(CI_conf_class):
                 model_list.append(mo)
         return model_list
 
-    def _exist_file(self, file):  # File exist
+    def _exist_file(self, file):
+        """
+         File exist
+        Args:
+            file ():
+
+        Returns:
+
+        """
         f = Path(file)
         if f.is_file():
             return True
@@ -43,6 +64,14 @@ class Lock_model(CI_conf_class):
             return False
 
     def get_last_line(self, model):
+        """
+
+        Args:
+            model ():
+
+        Returns:
+
+        """
         model_part = []
         flag = '__Dymola_LockedEditing="Model from IBPSA");'
         flag_tag = False
@@ -62,6 +91,15 @@ class Lock_model(CI_conf_class):
             exit(1)
 
     def lock_model(self, model, content):
+        """
+
+        Args:
+            model ():
+            content ():
+
+        Returns:
+
+        """
         mo = model[model.rfind(os.sep) + 1:model.rfind(".mo")]
         last_entry = content[len(content) - 1]
         flag = '   __Dymola_LockedEditing="Model from IBPSA");'
@@ -92,6 +130,12 @@ class Lock_model(CI_conf_class):
             return content
 
     def write_lock_model(self, model, new_content):
+        """
+
+        Args:
+            model ():
+            new_content ():
+        """
         try:
             print("lock object: " + model)
             outfile = open(model, 'w')
