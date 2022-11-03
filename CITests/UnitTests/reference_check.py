@@ -687,7 +687,6 @@ if __name__ == '__main__':
             batch=args.batch,
             tool=args.tool,
             package=args.single_package)
-
     else:
         dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
         dym_interface.library_check(library=args.library)
@@ -697,7 +696,6 @@ if __name__ == '__main__':
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-
         dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
@@ -708,18 +706,15 @@ if __name__ == '__main__':
                                                  path=args.path)
         if args.create_ref:
             package_list = ref_model.get_update_model()
-
         if args.update_ref:
             ref_list = ref_model.get_update_ref()
             ref_model.delte_ref_file(ref_list=ref_list)
             package_list = ref_model.get_update_package(ref_list=ref_list)
-
         else:
             conf.check_ci_folder_structure(folder_list=[f'..{os.sep}{conf.config_ci_dir}'])
             if args.modified_models is False:
                 conf.check_ci_file_structure(file_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
                 package_list = [args.single_package]
-
             if args.modified_models is True:
                 conf.check_ci_file_structure(file_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
                 ref_model.write_regression_list()
@@ -731,7 +726,6 @@ if __name__ == '__main__':
                                                 dymola_version=args.dymola_version,
                                                 path="package.mo")
                 package_list = list_reg_model.get_changed_regression_models()
-
         # Start regression test
         if len(package_list) > 0 or package_list is not None:
             val = ref_check.check_regression_test(package_list=package_list)
