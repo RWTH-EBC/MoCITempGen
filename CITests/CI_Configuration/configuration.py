@@ -100,12 +100,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Set files or directionaries")
     check_test_group = parser.add_argument_group("Arguments to build files or folders")
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
+    check_test_group.add_argument("-CM", "--ci-interactive", default=False, action="store_true")
+
     args = parser.parse_args()
     conf = CI_conf_class()
     if args.changed_model is True:
         folder_list = [conf.config_ci_dir]
         file_list = [conf.config_ci_changed_file]
         pass
+    if args.ci_interactive is True:
+        folder_list = [conf.config_ci_dir]
+        file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file]
+        pass
+
 
 
     conf.check_ci_folder_structure(folder_list)

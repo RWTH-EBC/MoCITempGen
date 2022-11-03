@@ -464,19 +464,19 @@ class get_modelica_models(CI_conf_class):
                 line = line.lstrip()
                 line = line.strip().replace("\n", "")
                 if line.rfind(".mo") > -1 and line.find("package") == -1:
-                    if line.find(f'{library}{os.sep}{single_package}') > -1 and line.find(
-                            "ReferenceResults") == -1:
+                    if line.find(f'{library}{os.sep}{single_package}') > -1 and line.find("ReferenceResults") == -1:
+                        model_name = line[line.rfind(library):line.rfind('.mo')]
                         if self.simulate_examples is True:
-                            example_test = self._get_icon_example(filepath=filepath, library=library)
+                            example_test = self._get_icon_example(filepath=model_name, library=library)
                             if example_test is None:
                                 print(
-                                    f'Model {filepath} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
+                                    f'Model {model_name} is not a simulation example because it does not contain the following "Modelica.Icons.Example"')
                                 continue
                             else:
                                 model_list.append(example_test)
                                 continue
                         else:
-                            model_name = line.replace(os.sep, ".")
+                            model_name = model_name.replace(os.sep, ".")
                             model_name = model_name.replace('/', ".")
                             modelica_models.append(model_name)
                             continue
