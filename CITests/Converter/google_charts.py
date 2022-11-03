@@ -88,7 +88,7 @@ class Plot_Charts(CI_conf_class):
     @staticmethod
     def _read_data(reference_file):
         """
-        Read Reference results in AixLib\Resources\ReferenceResults\Dymola\..
+        Read Reference results in AixLib\Resources\ReferenceResults\Dymola\…
         Args:
             reference_file ():
         Returns:
@@ -161,7 +161,7 @@ class Plot_Charts(CI_conf_class):
 
     def get_new_reference_files(self):
         if os.path.isfile(self.new_ref_file) is False:
-            print(f'File {self.new_ref_file} directonary does not exist.')
+            print(f'File {self.new_ref_file} directory does not exist.')
             exit(0)
         else:
             print(f'Plot results from file {self.new_ref_file}')
@@ -219,7 +219,7 @@ class Plot_Charts(CI_conf_class):
 
     def read_unitTest_log(self):
         """
-        Read unitTest_log from regressionTest, write variable and modelname with difference
+        Read unitTest_log from regressionTest, write variable and model name with difference
         Returns:
         """
         try:
@@ -230,8 +230,8 @@ class Plot_Charts(CI_conf_class):
             for line in lines:
                 if line.find("*** Warning:") > -1:
                     if line.find(".mat") > -1:
-                        model = line[line.find("Warning:") + 9:line.find(".mat")]  # modelname
-                        var = line[line.find(".mat:") + 5:line.find("exceeds ")].lstrip()  # variable name
+                        model = line[line.find("Warning:") + 9:line.find(".mat")]
+                        var = line[line.find(".mat:") + 5:line.find("exceeds ")].lstrip()
                         model_variable_list.append(f'{model}:{var}')
                     if line.find("*** Warning: Numerical Jacobian in 'RunScript") > -1 and line.find(".mos") > -1:
                         model = line[line.rfind(os.sep) + 1:line.find(".mos")].lstrip()
@@ -368,17 +368,19 @@ class Plot_Charts(CI_conf_class):
             var ():
         """
         path_name = (f'{self.library}{os.sep}funnel_comp{os.sep}{model}.mat_{var}'.strip())
-        folder = os.path.isdir(path_name)
-        if folder is False:
+        folder_name = os.path.isdir(path_name)
+        if folder_name is False:
             print(f'Cant find folder: {self.CRED}{model}{self.CEND} with variable {self.CRED}{var}{self.CEND}')
         else:
             print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
             value = self._read_csv_funnel(url=path_name)
             my_template = self.template(filename=self.chart_temp_file)
-            hmtl_chart = my_template.render(values=value, var=[f'{var}_ref', var], model=model,
+            html_chart = my_template.render(values=value,
+                                            var=[f'{var}_ref', var],
+                                            model=model,
                                             title=f'{model}.mat_{var}')
             file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
-            file_tmp.write(hmtl_chart)
+            file_tmp.write(html_chart)
             file_tmp.close()
 
     def create_index_layout(self):
@@ -406,11 +408,11 @@ class Plot_Charts(CI_conf_class):
         Creates a layout index that has all links to the subordinate index files
         """
         package_list = []
-        for folder in os.listdir(self.chart_dir):
-            if folder == "style.css" or folder == "index.html":
+        for folders in os.listdir(self.chart_dir):
+            if folders == "style.css" or folders == "index.html":
                 continue
             else:
-                package_list.append(folder)
+                package_list.append(folders)
         my_template = self.template(filename=self.temp_layout_file)
         if len(package_list) == 0:
             print(f'No html files')
@@ -431,20 +433,20 @@ class Plot_Charts(CI_conf_class):
             print(f'{file} exists.')
 
     def get_funnel_comp(self):
-        folder = os.listdir(self.funnel_path)
-        return folder
+        folders = os.listdir(self.funnel_path)
+        return folders
 
     def delete_folder(self):
         if os.path.isdir(self.chart_dir) is False:
-            print(f'Directonary {self.chart_dir} does not exist.')
+            print(f'Directory {self.chart_dir} does not exist.')
         else:
             folder_list = os.listdir(self.chart_dir)
-            for folder in folder_list:
-                if folder.find(".html") > -1:
-                    os.remove(f'{self.chart_dir}{os.sep}{folder}')
+            for folders in folder_list:
+                if folders.find(".html") > -1:
+                    os.remove(f'{self.chart_dir}{os.sep}{folders}')
                     continue
                 else:
-                    shutil.rmtree(f'{self.chart_dir}{os.sep}{folder}')
+                    shutil.rmtree(f'{self.chart_dir}{os.sep}{folders}')
 
     def check_setting(self):
         if self.library is None:
@@ -471,9 +473,6 @@ if __name__ == '__main__':
     unit_test_group.add_argument("--line-matplot",
                                  help='plot a google html chart in line form',
                                  action="store_true")
-    unit_test_group.add_argument("-m", "--modellist",
-                                 metavar="Modelica.Model",
-                                 help="Plot this model")
     unit_test_group.add_argument("--new-ref",
                                  help="Plot new models with new created reference files",
                                  action="store_true")
@@ -527,7 +526,7 @@ if __name__ == '__main__':
                 if args.ref_txt is True:  # Data from reference files
                     ref_file = charts.get_ref_file(model=model_variable[0])
                     if ref_file is None:
-                        print(f'Referencefile for model {model_variable[0]} does not exist.')
+                        print(f'Reference file for model {model_variable[0]} does not exist.')
                         continue
                     else:
                         result = charts.get_values(reference_list=ref_file)
