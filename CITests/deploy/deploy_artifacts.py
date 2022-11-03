@@ -15,7 +15,12 @@ class Deploy_Artifacts(CI_conf_class):
         self.folder = 'Referencefiles'
         super().__init__()
 
-    def _get_changed_ref(self):  # list all changed reference results to a list
+    def _get_changed_ref(self):
+        """
+        list all changed reference results to a list
+        Returns:
+
+        """
         changed_file = codecs.open(self.new_ref_file, "r", encoding='utf8')
         lines = changed_file.readlines()
         changed_ref = []
@@ -31,6 +36,11 @@ class Deploy_Artifacts(CI_conf_class):
         return changed_ref
 
     def _get_update_ref(self):
+        """
+
+        Returns:
+
+        """
         updated_file = codecs.open(self.update_ref_file, "r", encoding='utf8')
         lines = updated_file.readlines()
         updated_ref = []
@@ -45,8 +55,12 @@ class Deploy_Artifacts(CI_conf_class):
         updated_file.close()
         return updated_ref
 
-    def copy_txt(self,
-                 changed_ref):  # Copy reference results from AixLib\Resources\ReferenceResults\Dymola\* to Referencefiles\\*
+    def copy_txt(self, changed_ref):
+        """
+        Copy reference results from AixLib\Resources\ReferenceResults\Dymola\* to Referencefiles\\*
+        Args:
+            changed_ref ():
+        """
         if os.path.exists(self.folder) is False:
             os.mkdir(self.folder)
         else:

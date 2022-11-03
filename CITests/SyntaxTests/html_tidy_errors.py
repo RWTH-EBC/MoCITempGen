@@ -672,8 +672,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     conf = CI_conf_class()
-    conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
-    conf.check_ci_file_structure(file_list=[conf.config_ci_exit_file])
+    conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
+    conf.check_ci_file_structure(files_list=[conf.config_ci_exit_file])
     HTML_Check = HTML_Tidy(package=args.single_package,
                            correct_overwrite=args.correct_overwrite,
                            correct_backup=args.correct_backup,
