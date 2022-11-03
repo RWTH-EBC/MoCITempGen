@@ -720,8 +720,7 @@ if __name__ == '__main__':
             if args.modified_models is False:
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
-            '''
-            elif args.modified_models is True:
+            if args.modified_models is True:
                 conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
                 conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file])
                 ref_model.write_regression_list()
@@ -735,4 +734,4 @@ if __name__ == '__main__':
                 package_list = list_reg_model.get_changed_regression_models()
                 val = ref_check.check_regression_test(package_list=package_list)
                 exit(val)
-    '''
+
