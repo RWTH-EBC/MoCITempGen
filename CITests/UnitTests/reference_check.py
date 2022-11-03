@@ -318,7 +318,7 @@ class Ref_model(CI_conf_class):
                     continue
         if len(mos_list) == 0:
             print(f'No feasible mos script for regression test in {self.library_ref_results_dir}.')
-            exit(0)
+
         else:
             return mos_list
 
