@@ -4,9 +4,9 @@ import argparse
 class CI_conf_class(object):
 
     def __init__(self):
-        '''
+        """
         Dont change the self.<name>. But you can change the paths and file name
-        '''
+        """
         self.dymola_ci_test_dir = f'dymola-ci-tests'
         # [Whitelist_files]
         self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}ci_whitelist'
@@ -41,7 +41,8 @@ class CI_conf_class(object):
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
 
-    def return_file_list(self):
+    @staticmethod
+    def return_file_list():
         file_list = []
         file_dic = (vars(CI_conf_class()))
         for file in file_dic:
@@ -49,15 +50,17 @@ class CI_conf_class(object):
                 file_list.append(file_dic[file])
         return file_list
 
-    def return_file_dir(self):
+    @staticmethod
+    def return_file_dir():
         dir_list = []
         dir_dic = (vars(CI_conf_class()))
-        for dir in dir_dic:
-            if dir.find("_dir") > -1:
-                dir_list.append(dir_dic[dir])
+        for dirs in dir_dic:
+            if dirs.find("_dir") > -1:
+                dir_list.append(dir_dic[dirs])
         return dir_list
 
-    def check_ci_folder_structure(self, folder_list):
+    @staticmethod
+    def check_ci_folder_structure(folder_list):
         """
         Check CI Structure
         """
@@ -68,7 +71,8 @@ class CI_conf_class(object):
             else:
                 print(f'Path "{folder}" exist.')
 
-    def check_ci_file_structure(self, file_list):
+    @staticmethod
+    def check_ci_file_structure(file_list):
         for file in file_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
@@ -77,7 +81,8 @@ class CI_conf_class(object):
                 write_file = open(file, "w+")
                 write_file.close()
 
-    def create_folder(self, path):
+    @staticmethod
+    def create_folder(path):
         try:
             if not os.path.exists(path):
                 print(f'Create path: {path}')
@@ -90,7 +95,20 @@ class CI_conf_class(object):
 
 
 if __name__ == '__main__':
-
+    parser = argparse.ArgumentParser(description="Set files or directionaries")
+    check_test_group = parser.add_argument_group("Arguments to build files or folders")
+    check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
+    args = parser.parse_args()
     conf = CI_conf_class()
+    if args.changed_model is True:
+        folder_list = [conf.config_ci_dir]
+        file_list = [conf.config_ci_changed_file]
+        pass
 
-    # conf.return_file_list()
+
+    conf.check_ci_folder_structure(folder_list)
+    conf.check_ci_file_structure(file_list)
+
+
+
+
