@@ -191,10 +191,10 @@ class Ref_model(CI_conf_class):
         Returns:
 
         """
+        wh_list = []
         try:
             ref_wh = open(self.wh_ref_file, "r")
             lines = ref_wh.readlines()
-            wh_list = []
             for line in lines:
                 if len(line.strip()) == 0:
                     continue

@@ -70,7 +70,7 @@ class HTML_Tidy(CI_conf_class):
         """
         root_dir = self.package.replace(".", os.sep)
         top_package = os.path.join(root_dir, "package.mo")
-        errMsg = list()
+        err_msg = list()
         if not os.path.isfile(top_package):
             raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (
                 root_dir, top_package))
@@ -83,7 +83,7 @@ class HTML_Tidy(CI_conf_class):
             document_corr = results[0]
             err = results[1]
             if err is not "":  # write error to error message
-                errMsg.append("[-- %s ]\n%s" % (model, err))
+                err_msg.append("[-- %s ]\n%s" % (model, err))
             if self.correct_backup:
                 HTML_Tidy._backup_old_files(
                     self, model, document_corr, file_counter)
@@ -109,7 +109,7 @@ class HTML_Tidy(CI_conf_class):
                 else:
                     continue
         if self.log:
-            file = HTML_Tidy._return_logfile(self, errMsg)
+            file = self._return_logfile(err_msg)
             print("##########################################################")
             print(f'Logfile is saved in {root_dir}{os.sep}HTML-logfile.txt')
             var = HTML_Tidy.read_logFile(self, file)
@@ -151,8 +151,7 @@ class HTML_Tidy(CI_conf_class):
             self, theString=body, substitutions_dict={'\\"': '"'})
         return body
 
-    def make_string_replacements(self, theString: str,
-                                 substitutions_dict: dict = {'\\"': '"'}) -> str:
+    def make_string_replacements(self, theString: str, substitutions_dict: dict = {'\\"': '"'}) -> str:
         """Takes a string and replaces according to a given dictionary
 		Parameters
 		----------
