@@ -717,15 +717,13 @@ if __name__ == '__main__':
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
         else:
-
+            conf.check_ci_folder_structure(folder_list=[f'..{os.sep}{conf.config_ci_dir}'])
             if args.modified_models is False:
-                conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
-                conf.check_ci_file_structure(file_list=[conf.config_ci_exit_file])
+                conf.check_ci_file_structure(file_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
             if args.modified_models is True:
-                conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
-                conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file, conf.config_ci_exit_file])
+                conf.check_ci_file_structure(file_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
                 ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
