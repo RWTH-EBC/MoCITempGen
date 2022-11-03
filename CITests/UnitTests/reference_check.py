@@ -94,8 +94,8 @@ class Buildingspy_Regression_Check(CI_conf_class):
                         else:
                             print(f'{self.green} Regression test for model {package} was successful {self.CEND}')
                             continue
-            else:
-                self._write_exit_file(err_list=err_list)
+
+        self._write_exit_file(err_list=err_list)
         if len(err_list) > 0:
             print(f'{self.CRED}Regression test failed{self.CEND}')
             print(f'The following packages{self.CRED} failed: {self.CEND}')
@@ -717,12 +717,15 @@ if __name__ == '__main__':
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
         else:
+
             if args.modified_models is False:
+                conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
+                conf.check_ci_file_structure(file_list=[conf.config_ci_exit_file])
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
             if args.modified_models is True:
                 conf.check_ci_folder_structure(folder_list=[conf.config_ci_dir])
-                conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file])
+                conf.check_ci_file_structure(file_list=[conf.config_ci_changed_file, conf.config_ci_exit_file])
                 ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
