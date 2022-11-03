@@ -77,7 +77,7 @@ class CI_conf_class(object):
             if os.path.exists(file):
                 print(f'{file} does exist.')
             else:
-                print(f'{file} does not exist. Create a new one under {file}')
+                print(f'File {file} does not exist. Create a new one under {file}')
                 write_file = open(file, "w+")
                 write_file.close()
 
