@@ -48,10 +48,9 @@ class Buildingspy_Regression_Check(CI_conf_class):
                 ex_file.write(f'FAIL')
             ex_file.close()
             print(f'{self.green}All Reference files exists, except the Models on WhiteList.{self.CEND}')
-            exit(0)
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
-            exit(0)
+            exit(1)
 
     def check_regression_test(self, package_list):
         """
@@ -95,6 +94,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
                             print(f'{self.green} Regression test for model {package} was successful {self.CEND}')
                             continue
 
+        print(err_list)
         self._write_exit_file(err_list=err_list)
         if len(err_list) > 0:
             print(f'{self.CRED}Regression test failed{self.CEND}')
@@ -737,6 +737,7 @@ if __name__ == '__main__':
         # Start regression test
         if len(package_list) > 0 or package_list is not None:
             val = ref_check.check_regression_test(package_list=package_list)
+            print(val)
             exit(val)
 
 
