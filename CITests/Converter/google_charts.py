@@ -50,8 +50,8 @@ class Plot_Charts(CI_conf_class):
         """
         new_ref_list = self._check_ref_file(reference_file_list=reference_file_list)
         for reference_file in new_ref_list:
-            results = self._read_data(ref_file=reference_file)
-            self._mako_line_html_new_chart(ref_file=reference_file, value_list=results[0], legend_list=results[1])
+            results = self._read_data(reference_file=reference_file)
+            self._mako_line_html_new_chart(reference_file=reference_file, value_list=results[0], legend_list=results[1])
             continue
 
     def read_show_reference(self):
@@ -78,18 +78,19 @@ class Plot_Charts(CI_conf_class):
                     continue
 
             if len(reference_file_list) == 0:
-                print(f'No reference files in file {self.ci_interact_show_ref_file}. Please add here your reference files you want to '
-                      f'update')
+                print(
+                    f'No reference files in file {self.ci_interact_show_ref_file}. Please add here your reference files you want to '
+                    f'update')
                 exit(0)
             else:
                 return reference_file_list
 
     @staticmethod
-    def _read_data(ref_file):
+    def _read_data(reference_file):
         """
         Read Reference results in AixLib\Resources\ReferenceResults\Dymola\..
         Args:
-            ref_file ():
+            reference_file ():
         Returns:
 
         """
@@ -97,7 +98,7 @@ class Plot_Charts(CI_conf_class):
         value_list = []
         distriction_values = {}
         time_interval_list = []
-        for line in open(ref_file, 'r'):
+        for line in open(reference_file, 'r'):
             current_value = []
             if line.find("last-generated=") > -1 or line.find("statistics-simulation=") > -1 or line.find(
                     "statistics-initialization=") > -1:
@@ -143,20 +144,20 @@ class Plot_Charts(CI_conf_class):
 
     def get_updated_reference_files(self):
         if os.path.isfile(self.update_ref_file) is False:
-            print(f'File {self.update_ref_file} directonary does not exist.')
+            print(f'File {self.update_ref_file} directory does not exist.')
             exit(0)
         else:
             print(f'Plot results from file {self.update_ref_file}')
         file = open(self.update_ref_file, "r")
         lines = file.readlines()
-        ref_list = []
+        reference_list = []
         for line in lines:
             line = line.strip()
             if line.find(".txt") > -1 and line.find("_"):
-                ref_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
+                reference_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
                 continue
         file.close()
-        return ref_list
+        return reference_list
 
     def get_new_reference_files(self):
         if os.path.isfile(self.new_ref_file) is False:
@@ -166,19 +167,19 @@ class Plot_Charts(CI_conf_class):
             print(f'Plot results from file {self.new_ref_file}')
         file = open(self.new_ref_file, "r")
         lines = file.readlines()
-        ref_list = []
+        reference_list = []
         for line in lines:
             line = line.strip()
             if line.find(".txt") > -1 and line.find("_"):
-                ref_list.append(f'{line.strip()}')
+                reference_list.append(f'{line.strip()}')
                 continue
-        return ref_list
+        return reference_list
 
     @staticmethod
-    def get_values(ref_file):
-        ref = open(f'{ref_file}', "r")
-        lines = ref.readlines()
-        ref.close()
+    def get_values(reference_list):
+        reference_file = open(f'{reference_list}', "r")
+        lines = reference_file.readlines()
+        reference_file.close()
         measure_list = []
         for line in lines:  # searches for values and time intervals
             if line.find("last-generated=") > -1:
@@ -225,24 +226,24 @@ class Plot_Charts(CI_conf_class):
             self.check_file(file=self.f_log)
             log_file = open(self.f_log, "r")
             lines = log_file.readlines()
-            model_var_list = []
+            model_variable_list = []
             for line in lines:
                 if line.find("*** Warning:") > -1:
                     if line.find(".mat") > -1:
                         model = line[line.find("Warning:") + 9:line.find(".mat")]  # modelname
                         var = line[line.find(".mat:") + 5:line.find("exceeds ")].lstrip()  # variable name
-                        model_var_list.append(f'{model}:{var}')
+                        model_variable_list.append(f'{model}:{var}')
                     if line.find("*** Warning: Numerical Jacobian in 'RunScript") > -1 and line.find(".mos") > -1:
                         model = line[line.rfind(os.sep) + 1:line.find(".mos")].lstrip()
                         var = ""
-                        model_var_list.append(f'{model}:{var}')
+                        model_variable_list.append(f'{model}:{var}')
                     if line.find(
                             "*** Warning: Failed to interpret experiment annotation in 'RunScript") > -1 and line.find(
                             ".mos") > -1:
                         model = line[line.rfind(os.sep) + 1:line.find(".mos")].lstrip()
                         var = ""
-                        model_var_list.append(f'{model}:{var}')
-            return model_var_list
+                        model_variable_list.append(f'{model}:{var}')
+            return model_variable_list
         except IOError:
             print(f'Error: File {self.f_log} does not exist.')
             exit(1)
@@ -267,8 +268,8 @@ class Plot_Charts(CI_conf_class):
             e_list = []
             for i in range(0, len(e)):
                 e_list.append((e[i][1]))
-            result = zip(d, e_list)
-            result_set = list(result)
+            results = zip(d, e_list)
+            result_set = list(results)
             value_list = []
             for i in result_set:
                 i = str(i)
@@ -312,8 +313,10 @@ class Plot_Charts(CI_conf_class):
                         print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                         value = self._read_csv_funnel(url=path_name)
                         my_template = self.template(filename=self.chart_temp_file)  # Render Template
-                        html_chart = my_template.render(values=value, var=[f'{var}_ref', var], model=model,
-                                                       title=f'{model}.mat_{var}')
+                        html_chart = my_template.render(values=value,
+                                                        var=[f'{var}_ref', var],
+                                                        model=model,
+                                                        title=f'{model}.mat_{var}')
                         file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
                         file_tmp.write(html_chart)
                         file_tmp.close()
@@ -333,27 +336,27 @@ class Plot_Charts(CI_conf_class):
                 file_tmp.write(html_chart)
                 file_tmp.close()
 
-    def _mako_line_html_new_chart(self, ref_file, value_list,  legend_list):
+    def _mako_line_html_new_chart(self, reference_file, value_list, legend_list):
         """
          Load and read the templates, write variables in the templates
         Args:
-            ref_file ():
+            reference_file ():
             value_list ():
             legend_list ():
         """
-        if os.path.isfile(ref_file) is False:
+        if os.path.isfile(reference_file) is False:
             print(
-                f'Cant find folder: {self.CRED}{ref_file[ref_file.rfind(os.sep) + 1:]}{self.CEND} with variables: {self.CRED}{legend_list}{self.CEND}')
+                f'Cant find folder: {self.CRED}{reference_file[reference_file.rfind(os.sep) + 1:]}{self.CEND} with variables: {self.CRED}{legend_list}{self.CEND}')
         else:
             print(
-                f'Plot model: {self.green}{ref_file[ref_file.rfind(os.sep) + 1:]}{self.CEND} with variables:\n{self.green}{legend_list}{self.CEND}\n')
+                f'Plot model: {self.green}{reference_file[reference_file.rfind(os.sep) + 1:]}{self.CEND} with variables:\n{self.green}{legend_list}{self.CEND}\n')
             my_template = self.template(filename=self.chart_temp_file)
             html_chart = my_template.render(values=value_list,
-                                           var=legend_list,
-                                           model=ref_file,
-                                           title=ref_file)
+                                            var=legend_list,
+                                            model=reference_file,
+                                            title=reference_file)
             file_tmp = open(
-                f'{self.temp_chart_path}{os.sep}{ref_file[ref_file.rfind(os.sep):].replace(".txt", ".html")}', "w")
+                f'{self.temp_chart_path}{os.sep}{reference_file[reference_file.rfind(os.sep):].replace(".txt", ".html")}', "w")
             file_tmp.write(html_chart)
             file_tmp.close()
 
@@ -408,7 +411,7 @@ class Plot_Charts(CI_conf_class):
                 continue
             else:
                 package_list.append(folder)
-        my_template = self.template(filename=self.layout_temp_file)
+        my_template = self.template(filename=self.temp_layout_file)
         if len(package_list) == 0:
             print(f'No html files')
             exit(0)
@@ -527,7 +530,7 @@ if __name__ == '__main__':
                         print(f'Referencefile for model {model_variable[0]} does not exist.')
                         continue
                     else:
-                        result = charts.get_values(ref_file=ref_file)
+                        result = charts.get_values(reference_list=ref_file)
                         charts.mako_line_ref_chart(model=model_variable[0], var=model_variable[1])
         if args.new_ref is True:
             ref_list = charts.get_new_reference_files()
