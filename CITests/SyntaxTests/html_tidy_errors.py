@@ -601,8 +601,13 @@ class HTML_Tidy(CI_conf_class):
         except IOError:
             print(f'Error: File {self.wh_html_file} does not exist.')
 
-    def _ListAixLibModel(self):  # Remove whitelist models and list all library model
-        library_list, wh_library_list = HTML_Tidy._list_all_model(self)
+    def _ListAixLibModel(self):
+        """
+        Remove whitelist models and list all library model
+        Returns:
+
+        """
+        library_list, wh_library_list = self._list_all_model()
         model_whitelist = []
         for element in library_list:
             for subelement in wh_library_list:
