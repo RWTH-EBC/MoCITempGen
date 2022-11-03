@@ -667,10 +667,9 @@ if __name__ == '__main__':
                                  action="store_true")
     unit_test_group.add_argument("--validate-html-only", action="store_true")
     unit_test_group.add_argument("--validate-experiment-setup", action="store_true")
+    args = parser.parse_args()
 
-    args = parser.parse_args()  # Parse the arguments
     _setEnvironmentPath(dymola_version=args.dymola_version)
-
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
     print(f'1: Starting Dymola instance')
@@ -684,7 +683,6 @@ if __name__ == '__main__':
     dym_interface.library_check(library=args.library)
     dym_interface.dym_check_lic()
 
-    '''
     if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate, path=args.path).validate_html()
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
@@ -695,6 +693,7 @@ if __name__ == '__main__':
             batch=args.batch,
             tool=args.tool,
             package=args.single_package)
+    '''
     else:
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
