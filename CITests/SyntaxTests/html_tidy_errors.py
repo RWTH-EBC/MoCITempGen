@@ -75,7 +75,7 @@ class HTML_Tidy(CI_conf_class):
             raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (
                 rootDir, topPackage))
         file_counter = 0
-        model_list = HTML_Tidy._ListAixLibModel(self)
+        model_list = self._ListAixLibModel()
         for model in model_list:
             model = model.replace(".", os.sep)
             model = model.replace(os.sep + "mo", ".mo")
@@ -607,15 +607,15 @@ class HTML_Tidy(CI_conf_class):
         Returns:
 
         """
-        library_list, wh_library_list = self._list_all_model()
+        result = self._list_all_model()
         model_whitelist = []
-        for element in library_list:
-            for subelement in wh_library_list:
+        for element in result[0]:
+            for subelement in result[1]:
                 if element == subelement:
                     model_whitelist.append(element)
         for model in model_whitelist:
-            library_list.remove(model)
-        return library_list
+            result[0].remove(model)
+        return result[0]
 
     def _create_folder(self):
         try:
