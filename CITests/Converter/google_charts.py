@@ -60,27 +60,29 @@ class Plot_Charts(CI_conf_class):
         Returns:
 
         """
-        if os.path.isfile(self.show_ref_file) is False:
-            print(f'File {self.show_ref_file} directonary does not exist.')
+        if os.path.isfile(self.ci_interact_show_ref_file) is False:
+            print(f'File {self.ci_interact_show_ref_file} directory does not exist.')
             exit(0)
         else:
-            print(f'Plot results from file {self.show_ref_file}')
-        ref_list = []
-        file = open(self.show_ref_file, "r")
-        lines = file.readlines()
-        for line in lines:
-            if len(line) == 0:
-                continue
+            print(f'Plot results from file {self.ci_interact_show_ref_file}')
+            file = open(self.ci_interact_show_ref_file, "r")
+            lines = file.readlines()
+            file.close()
+            reference_file_list = []
+
+            for line in lines:
+                if len(line) == 0:
+                    continue
+                else:
+                    reference_file_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
+                    continue
+
+            if len(reference_file_list) == 0:
+                print(f'No reference files in file {self.ci_interact_show_ref_file}. Please add here your reference files you want to '
+                      f'update')
+                exit(0)
             else:
-                ref_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
-                continue
-        file.close()
-        if len(ref_list) == 0:
-            print(f'No reference files in file {self.show_ref_file}. Please add here your reference files you want to '
-                  f'update')
-            exit(0)
-        else:
-            return ref_list
+                return reference_file_list
 
     @staticmethod
     def _read_data(ref_file):
@@ -91,7 +93,7 @@ class Plot_Charts(CI_conf_class):
         Returns:
 
         """
-        legend_List = []
+        legend_list = []
         value_list = []
         distriction_values = {}
         time_interval_list = []
@@ -112,7 +114,7 @@ class Plot_Charts(CI_conf_class):
                 numbers = values[1]
                 time_interval_steps = len(numbers.split(","))
                 distriction_values[legend] = numbers
-                legend_List.append(legend)
+                legend_list.append(legend)
                 number = numbers.split(",")
                 for n in number:
                     value = n.replace("[", "").lstrip()
@@ -137,7 +139,7 @@ class Plot_Charts(CI_conf_class):
                 time = time + time_interval
         value_list.insert(0, time_interval_list)
         value_list = list(map(list, zip(*value_list)))
-        return value_list, legend_List
+        return value_list, legend_list
 
     def get_updated_reference_files(self):
         if os.path.isfile(self.update_ref_file) is False:
@@ -309,8 +311,8 @@ class Plot_Charts(CI_conf_class):
                     else:
                         print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                         value = self._read_csv_funnel(url=path_name)
-                        mytemplate = self.template(filename=self.chart_temp_file)  # Render Template
-                        html_chart = mytemplate.render(values=value, var=[f'{var}_ref', var], model=model,
+                        my_template = self.template(filename=self.chart_temp_file)  # Render Template
+                        html_chart = my_template.render(values=value, var=[f'{var}_ref', var], model=model,
                                                        title=f'{model}.mat_{var}')
                         file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
                         file_tmp.write(html_chart)
@@ -331,8 +333,14 @@ class Plot_Charts(CI_conf_class):
                 file_tmp.write(html_chart)
                 file_tmp.close()
 
-    def _mako_line_html_new_chart(self, ref_file, value_list,
-                                  legend_list):  # Load and read the templates, write variables in the templates
+    def _mako_line_html_new_chart(self, ref_file, value_list,  legend_list):
+        """
+         Load and read the templates, write variables in the templates
+        Args:
+            ref_file ():
+            value_list ():
+            legend_list ():
+        """
         if os.path.isfile(ref_file) is False:
             print(
                 f'Cant find folder: {self.CRED}{ref_file[ref_file.rfind(os.sep) + 1:]}{self.CEND} with variables: {self.CRED}{legend_list}{self.CEND}')
@@ -372,21 +380,21 @@ class Plot_Charts(CI_conf_class):
 
     def create_index_layout(self):
         """
-        Create a index layout from a template
+        Create an index layout from a template
         """
         html_file_list = []
         for file in os.listdir(self.temp_chart_path):
             if file.endswith(".html") and file != "index.html":
                 html_file_list.append(file)
-        mytemplate = self.template(filename=self.index_temp_file)
+        my_template = self.template(filename=self.temp_index_file)
         if len(html_file_list) == 0:
             print(f'No html files')
             os.rmdir(self.temp_chart_path)
             exit(0)
         else:
-            hmtl_chart = mytemplate.render(html_model=html_file_list)
+            html_chart = my_template.render(html_model=html_file_list)
             file_tmp = open(self.index_html_file, "w")
-            file_tmp.write(hmtl_chart)
+            file_tmp.write(html_chart)
             file_tmp.close()
             print(f'Create html file with reference results.')
 
