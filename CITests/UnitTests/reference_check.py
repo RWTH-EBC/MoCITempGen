@@ -679,9 +679,6 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
-    dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
-    dym_interface.library_check(library=args.library)
-    dym_interface.dym_check_lic()
 
     if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate, path=args.path).validate_html()
@@ -693,8 +690,10 @@ if __name__ == '__main__':
             batch=args.batch,
             tool=args.tool,
             package=args.single_package)
-    '''
     else:
+        dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
+        dym_interface.library_check(library=args.library)
+        dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
                                                  n_pro=args.number_of_processors,
@@ -702,9 +701,7 @@ if __name__ == '__main__':
                                                  batch=args.batch,
                                                  show_gui=args.show_gui,
                                                  path=args.path)
-        dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
-        dym_interface.library_check(library=args.library)
-        dym_interface.dym_check_lic()
+        '''
         conf = CI_conf_class()
         ref_model = Ref_model(library=args.library)
         if args.ref_list:
