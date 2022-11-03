@@ -60,7 +60,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             package_list ():
         Returns:
         """
-        print(f'Start regressiontest for {package_list}')
+        print(f'Test following packages: {package_list}')
         if package_list is None or len(package_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
             exit(1)
@@ -73,7 +73,10 @@ class Buildingspy_Regression_Check(CI_conf_class):
         if package_list is not None:
             if len(package_list) > 0:
                 for package in package_list:
-                    print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
+                    if self.batch is False:
+                        print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
+                    else:
+                        print(f'{self.green}Regression test for package:{self.CEND} {package}')
                     self.ut.setSinglePackage(package)
                     response = self.ut.run()
                     if response != 0:
@@ -94,7 +97,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             else:
                 self._write_exit_file(err_list=err_list)
         if len(err_list) > 0:
-            print(f'{self.CRED} Regression test failed{self.CEND}')
+            print(f'{self.CRED}Regression test failed{self.CEND}')
             print(f'The following packages{self.CRED} failed: {self.CEND}')
             for error in err_list:
                 print(f'{self.CRED}Error:{self.CEND} {error}')
@@ -149,7 +152,8 @@ class Ref_model(CI_conf_class):
         package_list = list(set(package_list))
         return package_list
 
-    def get_update_package(self, ref_list):
+    @staticmethod
+    def get_update_package(ref_list):
         """
         Args:
             ref_list ():
@@ -403,7 +407,7 @@ class Extended_model(CI_conf_class):
                             if extended_model.find(f'{types}') > -1:
                                 continue
                         use_model_list.append(extended_model)
-                ch_model_list = self._get_changed_used_model(lines=lines,model_list=use_model_list)
+                ch_model_list = self._get_changed_used_model(lines=lines, model_list=use_model_list)
                 if len(ch_model_list) > 0:
                     model_list.append(model)
             self.dymola.close()
@@ -538,14 +542,14 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
         validate the html syntax only
         """
-        val = self.validate.Validator()
-        errMsg = val.validateHTMLInPackage(self.path)
-        n_msg = len(errMsg)
+        vald = self.validate.Validator()
+        err_msg = vald.validateHTMLInPackage(self.path)
+        n_msg = len(err_msg)
         for i in range(n_msg):
             if i == 0:
-                print("The following malformed html syntax has been found:\n%s" % errMsg[i])
+                print("The following malformed html syntax has been found:\n%s" % err_msg[i])
             else:
-                print(errMsg[i])
+                print(err_msg[i])
         if n_msg == 0:
             exit(0)
         else:
@@ -556,8 +560,8 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
         validate regression test setup
         """
-        val = self.validate.Validator()
-        ret_val = val.validateExperimentSetup(self.path)
+        vald = self.validate.Validator()
+        ret_val = vald.validateExperimentSetup(self.path)
         exit(ret_val)
 
     def run_coverage_only(self, buildingspy_regression, batch, tool, package):
@@ -676,6 +680,7 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+
     if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate, path=args.path).validate_html()
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
@@ -713,6 +718,7 @@ if __name__ == '__main__':
             exit(val)
         else:
             if args.modified_models is False:
+
                 val = ref_check.check_regression_test(package_list=[args.single_package])
                 exit(val)
             elif args.modified_models is True:
