@@ -26,35 +26,32 @@ class Plot_Charts(CI_conf_class):
         self.layout_html_file = f'{self.chart_dir}{os.sep}index.html'
 
     @staticmethod
-    def _check_ref_file(ref_list):
+    def _check_ref_file(reference_file_list):
         """
-
         Args:
-            ref_list ():
-
+            reference_file_list ():
         Returns:
-
         """
         update_ref_list = []
-        for ref_file in ref_list:
-            if os.path.isfile(ref_file) is False:
-                print(f'File {ref_file} does not exist.')
+        for reference_file in reference_file_list:
+            if os.path.isfile(reference_file) is False:
+                print(f'File {reference_file} does not exist.')
                 continue
             else:
-                update_ref_list.append(ref_file)
-                print(f'\nCreate plots for reference result {ref_file}')
+                update_ref_list.append(reference_file)
+                print(f'\nCreate plots for reference result {reference_file}')
         return update_ref_list
 
-    def write_html_plot_templates(self, ref_list):
+    def write_html_plot_templates(self, reference_file_list):
         """
 
         Args:
-            ref_list ():
+            reference_file_list ():
         """
-        new_ref_list = self._check_ref_file(ref_list=ref_list)
-        for ref in new_ref_list:
-            results = self._read_data(ref_file=ref)
-            self._mako_line_html_new_chart(ref_file=ref, value_list=results[0], legend_list=results[1])
+        new_ref_list = self._check_ref_file(reference_file_list=reference_file_list)
+        for reference_file in new_ref_list:
+            results = self._read_data(ref_file=reference_file)
+            self._mako_line_html_new_chart(ref_file=reference_file, value_list=results[0], legend_list=results[1])
             continue
 
     def read_show_reference(self):
@@ -325,7 +322,7 @@ class Plot_Charts(CI_conf_class):
             else:
                 print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                 value = self._read_csv_funnel(url=path_name)
-                my_template = self.template(filename=self.chart_temp_file)  # Render Template
+                my_template = self.template(filename=self.temp_chart_file)
                 html_chart = my_template.render(values=value,
                                                 var=[f'{var}_ref', var],
                                                 model=model,
@@ -499,7 +496,7 @@ if __name__ == '__main__':
                                  action="store_true")
     args = parser.parse_args()
     conf = CI_conf_class()
-
+    print(f'\n\n\n')
     conf.check_ci_folder_structure(folder_list=[conf.chart_dir, conf.temp_chart_dir])
     conf.check_ci_file_structure(file_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
 
@@ -526,15 +523,15 @@ if __name__ == '__main__':
                         charts.mako_line_ref_chart(model=model_variable[0], var=model_variable[1])
         if args.new_ref is True:
             ref_list = charts.get_new_reference_files()
-            charts.write_html_plot_templates(ref_list=ref_list)
+            charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.update_ref is True:
             ref_list = charts.get_updated_reference_files()
-            charts.write_html_plot_templates(ref_list=ref_list)
+            charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.show_ref is True:
             ref_list = charts.read_show_reference()
-            charts.write_html_plot_templates(ref_list=ref_list)
+            charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.show_package is True:
             folder = charts.get_funnel_comp()
