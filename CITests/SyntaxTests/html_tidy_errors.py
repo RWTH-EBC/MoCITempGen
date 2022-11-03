@@ -68,12 +68,12 @@ class HTML_Tidy(CI_conf_class):
         Returns:
 
         """
-        rootDir = self.package.replace(".", os.sep)
-        topPackage = os.path.join(rootDir, "package.mo")
+        root_dir = self.package.replace(".", os.sep)
+        top_package = os.path.join(root_dir, "package.mo")
         errMsg = list()
-        if not os.path.isfile(topPackage):
+        if not os.path.isfile(top_package):
             raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (
-                rootDir, topPackage))
+                root_dir, top_package))
         file_counter = 0
         model_list = self._ListAixLibModel()
         for model in model_list:
@@ -111,7 +111,7 @@ class HTML_Tidy(CI_conf_class):
         if self.log:
             file = HTML_Tidy._return_logfile(self, errMsg)
             print("##########################################################")
-            print(f'Logfile is saved in {rootDir}{os.sep}HTML-logfile.txt')
+            print(f'Logfile is saved in {root_dir}{os.sep}HTML-logfile.txt')
             var = HTML_Tidy.read_logFile(self, file)
             return var
 

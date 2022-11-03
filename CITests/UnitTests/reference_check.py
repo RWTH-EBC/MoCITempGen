@@ -208,7 +208,7 @@ class Ref_model(CI_conf_class):
             return wh_list
         except IOError:
             print(f'Error: File {self.wh_ref_file} does not exist.')
-            exit(0)
+            return wh_list
 
     def _compare_ref_mos(self, mos_script_list, reference_list):
         """
