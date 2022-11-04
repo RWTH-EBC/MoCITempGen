@@ -85,6 +85,7 @@ class HTML_Tidy(CI_conf_class):
     def run_files(self):
         """
         Make sure that the parameter rootDir points to a Modelica package.
+        Write error to error message
         Returns:
         """
         root_dir = self.package.replace(".", os.sep)
@@ -95,7 +96,7 @@ class HTML_Tidy(CI_conf_class):
         for model in html_model_list:
             model_file = f'{model[:model.rfind(".mo")].replace(".", os.sep)}.mo'
             err, document_corr = self._check_file(model_file=model_file)
-            if err is not "":  # write error to error message
+            if err is not "":
                 err_msg.append("[-- %s ]\n%s" % (model, err))
             if self.correct_backup:
                 self._backup_old_files(model_file=model_file, document_corr=document_corr, file_counter=file_counter)
@@ -106,9 +107,9 @@ class HTML_Tidy(CI_conf_class):
                 htmlList = self.getInfoRevisionsHTML(model)
                 htmlStr = self.join_body(htmlList=htmlList, substitutions_dict={'\\"': '"'})
                 document_corr, errors = self._htmlCorrection(htmlStr)
-                docCorrStr = self.number_print_List(document_corr.split('\n'), sep='\n')
+                doc_corr_str = self.number_print_List(document_corr.split('\n'), sep='\n')
                 if len(errors) > 0 and errors.find("Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
-                    self._print_html_error(model=model, htmlList=htmlList, docCorrStr=docCorrStr, errors=errors)
+                    self._print_html_error(model=model, htmlList=htmlList, docCorrStr=doc_corr_str, errors=errors)
                     continue
                 else:
                     continue
