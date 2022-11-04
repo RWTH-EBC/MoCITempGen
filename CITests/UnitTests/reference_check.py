@@ -730,9 +730,17 @@ if __name__ == '__main__':
                                                 path="package.mo")
                 package_list = list_reg_model.get_changed_regression_models()
         # Start regression test
-        print(f'Start regression Test.\nTest following packages: {package_list}')
-        if len(package_list) > 0 or package_list is not None:
+        if package_list is None or len(package_list) == 0:
+            if args.batch is False:
+                print(f'All Reference files exist')
+                exit(0)
+            else:
+                print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
+                exit(1)
+        else:
+            print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
+
 
 
