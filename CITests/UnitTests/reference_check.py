@@ -58,7 +58,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             package_list ():
         Returns:
         """
-        print(f'Test following packages: {package_list}')
+
         if package_list is None or len(package_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
             exit(1)
@@ -217,9 +217,7 @@ class Ref_model(CI_conf_class):
         Args:
             mos_script_list ():
             reference_list ():
-
         Returns:
-
         """
         err_list = []
         for mos in mos_script_list:
@@ -648,8 +646,8 @@ if __name__ == '__main__':
                                  help='Maximum number of processors to be used')
     unit_test_group.add_argument('-t', "--tool", metavar="dymola", default="dymola",
                                  help="Tool for the regression tests. Set to dymola or jmodelica")
-    unit_test_group.add_argument("-DS", "--dymola-version", default="2020",
-                                 help="Version of Dymola(Give the number e.g. 2020")
+    unit_test_group.add_argument("-DS", "--dymola-version", default="2022",
+                                 help="Version of Dymola(Give the number e.g. 2022")
     unit_test_group.add_argument("--coverage-only",
                                  help='Only run the coverage test',
                                  action="store_true")
@@ -710,7 +708,8 @@ if __name__ == '__main__':
                                                  path=args.path)
         if args.create_ref:
             package_list = ref_model.get_update_model()
-        if args.update_ref:
+
+        elif args.update_ref:
             ref_list = ref_model.get_update_ref()
             ref_model.delte_ref_file(ref_list=ref_list)
             package_list = ref_model.get_update_package(ref_list=ref_list)
@@ -731,6 +730,7 @@ if __name__ == '__main__':
                                                 path="package.mo")
                 package_list = list_reg_model.get_changed_regression_models()
         # Start regression test
+        print(f'Start regression Test.\nTest following packages: {package_list}')
         if len(package_list) > 0 or package_list is not None:
             val = ref_check.check_regression_test(package_list=package_list)
             exit(val)
