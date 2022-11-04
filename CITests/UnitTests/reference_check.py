@@ -36,13 +36,13 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
-    def _write_exit_file(self, err_list):
+    def _write_exit_file(self, val):
         """
 
         """
         try:
             ex_file = open(self.config_ci_exit_file, "w")
-            if len(err_list) == 0:
+            if val == 0:
                 ex_file.write(f'successful')
             else:
                 ex_file.write(f'FAIL')
@@ -58,10 +58,6 @@ class Buildingspy_Regression_Check(CI_conf_class):
             package_list ():
         Returns:
         """
-
-        if package_list is None or len(package_list) == 0:
-            print(f'{self.CRED}Error:{self.CEND} Package is missing! (e.g. Airflow)')
-            exit(1)
         self.ut.batchMode(self.batch)
         self.ut.setLibraryRoot(self.path)
         self.ut.setNumberOfThreads(self.n_pro)
@@ -94,19 +90,18 @@ class Buildingspy_Regression_Check(CI_conf_class):
                         else:
                             print(f'{self.green}Regression test for model {package} was successful {self.CEND}')
                             continue
-        if self.batch is False:
-            exit_list = new_ref_list
+        if self.batch is True:
+            if len(err_list) > 0:
+                print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
+                for error in err_list:
+                    print(f'{self.CRED}     Error:{self.CEND} {error}')
+                return 1
+            else:
+                print(f'{self.green}Regression test was successful {self.CEND}')
+                return 0
         else:
-            exit_list = err_list
-        self._write_exit_file(err_list=exit_list)
-        if len(err_list) > 0:
-            print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
-            for error in err_list:
-                print(f'{self.CRED}     Error:{self.CEND} {error}')
-            return 1
-        else:
-            print(f'{self.green}Regression test was successful {self.CEND}')
-            return 0
+            if len(new_ref_list) > 0:
+                return 1
 
 
 class Ref_model(CI_conf_class):
@@ -117,7 +112,6 @@ class Ref_model(CI_conf_class):
         """
         super().__init__()
         self.library = library
-
 
     def delte_ref_file(self, ref_list):
         """
@@ -397,12 +391,15 @@ class Extended_model(CI_conf_class):
         type_list = ["Modelica", "Real", "Integer", "Boolean", "String"]
         if len(mo_list) > 0:
             if platform.system() == "Windows":  # Load ModelManagement
-                self.dymola.ExecuteCommand('cd("C:\Program Files\Dymola ' + self.dymola_version + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
+                self.dymola.ExecuteCommand(
+                    'cd("C:\Program Files\Dymola ' + self.dymola_version + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
             else:
-                self.dymola.ExecuteCommand('cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
+                self.dymola.ExecuteCommand(
+                    'cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
             for model in mo_list:
                 use_model_list = []
-                used_model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
+                used_model_list = self.dymola.ExecuteCommand(
+                    f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
                 if used_model_list is None:
                     continue
                 else:
@@ -412,7 +409,8 @@ class Extended_model(CI_conf_class):
                                 continue
                         use_model_list.append(use_model)
 
-                extended_model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.AST.ExtendsInClass("{model}");')
+                extended_model_list = self.dymola.ExecuteCommand(
+                    f'ModelManagement.Structure.AST.ExtendsInClass("{model}");')
                 if extended_model_list is None:
                     continue
                 else:
@@ -523,6 +521,7 @@ class Extended_model(CI_conf_class):
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
             exit(1)
+
 
 class Buildingspy_Validate_test(CI_conf_class):
 
@@ -671,6 +670,7 @@ if __name__ == '__main__':
     _setEnvironmentPath(dymola_version=args.dymola_version)
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
+
     print(f'1: Starting Dymola instance')
     if platform.system() == "Windows":
         dymola = DymolaInterface()
@@ -719,7 +719,8 @@ if __name__ == '__main__':
                 conf.check_ci_file_structure(files_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
                 package_list = [args.single_package]
             if args.modified_models is True:
-                conf.check_ci_file_structure(files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
+                conf.check_ci_file_structure(
+                    files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
                 ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
@@ -729,18 +730,18 @@ if __name__ == '__main__':
                                                 dymola_version=args.dymola_version,
                                                 path="package.mo")
                 package_list = list_reg_model.get_changed_regression_models()
+
         # Start regression test
         if package_list is None or len(package_list) == 0:
             if args.batch is False:
                 print(f'All Reference files exist')
-                exit(0)
+                val = 0
             else:
                 print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
-                exit(1)
+                val = 1
         else:
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
-            exit(val)
 
-
-
+        ref_check._write_exit_file(val=val)
+        exit(val)

@@ -596,11 +596,10 @@ class HTML_Tidy(CI_conf_class):
                         model = filepath.replace(os.sep, ".")
                         model = model[model.rfind(self.library):]
                         library_list.append(model)
-
-
             return library_list, wh_library_list
         except IOError:
             print(f'Error: File {self.wh_html_file} does not exist. Check without a whitelist.')
+            return library_list, wh_library_list
 
     def _ListAixLibModel(self):
         """
@@ -609,7 +608,6 @@ class HTML_Tidy(CI_conf_class):
 
         """
         result = self._list_all_model()
-        print(result)
         model_whitelist = []
         for element in result[0]:
             for subelement in result[1]:
