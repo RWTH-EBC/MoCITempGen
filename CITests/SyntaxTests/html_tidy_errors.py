@@ -3,8 +3,8 @@ import io
 import os
 import shutil
 import sys
-
 from git import Repo
+from tidylib import tidy_document
 
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
@@ -62,58 +62,62 @@ class HTML_Tidy(CI_conf_class):
         self.wh_library = wh_library
         super().__init__()
 
+    def _get_html_model(self):
+        library_list = self._get_library_model()
+        wh_library_list = self._get_wh_library_model()
+        html_model_list = self._remove_whitelist_model(library_list=library_list, wh_library_list=wh_library_list)
+        return html_model_list
+
+    def _check_arguments(self, root_dir):
+        top_package = os.path.join(root_dir, "package.mo")
+        if not os.path.isfile(top_package):
+            raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (root_dir, top_package))
+
+    def _print_html_error(self, model, htmlList, docCorrStr, errors):
+        print('\n' + "----" + model + "----")
+        print("\n-------- HTML Code --------")
+        print(f"\n{self.number_print_List(htmlList)}")
+        print(self.green + "\n-------- Corrected Code --------" + self.CEND)
+        print(f"\n{docCorrStr}")
+        print(self.CRED + "\n-------- Errors --------" + self.CEND)
+        print(f"\n{errors}")
+
     def run_files(self):
         """
         Make sure that the parameter rootDir points to a Modelica package.
         Returns:
-
         """
         root_dir = self.package.replace(".", os.sep)
-        top_package = os.path.join(root_dir, "package.mo")
+        self._check_arguments(root_dir=root_dir)
         err_msg = list()
-        if not os.path.isfile(top_package):
-            raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (
-                root_dir, top_package))
         file_counter = 0
-        model_list = self._ListAixLibModel()
-        for model in model_list:
-            model = model.replace(".", os.sep)
-            model = model.replace(os.sep + "mo", ".mo")
-            results = HTML_Tidy._CheckFile(self, model)
-            document_corr = results[0]
-            err = results[1]
+        html_model_list = self._get_html_model()
+        for model in html_model_list:
+            model_file = f'{model[:model.rfind(".mo")].replace(".", os.sep)}.mo'
+            err, document_corr = self._check_file(model_file=model_file)
             if err is not "":  # write error to error message
                 err_msg.append("[-- %s ]\n%s" % (model, err))
             if self.correct_backup:
-                HTML_Tidy._backup_old_files(
-                    self, model, document_corr, file_counter)
+                self._backup_old_files(model_file=model_file, document_corr=document_corr, file_counter=file_counter)
             if self.correct_overwrite:
-                HTML_Tidy._correct_overwrite(self, model, document_corr)
+                self._correct_overwrite(model, document_corr)
                 continue
             if self.correct_view:
-                htmlList = HTML_Tidy.getInfoRevisionsHTML(self, model)
-                htmlStr = HTML_Tidy.join_body(
-                    self, htmlList=htmlList, substitutions_dict={'\\"': '"'})
-                document_corr, errors = HTML_Tidy._htmlCorrection(self, htmlStr)
-                docCorrStr = HTML_Tidy.number_print_List(self, document_corr.split('\n'), sep='\n')
-                if len(errors) > 0 and errors.find(
-                        "Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
-                    print('\n' + "----" + model + "----")
-                    print("\n-------- HTML Code --------")
-                    print(f"\n{HTML_Tidy.number_print_List(self, htmlList)}")
-                    print(self.green + "\n-------- Corrected Code --------" + self.CEND)
-                    print(f"\n{docCorrStr}")
-                    print(self.CRED + "\n-------- Errors --------" + self.CEND)
-                    print(f"\n{errors}")
+                htmlList = self.getInfoRevisionsHTML(model)
+                htmlStr = self.join_body(htmlList=htmlList, substitutions_dict={'\\"': '"'})
+                document_corr, errors = self._htmlCorrection(htmlStr)
+                docCorrStr = self.number_print_List(document_corr.split('\n'), sep='\n')
+                if len(errors) > 0 and errors.find("Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
+                    self._print_html_error(model=model, htmlList=htmlList, docCorrStr=docCorrStr, errors=errors)
                     continue
                 else:
                     continue
         if self.log:
-            file = self._return_logfile(err_msg)
-            print("##########################################################")
-            print(f'Logfile is saved in {root_dir}{os.sep}HTML-logfile.txt')
-            var = HTML_Tidy.read_logFile(self, file)
-            return var
+            file = self._return_logfile(err_message=err_msg, root_dir=root_dir)
+            err_list = self.read_logFile(file=file)
+            self._write_exit(err_list=err_list)
+            variable = self._write_result(err_list=err_list)
+            exit(variable)
 
     def number_print_List(self, htmlList: list, sep: str = '') -> None:
         """
@@ -215,28 +219,56 @@ class HTML_Tidy(CI_conf_class):
         newfile = open(moFulNam, "w+b")
         newfile.write(document_corr.encode("utf-8"))
 
-    def _backup_old_files(self, moFulNam, document_corr,
-                          file_counter):  # This function backups the root folder and creates the corrected files
-        rootDir = self.package.replace(".", os.sep)
-        if os.path.exists(rootDir + "_backup") is False and file_counter == 1:
-            shutil.copytree(rootDir, rootDir + "_backup")
-            print("you can find your backup under " + rootDir + "_backup")
-        os.remove(moFulNam)
-        newfile = open(moFulNam, "w+b")
+    def _backup_old_files(self, model_file, document_corr, file_counter):
+        """
+        This function backups the root folder and creates the corrected files
+        Args:
+            moFulNam:
+            document_corr:
+            file_counter:
+        """
+        root_dir = self.package.replace(".", os.sep)
+        if os.path.exists(root_dir + "_backup") is False and file_counter == 1:
+            shutil.copytree(root_dir, root_dir + "_backup")
+            print("you can find your backup under " + root_dir + "_backup")
+        os.remove(model_file)
+        newfile = open(model_file, "w+b")
         newfile.write(document_corr.encode("utf-8"))
 
-    def _return_logfile(self, err_message):  # This function creates the logfile
-        file = f'{self.package.replace(".", os.sep)}{os.sep}HTML-logfile.txt'
-        log_file = open(f'{file}', "w")
-        if len(err_message) >= 0:
-            for error in err_message:
-                log_file.write(error + '\n')
-        log_file.close()
-        return file
+    def _return_logfile(self, err_message, root_dir):
+        """
+        This function creates the logfile
+        Args:
+            err_message:
+            root_dir:
 
-    def read_logFile(self, file):  # read logfile for possible errors
+        Returns:
+
+        """
+        try:
+            file = f'{root_dir}{os.sep}HTML-logfile.txt'
+            print(f'Logfile is saved in {file}')
+            log_file = open(f'{file}', "w")
+            if len(err_message) >= 0:
+                for error in err_message:
+                    log_file.write(error + '\n')
+            log_file.close()
+            return file
+
+        except IOError:
+            print(f'Error: File {root_dir}{os.sep}HTML-logfile.txt does not exist.')
+            exit(1)
+
+    def read_logFile(self, file):
+        """
+        read logfile for possible errors
+        Args:
+            file:
+        Returns:
+        """
         log_file = open(file, "r")
         lines = log_file.readlines()
+        log_file.close()
         err_list = []
         for line in lines:
             line = line.replace("\n", "")
@@ -257,37 +289,43 @@ class HTML_Tidy(CI_conf_class):
                 continue
             elif line.find("Warning") > -1:
                 err_list.append(line)
-        log_file.close()
+        return err_list
+
+    def _write_result(self, err_list):
+        if len(err_list) > 0:
+            variable = 1
+        else:
+            variable = 0
+        return variable
+
+    def _write_exit(self, err_list):
         try:
-            self._create_folder()
             exit_file = open(self.config_ci_exit_file, "w")
             if len(err_list) > 0:
                 print("Syntax Error: Check HTML-logfile")
-                exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 1")
-                exit_file.close()
-                var = 1
+                exit_file.write("exit 1")
             else:
-                print("HTML Check was successful!")
-                exit_file.write("#!/bin/bash" + "\n" + "\n" + "exit 0")
-                exit_file.close()
-                var = 0
+                print(f'HTML Check was successful!')
+                exit_file.write("exit 0")
+            exit_file.close()
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
-            exit(1)
-        return var
 
-    def _CheckFile(self, moFile):
+
+
+    def _check_file(self, model_file):
         """
-		This function returns a list that contain the html code of the
+        This function returns a list that contain the html code of the
 		info and revision sections. Each element of the list
 		is a string.
 
-		:param moFile: The name of a Modelica source file.
-		:return: list The list of strings of the info and revisions
-								section.
-		"""
-
-        with io.open(moFile, mode="r", encoding="utf-8-sig") as f:
+		:param model_file: The name of a Modelica source file.
+		:return: list The list of strings of the info and revisions section.
+        Args:
+            model_file:
+        Returns:
+        """
+        with io.open(model_file, mode="r", encoding="utf-8-sig") as f:
             lines = f.readlines()
         nLin = len(lines)
         isTagClosed = True
@@ -331,8 +369,8 @@ class HTML_Tidy(CI_conf_class):
                     idxC = -1
                 if idxC > -1:
                     htmlCode.append(lines[i][idxO + 6:idxC])
-                    code.append(HTML_Tidy._htmlCorrection(self, htmlCode)[0])
-                    errors.append(HTML_Tidy._htmlCorrection(self, htmlCode)[1])
+                    code.append(self._htmlCorrection(htmlCode)[0])
+                    errors.append(self._htmlCorrection(htmlCode)[1])
                     code.append(lines[i][idxC:])
                     htmlCode = list()
                     idxO = lines[i].find("<html>")
@@ -364,28 +402,24 @@ class HTML_Tidy(CI_conf_class):
             document_corr_img += line + '\n'
         return document_corr_img, errors_string
 
-    def _htmlCorrection(self, htmlCode):
+    def _htmlCorrection(self, html_code):
         """
-
         Args:
-            htmlCode ():
-
+            html_code ():
         Returns:
-
         """
         substitutions_dict: dict = {'"': '\\"', '<br>': '<br/>', '<br/>': '<br/>'}
-        htmlList = htmlCode
-        htmlStr = HTML_Tidy.join_body(self, htmlList=htmlList, substitutions_dict={'\\"': '"'})
-        from tidylib import tidy_document
-        htmlCorrect, errors = tidy_document(f"{htmlStr}",
-                                            options={'doctype': 'html5',
-                                                     'show-body-only': 1,
-                                                     'numeric-entities': 1,
-                                                     'output-html': 1,
-                                                     'wrap': 72,
-                                                     'alt-text': '', })
-        document_corr = HTML_Tidy.make_string_replacements(
-            self, theString=htmlCorrect, substitutions_dict=substitutions_dict)
+        html_str = self.join_body(htmlList=html_code, substitutions_dict={'\\"': '"'})
+
+        html_correct, errors = tidy_document(f"{html_str}",
+                                             options={'doctype': 'html5',
+                                                      'show-body-only': 1,
+                                                      'numeric-entities': 1,
+                                                      'output-html': 1,
+                                                      'wrap': 72,
+                                                      'alt-text': '', })
+        document_corr = self.make_string_replacements(theString=html_correct,
+                                                      substitutions_dict=substitutions_dict)
         return document_corr, errors
 
     def correct_table_summary(self, line, CloseFound):
@@ -573,9 +607,8 @@ class HTML_Tidy(CI_conf_class):
 
     def _list_all_model(self):
         """
-         List library and whitelist models
-        Returns:
 
+        Returns:
         """
         library_list = []
         wh_library_list = []
@@ -601,28 +634,54 @@ class HTML_Tidy(CI_conf_class):
             print(f'Error: File {self.wh_html_file} does not exist. Check without a whitelist.')
             return library_list, wh_library_list
 
-    def _ListAixLibModel(self):
+    def _get_wh_library_model(self):
         """
-        Remove whitelist models and list all library model
+        Returns:
+        """
+        wh_library_list = []
+        try:
+            file = open(self.wh_html_file, "r")
+            lines = file.readlines()
+            file.close()
+            for line in lines:
+                if line.find(".mo") > -1:
+                    line = line.replace(self.wh_library, self.library)
+                    line = line.replace("\n", "")
+                    wh_library_list.append(line)
+            return wh_library_list
+        except IOError:
+            print(f'Error: File {self.wh_html_file} does not exist. Check without a whitelist.')
+            return wh_library_list
+
+    def _get_library_model(self):
+        """
+         Return library models
         Returns:
 
         """
-        result = self._list_all_model()
-        model_whitelist = []
-        for element in result[0]:
-            for subelement in result[1]:
-                if element == subelement:
-                    model_whitelist.append(element)
-        for model in model_whitelist:
-            result[0].remove(model)
-        return result[0]
+        library_list = []
+        for subdir, dirs, files in os.walk(self.package.replace(".", os.sep)):
+            for file in files:
+                filepath = subdir + os.sep + file
+                if filepath.endswith(".mo"):
+                    model = filepath.replace(os.sep, ".")
+                    model = model[model.rfind(self.library):]
+                    library_list.append(model)
+        return library_list
 
-    def _create_folder(self):
-        try:
-            if not os.path.exists(self.config_dir):
-                os.makedirs(self.config_dir)
-        except FileExistsError:
-            pass
+    def _remove_whitelist_model(self, library_list, wh_library_list):
+        """
+        get library model
+        Returns:
+        """
+        remove_models_list = []
+        for model in library_list:
+            for wh_model in wh_library_list:
+                if model == wh_model:
+                    remove_models_list.append(model)
+        for remove_model in remove_models_list:
+            library_list.remove(remove_model)
+        return library_list
 
 
 class HTML_whitelist(CI_conf_class):
