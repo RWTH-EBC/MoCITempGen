@@ -68,7 +68,8 @@ class HTML_Tidy(CI_conf_class):
         html_model_list = self._remove_whitelist_model(library_list=library_list, wh_library_list=wh_library_list)
         return html_model_list
 
-    def _check_arguments(self, root_dir):
+    @staticmethod
+    def _check_arguments(root_dir):
         top_package = os.path.join(root_dir, "package.mo")
         if not os.path.isfile(top_package):
             raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (root_dir, top_package))
@@ -104,12 +105,12 @@ class HTML_Tidy(CI_conf_class):
                 self._correct_overwrite(model, document_corr)
                 continue
             if self.correct_view:
-                htmlList = self.getInfoRevisionsHTML(model)
+                htmlList = self._getInfoRevisionsHTML(model_file)
                 htmlStr = self.join_body(htmlList=htmlList, substitutions_dict={'\\"': '"'})
                 document_corr, errors = self._htmlCorrection(htmlStr)
                 doc_corr_str = self.number_print_List(document_corr.split('\n'), sep='\n')
                 if len(errors) > 0 and errors.find("Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
-                    self._print_html_error(model=model, htmlList=htmlList, docCorrStr=doc_corr_str, errors=errors)
+                    self._print_html_error(model=model_file, htmlList=htmlList, docCorrStr=doc_corr_str, errors=errors)
                     continue
                 else:
                     continue
@@ -172,15 +173,14 @@ class HTML_Tidy(CI_conf_class):
             theString = theString.replace(k, v)
         return theString
 
-    def getInfoRevisionsHTML(self, moFile):
+    def _getInfoRevisionsHTML(self, moFile):
         """Returns a list that contains the html code
 		This function returns a list that contain the html code of the
 		info and revision sections. Each element of the list
 		is a string.
 		Parameters
 		----------
-		moFile : str
-				The name of a Modelica source file.
+		moFile : str - The name of a Modelica source file.
 		Returns
 		-------
 		The list of strings of the info and revisions section. """
