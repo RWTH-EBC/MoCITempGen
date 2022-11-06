@@ -72,14 +72,15 @@ class HTML_Tidy(CI_conf_class):
     def _check_arguments(root_dir):
         top_package = os.path.join(root_dir, "package.mo")
         if not os.path.isfile(top_package):
-            raise ValueError("Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (root_dir, top_package))
+            raise ValueError(
+                "Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (root_dir, top_package))
 
-    def _print_html_error(self, model, htmlList, docCorrStr, errors):
+    def _print_html_error(self, model, html_list, doc_corr_str, errors):
         print('\n' + "----" + model + "----")
         print("\n-------- HTML Code --------")
-        print(f"\n{self.number_print_List(htmlList)}")
+        print(f"\n{self.number_print_List(html_list=html_list)}")
         print(self.green + "\n-------- Corrected Code --------" + self.CEND)
-        print(f"\n{docCorrStr}")
+        print(f"\n{doc_corr_str}")
         print(self.CRED + "\n-------- Errors --------" + self.CEND)
         print(f"\n{errors}")
 
@@ -102,15 +103,17 @@ class HTML_Tidy(CI_conf_class):
             if self.correct_backup:
                 self._backup_old_files(model_file=model_file, document_corr=document_corr, file_counter=file_counter)
             if self.correct_overwrite:
-                self._correct_overwrite(model, document_corr)
+                self._correct_overwrite(model_name=model_file, document_corr=document_corr)
                 continue
             if self.correct_view:
-                htmlList = self._getInfoRevisionsHTML(model_file)
-                htmlStr = self.join_body(htmlList=htmlList, substitutions_dict={'\\"': '"'})
-                document_corr, errors = self._htmlCorrection(htmlStr)
-                doc_corr_str = self.number_print_List(document_corr.split('\n'), sep='\n')
-                if len(errors) > 0 and errors.find("Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
-                    self._print_html_error(model=model_file, htmlList=htmlList, docCorrStr=doc_corr_str, errors=errors)
+                html_list = self._getInfoRevisionsHTML(model_file)
+                html_str = self.join_body(html_list=html_list, substitutions_dict={'\\"': '"'})
+                document_corr, errors = self._htmlCorrection(html_str)
+                doc_corr_str = self.number_print_List(html_list=document_corr.split('\n'), sep='\n')
+                if len(errors) > 0 and errors.find(
+                        "Warning: The summary attribute on the <table> element is obsolete in HTML5") == -1:
+                    self._print_html_error(model=model_file, html_list=html_list, doc_corr_str=doc_corr_str,
+                                           errors=errors)
                     continue
                 else:
                     continue
@@ -121,27 +124,30 @@ class HTML_Tidy(CI_conf_class):
             variable = self._write_result(err_list=err_list)
             exit(variable)
 
-    def number_print_List(self, htmlList: list, sep: str = '') -> None:
+    @staticmethod
+    def number_print_List(html_list: list, sep: str = '') -> None:
         """
         Print a list of strings with line numbers
 		Should be extended by a feature to highlight a given set of line
 		numbers. This can help the reader to quickly identify the lines
 		with errors.
 
-		Parameters
-		----------
-		htmlList : list of str
-				The html code - each line a list entry.
-		sep : str
-				String that seperates the line number from the line text.
-		"""
-        return sep.join(['{0:>5d} {1}'.format(i, line) for i, line in enumerate(htmlList)])
 
-    def join_body(self, htmlList: list, substitutions_dict: dict = {'\\"': '"'}) -> str:
-        """Joins a list of strings into a single string and makes replacements
+        Args:
+            html_list ():
+            sep ():
+
+        Returns:
+        """
+        return sep.join(['{0:>5d} {1}'.format(i, line) for i, line in enumerate(html_list)])
+
+    def join_body(self, html_list: list, substitutions_dict: dict = {'\\"': '"'}) -> str:
+        """
+
+        Joins a list of strings into a single string and makes replacements
 		Parameters
 		----------
-		htmlList : list of str
+		html_list : list of str
 				The html code - each line a list entry.
 		substitutions_dict : dict
 				A dictionary with key:value pairs for old and new text.
@@ -149,16 +155,19 @@ class HTML_Tidy(CI_conf_class):
 				we need to remove the escape characters.
 		Returns
 		-------
-		str
-				The html code as one string, cleared from escape characters.
-		"""
-        body = ''.join(htmlList)  # just glue it together again
-        body = HTML_Tidy.make_string_replacements(
-            self, theString=body, substitutions_dict={'\\"': '"'})
+
+        Args:
+            html_list ():
+
+        """
+        body = ''.join(html_list)
+        body = self._make_string_replacements(theString=body, substitutions_dict={'\\"': '"'})
         return body
 
-    def make_string_replacements(self, theString: str, substitutions_dict: dict = {'\\"': '"'}) -> str:
-        """Takes a string and replaces according to a given dictionary
+    def _make_string_replacements(self, theString: str, substitutions_dict: dict = {'\\"': '"'}) -> str:
+        """
+
+        Takes a string and replaces according to a given dictionary
 		Parameters
 		----------
 		theString : str
@@ -168,13 +177,21 @@ class HTML_Tidy(CI_conf_class):
 		Returns
 		-------
 		str
-				The modified string. """
+				The modified string.
+        Args:
+            theString ():
+            substitutions_dict ():
+
+        Returns:
+        """
         for k, v in substitutions_dict.items():
             theString = theString.replace(k, v)
         return theString
 
     def _getInfoRevisionsHTML(self, moFile):
-        """Returns a list that contains the html code
+        """
+
+        Returns a list that contains the html code
 		This function returns a list that contain the html code of the
 		info and revision sections. Each element of the list
 		is a string.
@@ -183,40 +200,50 @@ class HTML_Tidy(CI_conf_class):
 		moFile : str - The name of a Modelica source file.
 		Returns
 		-------
-		The list of strings of the info and revisions section. """
+		The list of strings of the info and revisions section.
+        Args:
+            moFile ():
 
+        Returns:
+
+        """
         with open(moFile, mode="r", encoding="utf-8-sig") as f:
             lines = f.readlines()
         nLin = len(lines)
-        isTagClosed = True
+        is_tag_closed = True
         entries = list()
         for i in range(nLin):
-            if isTagClosed:  # search for opening tag
+            if is_tag_closed:  # search for opening tag
                 idxO = lines[i].find("<html>")
                 if idxO > -1:  # search for closing tag on same line as opening tag
                     idxC = lines[i].find("</html>")
                     if idxC > -1:
                         entries.append(lines[i][idxO + 6:idxC] + '\n')
-                        isTagClosed = True
+                        is_tag_closed = True
                     else:
                         entries.append(lines[i][idxO + 6:])
-                        isTagClosed = False
+                        is_tag_closed = False
             else:  # search for closing tag
                 idxC = lines[i].find("</html>")
                 if idxC == -1:  # closing tag not found, copy full line
                     entries.append(lines[i])
                 else:  # search for opening tag on same line as closing tag
                     entries.append(lines[i][0:idxC] + '\n')  # found closing tag, copy beginning of line only
-                    isTagClosed = True
+                    is_tag_closed = True
                     idxO = lines[i].find("<html>")
                     if idxO > -1:
                         entries.append(lines[i][idxO + 6:])
-                        isTagClosed = False
+                        is_tag_closed = False
         return entries
 
-    def _correct_overwrite(self, moFulNam,
-                           document_corr):  # This function overwrites the old modelica files with the corrected files
-        os.remove(moFulNam)
+    def _correct_overwrite(self, model_name, document_corr):
+        """
+        This function overwrites the old modelica files with the corrected files
+        Args:
+            model_name ():
+            document_corr ():
+        """
+        os.remove(model_name)
         newfile = open(moFulNam, "w+b")
         newfile.write(document_corr.encode("utf-8"))
 
@@ -249,8 +276,8 @@ class HTML_Tidy(CI_conf_class):
         try:
             file = f'{root_dir}{os.sep}HTML-logfile.txt'
             print(f'Logfile is saved in {file}')
-            log_file = open(f'{file}', "w")
-            if len(err_message) >= 0:
+            log_file = open(f'{file}', "w", encoding="utf-8")
+            if len(err_message) > 0:
                 for error in err_message:
                     log_file.write(error + '\n')
             log_file.close()
@@ -267,7 +294,7 @@ class HTML_Tidy(CI_conf_class):
             file:
         Returns:
         """
-        log_file = open(file, "r")
+        log_file = open(file, "r",  encoding="utf-8")
         lines = log_file.readlines()
         log_file.close()
         err_list = []
@@ -312,13 +339,9 @@ class HTML_Tidy(CI_conf_class):
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
 
-
-
     def _check_file(self, model_file):
         """
-        This function returns a list that contain the html code of the
-		info and revision sections. Each element of the list
-		is a string.
+        This function returns a list that contain the html code of the info and revision sections. Each element of the list is a string.
 
 		:param model_file: The name of a Modelica source file.
 		:return: list The list of strings of the info and revisions section.
@@ -329,12 +352,12 @@ class HTML_Tidy(CI_conf_class):
         with io.open(model_file, mode="r", encoding="utf-8-sig") as f:
             lines = f.readlines()
         nLin = len(lines)
-        isTagClosed = True
+        is_tag_closed = True
         code = list()
         htmlCode = list()
         errors = list()
         for i in range(nLin):
-            if isTagClosed:  # search for opening tag
+            if is_tag_closed:  # search for opening tag
                 idxO = lines[i].find("<html>")
                 if idxO > -1:  # if found opening tag insert everything up to opening tag into the code list
                     code.append(lines[i][:idxO + 6])  # search for closing tag on same line as opening tag
@@ -349,16 +372,16 @@ class HTML_Tidy(CI_conf_class):
                         idxC = -1
                     if idxC > -1:
                         htmlCode.append(lines[i][idxO + 6:idxC] + '\n')
-                        code.append(HTML_Tidy._htmlCorrection(self, htmlCode)[0])
-                        errors.append(HTML_Tidy._htmlCorrection(self, htmlCode)[1])
+                        code.append(self._htmlCorrection(html_code=htmlCode)[0])
+                        errors.append(self._htmlCorrection(html_code=htmlCode)[1])
                         code.append(lines[i][idxC:])
-                        isTagClosed = True
+                        is_tag_closed = True
                     else:
                         htmlCode.append(lines[i][idxO + 6:])
-                        isTagClosed = False
+                        is_tag_closed = False
                 else:
                     code.append(lines[i])
-                    isTagClosed = True
+                    is_tag_closed = True
             else:  # check for both, correct and incorrect html tags, because dymola except also <\html>
                 idxC1 = lines[i].find("</html>")
                 idxC2 = lines[i].find("<\html>")
@@ -370,18 +393,18 @@ class HTML_Tidy(CI_conf_class):
                     idxC = -1
                 if idxC > -1:
                     htmlCode.append(lines[i][idxO + 6:idxC])
-                    code.append(self._htmlCorrection(htmlCode)[0])
-                    errors.append(self._htmlCorrection(htmlCode)[1])
+                    code.append(self._htmlCorrection(html_code=htmlCode)[0])
+                    errors.append(self._htmlCorrection(html_code=htmlCode)[1])
                     code.append(lines[i][idxC:])
                     htmlCode = list()
                     idxO = lines[i].find("<html>")
                     if idxO > -1:
-                        isTagClosed = False
+                        is_tag_closed = False
                     else:
-                        isTagClosed = True
+                        is_tag_closed = True
                 else:
                     htmlCode.append(lines[i])
-                    isTagClosed = False
+                    is_tag_closed = False
         document_corr = ""
         if len(code) > 0:
             for lines in code:
@@ -393,13 +416,13 @@ class HTML_Tidy(CI_conf_class):
         document_corr_img = ""
         CloseFound = True
         for line in document_corr.splitlines():
-            line, CloseFound = HTML_Tidy.correct_table_summary(self, line, CloseFound)
+            line, CloseFound = self.correct_table_summary(line=line, CloseFound=CloseFound)
             if self.font == True:
-                line, CloseFound = HTML_Tidy.correct_font(
-                    self, line, CloseFound)
+                line, CloseFound = self.correct_font(
+                    line, CloseFound)
             if self.align == True:
-                line, CloseFound = HTML_Tidy.correct_p_align(
-                    self, line, CloseFound)
+                line, CloseFound = self.correct_p_align(
+                    line, CloseFound)
             document_corr_img += line + '\n'
         return document_corr_img, errors_string
 
@@ -410,7 +433,7 @@ class HTML_Tidy(CI_conf_class):
         Returns:
         """
         substitutions_dict: dict = {'"': '\\"', '<br>': '<br/>', '<br/>': '<br/>'}
-        html_str = self.join_body(htmlList=html_code, substitutions_dict={'\\"': '"'})
+        html_str = self.join_body(html_list=html_code, substitutions_dict={'\\"': '"'})
 
         html_correct, errors = tidy_document(f"{html_str}",
                                              options={'doctype': 'html5',
@@ -419,7 +442,7 @@ class HTML_Tidy(CI_conf_class):
                                                       'output-html': 1,
                                                       'wrap': 72,
                                                       'alt-text': '', })
-        document_corr = self.make_string_replacements(theString=html_correct,
+        document_corr = self._make_string_replacements(theString=html_correct,
                                                       substitutions_dict=substitutions_dict)
         return document_corr, errors
 
@@ -688,12 +711,41 @@ class HTML_Tidy(CI_conf_class):
 class HTML_whitelist(CI_conf_class):
 
     def __init__(self, wh_library, git_url):
+        """
+
+        Args:
+            wh_library ():
+            git_url ():
+        """
         self.wh_library = wh_library
         self.git_url = git_url
         super().__init__()
 
-    def create_whitelist(self):  # Create a new whiteList
-        Repo.clone_from(self.git_url, self.wh_library)
+    def call_whitelist(self):
+        self._clone_repository()
+        model_list = self._get_whitelist_model()
+        self._write_whitelist(model_list=model_list)
+
+    def _clone_repository(self):
+        """
+        Pull git repository.
+        """
+        if os.path.exists(self.wh_library):
+            print(f'{self.wh_library} folder already exists.')
+        else:
+            print(f'Clone {self.wh_library} Repo')
+            Repo.clone_from(self.git_url, self.wh_library)
+
+    def _write_whitelist(self, model_list):
+        file = open(self.wh_html_file, "w")
+        for model in model_list:
+            file.write("\n" + model + ".mo" + "\n")
+        file.close()
+
+    def _get_whitelist_model(self):
+        """
+        Create a new whiteList
+        """
         model_list = []
         for subdir, dirs, files in os.walk(self.wh_library):
             for file in files:
@@ -702,10 +754,7 @@ class HTML_whitelist(CI_conf_class):
                     model = filepath.replace(os.sep, ".")
                     model = model[model.rfind(self.wh_library):model.rfind(".mo")]
                     model_list.append(model)
-        file = open(self.wh_html_file, "w")
-        for model in model_list:
-            file.write("\n" + model + ".mo" + "\n")
-        file.close()
+        return model_list
 
 
 if __name__ == '__main__':
@@ -725,7 +774,7 @@ if __name__ == '__main__':
                         help="correct html code: Remove font to span")
     parser.add_argument("--align", action="store_true", default=False,
                         help="correct html code: Remove align  to style=text-algin:")
-    parser.add_argument("--WhiteList", action="store_true", default=False,
+    parser.add_argument("--whitelist", action="store_true", default=False,
                         help="Create a new WhiteList Library IBPSA")
     parser.add_argument("--correct-view", action="store_true", default=False,
                         help="Print the Correct HTML Code")
@@ -738,6 +787,13 @@ if __name__ == '__main__':
     conf = CI_conf_class()
     conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
     conf.check_ci_file_structure(files_list=[conf.config_ci_exit_file])
+    if args.whitelist is True:
+        conf.check_ci_folder_structure(folders_list=[conf.wh_ci_dir])
+        conf.check_ci_file_structure(files_list=[conf.wh_html_file])
+        whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
+        print(f'Create a whitelist of {args.wh_library} Library')
+        whitelist.call_whitelist()
+
     HTML_Check = HTML_Tidy(package=args.single_package,
                            correct_overwrite=args.correct_overwrite,
                            correct_backup=args.correct_backup,
@@ -747,14 +803,8 @@ if __name__ == '__main__':
                            correct_view=args.correct_view,
                            library=args.library,
                            wh_library=args.wh_library)
-    if args.correct_backup is True:
-        print("Create a Backup")
-        HTML_Check.run_files()
-        var = HTML_Check.run_files()
-        print(var)
-    elif args.correct_overwrite is True:
-        print("Overwrite the Library")
-        var = HTML_Check.run_files()
+    HTML_Check.run_files()
+    if args.correct_overwrite is True:
         HTML = HTML_Tidy(package=args.single_package,
                          correct_overwrite=args.correct_overwrite,
                          correct_backup=args.correct_backup,
@@ -765,12 +815,5 @@ if __name__ == '__main__':
                          library=args.library,
                          wh_library=args.wh_library)
         HTML.run_files()
-    elif args.correct_view is True:
-        print("Print the Correct HTML Code")
-        HTML_Check.run_files()
-    elif args.WhiteList is True:
-        whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
-        print(f'Create a whitelist of {args.wh_library} Library')
-        whitelist.create_whitelist()
-    elif args.correct_overwrite is False and args.correct_backup is False and args.log is False and args.correct_view is False:
+    if args.correct_overwrite is False and args.correct_backup is False and args.log is False and args.correct_view is False:
         print("please use -h or --help for help")
