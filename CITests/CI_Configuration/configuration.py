@@ -11,7 +11,7 @@ class CI_conf_class(object):
         self.dymola_python_test_dir = f'Dymola_python_tests'
         # [Whitelist_files]
         self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}ci_whitelist'
-        self.wh_model_file = f'{self.wh_ci_dir}{os.sep}ci_model_whitelist.txt'
+        self.wh_model_file = f'{self.wh_ci_dir}{os.sep}ci_check_whitelist.txt'
         self.wh_simulate_file = f'{self.wh_ci_dir}{os.sep}ci_simulate_whitelist.txt'
         self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
         self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
