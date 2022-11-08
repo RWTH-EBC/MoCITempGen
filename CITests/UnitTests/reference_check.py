@@ -737,9 +737,12 @@ if __name__ == '__main__':
             if args.batch is False:
                 print(f'All Reference files exist')
                 val = 0
-            else:
+            if args.modified_models is False:
                 print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
                 val = 1
+            if args.modified_models is True:
+                print(f'No changed models in Package {args.single_package}')
+                val = 0
         else:
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
