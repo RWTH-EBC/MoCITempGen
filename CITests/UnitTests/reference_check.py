@@ -36,9 +36,8 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
-    def _write_exit_file(self, val):
+    def write_exit_file(self, val):
         """
-
         """
         try:
             ex_file = open(self.config_ci_exit_file, "w")
@@ -49,7 +48,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             ex_file.close()
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
-            exit(1)
+
 
     def check_regression_test(self, package_list):
         """
@@ -283,7 +282,7 @@ class Ref_model(CI_conf_class):
             wh_file.close()
         except IOError:
             print(f'Error: File {self.config_ci_ref_file} does not exist.')
-            exit(1)
+
 
     def _get_mos_scripts(self):
         """
@@ -520,7 +519,7 @@ class Extended_model(CI_conf_class):
                 return changed_list
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
-            exit(1)
+
 
 
 class Buildingspy_Validate_test(CI_conf_class):
@@ -743,5 +742,5 @@ if __name__ == '__main__':
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
 
-        ref_check._write_exit_file(val=val)
+        ref_check.write_exit_file(val=val)
         exit(val)
