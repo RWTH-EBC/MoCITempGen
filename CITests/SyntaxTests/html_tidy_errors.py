@@ -255,6 +255,7 @@ class HTML_Tidy(CI_conf_class):
                         is_tag_closed = False
         html_code = ''.join(html_code)
         html_correct_code = ''.join(html_correct_code)
+        '''
         code = ""
         for line in all_code.splitlines():
             #line = self.correct_p_align(line=line)
@@ -262,9 +263,10 @@ class HTML_Tidy(CI_conf_class):
             #line = self.correct_font(line=line)
             #line = self.correct_th_align(line=line)
             #line = self.correct_img_atr(line=line)
-            line = self.delete_html_revision(line=line)
+            #line = self.delete_html_revision(line=line)
             code += line + '\n'
-        return code, error_list, html_correct_code, html_code
+        '''
+        return all_code, error_list, html_correct_code, html_code
 
     def delete_html_revision(self, line, ):
         """
