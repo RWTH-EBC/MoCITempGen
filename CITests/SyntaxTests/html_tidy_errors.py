@@ -237,7 +237,10 @@ class HTML_Tidy(CI_conf_class):
                     html_section_code.append(f'{lines[i][0:idxC]}')
                     html_string = ''.join(html_section_code)
                     html_code.append(html_string)
+
                     html_corr, errors = self._htmlCorrection(html_section_code)
+
+
                     html_correct_code.append(html_corr)
                     if len(errors) > 0:
                         error_list.append(errors)
@@ -251,7 +254,88 @@ class HTML_Tidy(CI_conf_class):
                         is_tag_closed = False
         html_code = ''.join(html_code)
         html_correct_code = ''.join(html_correct_code)
-        return all_code, error_list, html_correct_code, html_code
+        code = ""
+        for line in all_code.splitlines():
+            #line = self.correct_p_align(line=line)
+            #line = self.correct_table_summary(line=line)
+            #line = self.correct_font(line=line)
+            #line = self.correct_th_align(line=line)
+            #line = self.correct_img_atr(line=line)
+            line = self.delete_html_revision(line=line)
+            code += line + '\n'
+        return code, error_list, html_correct_code, html_code
+
+    def delete_html_revision(self, line, ):
+        """
+        Delete revsion
+        Args:
+            line ():
+
+        Returns:
+
+        """
+
+        htmlTag = line.encode("utf-8").find(b"</html>")
+        htmlCloseTag = line.encode("utf-8").find(b"<html>")
+        RevTag = line.encode("utf-8").find(b"revision")
+        if htmlTag > -1 and RevTag > -1:
+            if htmlCloseTag > -1:
+                line = ""
+        return line
+    def correct_img_atr(self, line):
+        """
+        Correct img and check for missing alt attributed
+        Args:
+            line ():
+
+        Returns:
+
+        """
+
+        imgTag = line.encode("utf-8").find(b"img")
+        if imgTag > -1:
+            imgCloseTagIndex = line.find(">", imgTag)
+            imgAltIndex = line.find("alt", imgTag)
+            if imgCloseTagIndex > -1 and imgAltIndex == -1:  # if close tag exists but no alt attribute, insert alt attribute and change > to />
+                line = line[:imgTag] +    line[imgTag:].replace(">", ' alt="" />', 1)
+                CloseFound = True
+            elif imgCloseTagIndex > -1 and imgAltIndex > -1:  # if close tag exists and alt attribute exists, only change > to />
+                line = line[:imgTag] + line[imgTag:].replace(">", ' />', 1)
+                CloseFound = True
+
+            elif imgCloseTagIndex == -1:  # if close tag is not in the same line
+                line = line
+                CloseFound = False
+        else:  # if no close tag was found in previous line, but opening tag found search for close on this line with same
+            imgCloseTagIndex = line.find(">")
+            imgAltIndex = line.find("alt")
+            if imgCloseTagIndex > -1 and imgAltIndex == -1:
+                line = line[:imgCloseTagIndex] + \
+                       line[imgCloseTagIndex:].replace(">", ' alt="" />', 1)
+                CloseFound = True
+            elif imgCloseTagIndex > -1 and imgAltIndex > -1:
+                line = line[:imgCloseTagIndex] + \
+                       line[imgCloseTagIndex:].replace(">", ' />', 1)
+                CloseFound = True
+            elif imgCloseTagIndex == -1:
+                CloseFound = False
+                line = line
+        return line
+
+    def correct_th_align(self, line):
+        """
+        Correct algin with th and replace style="text-align"
+        Args:
+            line ():
+        Returns:
+        """
+
+        alignTag = line.encode("utf-8").find(b"align")
+        thTag = line.encode("utf-8").find(b"th")
+        CloseTagIntex = line.encode("utf-8").rfind(b'">')
+        if alignTag > -1 and thTag > -1:
+            line = (line.replace('\\', ''))
+        return line
 
     def _call_correct_overwrite(self, model_name, document_corr):
         """
@@ -279,6 +363,102 @@ class HTML_Tidy(CI_conf_class):
         os.remove(model_file)
         newfile = open(model_file, "w+b")
         newfile.write(document_corr.encode("utf-8"))
+
+    def correct_font(self, line):
+        """
+        Replace font to style für html5
+        Args:
+            line ():
+
+        Returns:
+
+        """
+
+        styleTag_1 = line.encode("utf-8").find(b"style=")
+        styleTag_2 = line.encode("utf-8").find(b"color")
+        fontTag = line.encode("utf-8").find(b"<font")
+        rfontTag = line.encode("utf-8").rfind(b"</font>")
+        firstCloseTage = line.encode("utf-8").find(b">")
+        etag = line.encode("utf-8").find(b"=")
+        if styleTag_1 > -1 and styleTag_2 > -1:
+            if fontTag > -1 and rfontTag > -1:
+                sline = (line[fontTag:rfontTag].replace('\\', ''))
+                sline = sline.replace('"', '')
+                sline = sline.replace('<font', '<span')
+                sline = (sline.replace('color:', '"color:'))
+                sline = sline.replace(';>', '">')
+                line = line[:fontTag] + sline + line[rfontTag:].replace('</font>', '</span>')
+        elif fontTag > -1 and rfontTag > -1:
+            sline = (line[fontTag:rfontTag].replace('\\', ''))
+            sline = sline.replace('"', '')
+            sline = sline.replace('<font', '<span')
+            sline = (sline.replace('color=', 'style="color:'))
+            sline = (sline.replace('>', '">'))
+            line = line[:fontTag] + sline + line[rfontTag:].replace('</font>', '</span>')
+        return line, CloseFound
+
+    def correct_table_summary(self, line):
+        """
+        delete Summary in table and add <caption> Text </caption>
+        Args:
+            line ():
+
+        Returns:
+
+        """
+
+        tableTag = line.encode("utf-8").find(b"<table")
+        sumTag = line.encode("utf-8").find(b"summary")
+        CloseTagIntex = line.encode("utf-8").rfind(b'">')
+        if tableTag > -1 and sumTag > -1:
+            line = line[:sumTag] + "> " +  line[sumTag:].replace('summary=', '<caption>', 1)
+            line = (line.replace('">', '</caption>', 1))
+        return line
+
+    def correct_p_align(self, line):
+        """
+        Correct align in p and replace style="text-align"
+        Wrong: <p style="text-align:center;">
+        # Correct: <p style="text-align:center;">
+        # Correct: <p style="text-align:center;font-style:italic;color:blue;">k = c<sub>p</sub>/c<sub>v</sub> </p>
+        # Correct: <p style="text-align:center;font-style:italic;">
+        Args:
+            line ():
+
+        Returns:
+        """
+        pTag = line.encode("utf-8").find(b"<p")
+        alignTag = line.encode("utf-8").find(b"align")
+        etag = line.encode("utf-8").find(b"=")
+        closetag = line.encode("utf-8").find(b">")
+        styleTag = line.encode("utf-8").find(b"text-align:")
+        style = line.encode("utf-8").find(b"style")
+        rstyle = style = line.encode("utf-8").find(b"style")
+        StyleCount = line.count("style=")
+        if styleTag > -1:
+            return line
+        elif pTag > -1 and alignTag > -1:
+            sline = (line[alignTag:closetag + 1].replace('\\', ''))
+            sline = (sline.replace('align="', 'style=text-align:'))
+            sline = (sline.replace('style=', 'style="'))
+            sline = (sline.replace(';', ''))
+            CloseTag_2 = sline.encode("utf-8").rfind(b">")
+            if CloseTag_2 > -1:
+                sline = (sline.replace('">', ';">'))
+            sline = sline.replace('""', '"')
+            line = (line[:alignTag] + sline + line[closetag + 1:])
+            StyleCount = line.count("style=")
+            if StyleCount > 1:
+                line = line.replace('style="', '')
+                line = line.replace('"', '')
+                line = line.replace(';>', ';">')
+                pTag = line.encode("utf-8").find(b"<p")
+                tline = line[pTag + 2:]
+                tline = ('style="' + tline.lstrip())
+                tline = tline.replace(" ", ";")
+                closetag = line.encode("utf-8").find(b">")
+                line = (line[:pTag + 3] + tline + line[closetag + 1:])
+        return line
 
     def read_log_file(self):
         """
@@ -345,7 +525,9 @@ class HTML_Tidy(CI_conf_class):
                                                       'output-html': 1,
                                                       'wrap': 72,
                                                       'alt-text': '',
-                                                      'show-warnings': 1
+                                                      'show-warnings': 1,
+                                                      'alt-text' : 1,
+                                                      'indent' : 1
                                                       })
         document_corr = self._make_string_replacements(theString=html_correct,
                                                        substitutions_dict=substitutions_dict)
@@ -463,10 +645,6 @@ if __name__ == '__main__':
                         help="Test only the Modelica package AixLib.Package")
     parser.add_argument("-p", "--path", default=".",
                         help="Path where top-level package.mo of the library is located")
-    parser.add_argument("--font", action="store_true", default=False,
-                        help="correct html code: Remove font to span")
-    parser.add_argument("--align", action="store_true", default=False,
-                        help="correct html code: Remove align  to style=text-algin:")
     parser.add_argument("--whitelist", action="store_true", default=False,
                         help="Create a new WhiteList Library IBPSA")
     parser.add_argument("--correct-view", action="store_true", default=False,
@@ -474,13 +652,12 @@ if __name__ == '__main__':
     parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
     parser.add_argument("--wh_library", default="IBPSA", help="Library on whitelist")
     parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
-    parser.add_argument("--filter-whitelist", default=True, action="store_true")
+    parser.add_argument("--filter-whitelist", default=False, action="store_true")
 
     args = parser.parse_args()
     conf = CI_conf_class()
     conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
     conf.check_ci_file_structure(files_list=[conf.config_ci_exit_file])
-
     if args.whitelist is True:
         conf.check_ci_folder_structure(folders_list=[conf.wh_ci_dir])
         conf.check_ci_file_structure(files_list=[conf.wh_html_file])
