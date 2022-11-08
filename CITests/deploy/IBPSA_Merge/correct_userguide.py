@@ -2,7 +2,12 @@ import argparse
 import os
 
 
-def folder_userguide(aixlib_dir):
+def folder_user_guide(aixlib_dir):
+	"""
+
+	Args:
+		aixlib_dir ():
+	"""
 	for root, dirs, files in os.walk(aixlib_dir):
 		if root[root.rfind(os.sep)+1:] == "UsersGuide":
 			for file in files:
@@ -25,4 +30,4 @@ if  __name__ == '__main__':
 	check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
 	check_test_group.add_argument("-ad", "--aixlib-dir", default="AixLib", help="path to the aixlib scripts")
 	args = parser.parse_args()
-	folder_userguide(args.aixlib_dir)
+	folder_user_guide(args.aixlib_dir)

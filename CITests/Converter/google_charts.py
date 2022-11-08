@@ -13,20 +13,22 @@ class Plot_Charts(CI_conf_class):
 
     def __init__(self, template, package, library):
         """
-
         Args:
             template (): mako template class
             package (): package to plot
             library (): library to plot
+        init:
+            self.f_log ():  path for unitTest-dymola.log, important for errors
+            self.temp_chart_path (): path for every single package
         """
         self.package = package
         self.library = library
         self.template = template
         super().__init__()
-        self.f_log = f'{self.library}{os.sep}unitTests-dymola.log'  # path for unitTest-dymola.log, important for errors
+        self.f_log = f'{self.library}{os.sep}unitTests-dymola.log'
         self.csv_file = f'reference.csv'
         self.test_csv = f'test.csv'
-        self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'  # path for every single package
+        self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'
         self.funnel_path = f'{self.library}{os.sep}funnel_comp'
         self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'

@@ -6,77 +6,77 @@ from pathlib import Path
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
+
 class Lock_model(CI_conf_class):
 
-    def __init__(self,  library, wh_library):
+    def __init__(self, library, wh_library):
+        """
+        Args:
+            library ():
+            wh_library ():
+        """
         self.library = library
         self.wh_library = wh_library
         super().__init__()
 
-    def _read_wh(self):
+    def sort_whitelist_model(self):
         """
-        Read whitelist and return a list
+        Read whitelist and return a list.
+        Sort List of models.
+
         Returns:
+            model_list ()
         """
         try:
             wh = open(self.wh_html_file, "r")
-            wl_lines = wh.readlines()
+            whitelist_lines = wh.readlines()
             wh.close()
-            return wl_lines
+            model_list = []
+            for line in whitelist_lines:
+                if len(line) == 1 or line.find("package.mo") > -1 or line.find("package.order") > -1 or line.find(
+                        "UsersGuide") > -1:
+                    continue
+                else:
+                    line = line.replace(self.wh_library, self.library)
+                    mo = line.replace(".", os.sep, line.count(".") - 1).lstrip()
+                    mo = mo.strip()
+                    model_list.append(mo)
+            return model_list
+
         except IOError:
             print(f'Error: File {self.wh_html_file} does not exist.')
             exit(1)
 
-    def _sort_list(self, wl_lines):
-        """
-        Sort List of models
-        Args:
-            wl_lines ():
-
-        Returns:
-
-        """
-        model_list = []
-        for line in wl_lines:
-            if len(line) == 1 or line.find("package.mo") > -1 or line.find("package.order") > -1 or line.find("UsersGuide") > -1:
-                continue
+    def call_lock_model(self):
+        mo_li = self.sort_whitelist_model()
+        for model in mo_li:
+            if Path(model).is_file():
+                result = self.get_last_line(model_file=model)
+                if len(result[0]) == 0:
+                    continue
+                if result[1] is False:
+                    new_content = self.lock_model(model, result[0])
+                    self.write_lock_model(model, new_content)
+                else:
+                    print(f'Already locked: {model}')
+                    continue
             else:
-                line = line.replace(self.wh_library, self.library)
-                mo = line.replace(".", os.sep, line.count(".")-1).lstrip()
-                mo = mo.strip()
-                model_list.append(mo)
-        return model_list
+                print(f'\n{model} File does not exist.')
+                continue
 
-    def _exist_file(self, file):
+    @staticmethod
+    def get_last_line(model_file):
         """
-         File exist
         Args:
-            file ():
-
+            model_file ():
         Returns:
-
-        """
-        f = Path(file)
-        if f.is_file():
-            return True
-        else:
-            return False
-
-    def get_last_line(self, model):
-        """
-
-        Args:
-            model ():
-
-        Returns:
-
         """
         model_part = []
         flag = '__Dymola_LockedEditing="Model from IBPSA");'
         flag_tag = False
         try:
-            if Path(model).is_file():
-                infile = open(model, "r")
+            if Path(model_file).is_file():
+                infile = open(model_file, "r")
                 for lines in infile:
                     model_part.append(lines)
                     if lines.find(flag) > -1:
@@ -84,12 +84,12 @@ class Lock_model(CI_conf_class):
                 infile.close()
                 return model_part, flag_tag
             else:
-                print(f'\n************************************{model}\nFile does not exist.')
+                print(f'\n{model_file}\nFile does not exist.')
         except IOError:
-            print(f'Error: File {model} does not exist.')
-            exit(1)
+            print(f'Error: File {model_file} does not exist.')
 
-    def lock_model(self, model, content):
+    @staticmethod
+    def lock_model(model, content):
         """
 
         Args:
@@ -108,7 +108,7 @@ class Lock_model(CI_conf_class):
         new = ', \n' + flag
         if last_entry.find(mo) > -1 and last_entry.find("end") > -1:
             flag_lines = content[len(content) - 2]
-            if flag_lines.isspace() == True:
+            if flag_lines.isspace():
                 flag_lines = content[len(content) - 3]
                 del content[len(content) - 2]
             if flag_lines.find(old_html_flag) > -1:
@@ -128,7 +128,8 @@ class Lock_model(CI_conf_class):
             content.insert(len(content), flag_lines)
             return content
 
-    def write_lock_model(self, model, new_content):
+    @staticmethod
+    def write_lock_model(model, new_content):
         """
         Args:
             model ():
@@ -144,6 +145,7 @@ class Lock_model(CI_conf_class):
             print(f'Error: File {model} does not exist.')
             exit(1)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Lock models.')
     unit_test_group = parser.add_argument_group("arguments to run class Lock_model")
@@ -151,21 +153,4 @@ if __name__ == '__main__':
     unit_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
     args = parser.parse_args()
     lock = Lock_model(library=args.library, wh_library=args.wh_library)
-    wl_lines = lock._read_wh()  # read html whitelist (models from IBPSA)
-    mo_li = lock._sort_list(wl_lines=wl_lines)  # Sort list of IPBSA Models
-    for model in mo_li:
-        if Path(model).is_file():
-            result = lock.get_last_line(model)
-            content = result[0]
-            flag = result[1]
-            if len(content) == 0:
-                continue
-            if flag is False:
-                new_content = lock.lock_model(model, content)
-                lock.write_lock_model(model, new_content)
-            else:
-                print(f'Already locked: {model}')
-                continue
-        else:
-            print(f'\n{model} File does not exist.')
-            continue
+    lock.call_lock_model()
