@@ -650,7 +650,7 @@ if __name__ == '__main__':
     parser.add_argument("--correct-view", action="store_true", default=False,
                         help="Print the Correct HTML Code")
     parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    parser.add_argument("--wh_library", default="IBPSA", help="Library on whitelist")
+    parser.add_argument("--wh-library", default="IBPSA", help="Library on whitelist")
     parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
     parser.add_argument("--filter-whitelist", default=False, action="store_true")
 
