@@ -137,6 +137,7 @@ class HTML_Tidy(CI_conf_class):
     def call_read_log(self):
         err_list = self.read_log_file()
         variable = self._write_exit(err_list=err_list)
+        exit(variable)
 
     def _call_write_log(self, model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
         if len(error_list) > 0:

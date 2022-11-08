@@ -17,7 +17,6 @@ class Lock_model(CI_conf_class):
         """
         Read whitelist and return a list
         Returns:
-
         """
         try:
             wh = open(self.wh_html_file, "r")
@@ -131,7 +130,6 @@ class Lock_model(CI_conf_class):
 
     def write_lock_model(self, model, new_content):
         """
-
         Args:
             model ():
             new_content ():
