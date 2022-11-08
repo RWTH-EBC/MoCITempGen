@@ -49,17 +49,16 @@ In case of trouble just put the dll in your working dir.
 class HTML_Tidy(CI_conf_class):
     """Class to Check Packages and run CheckModel Tests"""
 
-    def __init__(self, package, correct_overwrite, correct_backup, log, font, align, correct_view,
-                 library, wh_library):
+    def __init__(self, package, correct_overwrite, correct_backup, log, correct_view,
+                 library, wh_library, filter_whitelist):
         self.package = package
         self.correct_overwrite = correct_overwrite
         self.correct_backup = correct_backup
         self.log = log
-        self.font = font
-        self.align = align
         self.correct_view = correct_view
         self.library = library
         self.wh_library = wh_library
+        self.filter_whitelist = filter_whitelist
         self.root_dir = self.package.replace(".", os.sep)
         self.html_error_log = f'{self.root_dir}{os.sep}HTML_error_log.txt'
         self.html_correct_log = f'{self.root_dir}{os.sep}HTML_correct_log.txt'
@@ -67,7 +66,10 @@ class HTML_Tidy(CI_conf_class):
 
     def _get_html_model(self):
         library_list = self._get_library_model()
-        wh_library_list = self._get_wh_library_model()
+        if self.filter_whitelist is True:
+            wh_library_list = self._get_wh_library_model()
+        else:
+            wh_library_list = []
         html_model_list = self._remove_whitelist_model(library_list=library_list, wh_library_list=wh_library_list)
         return html_model_list
 
@@ -95,134 +97,57 @@ class HTML_Tidy(CI_conf_class):
         html_model_list = self._get_html_model()
         for model in html_model_list:
             model_file = f'{model[:model.rfind(".mo")].replace(".", os.sep)}.mo'
-            #all_code, error_list = self._get_html_section(model_file=model_file)
-            document_corr, err = self._check_file(model_file=model_file)
-
-            if err != "":  # write error to error message
-                errMsg.append("[-- %s ]\n%s" % (model, err))
+            correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
             if self.correct_backup:
-                self._call_backup_old_files(model_file=model_file, document_corr=document_corr,
+                self._call_backup_old_files(model_file=model_file,
+                                            document_corr=document_corr,
                                             file_counter=file_counter)
             if self.correct_overwrite:
-                correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
                 if len(error_list) > 0:
                     print(f'Error in file {model_file} with error {error_list}')
+                    print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
-                    pass
+                if self.log:
+                    correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
+                        model_file=model_file)
+                    self._call_write_log(model_file=model_file,
+                                         error_log_file=error_log_file,
+                                         correct_log_file=correct_log_file,
+                                         error_list=error_list,
+                                         html_correct_code=html_correct_code,
+                                         html_code=html_code)
+
             if self.correct_view:
-                self._call_correct_view(model_file=model_file)
-            if self.log:
-                self._call_write_log(model_file=model_file, error_log_file=error_log_file,
-                                     correct_log_file=correct_log_file)
+                self._call_correct_view(model_file=model_file,
+                                        error_list=error_list,
+                                        html_correct_code=html_correct_code,
+                                        html_code=html_code)
+                if self.log:
+                    self._call_write_log(model_file=model_file,
+                                         error_log_file=error_log_file,
+                                         correct_log_file=correct_log_file,
+                                         error_list=error_list,
+                                         html_correct_code=html_correct_code,
+                                         html_code=html_code)
+
         if self.log:
             error_log_file.close()
             correct_log_file.close()
-
-    def _get_html_section(self, model_file):
-        """
-        Args:
-            model_file ():
-        """
-        with io.open(model_file, mode="r", encoding="utf-8-sig") as f:
-            lines = f.readlines()
-        number_lines = len(lines)
-        html_code = []
-        modelica_code = []
-        html_correct_code = []
-        error_list = []
-        all_code = ""
-        html_tag_open = False
-        html_tag_close = False
-        line_counter = 0
-        for line in lines:
-            if len(line) == 0:
-                continue
-            line_counter = line_counter + 1
-            line = line.replace(f'\n', "")
-            all_code = f'{all_code}\n{line}'
-            idx_html_open = line.find(f'<html>')
-            idx1_html_close = line.find(f'</html>')
-            idx2_html_close = line.find(f'<\html>')
-            if idx_html_open > -1 and html_tag_open is False:
-                html_tag_open = True
-                html_code.append(line[idx_html_open:])
-                modelica_code.append(line[:idx_html_open])
-                if idx1_html_close > -1:
-                    html_code.append(line[:idx1_html_close + 7])
-                    modelica_code.append(line[idx1_html_close:])
-                elif idx2_html_close > -1:
-                    html_code.append(line[:idx2_html_close + 7])
-                    modelica_code.append(line[idx2_html_close:])
-            elif idx1_html_close > -1 or idx2_html_close > -1:
-                html_tag_open = False
-                if idx1_html_close > -1:
-                    html_code.append(line[:idx1_html_close + 7])
-                    html_string = ' '.join(html_code)
-                    html_correct, errors = self._correct_html(code=html_string)
-                    html_correct_code.append(html_correct)
-                    error_list.append(errors)
-                    all_code = all_code.replace(html_string, f'<html>{html_correct}</html>')
-                    html_code = list()
-                    modelica_code.append(line[idx1_html_close + 7:idx_html_open])
-                if idx2_html_close > -1:
-                    html_code.append(line[:idx2_html_close + 7])
-                    modelica_code.append(line[idx2_html_close + 7:idx_html_open])
-                if idx_html_open > -1:
-                    html_code.append(line[idx_html_open:])
-                    html_tag_open = True
-                    # modelica_code.append(line[idx1_html_close:])
-            elif html_tag_open is True and idx_html_open == -1:
-                html_code.append(line)
-            else:
-                modelica_code.append(line)
-        #print(all_code)
-        return all_code, error_list
-
 
     def call_read_log(self):
         err_list = self.read_log_file()
         variable = self._write_exit(err_list=err_list)
 
-    def _call_write_log(self, model_file, error_log_file, correct_log_file):
-        correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
+    def _call_write_log(self, model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
         if len(error_list) > 0:
-            error_log_file.write(f'\n---- {model_file} ----\n{errors} ')
+            error_log_file.write(f'\n---- {model_file} ----\n   {error_list}\n')
             correct_log_file.write(
-                f'\n---- {model_file} ----\n-------- HTML Code --------\n{self.number_print_List(html_list=html_code)}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------\n{error_list}')
+                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------\n{error_list}\n\n')
 
-    def _call_correct_view(self, model_file):
-        html_list = self._getInfoRevisionsHTML(model_file=model_file)
-        # print(html_list)
-
-        html_str = self.join_body(html_list=html_list, substitutions_dict={'\\"': '"'})
-        # print(html_str)
-
-        document_corr, errors = self._htmlCorrection(html_code=html_str)
-        print(document_corr)
-        print(errors)
-        doc_corr_str = self.number_print_List(html_list=document_corr.split('\n'), sep='\n')
-        # print(doc_corr_str)
-        '''
-        if len(errors) > 0:
-            print(f'\n---- {model_file} ----')
-            print(f'Error: {errors} ')
-            print(f'document_corr: {document_corr}')
-            print(f'doc_corr_str: {doc_corr_str}')
-        '''
-
-    @staticmethod
-    def number_print_List(html_list: list, sep: str = '') -> None:
-        """
-        Print a list of strings with line numbers
-		Should be extended by a feature to highlight a given set of line
-		numbers. This can help the reader to quickly identify the lines
-		with errors.
-        Args:
-            html_list ():
-            sep ():
-        Returns:
-        """
-        return sep.join(['{0:>5d} {1}'.format(i, line) for i, line in enumerate(html_list)])
+    def _call_correct_view(self, model_file, error_list, html_correct_code, html_code):
+        if len(error_list) > 0:
+            print(
+                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------\n{error_list}')
 
     def join_body(self, html_list: list, substitutions_dict: dict = {'\\"': '"'}) -> str:
         """
@@ -311,17 +236,21 @@ class HTML_Tidy(CI_conf_class):
                 else:  # search for opening tag on same line as closing tag
                     html_section_code.append(f'{lines[i][0:idxC]}')
                     html_string = ''.join(html_section_code)
+                    html_code.append(html_string)
                     html_corr, errors = self._htmlCorrection(html_section_code)
                     html_correct_code.append(html_corr)
                     if len(errors) > 0:
                         error_list.append(errors)
                     all_code = all_code.replace(html_string, html_corr)
+
                     html_section_code = list()
                     is_tag_closed = True
                     idxO = lines[i].find("<html>")
                     if idxO > -1:
                         html_section_code.append(f'{lines[i][idxO + 6:]}')
                         is_tag_closed = False
+        html_code = ''.join(html_code)
+        html_correct_code = ''.join(html_correct_code)
         return all_code, error_list, html_correct_code, html_code
 
     def _call_correct_overwrite(self, model_name, document_corr):
@@ -331,7 +260,6 @@ class HTML_Tidy(CI_conf_class):
             model_name ():
             document_corr ():
         """
-        print(f'Overwrite model: {model_name}')
         os.remove(model_name)
         newfile = open(model_name, "w+b")
         newfile.write(document_corr.encode("utf-8"))
@@ -367,7 +295,8 @@ class HTML_Tidy(CI_conf_class):
         warning_font = f'Warning: <font> element removed from HTML5'
         warning_align = f'Warning: <p> attribute "align" not allowed for HTML5'
         warning_img = f'Warning: <img> lacks "alt" attribute'
-        warning_list = [warning_table, warning_font, warning_align, warning_img]
+        except_warning_list = [warning_img]
+        warning_list = [warning_table, warning_font, warning_align]
         for line in lines:
             line = line.replace("\n", "")
             for warning in warning_list:
@@ -378,6 +307,10 @@ class HTML_Tidy(CI_conf_class):
                 continue
             elif line.find("Warning") > -1:
                 err_list.append(line)
+                for warning in except_warning_list:
+                    if line.find(warning) > -1:
+                        err_list.remove(line)
+                        continue
         return err_list
 
     def _write_exit(self, err_list):
@@ -395,140 +328,6 @@ class HTML_Tidy(CI_conf_class):
             return variable
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
-
-    def _check_file(self, model_file):
-        """
-        This function returns a list that contain the html code of the info and revision sections. Each element of the list is a string.
-
-		param model_file: The name of a Modelica source file.
-		return: list The list of strings of the info and revisions section.
-        Args:
-            model_file:
-        Returns:
-        """
-        with io.open(model_file, mode="r", encoding="utf-8-sig") as f:
-            lines = f.readlines()
-        nLin = len(lines)
-        is_tag_closed = True
-        code = list()
-        htmlCode = list()
-        errors = list()
-        for i in range(nLin):
-            if is_tag_closed:  # search for opening tag
-                idxO = lines[i].find("<html>")
-                if idxO > -1:  # if found opening tag insert everything up to opening tag into the code list
-                    code.append(lines[i][:idxO + 6])  # search for closing tag on same line as opening tag
-                    idxC1 = lines[i].find("</html>")
-                    idxC2 = lines[i].find(
-                        "<\html>")  # check for both, correct and incorrect html tags, because dymola except also <\html>
-                    if idxC1 > -1:
-                        idxC = idxC1
-                    elif idxC2 > -1:
-                        idxC = idxC2
-                    else:
-                        idxC = -1
-                    if idxC > -1:
-                        htmlCode.append(lines[i][idxO + 6:idxC] + '\n')
-                        code.append(self._htmlCorrection(html_code=htmlCode)[0])
-                        errors.append(self._htmlCorrection(html_code=htmlCode)[1])
-                        code.append(lines[i][idxC:])
-                        is_tag_closed = True
-                    else:
-                        htmlCode.append(lines[i][idxO + 6:])
-                        is_tag_closed = False
-                else:
-                    code.append(lines[i])
-                    is_tag_closed = True
-            else:  # check for both, correct and incorrect html tags, because dymola except also <\html>
-                idxC1 = lines[i].find("</html>")
-                idxC2 = lines[i].find("<\html>")
-                if idxC1 > -1:
-                    idxC = idxC1
-                elif idxC2 > -1:
-                    idxC = idxC2
-                else:
-                    idxC = -1
-                if idxC > -1:
-                    htmlCode.append(lines[i][idxO + 6:idxC])
-                    code.append(self._htmlCorrection(html_code=htmlCode)[0])
-                    errors.append(self._htmlCorrection(html_code=htmlCode)[1])
-                    code.append(lines[i][idxC:])
-                    htmlCode = list()
-                    idxO = lines[i].find("<html>")
-                    if idxO > -1:
-                        is_tag_closed = False
-                    else:
-                        is_tag_closed = True
-                else:
-                    htmlCode.append(lines[i])
-                    is_tag_closed = False
-        document_corr = ""
-
-        if len(code) > 0:
-            for lines in code:
-                document_corr += lines
-        errors_string = ""
-        if len(errors) > 0:
-            for lines in errors:
-                errors_string += lines
-        document_corr_img = ""
-        CloseFound = True
-        for line in document_corr.splitlines():
-            line, CloseFound = self.correct_table_summary(line=line, CloseFound=CloseFound)
-            if self.font == True:
-                line, CloseFound = self.correct_font(
-                    line, CloseFound)
-            if self.align == True:
-                line, CloseFound = self.correct_p_align(
-                    line, CloseFound)
-            document_corr_img += line + '\n'
-        return document_corr_img, errors_string
-
-    def _correct_html(self, code):
-        html_code = ""
-        html_correct, errors = tidy_document(f"{code}",
-                                             options={'doctype': 'html5',
-                                                      'show-body-only': 1,
-                                                      'numeric-entities': 0,
-                                                      'output-html': 1,
-                                                      'wrap': 72,
-                                                      'alt-text': '',
-                                                      'fix-backslash': 0,
-                                                      'replace-color': 0,
-                                                      'join-styles': 0})
-        html_correct = html_correct.replace('"\\&quot;', '\\"')
-        html_correct = html_correct.replace('&quot;', '')
-
-        #for line in html_correct.splitlines():
-            #line, CloseFound = self.correct_font(line=line, CloseFound=True)
-            #line = self._correct_style(line=line)
-            #print("test")
-            #print(line)
-            #html_code += line + '\n'
-        #print(html_correct)
-
-        #html_correct = html_correct.replace('\"font-size:"','\"font-size:')
-        return html_correct, errors
-
-    def _correct_style(self, line):
-        color_flag = False
-        style_list = list()
-        idx_style = line.find('style')
-        idx_color = line.find('color')
-        idx_size = öome-find('size')
-        if idx_style > -1:
-            style_list.append(line)
-            if idx_color > -1:
-                #print(line[])
-                pass
-            if idx_size > -1:
-                pass
-            #line = '<style\np { color: + ' }
-            pass
-        #print(style_list)
-        return line
-
-
 
     def _htmlCorrection(self, html_code):
         """
@@ -551,218 +350,6 @@ class HTML_Tidy(CI_conf_class):
         document_corr = self._make_string_replacements(theString=html_correct,
                                                        substitutions_dict=substitutions_dict)
         return document_corr, errors
-
-    def correct_table_summary(self, line, CloseFound):
-        """
-        delete Summary in table and add <caption> Text </caption>
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        if CloseFound == True:
-            tableTag = line.encode("utf-8").find(b"<table")
-            sumTag = line.encode("utf-8").find(b"summary")
-            CloseTagIntex = line.encode("utf-8").rfind(b'">')
-            if tableTag > -1 and sumTag > -1:
-                line = line[:sumTag] + "> " + \
-                       line[sumTag:].replace('summary=', '<caption>', 1)
-                line = (line.replace('">', '</caption>', 1))
-        return line, CloseFound
-
-    def correct_th_align(self, line, CloseFound):
-        """
-        Correct algin with th and replace style="text-align"
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        if CloseFound == True:
-            alignTag = line.encode("utf-8").find(b"align")
-            thTag = line.encode("utf-8").find(b"th")
-            CloseTagIntex = line.encode("utf-8").rfind(b'">')
-            if alignTag > -1 and thTag > -1:
-                line = (line.replace('\\', ''))
-        return line, CloseFound
-
-    def correct_p_align(self, line, CloseFound):
-        """
-        Correct align in p and replace style="text-align"
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        # Wrong: <p style="text-align:center;">
-        # Correct: <p style="text-align:center;">
-        # Correct: <p style="text-align:center;font-style:italic;color:blue;">k = c<sub>p</sub>/c<sub>v</sub> </p>
-        # Correct: <p style="text-align:center;font-style:italic;">
-        if CloseFound == True:
-            pTag = line.encode("utf-8").find(b"<p")
-            alignTag = line.encode("utf-8").find(b"align")
-            etag = line.encode("utf-8").find(b"=")
-            closetag = line.encode("utf-8").find(b">")
-            styleTag = line.encode("utf-8").find(b"text-align:")
-            style = line.encode("utf-8").find(b"style")
-            rstyle = style = line.encode("utf-8").find(b"style")
-            StyleCount = line.count("style=")
-            if styleTag > -1:
-                return line, CloseFound
-            elif pTag > -1 and alignTag > -1:
-                sline = (line[alignTag:closetag + 1].replace('\\', ''))
-                sline = (sline.replace('align="', 'style=text-align:'))
-                sline = (sline.replace('style=', 'style="'))
-                sline = (sline.replace(';', ''))
-                CloseTag_2 = sline.encode("utf-8").rfind(b">")
-                if CloseTag_2 > -1:
-                    sline = (sline.replace('">', ';">'))
-                sline = sline.replace('""', '"')
-                line = (line[:alignTag] + sline + line[closetag + 1:])
-                StyleCount = line.count("style=")
-                if StyleCount > 1:
-                    line = line.replace('style="', '')
-                    line = line.replace('"', '')
-                    line = line.replace(';>', ';">')
-                    pTag = line.encode("utf-8").find(b"<p")
-                    tline = line[pTag + 2:]
-                    tline = ('style="' + tline.lstrip())
-                    tline = tline.replace(" ", ";")
-                    closetag = line.encode("utf-8").find(b">")
-                    line = (line[:pTag + 3] + tline + line[closetag + 1:])
-        return line, CloseFound
-
-    def correct_font(self, line, CloseFound):
-        """
-        Replace font to style für html5
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        if CloseFound == True:
-            styleTag_1 = line.encode("utf-8").find(b"style=")
-            styleTag_2 = line.encode("utf-8").find(b"color")
-            fontTag = line.encode("utf-8").find(b"<font")
-            rfontTag = line.encode("utf-8").rfind(b"</font>")
-            firstCloseTage = line.encode("utf-8").find(b">")
-            etag = line.encode("utf-8").find(b"=")
-            if styleTag_1 > -1 and styleTag_2 > -1:
-                if fontTag > -1 and rfontTag > -1:
-                    sline = (line[fontTag:rfontTag].replace('\\', ''))
-                    sline = sline.replace('"', '')
-                    sline = sline.replace('<font', '<span')
-                    sline = (sline.replace('color:', '"color:'))
-                    sline = sline.replace(';>', '">')
-                    line = line[:fontTag] + sline + \
-                           line[rfontTag:].replace('</font>', '</span>')
-            elif fontTag > -1 and rfontTag > -1:
-                sline = (line[fontTag:rfontTag].replace('\\', ''))
-                sline = sline.replace('"', '')
-                sline = sline.replace('<font', '<span')
-                sline = (sline.replace('color=', 'style="color:'))
-                sline = (sline.replace('>', '">'))
-                line = line[:fontTag] + sline + \
-                       line[rfontTag:].replace('</font>', '</span>')
-        return line, CloseFound
-
-    def correct_img_atr(self, line, CloseFound):
-        """
-        Correct img and check for missing alt attributed
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        if CloseFound == True:
-            imgTag = line.encode("utf-8").find(b"img")
-            if imgTag > -1:
-                imgCloseTagIndex = line.find(">", imgTag)
-                imgAltIndex = line.find("alt", imgTag)
-                if imgCloseTagIndex > -1 and imgAltIndex == -1:  # if close tag exists but no alt attribute, insert alt attribute and change > to />
-                    line = line[:imgTag] + \
-                           line[imgTag:].replace(">", ' alt="" />', 1)
-                    CloseFound = True
-                elif imgCloseTagIndex > -1 and imgAltIndex > -1:  # if close tag exists and alt attribute exists, only change > to />
-                    line = line[:imgTag] + line[imgTag:].replace(">", ' />', 1)
-                    CloseFound = True
-
-                elif imgCloseTagIndex == -1:  # if close tag is not in the same line
-                    line = line
-                    CloseFound = False
-        else:  # if no close tag was found in previous line, but opening tag found search for close on this line with same
-            imgCloseTagIndex = line.find(">")
-            imgAltIndex = line.find("alt")
-            if imgCloseTagIndex > -1 and imgAltIndex == -1:
-                line = line[:imgCloseTagIndex] + \
-                       line[imgCloseTagIndex:].replace(">", ' alt="" />', 1)
-                CloseFound = True
-            elif imgCloseTagIndex > -1 and imgAltIndex > -1:
-                line = line[:imgCloseTagIndex] + \
-                       line[imgCloseTagIndex:].replace(">", ' />', 1)
-                CloseFound = True
-            elif imgCloseTagIndex == -1:
-                CloseFound = False
-                line = line
-        return line, CloseFound
-
-    def delete_html_revision(self, line, CloseFound):
-        """
-        Delete revsion
-        Args:
-            line ():
-            CloseFound ():
-
-        Returns:
-
-        """
-        if CloseFound == True:
-            htmlTag = line.encode("utf-8").find(b"</html>")
-            htmlCloseTag = line.encode("utf-8").find(b"<html>")
-            RevTag = line.encode("utf-8").find(b"revision")
-            if htmlTag > -1 and RevTag > -1:
-                if htmlCloseTag > -1:
-                    line = ""
-        return line, CloseFound
-
-    def _list_all_model(self):
-        """
-
-        Returns:
-        """
-        library_list = []
-        wh_library_list = []
-        try:
-            rootdir = self.package.replace(".", os.sep)
-            file = open(self.wh_html_file, "r")
-            lines = file.readlines()
-            for line in lines:
-                if line.find(".mo") > -1:
-                    line = line.replace(self.wh_library, self.library)
-                    line = line.replace("\n", "")
-                    wh_library_list.append(line)
-            file.close()
-            for subdir, dirs, files in os.walk(rootdir):  # Return library models
-                for file in files:
-                    filepath = subdir + os.sep + file
-                    if filepath.endswith(".mo"):
-                        model = filepath.replace(os.sep, ".")
-                        model = model[model.rfind(self.library):]
-                        library_list.append(model)
-            return library_list, wh_library_list
-        except IOError:
-            print(f'Error: File {self.wh_html_file} does not exist. Check without a whitelist.')
-            return library_list, wh_library_list
 
     def _get_wh_library_model(self):
         """
@@ -887,7 +474,7 @@ if __name__ == '__main__':
     parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
     parser.add_argument("--wh_library", default="IBPSA", help="Library on whitelist")
     parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
-    parser.add_argument("--filter", default=False, action="store_true")
+    parser.add_argument("--filter-whitelist", default=True, action="store_true")
 
     args = parser.parse_args()
     conf = CI_conf_class()
@@ -905,11 +492,10 @@ if __name__ == '__main__':
                                 correct_overwrite=args.correct_overwrite,
                                 correct_backup=args.correct_backup,
                                 log=args.log,
-                                font=args.font,
-                                align=args.align,
                                 correct_view=args.correct_view,
                                 library=args.library,
-                                wh_library=args.wh_library)
+                                wh_library=args.wh_library,
+                                filter_whitelist=args.filter_whitelist)
     html_tidy_check.run_files()
     if args.log is True:
         variable = html_tidy_check.call_read_log()
