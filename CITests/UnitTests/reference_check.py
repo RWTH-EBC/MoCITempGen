@@ -372,7 +372,6 @@ class Extended_model(CI_conf_class):
         self.dymola_version = dymola_version
         self.path = path
         super().__init__()
-        self.resource_dir = f'{self.resource_dir}{os.sep}{self.package.replace(self.library + ".", "")}'
 
         self.dymola = dymola
         self.dymola_exception = dymola_exception
@@ -389,7 +388,7 @@ class Extended_model(CI_conf_class):
         model_list = []
         type_list = ["Modelica", "Real", "Integer", "Boolean", "String"]
         if len(mo_list) > 0:
-            if platform.system() == "Windows":  # Load ModelManagement
+            if platform.system() == "Windows":
                 self.dymola.ExecuteCommand(
                     'cd("C:\Program Files\Dymola ' + self.dymola_version + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
             else:
@@ -508,8 +507,11 @@ class Extended_model(CI_conf_class):
                 for mo in mo_list:
                     if model == mo:
                         ref_list.append(model)
-            ch_model_list = self._get_usedmodel(mo_list=mo_list, lines=changed_lines)
-            changed_list = self._insert_list(ref_list=ref_list, mos_list=mos_list, modelica_list=modelica_list,
+            ch_model_list = self._get_usedmodel(mo_list=mo_list,
+                                                lines=changed_lines)
+            changed_list = self._insert_list(ref_list=ref_list,
+                                             mos_list=mos_list,
+                                             modelica_list=modelica_list,
                                              ch_model_list=ch_model_list)
             if len(changed_list) == 0:
                 print(f'No models to check and cannot start a regression test')
