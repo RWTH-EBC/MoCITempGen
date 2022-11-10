@@ -111,6 +111,7 @@ class Ref_model(CI_conf_class):
         """
         super().__init__()
         self.library = library
+        self.wh_ref_file = f'..{os.sep}{self.wh_ref_file}'
 
     def delte_ref_file(self, ref_list):
         """
@@ -372,10 +373,12 @@ class Extended_model(CI_conf_class):
         self.dymola_version = dymola_version
         self.path = path
         super().__init__()
-
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        self.config_ci_changed_file = f'..{os.sep}{self.config_ci_changed_file}'
+        self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
+
 
     def _get_usedmodel(self, mo_list, lines):
         """
