@@ -112,6 +112,7 @@ class Ref_model(CI_conf_class):
         super().__init__()
         self.library = library
         self.wh_ref_file = f'..{os.sep}{self.wh_ref_file}'
+        self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
 
     def delte_ref_file(self, ref_list):
         """
