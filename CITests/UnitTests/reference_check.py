@@ -487,35 +487,27 @@ class Extended_model(CI_conf_class):
             ref_lines = ref_file.readlines()
             changed_models.close()
             ref_file.close()
-            mos_list = []
-            modelica_list = []
+            mos_script_list = []
+            modelica_model_list = []
+            reference_list = list()
             for line in changed_lines:
                 if len(line) == 0:
                     continue
                 else:
                     line = line.replace("/", ".")
                     line = line.replace(os.sep, ".")
-                    if line.rfind(".mos") > -1 and line.rfind("Scripts") > -1 and line.find(
-                            ".package") == -1 and line.rfind(self.package) > -1:
+                    if line.rfind(".mos") > -1 and line.rfind("Scripts") > -1 and line.find(".package") == -1 and line.rfind(self.package) > -1:
                         line = line.replace("Dymola", self.library)
-                        mos_list.append(line[line.rfind(self.library):line.rfind(".mos")])
-                    if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(
-                            self.package) > -1 and line.rfind("Scripts") == -1:
-                        modelica_list.append(line[line.rfind(self.library):line.rfind(".mo")])
-            mo_list = []
-            for line in ref_lines:
-                if line.find(self.package) > -1:
-                    mo_list.append(line.strip())
-            ref_list = []
-            for model in modelica_list:
-                for mo in mo_list:
-                    if model == mo:
-                        ref_list.append(model)
-            ch_model_list = self._get_usedmodel(mo_list=mo_list,
+                        mos_script_list.append(line[line.rfind(self.library):line.rfind(".mos")])
+                    if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
+                        modelica_model_list.append(line[line.rfind(self.library):line.rfind(".mo")])
+                    if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
+                        reference_list.append(line[line.rfind(self.library):line.rfind(".txt")])
+            ch_model_list = self._get_usedmodel(mo_list=modelica_model_list,
                                                 lines=changed_lines)
-            changed_list = self._insert_list(ref_list=ref_list,
-                                             mos_list=mos_list,
-                                             modelica_list=modelica_list,
+            changed_list = self._insert_list(ref_list=reference_list,
+                                             mos_list=mos_script_list,
+                                             modelica_list=modelica_model_list,
                                              ch_model_list=ch_model_list)
             if len(changed_list) == 0:
                 print(f'No models to check and cannot start a regression test')
