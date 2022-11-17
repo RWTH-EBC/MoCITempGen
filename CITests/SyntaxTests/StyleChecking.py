@@ -230,7 +230,7 @@ if __name__ == '__main__':
                             library=args.path,
                             dymola_version=args.dymola_version,
                             changed_models=args.changed_models)
-    #CheckStyle.dym_check_lic()
+    CheckStyle.dym_check_lic()
     model_list = []
     if args.changed_models is False:
         model_list = [args.single_package]

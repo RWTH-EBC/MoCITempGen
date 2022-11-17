@@ -39,7 +39,6 @@ class CI_conf_class(object):
         self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
         # [Dymola_Python_Tests] + Parser Commands
         self.dymola_python_test_url = f'https://$CI_TEST_Name:$CI_TEST_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
-
         # [Color]
         self.CRED = '\033[91m'  # Colors
         self.CEND = '\033[0m'
@@ -116,11 +115,8 @@ if __name__ == '__main__':
         pass
     if args.ci_interactive is True:
         folder_list = [conf.config_ci_dir]
-        file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file, conf.ci_interact_update_ref_file, conf.ci_interact_show_ref_file]
+        file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file]
         pass
-
-
-
     conf.check_ci_folder_structure(folders_list=folder_list)
     conf.check_ci_file_structure(files_list=file_list)
 
