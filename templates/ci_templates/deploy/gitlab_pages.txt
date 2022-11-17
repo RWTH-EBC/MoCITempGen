@@ -1,0 +1,21 @@
+stages:        
+    - ${ci_stage_deploy}
+pages:
+    stage: ${ci_stage_deploy}
+    before_script:
+        - apt-get update -y
+        - apt-get install zip unzip -y
+    script:
+        - mkdir -p public/$CI_COMMIT_REF_NAME
+        - cp -r $CI_COMMIT_REF_NAME/* public/$CI_COMMIT_REF_NAME
+    artifacts:
+        paths:
+         - public
+        expire_in: ${expire_in_time}
+    except:
+        refs:
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+    when: always
+    allow_failure: true 

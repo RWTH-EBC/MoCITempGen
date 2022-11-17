@@ -37,6 +37,9 @@ class CI_conf_class(object):
         self.artifacts_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}artifacts'
         self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
+        # [Dymola_Python_Tests] + Parser Commands
+        self.dymola_python_test_url = f'https://$CI_TEST_Name:$CI_TEST_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
+
         # [Color]
         self.CRED = '\033[91m'  # Colors
         self.CEND = '\033[0m'

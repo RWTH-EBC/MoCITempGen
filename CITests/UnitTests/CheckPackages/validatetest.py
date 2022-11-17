@@ -7,7 +7,6 @@ import sys
 import time
 from git import Repo
 from natsort import natsorted
-
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
@@ -387,7 +386,7 @@ class get_modelica_models(CI_conf_class):
     @staticmethod
     def get_wh_models(wh_file, wh_library, library, single_package):
         """
-        Returns: return models who are on the whitelist
+        Returns: return models that are on the whitelist
         """
         wh_list_models = []
         try:
@@ -455,7 +454,7 @@ class get_modelica_models(CI_conf_class):
 
     def get_changed_models(self, model_file, library, single_package):
         """
-        Returns: return a list with changed models
+        Returns: return a list with changed models.
         """
         try:
             file = open(model_file, "r", encoding='utf8', errors='ignore')
