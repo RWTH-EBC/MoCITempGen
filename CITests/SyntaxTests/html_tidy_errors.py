@@ -88,8 +88,6 @@ class HTML_Tidy(CI_conf_class):
         """
         self._check_arguments(root_dir=self.root_dir)
         file_counter = 0
-        errMsg = list()
-        except_error = [f'Warning: <p> attribute "align" not allowed for HTML5']
         if self.log:
             error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
             print(f'Error-log-file is saved in {self.html_error_log}')
@@ -118,12 +116,10 @@ class HTML_Tidy(CI_conf_class):
                                                  html_correct_code=html_correct_code,
                                                  html_code=html_code)
                 if self.correct_view:
-                    '''
                     self._call_correct_view(model_file=model_file,
                                             error_list=error_list,
                                             html_correct_code=html_correct_code,
                                             html_code=html_code)
-                    '''
                     if self.log:
                         self._call_write_log(model_file=model_file,
                                              error_log_file=error_log_file,
@@ -549,7 +545,7 @@ class HTML_Tidy(CI_conf_class):
 
     def _get_wh_library_model(self):
         """
-        Returns:
+        Returns: models from html whitelist, if whitelist not found return an empty list
         """
         wh_library_list = []
         try:
@@ -603,8 +599,8 @@ class HTML_whitelist(CI_conf_class):
         """
 
         Args:
-            wh_library ():
-            git_url ():
+            wh_library (): Name of whitelist library
+            git_url (): clone git url
         """
         self.wh_library = wh_library
         self.git_url = git_url
