@@ -340,7 +340,7 @@ class CI_yml_templates(CI_template_config):
                                       except_branch_list=self.except_branch_list,
                                       config_ci_changed_file=self.config_ci_changed_file.replace(os.sep, "/"),
                                       merge_branch=merge_branch,
-                                      ci_stage_create_exampeL_whitelist=self.ci_stage_create_exampeL_whitelist,
+                                      ci_stage_create_exampeL_whitelist=self.ci_stage_create_example_whitelist,
                                       bot_update_example_wh_commit=self.bot_update_example_wh_commit,
                                       config_ci_exit_file=self.config_ci_exit_file.replace(os.sep, "/"),
                                       wh_simulate_file=self.wh_simulate_file.replace(os.sep, "/"),

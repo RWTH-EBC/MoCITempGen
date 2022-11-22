@@ -33,7 +33,7 @@ class CI_template_config(CI_conf_class):
         self.ci_stage_lib_merge = f'{self.wh_library}_merge'
         self.ci_stage_html_whitelist = f'create_html_whitelist'
         self.ci_stage_create_whitelist = f'create_model_whitelist'
-        self.ci_stage_create_exampeL_whitelist = f'create_example_whitelist'
+        self.ci_stage_create_example_whitelist = f'create_example_whitelist'
         self.ci_stage_html_check = f'HTML_Check'
         self.ci_stage_style_check = f'Style_check'
         self.ci_stage_model_check = f'model_check'

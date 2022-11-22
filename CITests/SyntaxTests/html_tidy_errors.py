@@ -89,6 +89,7 @@ class HTML_Tidy(CI_conf_class):
         self._check_arguments(root_dir=self.root_dir)
         file_counter = 0
         errMsg = list()
+        except_error = [f'Warning: <p> attribute "align" not allowed for HTML5']
         if self.log:
             error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
             print(f'Error-log-file is saved in {self.html_error_log}')
@@ -100,35 +101,36 @@ class HTML_Tidy(CI_conf_class):
             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
             if self.correct_backup:
                 self._call_backup_old_files(model_file=model_file,
-                                            document_corr=document_corr,
+                                            document_corr=correct_code,
                                             file_counter=file_counter)
-            if self.correct_overwrite:
-                if len(error_list) > 0:
+            if len(error_list) > 0:
+                if self.correct_overwrite:
                     print(f'Error in file {model_file} with error {error_list}')
                     print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
-                if self.log:
-                    correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
-                        model_file=model_file)
-                    self._call_write_log(model_file=model_file,
-                                         error_log_file=error_log_file,
-                                         correct_log_file=correct_log_file,
-                                         error_list=error_list,
-                                         html_correct_code=html_correct_code,
-                                         html_code=html_code)
-
-            if self.correct_view:
-                self._call_correct_view(model_file=model_file,
-                                        error_list=error_list,
-                                        html_correct_code=html_correct_code,
-                                        html_code=html_code)
-                if self.log:
-                    self._call_write_log(model_file=model_file,
-                                         error_log_file=error_log_file,
-                                         correct_log_file=correct_log_file,
-                                         error_list=error_list,
-                                         html_correct_code=html_correct_code,
-                                         html_code=html_code)
+                    if self.log:
+                        correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
+                                model_file=model_file)
+                        self._call_write_log(model_file=model_file,
+                                                 error_log_file=error_log_file,
+                                                 correct_log_file=correct_log_file,
+                                                 error_list=error_list,
+                                                 html_correct_code=html_correct_code,
+                                                 html_code=html_code)
+                if self.correct_view:
+                    '''
+                    self._call_correct_view(model_file=model_file,
+                                            error_list=error_list,
+                                            html_correct_code=html_correct_code,
+                                            html_code=html_code)
+                    '''
+                    if self.log:
+                        self._call_write_log(model_file=model_file,
+                                             error_log_file=error_log_file,
+                                             correct_log_file=correct_log_file,
+                                             error_list=error_list,
+                                             html_correct_code=html_correct_code,
+                                             html_code=html_code)
 
         if self.log:
             error_log_file.close()
@@ -139,16 +141,24 @@ class HTML_Tidy(CI_conf_class):
         variable = self._write_exit(err_list=err_list)
         exit(variable)
 
-    def _call_write_log(self, model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
+    @staticmethod
+    def _call_write_log(model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
         if len(error_list) > 0:
-            error_log_file.write(f'\n---- {model_file} ----\n   {error_list}\n')
+            html_correct_code = html_correct_code.replace(f'\n', "")
+            error_log_file.write(f'\n---- {model_file} ----')
             correct_log_file.write(
-                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------\n{error_list}\n\n')
+                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
+            for error in error_list:
+                error_log_file.write(f'\n{error}\n')
+                correct_log_file.write(f'\n{error}\n')
 
-    def _call_correct_view(self, model_file, error_list, html_correct_code, html_code):
+    @staticmethod
+    def _call_correct_view(model_file, error_list, html_correct_code, html_code):
         if len(error_list) > 0:
             print(
-                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------\n{error_list}')
+                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
+            for error in error_list:
+                print(f'\n{error}\n')
 
     def join_body(self, html_list: list, substitutions_dict: dict = {'\\"': '"'}) -> str:
         """
@@ -241,7 +251,6 @@ class HTML_Tidy(CI_conf_class):
 
                     html_corr, errors = self._htmlCorrection(html_section_code)
 
-
                     html_correct_code.append(html_corr)
                     if len(errors) > 0:
                         error_list.append(errors)
@@ -285,6 +294,7 @@ class HTML_Tidy(CI_conf_class):
             if htmlCloseTag > -1:
                 line = ""
         return line
+
     def correct_img_atr(self, line):
         """
         Correct img and check for missing alt attributed
@@ -300,7 +310,7 @@ class HTML_Tidy(CI_conf_class):
             imgCloseTagIndex = line.find(">", imgTag)
             imgAltIndex = line.find("alt", imgTag)
             if imgCloseTagIndex > -1 and imgAltIndex == -1:  # if close tag exists but no alt attribute, insert alt attribute and change > to />
-                line = line[:imgTag] +    line[imgTag:].replace(">", ' alt="" />', 1)
+                line = line[:imgTag] + line[imgTag:].replace(">", ' alt="" />', 1)
                 CloseFound = True
             elif imgCloseTagIndex > -1 and imgAltIndex > -1:  # if close tag exists and alt attribute exists, only change > to />
                 line = line[:imgTag] + line[imgTag:].replace(">", ' />', 1)
@@ -414,7 +424,7 @@ class HTML_Tidy(CI_conf_class):
         sumTag = line.encode("utf-8").find(b"summary")
         CloseTagIntex = line.encode("utf-8").rfind(b'">')
         if tableTag > -1 and sumTag > -1:
-            line = line[:sumTag] + "> " +  line[sumTag:].replace('summary=', '<caption>', 1)
+            line = line[:sumTag] + "> " + line[sumTag:].replace('summary=', '<caption>', 1)
             line = (line.replace('">', '</caption>', 1))
         return line
 
@@ -478,8 +488,9 @@ class HTML_Tidy(CI_conf_class):
         warning_font = f'Warning: <font> element removed from HTML5'
         warning_align = f'Warning: <p> attribute "align" not allowed for HTML5'
         warning_img = f'Warning: <img> lacks "alt" attribute'
-        except_warning_list = [warning_img]
-        warning_list = [warning_table, warning_font, warning_align]
+        warning_th_align = f' Warning: <th> attribute "align" not allowed for HTML5'
+        except_warning_list = [warning_img, warning_align, warning_table, warning_th_align]
+        warning_list = [warning_font]
         for line in lines:
             line = line.replace("\n", "")
             for warning in warning_list:
@@ -529,8 +540,8 @@ class HTML_Tidy(CI_conf_class):
                                                       'wrap': 72,
                                                       'alt-text': '',
                                                       'show-warnings': 1,
-                                                      'alt-text' : 1,
-                                                      'indent' : 1
+                                                      'alt-text': 1,
+                                                      'indent': 1
                                                       })
         document_corr = self._make_string_replacements(theString=html_correct,
                                                        substitutions_dict=substitutions_dict)
