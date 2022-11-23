@@ -1,7 +1,6 @@
 stages:
     - ${ci_stage_regression_test}
     - ${ci_stage_ref_check}
-    - ${ci_stage_update_ref}
     - ${ci_stage_plot_ref}
     - ${ci_stage_prepare}
 
@@ -429,77 +428,6 @@ RegressionTest_Check_References:
             %endfor
     only:
         - external_pull_requests
-
-Update_Regression_Results:
-    stage: ${ci_stage_update_ref}
-    before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-    script:
-        - mkdir CorrectedVersion && cd CorrectedVersion
-        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
-        - python ${dymola_python_configuration_file} --ci-interactive
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --update-ref --single-package ${library} -n 4 < ../${config_ci_eof_file}
-    after_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - cd CorrectedVersion && cd $CI_PROJECT_NAME
-        - git ls-files --others --exclude-standard
-        - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            python ${dymola_python_google_chart_file} --line-html --update-ref --single-package ${library} ;
-            push_model=$(git ls-files --others --exclude-standard) ;
-            echo $push_model ;
-            (git ls-files --others --exclude-standard) > ${config_ci_new_ref_file} ;
-            message="${bot_create_ref_commit}" ;
-            git add ${library}/Resources/ReferenceResults/Dymola/* ;
-            git commit -m "$message";
-            git push git@github.com:$Github_Repository.git ;
-            GREEN='\033[0;32m' ;
-            NC='\033[0m' ;
-            echo  -e "$GREEN New or updated reference files were pushed to this branch. The job was successfully and the newly added files are tested in another commit. $NC " ;
-            pip install pandas mako matplot;
-            cd .. ;
-            cd .. ;
-            mkdir -p $CI_COMMIT_REF_NAME/plots ;
-            mkdir -p data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/simulator-dymola.log data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/unitTests-dymola.log data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/funnel_comp data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/Referencefiles data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${chart_dir}/* $CI_COMMIT_REF_NAME/plots ;
-            exit 0 ;
-          else
-            exit 0 ;
-          fi
-    artifacts:
-        when: always
-        paths:
-            - data
-            - $CI_COMMIT_REF_NAME/plots
-        expire_in: 7 day
-    retry:
-        max: 2
-        when: runner_system_failure
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_update_ref_commit}/
-    except:
-        refs:
-            - external_pull_requests
 
 plot_reference_results:
     stage: plot_ref

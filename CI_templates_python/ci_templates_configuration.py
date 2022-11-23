@@ -39,7 +39,7 @@ class CI_template_config(CI_conf_class):
         self.ci_stage_model_check = f'model_check'
         self.ci_stage_simulate = f'simulate'
         self.ci_stage_regression_test = f'RegressionTest'
-        self.ci_stage_update_ref = f'Update_Ref'
+        #self.ci_stage_update_ref = f'Update_Ref'
         self.ci_stage_plot_ref = f'plot_ref'
         self.ci_stage_prepare = f'prepare'
         self.ci_stage_open_PR = f'open_PR'
@@ -67,7 +67,7 @@ class CI_template_config(CI_conf_class):
         self.temp_ci_deploy_test_file = f'{self.temp_ci_dir}{os.sep}deploy{os.sep}deploy_ci_tests.txt'
         # [Created CI_template_folder]
         #self.temp_dir = f'Dymola_python_tests{os.sep}gitlab_ci_templates'
-        self.temp_dir = f'dymola-ci-tests'
+        self.temp_dir = f'dymola-ci-tests{os.sep}ci_templates'
         # [Dymola test scripts]
         self.xvfb_flag = f'xvfb-run -n 77'
         self.dymola_python_dir = f'Dymola_python_tests{os.sep}CITests'
@@ -80,9 +80,9 @@ class CI_template_config(CI_conf_class):
         self.dymola_python_syntax_test_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}StyleChecking.py'
         self.dymola_python_configuration_file = f'{self.dymola_python_dir}{os.sep}CI_Configuration{os.sep}configuration.py'
         # [Triggers different jobs specifically: Interact CI: User]
-        self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
+        #self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
         self.ci_show_ref_commit = "ci_show_ref"                     # show reference results from list
-        self.ci_dif_ref_commit = "ci_dif_ref"                       # Show difference in reference results
+        #self.ci_dif_ref_commit = "ci_dif_ref"                       # Show difference in reference results
         self.ci_create_model_wh_commit = "ci_create_model_wh"       # create a whitelist with models that failed the check job
         self.ci_create_html_wh_commit = "ci_create_html_wh"         # create a whitelist with models that should not go through the html check
         self.ci_create_simulate_wh_commit = "ci_create_example_wh"  # create a whitelist with models that failed the simulate job
@@ -91,6 +91,7 @@ class CI_template_config(CI_conf_class):
         self.ci_regression_test_commit = "ci_regression_test"       # trigger only the regression job
         self.ci_html_commit = "ci_html"                             # trigger only the html job
         self.ci_setting_commit = "ci_setting"                       # trigger only the setting job
+        self.ci_style_commit = "ci_style_check"                     # trigger only the style check job
         self.ci_trigger_ibpsa_commit = "ci_trigger_ibpsa"           # trigger only the (IBPSA)-merge job
         self.ci_merge_except_commit = "ci_merge_except"
         self.ci_correct_html_commit = "ci_correct_html"
@@ -113,7 +114,8 @@ class CI_template_config(CI_conf_class):
 
 
 
-    def create_except_commit_list(self):
+    @staticmethod
+    def create_except_commit_list():
         except_commit_list = []
         except_commit_dic = (vars(CI_template_config()))
         for commit in except_commit_dic:
@@ -124,7 +126,8 @@ class CI_template_config(CI_conf_class):
     def _create_except_branches(self):
         pass
 
-    def _create_stage_list(self):
+    @staticmethod
+    def _create_stage_list():
         stage_list = []
         stage_dic = (vars(CI_template_config()))
         for stage in stage_dic:

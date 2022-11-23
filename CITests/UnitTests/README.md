@@ -1,11 +1,30 @@
 # What is it?
-This templates check, simulate or perform a regression test of AixLib models.
+This templates check, simulate or perform a regression test of dymola models.
 
-### validatetest
-	
-Check and simulate modelica models with dymola-python-interface.
+### Validatetest.py
+Check and simulate dymola models with dymola-python-interface.
+#### Parser Arguments
+| Parser Arguments  | Description                                                                        | 
+|-------------------|------------------------------------------------------------------------------------| 
+| --single-package | Test the Modelica package.                                                         |
+| --whitelist  | Create a whitelist of a library with failed models.                                |
+| --simulate-examples | Check and simulate examples in the package.                                        |
+| --dymola-version | Version of dymola (Give the number e.g. 2022")                                     |
+| --changed-model  | Check only changed models with last commit push (in CI: ci_changed_model_list.txt) |
+| --filter-whitelist | Argument that models on the whitelist are not tested (default: True).              |
+| --library  | Library to test.                                                                   |
+| --wh-library | library on a whitelist                                     |
+| --repo-dir  | folder of a whitelist library                     |
+| --git-url | url repository of whitelist library"        |
 
-### reference_check
+#### Example: Execution on gitlab runner (linux)
+    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py  --single-package Airflow --library AixLib -DS 2022 --wh-library IBPSA --filter-whitelist
+    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py --single-package Airflow --library AixLib -DS 2022 -CM
+    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py -DS 2022 --repo-dir IBPSA --git-url https://github.com/ibpsa/modelica-ibpsa.git  --library AixLib --wh-library IBPSA --whitelist
+For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
+
+
+### reference_check.py
 For further information on how to use the UnitTest, please refer to the following [link](https://github.com/ibpsa/modelica-ibpsa/wiki/Unit-Tests)
 #### To Write a new Unit Test:
 This documentation briefly describes how to apply and use the unit tests and how to create reference files that will later be compared for a unit test. 

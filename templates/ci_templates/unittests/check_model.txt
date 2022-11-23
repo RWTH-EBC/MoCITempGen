@@ -129,7 +129,6 @@ Check_${library}_${package}_changed_models:
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
-
     artifacts:
         when: on_failure
         paths:

@@ -1,5 +1,4 @@
 import argparse
-import io
 import os
 import shutil
 import sys
@@ -51,6 +50,18 @@ class HTML_Tidy(CI_conf_class):
 
     def __init__(self, package, correct_overwrite, correct_backup, log, correct_view,
                  library, wh_library, filter_whitelist):
+        """
+
+        Args:
+            package (): package to test
+            correct_overwrite (): argument (default:false) overwrite models that failed html test
+            correct_backup ():  argument(default:false) write a backup of a library
+            log (): argument(default:false): write a html log of the html check
+            correct_view (): argument(default:false): print models that failed html test
+            library ():  library to test
+            wh_library ():  library on the whitelist
+            filter_whitelist (): argument(default:false): filter models that are on the whitelist
+        """
         self.package = package
         self.correct_overwrite = correct_overwrite
         self.correct_backup = correct_backup
@@ -66,7 +77,7 @@ class HTML_Tidy(CI_conf_class):
 
     def _get_html_model(self):
         """
-        Returns:
+        Returns: return models to check
         """
         library_list = self._get_library_model()
         if self.filter_whitelist is True:
@@ -79,9 +90,8 @@ class HTML_Tidy(CI_conf_class):
     @staticmethod
     def _check_arguments(root_dir):
         """
-
         Args:
-            root_dir ():
+            root_dir (): check if the package exist
         """
         top_package = os.path.join(root_dir, "package.mo")
         if not os.path.isfile(top_package):
@@ -91,8 +101,7 @@ class HTML_Tidy(CI_conf_class):
     def run_files(self):
         """
         Make sure that the parameter rootDir points to a Modelica package.
-        Write error to error message
-        Returns:
+        Write errors to error message.
         """
         self._check_arguments(root_dir=self.root_dir)
         file_counter = 0
@@ -116,13 +125,13 @@ class HTML_Tidy(CI_conf_class):
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
                     if self.log:
                         correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
-                                model_file=model_file)
+                            model_file=model_file)
                         self._call_write_log(model_file=model_file,
-                                                 error_log_file=error_log_file,
-                                                 correct_log_file=correct_log_file,
-                                                 error_list=error_list,
-                                                 html_correct_code=html_correct_code,
-                                                 html_code=html_code)
+                                             error_log_file=error_log_file,
+                                             correct_log_file=correct_log_file,
+                                             error_list=error_list,
+                                             html_correct_code=html_correct_code,
+                                             html_code=html_code)
                 if self.correct_view:
                     self._call_correct_view(model_file=model_file,
                                             error_list=error_list,
@@ -142,14 +151,25 @@ class HTML_Tidy(CI_conf_class):
 
     def call_read_log(self):
         """
+        Read the html log.
         Returns: variable with 0 or 1
         """
         err_list = self.read_log_file()
-        variable = self._write_exit(err_list=err_list)
-        return variable
+        var = self._write_exit(err_list=err_list)
+        return var
 
     @staticmethod
     def _call_write_log(model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
+        """
+        Write a log file of the html test.
+        Args:
+            model_file (): model to check
+            error_log_file (): file of the error log
+            correct_log_file (): file with corrected models
+            error_list (): list of errors for each model
+            html_correct_code (): corrected html code
+            html_code (): html code of a modelica file
+        """
         if len(error_list) > 0:
             html_correct_code = html_correct_code.replace(f'\n', "")
             error_log_file.write(f'\n---- {model_file} ----')
@@ -161,38 +181,40 @@ class HTML_Tidy(CI_conf_class):
 
     @staticmethod
     def _call_correct_view(model_file, error_list, html_correct_code, html_code):
+        """
+        print the corrected html code
+        Args:
+            model_file (): model to test
+            error_list (): list of errors for each model
+            html_correct_code (): corrected html code
+            html_code (): html code of a modelica file
+        """
         if len(error_list) > 0:
             print(
                 f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
             for error in error_list:
                 print(f'\n{error}\n')
 
-    def join_body(self, html_list: list, substitutions_dict: dict = {'\\"': '"'}) -> str:
+    def join_body(self, html_list: list) -> str:
         """
         Joins a list of strings into a single string and makes replacements
-		Parameters
-		----------
-		html_list : list of str
-				The html code - each line a list entry.
-		substitutions_dict : dict
-				A dictionary with key:value pairs for old and new text.
-				The html code is escaped in Modelica. To feed it to tidy-lib
-				we need to remove the escape characters.
-		Returns
-		-------
         Args:
             html_list ():
+            The html code is escaped in Modelica. To feed it to tidy-lib
+            we need to remove the escape characters.
+        Returns: body
         """
         body = ''.join(html_list)
-        body = self._make_string_replacements(theString=body, substitutions_dict={'\\"': '"'})
+        body = self._make_string_replacements(the_string=body, substitutions_dict={'\\"': '"'})
         return body
 
-    def _make_string_replacements(self, theString: str, substitutions_dict: dict = {'\\"': '"'}) -> str:
+    @staticmethod
+    def _make_string_replacements(the_string: str, substitutions_dict: dict = {'\\"': '"'}) -> str:
         """
         Takes a string and replaces according to a given dictionary
 		Parameters
 		----------
-		theString : str
+		the_string : str
 				The string that contains replaceable text.
 		substitutions_dict : dict
 				A dictionary with key:value pairs for old and new text.
@@ -207,8 +229,8 @@ class HTML_Tidy(CI_conf_class):
         Returns:
         """
         for k, v in substitutions_dict.items():
-            theString = theString.replace(k, v)
-        return theString
+            the_string = the_string.replace(k, v)
+        return the_string
 
     def _getInfoRevisionsHTML(self, model_file):
         """
@@ -218,7 +240,7 @@ class HTML_Tidy(CI_conf_class):
 		is a string.
 		Parameters
 		----------
-		moFile : str - The name of a Modelica source file.
+		model_file : str - The name of a Modelica source file.
 		Returns
 		-------
 		The list of strings of the info and revisions section.
@@ -284,16 +306,14 @@ class HTML_Tidy(CI_conf_class):
         '''
         return all_code, error_list, html_correct_code, html_code
 
-    def delete_html_revision(self, line, ):
+    @staticmethod
+    def delete_html_revision(line, ):
         """
-        Delete revsion
+        Delete revision
         Args:
             line ():
-
         Returns:
-
         """
-
         htmlTag = line.encode("utf-8").find(b"</html>")
         htmlCloseTag = line.encode("utf-8").find(b"<html>")
         RevTag = line.encode("utf-8").find(b"revision")
@@ -302,47 +322,40 @@ class HTML_Tidy(CI_conf_class):
                 line = ""
         return line
 
-    def correct_img_atr(self, line):
+    @staticmethod
+    def correct_img_atr(line):
         """
         Correct img and check for missing alt attributed
         Args:
             line ():
-
         Returns:
-
         """
-
         imgTag = line.encode("utf-8").find(b"img")
         if imgTag > -1:
             imgCloseTagIndex = line.find(">", imgTag)
             imgAltIndex = line.find("alt", imgTag)
             if imgCloseTagIndex > -1 and imgAltIndex == -1:  # if close tag exists but no alt attribute, insert alt attribute and change > to />
                 line = line[:imgTag] + line[imgTag:].replace(">", ' alt="" />', 1)
-                CloseFound = True
             elif imgCloseTagIndex > -1 and imgAltIndex > -1:  # if close tag exists and alt attribute exists, only change > to />
                 line = line[:imgTag] + line[imgTag:].replace(">", ' />', 1)
-                CloseFound = True
 
             elif imgCloseTagIndex == -1:  # if close tag is not in the same line
                 line = line
-                CloseFound = False
         else:  # if no close tag was found in previous line, but opening tag found search for close on this line with same
             imgCloseTagIndex = line.find(">")
             imgAltIndex = line.find("alt")
             if imgCloseTagIndex > -1 and imgAltIndex == -1:
                 line = line[:imgCloseTagIndex] + \
                        line[imgCloseTagIndex:].replace(">", ' alt="" />', 1)
-                CloseFound = True
             elif imgCloseTagIndex > -1 and imgAltIndex > -1:
                 line = line[:imgCloseTagIndex] + \
                        line[imgCloseTagIndex:].replace(">", ' />', 1)
-                CloseFound = True
             elif imgCloseTagIndex == -1:
-                CloseFound = False
                 line = line
         return line
 
-    def correct_th_align(self, line):
+    @staticmethod
+    def correct_th_align(line):
         """
         Correct algin with th and replace style="text-align"
         Args:
@@ -352,12 +365,12 @@ class HTML_Tidy(CI_conf_class):
 
         alignTag = line.encode("utf-8").find(b"align")
         thTag = line.encode("utf-8").find(b"th")
-        CloseTagIntex = line.encode("utf-8").rfind(b'">')
         if alignTag > -1 and thTag > -1:
             line = (line.replace('\\', ''))
         return line
 
-    def _call_correct_overwrite(self, model_name, document_corr):
+    @staticmethod
+    def _call_correct_overwrite(model_name, document_corr):
         """
         This function overwrites the old modelica files with the corrected files
         Args:
@@ -384,22 +397,19 @@ class HTML_Tidy(CI_conf_class):
         newfile = open(model_file, "w+b")
         newfile.write(document_corr.encode("utf-8"))
 
-    def correct_font(self, line):
+    @staticmethod
+    def correct_font(line):
         """
         Replace font to style für html5
         Args:
             line ():
 
         Returns:
-
         """
-
         styleTag_1 = line.encode("utf-8").find(b"style=")
         styleTag_2 = line.encode("utf-8").find(b"color")
         fontTag = line.encode("utf-8").find(b"<font")
         rfontTag = line.encode("utf-8").rfind(b"</font>")
-        firstCloseTage = line.encode("utf-8").find(b">")
-        etag = line.encode("utf-8").find(b"=")
         if styleTag_1 > -1 and styleTag_2 > -1:
             if fontTag > -1 and rfontTag > -1:
                 sline = (line[fontTag:rfontTag].replace('\\', ''))
@@ -415,27 +425,25 @@ class HTML_Tidy(CI_conf_class):
             sline = (sline.replace('color=', 'style="color:'))
             sline = (sline.replace('>', '">'))
             line = line[:fontTag] + sline + line[rfontTag:].replace('</font>', '</span>')
-        return line, CloseFound
+        return line
 
-    def correct_table_summary(self, line):
+    @staticmethod
+    def correct_table_summary(line):
         """
         delete Summary in table and add <caption> Text </caption>
         Args:
             line ():
-
         Returns:
-
         """
-
         tableTag = line.encode("utf-8").find(b"<table")
         sumTag = line.encode("utf-8").find(b"summary")
-        CloseTagIntex = line.encode("utf-8").rfind(b'">')
         if tableTag > -1 and sumTag > -1:
             line = line[:sumTag] + "> " + line[sumTag:].replace('summary=', '<caption>', 1)
             line = (line.replace('">', '</caption>', 1))
         return line
 
-    def correct_p_align(self, line):
+    @staticmethod
+    def correct_p_align(line):
         """
         Correct align in p and replace style="text-align"
         Wrong: <p style="text-align:center;">
@@ -449,12 +457,8 @@ class HTML_Tidy(CI_conf_class):
         """
         pTag = line.encode("utf-8").find(b"<p")
         alignTag = line.encode("utf-8").find(b"align")
-        etag = line.encode("utf-8").find(b"=")
         closetag = line.encode("utf-8").find(b">")
         styleTag = line.encode("utf-8").find(b"text-align:")
-        style = line.encode("utf-8").find(b"style")
-        rstyle = style = line.encode("utf-8").find(b"style")
-        StyleCount = line.count("style=")
         if styleTag > -1:
             return line
         elif pTag > -1 and alignTag > -1:
@@ -483,9 +487,7 @@ class HTML_Tidy(CI_conf_class):
     def read_log_file(self):
         """
         read logfile for possible errors
-        Args:
-            file:
-        Returns:
+        Returns: return a list of error
         """
         log_file = open(self.html_error_log, "r", encoding="utf-8")
         lines = log_file.readlines()
@@ -515,29 +517,37 @@ class HTML_Tidy(CI_conf_class):
         return err_list
 
     def _write_exit(self, err_list):
+        """
+        If an entry in the error list exist, the check failed
+        Args:
+            err_list (): list with error of html check
+        Returns: return a variable (if 0: check was successful, 1: check failed)
+        """
         try:
             exit_file = open(self.config_ci_exit_file, "w")
             if len(err_list) > 0:
                 print(f'{self.CRED}Syntax Error:{self.CEND} Check HTML-logfile')
                 exit_file.write("exit 1")
-                variable = 1
+                var = 1
             else:
                 print(f'{self.green}HTML Check was successful!{self.CEND}')
                 exit_file.write("exit 0")
-                variable = 0
+                var = 0
             exit_file.close()
-            return variable
+            return var
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
 
     def _htmlCorrection(self, html_code):
         """
         Args:
-            html_code ():
+            html_code (): html code of a modelica file
         Returns:
+            document_corr (): return corrected code
+            errors (): return the error of the html code
         """
         substitutions_dict: dict = {'"': '\\"', '<br>': '<br/>', '<br/>': '<br/>'}
-        html_str = self.join_body(html_list=html_code, substitutions_dict={'\\"': '"'})
+        html_str = self.join_body(html_list=html_code)
 
         html_correct, errors = tidy_document(f"{html_str}",
                                              options={'doctype': 'html5',
@@ -545,12 +555,11 @@ class HTML_Tidy(CI_conf_class):
                                                       'numeric-entities': 1,
                                                       'output-html': 1,
                                                       'wrap': 72,
-                                                      'alt-text': '',
                                                       'show-warnings': 1,
                                                       'alt-text': 1,
                                                       'indent': 1
                                                       })
-        document_corr = self._make_string_replacements(theString=html_correct,
+        document_corr = self._make_string_replacements(the_string=html_correct,
                                                        substitutions_dict=substitutions_dict)
         return document_corr, errors
 
@@ -590,8 +599,8 @@ class HTML_Tidy(CI_conf_class):
     @staticmethod
     def _remove_whitelist_model(library_list, wh_library_list):
         """
-        get library model
-        Returns:
+        remove models that are on the whitelist
+        Returns: return a list of models, that are not on the whitelist
         """
         remove_models_list = []
         for model in library_list:
@@ -607,7 +616,6 @@ class HTML_whitelist(CI_conf_class):
 
     def __init__(self, wh_library, git_url):
         """
-
         Args:
             wh_library (): Name of whitelist library
             git_url (): clone git url
@@ -618,7 +626,7 @@ class HTML_whitelist(CI_conf_class):
 
     def call_whitelist(self):
         """
-
+        Create a whitelist of a library
         """
         self._clone_repository()
         model_list = self._get_whitelist_model()
@@ -636,9 +644,9 @@ class HTML_whitelist(CI_conf_class):
 
     def _write_whitelist(self, model_list):
         """
-
+        write a whitelist with models
         Args:
-            model_list ():
+            model_list (): models on the whitelist
         """
         file = open(self.wh_html_file, "w")
         for model in model_list:
@@ -662,25 +670,26 @@ class HTML_whitelist(CI_conf_class):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Run HTML correction on files, print found errors or backup old files')
+        description='Run HTML correction on files')
     parser.add_argument("--correct-overwrite", action="store_true", default=False,
                         help="correct html code in modelica files and overwrite old files")
     parser.add_argument("--correct-backup", action="store_true", default=False,
-                        help="correct html code in modelica "  "files and backup old files")
+                        help="backup old files")
     parser.add_argument("--log", action="store_true",
-                        default=False, help="print logfile of errors found")
+                        default=False, help="create logfile of model with errors")
     parser.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                        help="Test only the Modelica package AixLib.Package")
+                        help="Package to test for a html test")
     parser.add_argument("-p", "--path", default=".",
                         help="Path where top-level package.mo of the library is located")
     parser.add_argument("--whitelist", action="store_true", default=False,
-                        help="Create a new WhiteList Library IBPSA")
+                        help="Create a new whitelist for a Library")
     parser.add_argument("--correct-view", action="store_true", default=False,
-                        help="Print the Correct HTML Code")
+                        help="Check and print the Correct HTML Code")
     parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    parser.add_argument("--wh-library", default="IBPSA", help="Library on whitelist")
-    parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
-    parser.add_argument("--filter-whitelist", default=False, action="store_true")
+    parser.add_argument("--wh-library", default="IBPSA", help="Library that is written to a whitelist")
+    parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
+                        help="url repository of library for whitelist")
+    parser.add_argument("--filter-whitelist", default=False, action="store_true", help="Argument for ")
 
     args = parser.parse_args()
     conf = CI_conf_class()

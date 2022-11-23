@@ -20,7 +20,7 @@ class Buildingspy_Regression_Check(CI_conf_class):
             package (): package to be checked
             n_pro (): number of processors
             tool (): dymola or Openmodelica
-            batch (): boolean: - False: interactive with script (e.g. generate new regressiontests) - True: No interactive with script
+            batch (): boolean: - False: interactive with script (e.g. generate new regression-tests) - True: No interactive with script
             show_gui (): show_gui (): True - show dymola, false - dymola hidden.
             path (): Path where top-level package.mo of the library is located
         """
@@ -36,12 +36,13 @@ class Buildingspy_Regression_Check(CI_conf_class):
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
-    def write_exit_file(self, val):
+    def write_exit_file(self, var):
         """
+        write an exit file, important for gitlab ci
         """
         try:
             ex_file = open(self.config_ci_exit_file, "w")
-            if val == 0:
+            if var == 0:
                 ex_file.write(f'successful')
             else:
                 ex_file.write(f'FAIL')
@@ -107,14 +108,15 @@ class Ref_model(CI_conf_class):
 
     def __init__(self, library):
         """
-
+        Args:
+            library (): library to test
         """
         super().__init__()
         self.library = library
         self.wh_ref_file = f'..{os.sep}{self.wh_ref_file}'
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
 
-    def delte_ref_file(self, ref_list):
+    def delete_ref_file(self, ref_list):
         """
         Delete reference files.
         Args:
@@ -151,6 +153,11 @@ class Ref_model(CI_conf_class):
         return package_list
 
     def get_update_model(self):
+        """
+
+        Returns: return a package_list to check for regression test
+
+        """
         mos_script_list = self._get_mos_scripts()  # Mos Scripts
         reference_list = self._get_check_ref()  # Reference files
         mos_list = self._compare_ref_mos(mos_script_list=mos_script_list, reference_list=reference_list)
@@ -168,7 +175,7 @@ class Ref_model(CI_conf_class):
     def get_update_package(ref_list):
         """
         Args:
-            ref_list ():
+            ref_list (): list of reference files
         Returns:
         """
         ref_package_list = []
@@ -182,9 +189,8 @@ class Ref_model(CI_conf_class):
 
     def _get_whitelist_package(self):
         """
-         get and filter package from reference whitelist
-        Returns:
-
+        Get and filter package from reference whitelist
+        Returns: return files that are not on the reference whitelist
         """
         wh_list = []
         try:
@@ -319,6 +325,12 @@ class Ref_model(CI_conf_class):
 class python_dymola_interface(CI_conf_class):
 
     def __init__(self, dymola, dymola_exception):
+        """
+
+        Args:
+            dymola (): python-dymola interface
+            dymola_exception (): python-exception interface
+        """
         super().__init__()
         self.dymola = dymola
         self.dymola_exception = dymola_exception
@@ -326,8 +338,8 @@ class python_dymola_interface(CI_conf_class):
 
     def library_check(self, library):
         """
+        Check, if library is existing and opened correctly
         """
-
         library_check = self.dymola.openModel("package.mo")
         if library_check is True:
             print(f'Found {library}{os.sep}package.mo Library. Start regression test.')
@@ -362,12 +374,12 @@ class Extended_model(CI_conf_class):
         """
 
         Args:
-            dymola ():
-            dymola_exception ():
-            package ():
-            library ():
-            dymola_version ():
-            path ():
+            dymola (): python-dymola interface
+            dymola_exception (): python-exception interface
+            package (): package to test
+            library (): library to test
+            dymola_version (): dymola version
+            path (): path to test
         """
         self.package = package
         self.library = library
@@ -381,7 +393,7 @@ class Extended_model(CI_conf_class):
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
 
 
-    def _get_usedmodel(self, mo_list, lines):
+    def _get_used_model(self, mo_list, lines):
         """
         get a list with all used models of regression models
         gives a list of regression models where submodels have been modified
@@ -432,10 +444,11 @@ class Extended_model(CI_conf_class):
         """
         return all used models, that changed
         Args:
-            lines ():
-            model_list ():
+            lines (): lines from changed models
+            model_list (): models to check
 
         Returns:
+            ch_model_list () : return a list of changed models
         """
         ch_model_list = []
         for line in lines:
@@ -450,10 +463,10 @@ class Extended_model(CI_conf_class):
         """
         return models, scripts, reference results and used models, that changed
         Args:
-            ref_list ():
-            mos_list ():
-            modelica_list ():
-            ch_model_list ():
+            ref_list (): list of reference files
+            mos_list (): list of .mos files
+            modelica_list (): list of modelica files
+            ch_model_list (): list of changed models
         Returns:
         """
         changed_list = []
@@ -470,9 +483,9 @@ class Extended_model(CI_conf_class):
                 print(f'Changed model files: {model}')
                 changed_list.append(model[:model.rfind(".")])
         if ch_model_list is not None:
-            for usedmodel in ch_model_list:
-                print(f'Changed used model files: {usedmodel}')
-                changed_list.append(usedmodel[:usedmodel.rfind(".")])
+            for used_model in ch_model_list:
+                print(f'Changed used model files: {used_model}')
+                changed_list.append(used_model[:used_model.rfind(".")])
         changed_list = list(set(changed_list))
         return changed_list
 
@@ -503,8 +516,8 @@ class Extended_model(CI_conf_class):
                         modelica_model_list.append(line[line.rfind(self.library):line.rfind(".mo")])
                     if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
                         reference_list.append(line[line.rfind(self.library):line.rfind(".txt")])
-            ch_model_list = self._get_usedmodel(mo_list=modelica_model_list,
-                                                lines=changed_lines)
+            ch_model_list = self._get_used_model(mo_list=modelica_model_list,
+                                                 lines=changed_lines)
             changed_list = self._insert_list(ref_list=reference_list,
                                              mos_list=mos_script_list,
                                              modelica_list=modelica_model_list,
@@ -526,8 +539,8 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
 
         Args:
-            validate ():
-            path ():
+            validate (): validate library from buildingspy
+            path (): path to check
         """
         self.path = path
         self.validate = validate
@@ -537,8 +550,8 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
         validate the html syntax only
         """
-        vald = self.validate.Validator()
-        err_msg = vald.validateHTMLInPackage(self.path)
+        valid = self.validate.Validator()
+        err_msg = valid.validateHTMLInPackage(self.path)
         n_msg = len(err_msg)
         for i in range(n_msg):
             if i == 0:
@@ -555,8 +568,8 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
         validate regression test setup
         """
-        vald = self.validate.Validator()
-        ret_val = vald.validateExperimentSetup(self.path)
+        valid = self.validate.Validator()
+        ret_val = valid.validateExperimentSetup(self.path)
         exit(ret_val)
 
     def run_coverage_only(self, buildingspy_regression, batch, tool, package):
@@ -564,7 +577,7 @@ class Buildingspy_Validate_test(CI_conf_class):
         Specifies which models are tested
         Args:
             buildingspy_regression (): library buildingspy: use for regression tests
-            batch (): boolean: - False: interactive with script (e.g. generate new regressiontests) - True: No interactive with script
+            batch (): boolean: - False: interactive with script (e.g. generate new regression-tests) - True: No interactive with script
             tool (): dymola or Openmodelica
             package (): package to be checked
         """
@@ -708,7 +721,7 @@ if __name__ == '__main__':
 
         elif args.update_ref:
             ref_list = ref_model.get_update_ref()
-            ref_model.delte_ref_file(ref_list=ref_list)
+            ref_model.delete_ref_file(ref_list=ref_list)
             package_list = ref_model.get_update_package(ref_list=ref_list)
         else:
             conf.check_ci_folder_structure(folders_list=[f'..{os.sep}{conf.config_ci_dir}'])
@@ -729,6 +742,7 @@ if __name__ == '__main__':
                 package_list = list_reg_model.get_changed_regression_models()
 
         # Start regression test
+        val = 0
         if package_list is None or len(package_list) == 0:
             if args.batch is False:
                 print(f'All Reference files exist')
@@ -743,5 +757,5 @@ if __name__ == '__main__':
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
 
-        ref_check.write_exit_file(val=val)
+        ref_check.write_exit_file(var=val)
         exit(val)

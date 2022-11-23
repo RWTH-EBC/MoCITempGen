@@ -1,105 +1,55 @@
 # What is it?
-This templates check, simulate and make a regression test of the AixLib models.
+These tests validate the html syntax or the dymola style.
 
-# How to implement?
-To integrate the tests in the GitLab-CI  include the templates.
-Add the following lines to your .gitlab-ci.yml:
-
-	image: registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:miniconda-latest
-
-	stages:
-		- build
-		- HTML_Check
-		- create_html_whitelist
-		- StyleCheck
-		- deploy
-		- openMR
-		- post
-		
-	include:
-		- 'bin/templates/03_ci_templates/03_SyntaxTest/html_check.gitlab-ci.yml'  
-		- 'bin/templates/03_ci_templates/03_SyntaxTest/style_check.gitlab-ci.yml
-'	
+## html_tidy_errors.py
+The Test html_tidy_errors.py validate and correct the HTML code. 
+Return a log file.
+#### Parser Arguments
+| Parser Arguments  | Description      | 
+|-------------------| ------------------------- | 
+| --correct-overwrite  |correct html code in modelica files and overwrite old files.|
+| --correct-backup  | backup old files.|
+| --single-package  | Package tested for correct html syntax.|
+| --log | create logfile of model with errors.|
+| --path  | Path where top-level package.mo of the library is located.|
+| --whitelist | Create a new whitelist for a Library.|
+| --correct-view  | Check and print the Correct HTML Code.|
+| --library  | library tested for correct html syntax.|
+| --wh-library | library tested for correct html syntax.|
+| --git-url  | Url repository of a library for which a whitelist is written.|
+| --filter-whitelist | Argument that models on the whitelist are not tested (default: True).|
 
 
-### html_tidy_errors	
+#### Example: Execution on gitlab runner (linux)
+    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-view --log  --filter-whitelist
+    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-overwrite --filter-whitelist --log
+    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --whitelist --git-url https://github.com/ibpsa/modelica-ibpsa.git --wh-library IBPSA
 
-The Test html_tidy_errors.py validate and correct the HTML code. If the Test failed, it will be
-create a new branch and the test repeat. The corrected Version is pushed to the new branch and will create a Merge-Request to
-your working-branch.   
+![ModelManagement_StyleChecking.PNG](../../Documentation/Images/HTMLProcess.png)
+For more information look at following [Repository](https://github.com/RWTH-EBC/HTML-Tidy-Modelica).
 
-You have following options:
-	
-	1. --correct-backup: 
+For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
+## StyleChecking.py
+StyleChecking use the *ModelManagement* library in dymola. The script tests the syntax of models or library. 
+Return a log file. 
+#### Parser Arguments
+| Parser Arguments  | Description      | 
+|-------------------| ------------------------- | 
+| --single-package  | Name of the package to test.|
+| --library         | Name of the library to test.|
+| --dymola-version  | Number of dymola-version (e.g. 2022, depends on dymola image). |
+| --changed-models  | Check only changed models with last commit push (in CI: ci_changed_model_list.txt)|
 
-The library will be overwrite and write a Backup of the Library. 
+#### Example: Execution on gitlab runner (linux)
+    xvfb-run -n 77 python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -DS 2022
+    xvfb-run -n 77 python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -CM -DS 2022
 
-	2.  --correct-overwrite: 
-	
-The Script will just overwrite the Library without create a Backup.
-	
-	3.  --log:
+![ModelManagement_StyleChecking.PNG](../../Documentation/Images/ModelManagement_StyleChecking.PNG)
 
-The Script will write a Log File with all Errors and Warning by validate the library.
- 
-    4. -p (path) 
-	
-Chose which Library, Package or Model will be checked. 
-
-	5. --align
-
-This tag will correct align Warning. By Default this tag is false and will not fail the test.	
-	
-	6. --font
-
-This tag will correct font Warning. By Default this tag is false and will not fail the test.	
-
-	7. --WhiteList
-	
-Create a new WhiteList with all models in Library. These models will not be checked.
-
-	8. --correct-view
-	
-Reads and validate the html code. Does not change the html code
-
-Add the following command to your .gitlab-ci.yml. 
-
-    - python bin/02_CITests/SyntaxTests/html_tidy_errors.py -p "AixLib" --correct-overwrite --log  --align --font
-
-
-For more information look at following [Repository](https://github.com/RWTH-EBC/HTML-Tidy-Modelica)
-
-![E.ON EBC RWTH Aachen University](../../Documentation/Images/HTMLProcess.png)
+For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
 
 
 
-
-For more help type the command python bin/CITests/SyntaxTests/html_tidy_errors.py --help
-
-
-### StyleChecking
-
-The test StyleChecking use the ModelManagement library in modelica. The script tests the syntax of models or library.
-
-	- python bin/CITests/SyntaxTests/StyleChecking.py -s "AixLib" -p AixLib/package.mo
-
-
-The following option will be checked:
-
-![E.ON EBC RWTH Aachen University](../../Documentation/Images/ModelManagement_StyleChecking.PNG)
-
-
-For more help type the command: 
-
-	- python bin/CITests/SyntaxTests/StyleChecking.py --help
-
-	
-# What is done?
-- Check and correct HTML code
-- Create a new branch
-- Produce a Merge-Request
-- Push the corrected code to your branch
-- Check the style of models
 
 
 

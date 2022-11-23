@@ -6,16 +6,15 @@ Style_Check_AixLib:
     before_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
-        - xvfb-run -n 77 python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+        - ${xvfb_flag} python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
         when: on_failure
         paths:
             - ${library}/${library}_StyleCheckLog.html
-            - ${library}/${library}_StyleErrorLog.html
-        expire_in: 7 day 
+        expire_in: 7 day
     allow_failure: true 
     only:
         refs:
@@ -35,7 +34,7 @@ Development_Style_Check:
     before_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
@@ -43,7 +42,6 @@ Development_Style_Check:
         when: on_failure
         paths:
             - ${library}/${library}_StyleCheckLog.html
-            - ${library}/${library}_StyleErrorLog.html
         expire_in: ${expire_in_time}
     allow_failure: true
     only:
@@ -52,13 +50,34 @@ Development_Style_Check:
             - ${branch}
             %endfor
 
+CI_Style_Check:
+    stage: ${ci_stage_style_check}
+    before_script:
+        - export PIP_CACHE_DIR="/opt/cache/pip"
+        - source activate ${python_version}
+        - export PYTHONIOENCODING=utf-8
+        - git clone ${dymola_python_test_url}
+    script:
+        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${library}/${library}_StyleCheckLog.html
+        expire_in: ${expire_in_time}
+    allow_failure: true
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE  =~ /${ci_style_commit}/
+    except:
+        refs:
+            - external_pull_requests
     
 Style_Check_ChangedModel:
     stage: ${ci_stage_style_check}
     before_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
@@ -75,7 +94,6 @@ Style_Check_ChangedModel:
             - ${branch}
             %endfor
             - /^${html_praefix}.*$/
-
         variables:
             %for commit in except_commit_list:
             - $CI_COMMIT_MESSAGE =~ /${commit}/
@@ -83,10 +101,7 @@ Style_Check_ChangedModel:
     artifacts:
         when: on_failure
         paths:
-            - ${library}/ChangedModels_StyleCheckLog.html
-            - ${library}/ChangedModels_StyleErrorLog.html
             - ${library}/${library}_StyleCheckLog.html
-            - ${library}/${library}_StyleErrorLog.html
             - ${config_ci_changed_file}
         expire_in: ${expire_in_time}
     allow_failure: true 

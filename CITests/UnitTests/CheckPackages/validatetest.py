@@ -1,6 +1,5 @@
 import argparse
 import glob
-import multiprocessing
 import os
 import platform
 import sys
@@ -35,7 +34,7 @@ class Git_Repository_Clone(object):
 
 
 class ValidateTest(CI_conf_class):
-    def __init__(self, dymola, dymola_exception, single_package, number_of_processors, show_gui, simulate_examples,
+    def __init__(self, dymola, dymola_exception, single_package, simulate_examples,
                  changed_model, library,
                  wh_library, filter_whitelist):
         """
@@ -44,8 +43,6 @@ class ValidateTest(CI_conf_class):
             dymola (): python_dymola_interface class.
             dymola_exception (): python_dymola_exception class.
             single_package (): Package to be testet.
-            number_of_processors (): processors number.
-            show_gui (): True - show dymola, false - dymola hidden.
             simulate_examples (): boolean - true: simulate examples
             changed_model (): boolean - true: check or simulate only models in a commit .
             library (): library to test.
@@ -53,8 +50,6 @@ class ValidateTest(CI_conf_class):
             filter_whitelist (): boolean - true: filter models from a whitelist.
         """
         self.single_package = single_package
-        self.number_of_processors = number_of_processors
-        self.show_gui = show_gui
         self.simulate_examples = simulate_examples
         self.changed_model = changed_model
         self.library = library
@@ -202,7 +197,6 @@ class Create_whitelist(CI_conf_class):
         self.wh_lib_path = f'{self.wh_library}{os.sep}{self.wh_library}{os.sep}package.mo'
         self.err_log = f'{self.wh_library}{os.sep}{self.wh_library}-errorlog.txt'
         super().__init__()
-
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand(
@@ -274,7 +268,6 @@ class Create_whitelist(CI_conf_class):
         Args:
             model_list (): List of models that are being tested
             version (): version number of whitelist based on the latest Aixlib conversion script.
-
         """
         package_check = self.dymola.openModel(self.wh_lib_path)
         print(f'Library path: {self.wh_lib_path}')
@@ -379,6 +372,11 @@ class Create_whitelist(CI_conf_class):
 class get_modelica_models(CI_conf_class):
 
     def __init__(self, simulate_examples):
+        """
+        return models or simulates to check
+        Args:
+            simulate_examples ():  return examples and validation model
+        """
         super().__init__()
         self.simulate_examples = simulate_examples
 
@@ -544,6 +542,12 @@ class get_modelica_models(CI_conf_class):
 class python_dymola_interface(CI_conf_class):
 
     def __init__(self, dymola, dymola_exception):
+        """
+
+        Args:
+            dymola (): python-dymola interface
+            dymola_exception ():  python-dymola exception
+        """
         super().__init__()
         self.dymola = dymola
         self.dymola_exception = dymola_exception
@@ -617,25 +621,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Check and validate single packages")
     check_test_group = parser.add_argument_group("Arguments to run check tests")
     check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                                  help="Test only the Modelica package AixLib.Package")
-    check_test_group.add_argument("-n", "--number-of-processors", type=int, default=multiprocessing.cpu_count(),
-                                  help="Maximum number of processors to be used")
-    check_test_group.add_argument("--show-gui", help="show the GUI of the simulator", action="store_true")
+                                  help="Test the Modelica package")
     check_test_group.add_argument("-WL", "--whitelist",
-                                  help="Create a WhiteList of IBPSA Library.",
+                                  help="Create a whitelist of a library with failed models.",
                                   action="store_true")
     check_test_group.add_argument("-SE", "--simulate-examples", help="Check and simulate examples in the package",
                                   action="store_true")
-    check_test_group.add_argument("-DS", "--dymola-version", default="2020",
+    check_test_group.add_argument("-DS", "--dymola-version", default="2022",
                                   help="Version of dymola (Give the number e.g. 2020")
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
     check_test_group.add_argument("-FW", "--filter-whitelist", default=False, action="store_true")
     check_test_group.add_argument("-l", "--library", default="AixLib", help="Library to test")
-    check_test_group.add_argument("-wh-l", "--wh-library", default="IBPSA", help="Whitelist library to test")
-    check_test_group.add_argument("--repo-dir", help="Library to test")
+    check_test_group.add_argument("-wh-l", "--wh-library", default="IBPSA", help="library on a whitelist")
+    check_test_group.add_argument("--repo-dir", help="folder of a whitelist library ")
     check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                                   help="url repository of whitelist library")
-    check_test_group.add_argument("--wh-path", help="path of white library")
     args = parser.parse_args()
     _setEnvironmentPath(dymola_version=args.dymola_version)
 
@@ -649,7 +649,7 @@ if __name__ == '__main__':
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
 
-    if args.whitelist is True:  # Write a new whiteList
+    if args.whitelist is True:
         wh = Create_whitelist(dymola=dymola,
                               dymola_exception=dymola_exception,
                               library=args.library,
@@ -662,8 +662,6 @@ if __name__ == '__main__':
         CheckModelTest = ValidateTest(dymola=dymola,
                                       dymola_exception=dymola_exception,
                                       single_package=args.single_package,
-                                      number_of_processors=args.number_of_processors,
-                                      show_gui=args.show_gui,
                                       simulate_examples=args.simulate_examples,
                                       changed_model=args.changed_model,
                                       library=args.library,

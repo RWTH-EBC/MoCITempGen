@@ -7,6 +7,6 @@ Create your own ci-templates for your own purposes.
 ## [CI Tests](CITests)
 This folder contains all CI tests for AixLib in GitLab with unitTests, syntaxTest, deploy scripts, converter scripts and cleanUpScripts.
 ## templates
-This folder contains templates for creating plots of regression tests or ci templates.
+This folder contains templates for creating plots of regression tests or ci-templates.
 
 

@@ -155,6 +155,7 @@ class CI_yml_templates(CI_template_config):
                                      merge_branch=merge_branch,
                                      expire_in_time=self.expire_in_time,
                                      xvfb_flag=self.xvfb_flag,
+                                     ci_style_commit=self.ci_style_commit,
                                      dymola_python_syntax_test_file=self.dymola_python_syntax_test_file.replace(os.sep,
                                                                                                                 "/"),
                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
@@ -202,7 +203,6 @@ class CI_yml_templates(CI_template_config):
         mytemplate = Template(filename=self.temp_ci_regression_file)
         yml_text = mytemplate.render(ci_stage_regression_test=self.ci_stage_regression_test,
                                      ci_stage_ref_check=self.ci_stage_ref_check,
-                                     ci_stage_update_ref=self.ci_stage_update_ref,
                                      ci_stage_plot_ref=self.ci_stage_plot_ref,
                                      ci_stage_prepare=self.ci_stage_prepare,
                                      python_version=self.python_version,
@@ -222,9 +222,8 @@ class CI_yml_templates(CI_template_config):
                                      config_ci_eof_file=self.config_ci_eof_file.replace(os.sep, "/"),
                                      bot_create_ref_commit=self.bot_create_ref_commit,
                                      config_ci_new_ref_file=self.config_ci_new_ref_file.replace(os.sep, "/"),
-                                     ci_update_ref_commit=self.ci_update_ref_commit,
-                                     ci_show_ref_commit=self.ci_show_ref_commit,
                                      xvfb_flag=self.xvfb_flag,
+                                     ci_show_ref_commit=self.ci_show_ref_commit,
                                      dymola_python_test_reference_file=self.dymola_python_test_reference_file.replace(
                                          os.sep, "/"),
                                      dymola_python_google_chart_file=self.dymola_python_google_chart_file.replace(
