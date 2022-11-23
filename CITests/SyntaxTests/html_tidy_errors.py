@@ -65,6 +65,9 @@ class HTML_Tidy(CI_conf_class):
         super().__init__()
 
     def _get_html_model(self):
+        """
+        Returns:
+        """
         library_list = self._get_library_model()
         if self.filter_whitelist is True:
             wh_library_list = self._get_wh_library_model()
@@ -75,6 +78,11 @@ class HTML_Tidy(CI_conf_class):
 
     @staticmethod
     def _check_arguments(root_dir):
+        """
+
+        Args:
+            root_dir ():
+        """
         top_package = os.path.join(root_dir, "package.mo")
         if not os.path.isfile(top_package):
             raise ValueError(
@@ -133,9 +141,12 @@ class HTML_Tidy(CI_conf_class):
             correct_log_file.close()
 
     def call_read_log(self):
+        """
+        Returns: variable with 0 or 1
+        """
         err_list = self.read_log_file()
         variable = self._write_exit(err_list=err_list)
-        exit(variable)
+        return variable
 
     @staticmethod
     def _call_write_log(model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
@@ -564,9 +575,7 @@ class HTML_Tidy(CI_conf_class):
 
     def _get_library_model(self):
         """
-         Return library models
-        Returns:
-
+        Returns: library models to check
         """
         library_list = []
         for subdir, dirs, files in os.walk(self.package.replace(".", os.sep)):
@@ -578,7 +587,8 @@ class HTML_Tidy(CI_conf_class):
                     library_list.append(model)
         return library_list
 
-    def _remove_whitelist_model(self, library_list, wh_library_list):
+    @staticmethod
+    def _remove_whitelist_model(library_list, wh_library_list):
         """
         get library model
         Returns:
@@ -607,6 +617,9 @@ class HTML_whitelist(CI_conf_class):
         super().__init__()
 
     def call_whitelist(self):
+        """
+
+        """
         self._clone_repository()
         model_list = self._get_whitelist_model()
         self._write_whitelist(model_list=model_list)
@@ -622,6 +635,11 @@ class HTML_whitelist(CI_conf_class):
             Repo.clone_from(self.git_url, self.wh_library)
 
     def _write_whitelist(self, model_list):
+        """
+
+        Args:
+            model_list ():
+        """
         file = open(self.wh_html_file, "w")
         for model in model_list:
             file.write("\n" + model + ".mo" + "\n")

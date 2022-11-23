@@ -1,42 +1,16 @@
 # What is it?
 This templates check, simulate or perform a regression test of AixLib models.
 
-# How to implement?
-Add the following lines to your .gitlab-ci.yml:
+### validatetest
 	
-	stages:
-		- Ref_Check
-		- Update_WhiteList
-		- check
-		- post
-		- create_whitelist
-		- simulate
-		- RegressionTest
-		- Update_Ref
-		- plot_ref
-		- prepare
-		- deploy
+Check and simulate modelica models with dymola-python-interface.
 
-	include:
-		- 'bin/templates/03_ci_templates/02_UnitTests/check_model.gitlab-ci.yml'  
-		- 'bin/templates/03_ci_templates/02_UnitTests/regression_test.gitlab-ci.yml'  
-		- 'bin/templates/03_ci_templates/02_UnitTests/simulate_model.gitlab-ci.yml'
-
-	
-
-### runUnitTests
-
-
-For further information on how to use theUnitTest, please refer to the following [link](https://github.com/ibpsa/modelica-ibpsa/wiki/Unit-Tests)
-
+### reference_check
+For further information on how to use the UnitTest, please refer to the following [link](https://github.com/ibpsa/modelica-ibpsa/wiki/Unit-Tests)
 #### To Write a new Unit Test:
-
 This documentation briefly describes how to apply and use the unit tests and how to create reference files that will later be compared for a unit test. 
-
 The documentation already explains how to use a UnitTest and what to consider. A concrete example is given here.
-
 This example uses the AixLib.Airflow.FacadeVentilationUnit.Examples.FacadeVentilationUnit.mo model. 
-
 
 	within AixLib.Airflow.FacadeVentilationUnit.Examples;
 	model FacadeVentilationUnit
@@ -313,50 +287,4 @@ The reference file then looks like the one below and can be compared and used in
 	FVUController.roomToBeCooled.reference=[2.931499938964844e+02, 2.928360595703125e+02, 2.925233459472656e+02, 2.922131042480469e+02, 2.919065551757812e+02, 2.916049194335938e+02, 2.913093872070312e+02, 2.910211181640625e+02, 2.907412414550781e+02, 2.904708557128906e+02, 2.902110595703125e+02, 2.89962890625e+02, 2.897272644042969e+02, 2.895051574707031e+02, 2.892974243164062e+02, 2.891049194335938e+02, 2.889283752441406e+02, 2.887684631347656e+02, 2.886258544921875e+02, 2.885011291503906e+02, 2.883947143554688e+02, 2.883070983886719e+02, 2.882385559082031e+02, 2.881894226074219e+02, 2.881598815917969e+02, 2.881499938964844e+02, 2.881598815917969e+02, 2.881894226074219e+02, 2.882385559082031e+02, 2.883070983886719e+02, 2.883947143554688e+02, 2.885011291503906e+02, 2.886258544921875e+02, 2.887684631347656e+02, 2.889283752441406e+02, 2.891049194335938e+02, 2.892974243164062e+02, 2.895051574707031e+02, 2.897272644042969e+02, 2.89962890625e+02, 2.902110595703125e+02, 2.904708557128906e+02, 2.907412414550781e+02, 2.910211181640625e+02, 2.913093872070312e+02, 2.916049194335938e+02, 2.919065551757812e+02, 2.922131042480469e+02, 2.925233459472656e+02, 2.928360595703125e+02, 2.931499938964844e+02, 2.934639587402344e+02, 2.937766723632812e+02, 2.940869140625e+02, 2.943934631347656e+02, 2.946950988769531e+02, 2.949906311035156e+02, 2.952789001464844e+02, 2.955587768554688e+02, 2.958291320800781e+02, 2.960889282226562e+02, 2.963371276855469e+02, 2.965727233886719e+02, 2.967948303222656e+02, 2.970025634765625e+02, 2.971950988769531e+02, 2.973716430664062e+02, 2.975315246582031e+02, 2.976741333007812e+02, 2.977988891601562e+02, 2.979052734375e+02, 2.97992919921875e+02, 2.980614318847656e+02, 2.981105651855469e+02, 2.9814013671875e+02, 2.981499938964844e+02, 2.9814013671875e+02, 2.981105651855469e+02, 2.980614318847656e+02, 2.97992919921875e+02, 2.979052734375e+02, 2.977988891601562e+02, 2.976741333007812e+02, 2.975315246582031e+02, 2.973716430664062e+02, 2.971950988769531e+02, 2.970025634765625e+02, 2.967948303222656e+02, 2.965727233886719e+02, 2.963371276855469e+02, 2.960889282226562e+02, 2.958291320800781e+02, 2.955587768554688e+02, 2.952789001464844e+02, 2.949906311035156e+02, 2.946950988769531e+02, 2.943934631347656e+02, 2.940869140625e+02, 2.937766723632812e+02, 2.934639587402344e+02, 2.931499938964844e+02]
 	time=[0e+00, 8.64e+04]
 ```
-### validatetest
 	
-This test check and simulate the models. You have following options:
-	
-	 parser = argparse.ArgumentParser(description="Check and Validate single Packages")  # Configure the argument parser
-    check_test_group = parser.add_argument_group("arguments to run check tests")
-    check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                                  help="Test only the Modelica package AixLib.Package")
-    check_test_group.add_argument("-n", "--number-of-processors", type=int, default=multiprocessing.cpu_count(),
-                                  help="Maximum number of processors to be used")
-    check_test_group.add_argument("--show-gui", help="show the GUI of the simulator", action="store_true")
-    check_test_group.add_argument("-WL", "--whitelist",
-                                  help="Create a WhiteList of IBPSA Library: y: Create WhiteList, n: Don´t create WhiteList",
-                                  action="store_true")
-    check_test_group.add_argument("-SE", "--simulateexamples", help="Check and Simulate Examples in the Package",
-                                  action="store_true")
-    check_test_group.add_argument("-DS", "--dymolaversion", default="2020",
-                                  help="Version of Dymola(Give the number e.g. 2020")
-    check_test_group.add_argument("-V", "--check-version", default=False, action="store_true")
-    check_test_group.add_argument("-CM", "--changedmodels", default=False, action="store_true")
-    check_test_group.add_argument("-FW", "--filterwhitelist", default=False, action="store_true")
-    check_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    check_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
-    check_test_group.add_argument("--repo-dir", help="Library to test")
-    check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git", help="url repository")
-    check_test_group.add_argument("--wh-path", help="path of white library")
-	
-	1.	--whitelist
-	
-Clone the repository of IBPSA and check the models. Models that failed will append to the Whitelist. These models will not checked.
-
-	2. --simulateexamples
-
-Example:
-
-`python bin/CITests/02_UnitTests/CheckPackages/validatetest.py  --single-package "Airflow" --library AixLib -DS 2020 --wh-library IBPSA --filterwhitelist --simulateexamples`
-	
-`python bin/CITests/02_UnitTests/CheckPackages/validatetest.py -DS 2020 --repo-dir IBPSA --git-url https://github.com/ibpsa/modelica-ibpsa.git  --library AixLib --wh-library IBPSA --whitelist`
-
-
-The Test will check and simulate all examples and validation in AixLib. 
-	
-# What is done?
-- Simulate models
-- check models
-- Write a Whitelist of failing IBPSA models
-- regression test of models

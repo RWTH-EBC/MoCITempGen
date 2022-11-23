@@ -152,7 +152,7 @@ class ValidateTest(CI_conf_class):
             filter_whitelist: boolean - true  Filter model on whitelist
         """
         self._check_packages()
-        #python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
+        python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
         conf = CI_conf_class()
         if self.changed_model is True:
