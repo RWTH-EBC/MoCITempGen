@@ -6,10 +6,9 @@ class GET_API_GITHUB(object):
 
     def __init__(self, github_repo, working_branch):
         """
-
         Args:
-            github_repo ():
-            working_branch ():
+            github_repo (): github repository
+            working_branch ():  Branch in which work is currently being done
         """
         self.github_repo = github_repo
         self.working_branch = working_branch
@@ -18,6 +17,7 @@ class GET_API_GITHUB(object):
         """
 
         Returns:
+            pr_number (): Return the pull request number
 
         """
         url = f'https://api.github.com/repos/{self.github_repo}/pulls'

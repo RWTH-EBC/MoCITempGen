@@ -2,30 +2,28 @@ import argparse
 import os
 import sys
 from pathlib import Path
-
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
-
 class Lock_model(CI_conf_class):
 
-    def __init__(self, library, wh_library):
+    def __init__(self, library, lock_library):
         """
+        lock model from the whitelist library
         Args:
-            library ():
-            wh_library ():
+            library (): library
+            lock_library (): lock library
         """
         self.library = library
-        self.wh_library = wh_library
+        self.lock_library = lock_library
         super().__init__()
 
-    def sort_whitelist_model(self):
+    def _sort_whitelist_model(self):
         """
         Read whitelist and return a list.
         Sort List of models.
-
         Returns:
-            model_list ()
+            model_list (): return a list of models to lock
         """
         try:
             wh = open(self.wh_html_file, "r")
@@ -42,13 +40,15 @@ class Lock_model(CI_conf_class):
                     mo = mo.strip()
                     model_list.append(mo)
             return model_list
-
         except IOError:
             print(f'Error: File {self.wh_html_file} does not exist.')
             exit(1)
 
     def call_lock_model(self):
-        mo_li = self.sort_whitelist_model()
+        """
+        lock models
+        """
+        mo_li = self._sort_whitelist_model()
         for model in mo_li:
             if Path(model).is_file():
                 result = self.get_last_line(model_file=model)
@@ -67,8 +67,9 @@ class Lock_model(CI_conf_class):
     @staticmethod
     def get_last_line(model_file):
         """
+        Search for each model  for the __Dymola_LockedEditing="Model from IBPSA"); flag
         Args:
-            model_file ():
+            model_file (): file of a model
         Returns:
         """
         model_part = []
@@ -91,11 +92,9 @@ class Lock_model(CI_conf_class):
     @staticmethod
     def lock_model(model, content):
         """
-
         Args:
-            model ():
+            model (): model name
             content ():
-
         Returns:
 
         """
@@ -150,7 +149,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Lock models.')
     unit_test_group = parser.add_argument_group("arguments to run class Lock_model")
     unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    unit_test_group.add_argument("-wh-l", "--wh-library", help="Library to test")
+    unit_test_group.add_argument("-wh-l", "--lock-library", help="Library to lock")
     args = parser.parse_args()
-    lock = Lock_model(library=args.library, wh_library=args.wh_library)
+    lock = Lock_model(library=args.library, lock_library=args.lock_library)
     lock.call_lock_model()

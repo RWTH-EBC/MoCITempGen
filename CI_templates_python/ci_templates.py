@@ -184,10 +184,12 @@ class CI_yml_templates(CI_template_config):
                                      library=self.library,
                                      ci_trigger_ibpsa_commit=self.ci_trigger_ibpsa_commit,
                                      expire_in_time=self.expire_in_time,
-                                     dymolaversion=self.dymola_version,
+                                     dymola_version=self.dymola_version,
                                      wh_library=self.wh_library,
                                      bot_merge_commit=self.bot_merge_commit,
-                                     wh_model_file=self.wh_model_file)
+                                     wh_model_file=self.wh_model_file,
+                                     xvfb_flag=self.xvfb_flag,
+                                     dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-2]}'
         CI_conf_class().check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-1]}'

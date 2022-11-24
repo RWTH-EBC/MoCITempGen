@@ -1,9 +1,7 @@
-
 stages:
     - ${ci_stage_lib_merge}
     - ${ci_stage_update_whitelist}
     - ${ci_stage_open_PR}
-
 
 IBPSA:
     stage: ${ci_stage_lib_merge}
@@ -32,9 +30,8 @@ IBPSA:
         - python mergeModelicaIBPSA.py
         - cd ..
         - cd ..
-        - cd .. 
-        - python Dymola_python_tests/CITests/deploy/IBPSA_Merge/copy_conversion_script.py --dst "Convertmos" --ibpsa-dir  "modelica-ibpsa/IBPSA/Resources/Scripts/Conversion/ConvertIBPSA_*" --aixlib-dir "${library}/Resources/Scripts"
-        - python Dymola_python_tests/CITests/deploy/IBPSA_Merge/correct_userguide.py
+        - cd ..
+        - python Dymola_python_tests/CITests/deploy/IBPSA_Merge/library_merge.py
         - rm -r modelica-ibpsa
     only:
         refs:
@@ -65,9 +62,10 @@ WhiteList:
         - git clone ${dymola_python_test_url}
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
-        - python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --WhiteList # Update WhiteList for HTML
-        - xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py -DS ${dymolaversion} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
-        - python Dymola_python_tests/CITests/Converter/lock_model.py --library ${library} --wh-library ${wh_library}
+        - python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --whitelist
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - python Dymola_python_tests/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
         - rm  -r ${wh_library}
         - message="${bot_merge_commit}"
         - git add  .

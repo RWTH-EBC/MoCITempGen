@@ -26,6 +26,31 @@ For the implementation in gitlab-yaml go to the following [link](https://git.rwt
 
 ### reference_check.py
 For further information on how to use the UnitTest, please refer to the following [link](https://github.com/ibpsa/modelica-ibpsa/wiki/Unit-Tests)
+#### Parser Arguments
+| Parser Arguments   | Description                                                         | 
+|--------------------|---------------------------------------------------------------------| 
+| --batch            | Argument (default:False) Run in batch mode without user interaction |
+| --show-gui         | Show the GUI of the simulator                                       |
+| --single-package   | Test only the Modelica package Modelica.Package                     |
+| --path             | Path where top-level package.mo of the library is located           |
+| --library          | Library to test                                                     |
+| --tool | Tool for the regression tests. Set to dymola or jmodelica           |
+| --coverage-only          | Only run the coverage test                                          |
+| --create-ref      | checks if all reference files exist                                 |
+| --ref-list      | Create a reference list                                             |
+| --update-ref        | update all reference files that are on the interact-ci file         |
+| --modified-models       | Regression test only for modified models                            |
+| --validate-html-only      | Validate the html of modelica files                                 |
+| --validate-experiment-setup       | Check the setup                                                     |
+
+#### Example: Execution on gitlab runner (linux)
+    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package AixLib.Airflow --library AixLib --batch -DS 2022
+    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py --coverage-only
+    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package  AixLib.Airflow  --library AixLib --batch -DS 2022 -n 2 --modified-model
+    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py --create-ref -n 4 < ../dymola-ci-tests/Configfiles/EOF.sh
+
+For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
+
 #### To Write a new Unit Test:
 This documentation briefly describes how to apply and use the unit tests and how to create reference files that will later be compared for a unit test. 
 The documentation already explains how to use a UnitTest and what to consider. A concrete example is given here.
@@ -276,14 +301,6 @@ This mos file looks like the following
 	 grid=true,
 	 filename = "FacadeVentilationUnit.mat",
 	 colors={{28,108,200},{238,46,47}});
-
-	 
-	 
-Then the unit test is executed with the following command
-
-```shell
-	python ../bin/runUnitTests.py -n 2 --single-package AixLib.Airflow --tool dymola
-```
 
 You will be asked if the user wants to have a reference file created and saved.
 The reference file then looks like the one below and can be compared and used in future UnitTests. The reference file is saved as text file under the path AixLib/Resources/ReferenceResults/Dymola/AixLib_Airflow_FacadeVentilationUnit_Examples_FacadeVentilationUnit.txt 

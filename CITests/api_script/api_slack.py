@@ -5,13 +5,28 @@ from datetime import date
 class Slack_Notification(object):
 
     def __init__(self, github_token, slack_token, github_repo, base_branch):
+        """
+
+        Args:
+            github_token (): github token
+            slack_token (): slack token
+            github_repo (): github repository
+            base_branch (): Branch to be merged into
+        """
         self.slack_token = slack_token
         self.github_token = github_token
         self.github_repo = github_repo
         self.base_branch = base_branch
         self.url = f'https://api.github.com/repos/{github_repo}/branches'
 
-    def _get_data(self, branch):  # date of last commit
+    def _get_data(self, branch):
+        """
+        date of last commit
+        Args:
+            branch ():
+        Returns:
+
+        """
         branch_url = self.url + "/" + branch
         payload = {}
         headers = {
@@ -31,7 +46,12 @@ class Slack_Notification(object):
             login_name = author_commit["name"]
         return author_commit, login_name
 
-    def _get_branches(self):  # get a list of branches in repo
+    def _get_branches(self):
+        """
+        get a list of branches in repo
+        Returns:
+
+        """
         try:
             url = f'{self.url}?per_page=100'
             payload={}

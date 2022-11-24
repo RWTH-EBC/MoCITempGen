@@ -4,7 +4,6 @@ import shutil
 import sys
 import pandas as pd
 from mako.template import Template
-
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
@@ -518,31 +517,25 @@ class Plot_Charts(CI_conf_class):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot diagramms')  # Initialize a Parser
+    parser = argparse.ArgumentParser(description='Plot diagramms')
     unit_test_group = parser.add_argument_group("arguments to plot diagrams")
     unit_test_group.add_argument("--line-html",
                                  help='plot a google html chart in line form',
                                  action="store_true")
     unit_test_group.add_argument("--create-layout",
-                                 help='plot a google html chart in line form',
+                                 help='Create a layout with a plots',
                                  action="store_true")
     unit_test_group.add_argument("--line-matplot",
-                                 help='plot a google html chart in line form',
+                                 help='plot a matlab chart ',
                                  action="store_true")
     unit_test_group.add_argument("--new-ref",
                                  help="Plot new models with new created reference files",
-                                 action="store_true")
-    unit_test_group.add_argument("-pM", "--plotModel",
-                                 help="Plot this model",
-                                 action="store_true")
-    unit_test_group.add_argument("--all-model",
-                                 help='Plot all model',
                                  action="store_true")
     unit_test_group.add_argument("-e", "--error",
                                  help='Plot only model with errors',
                                  action="store_true")
     unit_test_group.add_argument("--show-ref",
-                                 help='Plot only model with errors',
+                                 help='Plot only model on the interact ci list',
                                  action="store_true")
     unit_test_group.add_argument("--update-ref",
                                  help='Plot only updated models',
@@ -562,7 +555,6 @@ if __name__ == '__main__':
                                  action="store_true")
     args = parser.parse_args()
     conf = CI_conf_class()
-    print(f'\n\n\n')
     conf.check_ci_folder_structure(folders_list=[conf.chart_dir, conf.temp_chart_dir])
     conf.check_ci_file_structure(files_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
     charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)

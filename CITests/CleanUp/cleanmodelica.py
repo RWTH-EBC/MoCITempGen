@@ -14,7 +14,10 @@ import sys
 class CleanModelica(object):
 
     def __init__(self):
-        # List of files that should be deleted
+        """
+        List of files that should be deleted
+        Directories to be deleted. This will be non-recursive
+        """
         self.delete_files = ['buildlog.txt', 'dsfinal.txt', 'dsin.txt', 'dslog.txt',
                              'dsmodel*', 'dymosim', 'dymosim.lib', 'dymosim.exp',
                              'dymosim.dll', 'dymola.log', 'dymosim.exe', '*.mat', '*.mof',
@@ -23,12 +26,13 @@ class CleanModelica(object):
                              'stop', 'stop.',
                              'fmiModelIdentifier.h', 'modelDescription.xml',
                              'fmiFunctions.o',
-                             'CSVWriter.csvWriter.csv', 'test.csv',]
-
-        # Directories to be deleted. This will be non-recursive
+                             'CSVWriter.csvWriter.csv', 'test.csv']
         self.delete_dirs = ['binaries']
 
-    def _delete_files_func(self):  # Array in which the names of the files that will be deleted are stored
+    def delete_files_func(self):
+        """
+        Array in which the names of the files that will be deleted are stored
+        """
         matches = []
         for root, dirnames, filenames in os.walk('.'):
             for file in self.delete_files:
@@ -41,17 +45,17 @@ class CleanModelica(object):
             sys.stdout.write("Deleting file '" + f + "'.\n")
             os.remove(f)
 
-    def _delete_dir_func(self):  # Delete directories
-        for dir in self.delete_dirs:
-            if os.path.exists(dir):
-                sys.stdout.write("Deleting directory '" + dir + "'.\n")
-                shutil.rmtree(dir)
+    def delete_dir_func(self):  # Delete directories
+        for folder in self.delete_dirs:
+            if os.path.exists(folder):
+                sys.stdout.write("Deleting directory '" + folder + "'.\n")
+                shutil.rmtree(folder)
 
 
 if __name__ == "__main__":
-    cleanM = CleanModelica()
-    cleanM.delete_files()
-    cleanM.delete_dirs()
+    clean = CleanModelica()
+    clean.delete_files_func()
+    clean.delete_dir_func()
 
 
 

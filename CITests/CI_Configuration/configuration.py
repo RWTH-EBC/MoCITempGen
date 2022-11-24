@@ -119,7 +119,3 @@ if __name__ == '__main__':
         pass
     conf.check_ci_folder_structure(folders_list=folder_list)
     conf.check_ci_file_structure(files_list=file_list)
-
-
-
-
