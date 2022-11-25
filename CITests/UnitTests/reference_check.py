@@ -317,7 +317,7 @@ class Ref_model(CI_conf_class):
                     continue
         if len(mos_list) == 0:
             print(f'No feasible mos script for regression test in {self.library_resource_dir}.')
-
+            return mos_list
         else:
             return mos_list
 
@@ -411,36 +411,41 @@ class Extended_model(CI_conf_class):
                 self.dymola.ExecuteCommand(
                     'cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
             for model in mo_list:
-                use_model_list = []
                 used_model_list = self.dymola.ExecuteCommand(
                     f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
-                if used_model_list is None:
-                    continue
-                else:
+                if used_model_list is not None:
                     for use_model in used_model_list:
                         for types in type_list:
                             if use_model.find(f'{types}') > -1:
-                                continue
-                        use_model_list.append(use_model)
-
+                                used_model_list.remove(use_model)
+                                break
                 extended_model_list = self.dymola.ExecuteCommand(
-                    f'ModelManagement.Structure.AST.ExtendsInClass("{model}");')
-                if extended_model_list is None:
-                    continue
-                else:
+                    f'ModelManagement.Structure.AST.Classes.ExtendsInClass("{model}");')
+                if extended_model_list is not None:
                     for extended_model in extended_model_list:
                         for types in type_list:
                             if extended_model.find(f'{types}') > -1:
-                                continue
-                        use_model_list.append(extended_model)
-                ch_model_list = self._get_changed_used_model(lines=lines, model_list=use_model_list)
+                                extended_model_list.remove(extended_model)
+                                break
+                ch_model_list = self._get_changed_used_model(lines=lines,
+                                                             used_model_list=used_model_list,
+                                                             extended_model_list=extended_model_list)
                 if len(ch_model_list) > 0:
                     model_list.append(model)
             self.dymola.close()
             model_list = list(set(model_list))
             return model_list
 
-    def _get_changed_used_model(self, lines, model_list):
+    def _get_package_model(self):
+        package_model_list = list()
+        for subdir, dirs, files in os.walk(self.package.replace(".", os.sep)):
+            for file in files:
+                filepath = f'{self.library}{os.sep}{subdir}{os.sep}{file}'
+                package_model_list.append(filepath[:filepath.rfind(".mo")].replace(os.sep, "."))
+        return package_model_list
+
+
+    def _get_changed_used_model(self, lines, used_model_list, extended_model_list):
         """
         return all used models, that changed
         Args:
@@ -452,13 +457,56 @@ class Extended_model(CI_conf_class):
         """
         ch_model_list = []
         for line in lines:
-            for model in model_list:
-                if line[line.find(self.library):line.rfind(".mo")].strip() == model:
-                    ch_model_list.append(model)
+            if used_model_list is not None:
+                for model in used_model_list:
+                    if line[line.find(self.library):line.rfind(".mo")].strip() == model:
+                        ch_model_list.append(model)
+            if extended_model_list is not None:
+                for model in extended_model_list:
+                    if line[line.find(self.library):line.rfind(".mo")].strip() == model:
+                        ch_model_list.append(model)
+        ch_model_list = list(set(ch_model_list))
         return ch_model_list
 
-    @staticmethod
-    def _insert_list(ref_list, mos_list, modelica_list,
+
+    def _mos_script_to_model_exist(self, model):
+        test_model = model.replace(f'{self.library}.', "")
+        test_model = test_model.replace(".", os.sep)
+        for subdir, dirs, files in os.walk(self.library_resource_dir):
+            for file in files:
+                filepath = subdir + os.sep + file
+                if filepath.endswith(".mos") and filepath.find(self.package.replace(".", os.sep)) > -1:
+                    if filepath.find(test_model) > -1:
+                        infile = open(filepath, "r")
+                        lines = infile.read()
+                        infile.close()
+                        if lines.find("simulateModel") > -1:
+                            return model
+                        if lines.find("simulateModel") == -1:
+                            return None
+
+    def _model_to_ref_exist(self, ref_file):
+        model_file = ref_file.replace("_", os.sep)
+        for subdir, dirs, files in os.walk(self.package.replace(".", os.sep)):
+            for file in files:
+                filepath = f'{self.library}{os.sep}{subdir}{os.sep}{file}'
+                if filepath.endswith(".mo") and filepath.find(self.package.replace(".", os.sep)) > -1:
+                    if filepath.find(model_file) > -1:
+                        return model_file.replace(os.sep, ".")
+
+    def model_to_mos_script_exist(self, mos_script):
+        model_file = mos_script.replace(".", os.sep)
+        for subdir, dirs, files in os.walk(self.package.replace(".", os.sep)):
+            for file in files:
+                filepath = f'{self.library}{os.sep}{subdir}{os.sep}{file}'
+                if filepath.endswith(".mo") and filepath.find(self.package.replace(".", os.sep)) > -1:
+                    if filepath.find(model_file) > -1:
+                        return mos_script
+
+
+
+
+    def _insert_list(self, ref_list, mos_list, modelica_list,
                      ch_model_list):
         """
         return models, scripts, reference results and used models, that changed
@@ -470,22 +518,36 @@ class Extended_model(CI_conf_class):
         Returns:
         """
         changed_list = []
+        print(f'\n ------The last modified files ------\n')
         if ref_list is not None:
             for ref in ref_list:
-                print(f'Changed reference files: {ref}')
-                changed_list.append(ref[:ref.rfind("_")].replace("_", "."))
+                model_file = self._model_to_ref_exist(ref_file=ref)
+                if model_file is not None:
+                    model = self._mos_script_to_model_exist(model=model_file)
+                    if model is not None:
+                        print(f'Changed reference files: {ref}')
+                        changed_list.append(ref[:ref.rfind("_")].replace("_", "."))
         if mos_list is not None:
             for mos in mos_list:
-                print(f'Changed mos script files: {mos}')
-                changed_list.append(mos[:mos.rfind(".")])
+                mos_script = self.model_to_mos_script_exist(mos_script=mos)
+                if mos_script is not None:
+                    model = self._mos_script_to_model_exist(model=mos_script)
+                    if model is not None:
+                        print(f'Changed mos script files: {mos}')
+                        changed_list.append(mos[:mos.rfind(".")])
         if modelica_list is not None:
             for model in modelica_list:
-                print(f'Changed model files: {model}')
-                changed_list.append(model[:model.rfind(".")])
+                model = self._mos_script_to_model_exist(model=model)
+                if model is not None:
+                    print(f'Changed model files: {model}')
+                    changed_list.append(model[:model.rfind(".")])
         if ch_model_list is not None:
             for used_model in ch_model_list:
-                print(f'Changed used model files: {used_model}')
-                changed_list.append(used_model[:used_model.rfind(".")])
+                model = self._mos_script_to_model_exist(model=used_model)
+                if model is not None:
+                    print(f'Changed used model files: {used_model}')
+                    changed_list.append(used_model[:used_model.rfind(".")])
+        print(f'\n -----------------------------------\n')
         changed_list = list(set(changed_list))
         return changed_list
 
@@ -497,11 +559,10 @@ class Extended_model(CI_conf_class):
             changed_models = open(self.config_ci_changed_file, "r", encoding='utf8')
             ref_file = open(self.config_ci_ref_file, "r", encoding='utf8')
             changed_lines = changed_models.readlines()
-            ref_lines = ref_file.readlines()
             changed_models.close()
             ref_file.close()
-            mos_script_list = []
-            modelica_model_list = []
+            mos_script_list = list()
+            modelica_model_list = list()
             reference_list = list()
             for line in changed_lines:
                 if len(line) == 0:
@@ -516,7 +577,8 @@ class Extended_model(CI_conf_class):
                         modelica_model_list.append(line[line.rfind(self.library):line.rfind(".mo")])
                     if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
                         reference_list.append(line[line.rfind(self.library):line.rfind(".txt")])
-            ch_model_list = self._get_used_model(mo_list=modelica_model_list,
+            model_package = self._get_package_model()
+            ch_model_list = self._get_used_model(mo_list=model_package,
                                                  lines=changed_lines)
             changed_list = self._insert_list(ref_list=reference_list,
                                              mos_list=mos_script_list,
@@ -528,8 +590,10 @@ class Extended_model(CI_conf_class):
             else:
                 print(f'Number of checked packages: {str(len(changed_list))}')
                 return changed_list
+
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
+
 
 
 
@@ -708,7 +772,7 @@ if __name__ == '__main__':
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-        dym_interface.dym_check_lic()
+        #dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
                                                  n_pro=args.number_of_processors,
@@ -731,7 +795,7 @@ if __name__ == '__main__':
             if args.modified_models is True:
                 conf.check_ci_file_structure(
                     files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
-                ref_model.write_regression_list()
+                #ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
                                                 dymola_exception=dymola_exception,
