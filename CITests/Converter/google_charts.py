@@ -599,4 +599,5 @@ if __name__ == '__main__':
         charts.create_index_layout()
         charts.create_layout(temp_dir=conf.chart_dir, layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
     if args.create_layout is True:
+        conf.check_ci_folder_structure(folders_list=[f'data{os.sep}plots'])
         charts.create_layout(temp_dir=f'data{os.sep}plots', layout_html_file=f'data{os.sep}plots{os.sep}index.html')
