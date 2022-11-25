@@ -121,7 +121,9 @@ class HTML_Tidy(CI_conf_class):
                                             file_counter=file_counter)
             if len(error_list) > 0:
                 if self.correct_overwrite:
-                    print(f'Error in file {model_file} with error {error_list}')
+                    print(f'Error in file {model_file} with error:')
+                    for error in error_list:
+                        print(f'\n{error}\n')
                     print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
                     if self.log:
