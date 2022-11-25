@@ -112,6 +112,7 @@ class HTML_Tidy(CI_conf_class):
             print(f'Correct-log-file is saved in {self.html_correct_log}')
         html_model_list = self._get_html_model()
         for model in html_model_list:
+            error_list = list()
             model_file = f'{model[:model.rfind(".mo")].replace(".", os.sep)}.mo'
             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
             if self.correct_backup:
@@ -144,7 +145,6 @@ class HTML_Tidy(CI_conf_class):
                                              error_list=error_list,
                                              html_correct_code=html_correct_code,
                                              html_code=html_code)
-
         if self.log:
             error_log_file.close()
             correct_log_file.close()
@@ -171,7 +171,7 @@ class HTML_Tidy(CI_conf_class):
             html_code (): html code of a modelica file
         """
         if len(error_list) > 0:
-            html_correct_code = html_correct_code.replace(f'\n', "")
+            #html_correct_code = html_correct_code.replace(f'\n', "")
             error_log_file.write(f'\n---- {model_file} ----')
             correct_log_file.write(
                 f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
