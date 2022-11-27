@@ -159,10 +159,11 @@ class Ref_model(CI_conf_class):
         """
         mos_script_list = self._get_mos_scripts()  # Mos Scripts
         reference_list = self._get_check_ref()  # Reference files
-        print(reference_list)
-        mos_list = self._compare_ref_mos(mos_script_list=mos_script_list, reference_list=reference_list)
+        mos_list = self._compare_ref_mos(mos_script_list=mos_script_list,
+                                         reference_list=reference_list)
         wh_list = self._get_whitelist_package()
-        model_list = self._compare_wh_mos(package_list=mos_list, wh_list=wh_list)
+        model_list = self._compare_wh_mos(package_list=mos_list,
+                                          wh_list=wh_list)
         model_list = list(set(model_list))
         package_list = []
         for model in model_list:

@@ -383,11 +383,10 @@ RegressionTest_Check_References:
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
         - cd CorrectedVersion && cd $CI_PROJECT_NAME
-        - git ls-files --others --exclude-standard
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            push_model=$(git ls-files --others --exclude-standard) ;
+            push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             echo $push_model ;
-            (git ls-files --others --exclude-standard) > ${config_ci_new_ref_file} ;
+            (git ls-files --others --exclude-standard ${library}) > ${config_ci_new_ref_file} ;
             message="${bot_create_ref_commit}" ;
             git add $push_model ;
             git commit -m "$message";

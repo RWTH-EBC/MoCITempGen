@@ -16,6 +16,7 @@ class CI_conf_class(object):
         self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
         self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
         # [Config_files]
+
         self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}Configfiles'
         self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}exit.sh'
         self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_ref_file.txt'
