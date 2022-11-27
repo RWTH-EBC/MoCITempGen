@@ -377,7 +377,7 @@ RegressionTest_Check_References:
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
         - python ${dymola_python_configuration_file} --ci-interactive
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -n 4 < ../${config_ci_eof_file}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}

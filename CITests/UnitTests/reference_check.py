@@ -50,7 +50,6 @@ class Buildingspy_Regression_Check(CI_conf_class):
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
 
-
     def check_regression_test(self, package_list):
         """
         start regression test for a package
@@ -160,6 +159,7 @@ class Ref_model(CI_conf_class):
         """
         mos_script_list = self._get_mos_scripts()  # Mos Scripts
         reference_list = self._get_check_ref()  # Reference files
+        print(reference_list)
         mos_list = self._compare_ref_mos(mos_script_list=mos_script_list, reference_list=reference_list)
         wh_list = self._get_whitelist_package()
         model_list = self._compare_wh_mos(package_list=mos_list, wh_list=wh_list)
@@ -227,7 +227,7 @@ class Ref_model(CI_conf_class):
                     err_list.append(mos)
                     break
         for err in err_list:
-            mos_script_list.remove(err)  #
+            mos_script_list.remove(err)
         for package in mos_script_list:
             print(f'{self.CRED}No Reference result for Model:{self.CRED} {package}')
         return mos_script_list
@@ -290,7 +290,6 @@ class Ref_model(CI_conf_class):
             wh_file.close()
         except IOError:
             print(f'Error: File {self.config_ci_ref_file} does not exist.')
-
 
     def _get_mos_scripts(self):
         """
@@ -392,7 +391,6 @@ class Extended_model(CI_conf_class):
         self.config_ci_changed_file = f'..{os.sep}{self.config_ci_changed_file}'
         self.config_ci_ref_file = f'..{os.sep}{self.config_ci_ref_file}'
 
-
     def _get_used_model(self, mo_list, lines):
         """
         get a list with all used models of regression models
@@ -444,13 +442,13 @@ class Extended_model(CI_conf_class):
                 package_model_list.append(filepath[:filepath.rfind(".mo")].replace(os.sep, "."))
         return package_model_list
 
-
     def _get_changed_used_model(self, lines, used_model_list, extended_model_list):
         """
         return all used models, that changed
         Args:
             lines (): lines from changed models
-            model_list (): models to check
+            used_model_list (): models to check
+            extended_model_list (): models to check
 
         Returns:
             ch_model_list () : return a list of changed models
@@ -467,7 +465,6 @@ class Extended_model(CI_conf_class):
                         ch_model_list.append(model)
         ch_model_list = list(set(ch_model_list))
         return ch_model_list
-
 
     def _mos_script_to_model_exist(self, model):
         test_model = model.replace(f'{self.library}.', "")
@@ -502,9 +499,6 @@ class Extended_model(CI_conf_class):
                 if filepath.endswith(".mo") and filepath.find(self.package.replace(".", os.sep)) > -1:
                     if filepath.find(model_file) > -1:
                         return mos_script
-
-
-
 
     def _insert_list(self, ref_list, mos_list, modelica_list,
                      ch_model_list):
@@ -570,12 +564,15 @@ class Extended_model(CI_conf_class):
                 else:
                     line = line.replace("/", ".")
                     line = line.replace(os.sep, ".")
-                    if line.rfind(".mos") > -1 and line.rfind("Scripts") > -1 and line.find(".package") == -1 and line.rfind(self.package) > -1:
+                    if line.rfind(".mos") > -1 and line.rfind("Scripts") > -1 and line.find(
+                            ".package") == -1 and line.rfind(self.package) > -1:
                         line = line.replace("Dymola", self.library)
                         mos_script_list.append(line[line.rfind(self.library):line.rfind(".mos")])
-                    if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
+                    if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(
+                            self.package) > -1 and line.rfind("Scripts") == -1:
                         modelica_model_list.append(line[line.rfind(self.library):line.rfind(".mo")])
-                    if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(self.package) > -1 and line.rfind("Scripts") == -1:
+                    if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(
+                            self.package) > -1 and line.rfind("Scripts") == -1:
                         reference_list.append(line[line.rfind(self.library):line.rfind(".txt")])
             model_package = self._get_package_model()
             ch_model_list = self._get_used_model(mo_list=model_package,
@@ -593,8 +590,6 @@ class Extended_model(CI_conf_class):
 
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
-
-
 
 
 class Buildingspy_Validate_test(CI_conf_class):
@@ -754,17 +749,20 @@ if __name__ == '__main__':
         dymola_exception = DymolaException()
 
     if args.validate_html_only:
-        Buildingspy_Validate_test(validate=validate, path=args.path).validate_html()
+        Buildingspy_Validate_test(validate=validate,
+                                  path=args.path).validate_html()
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
-        Buildingspy_Validate_test(validate=validate, path=args.path).validate_experiment_setup()
+        Buildingspy_Validate_test(validate=validate,
+                                  path=args.path).validate_experiment_setup()
     elif args.coverage_only:
-        Buildingspy_Validate_test(validate=validate, path=args.path).run_coverage_only(
-            buildingspy_regression=regression,
-            batch=args.batch,
-            tool=args.tool,
-            package=args.single_package)
+        Buildingspy_Validate_test(validate=validate,
+                                  path=args.path).run_coverage_only(buildingspy_regression=regression,
+                                                                    batch=args.batch,
+                                                                    tool=args.tool,
+                                                                    package=args.single_package)
     else:
-        dym_interface = python_dymola_interface(dymola=dymola, dymola_exception=dymola_exception)
+        dym_interface = python_dymola_interface(dymola=dymola,
+                                                dymola_exception=dymola_exception)
         dym_interface.library_check(library=args.library)
         conf = CI_conf_class()
         ref_model = Ref_model(library=args.library)
@@ -772,7 +770,7 @@ if __name__ == '__main__':
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-        #dym_interface.dym_check_lic()
+        dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
                                                  n_pro=args.number_of_processors,
@@ -795,7 +793,7 @@ if __name__ == '__main__':
             if args.modified_models is True:
                 conf.check_ci_file_structure(
                     files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
-                #ref_model.write_regression_list()
+                # ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
                                                 dymola_exception=dymola_exception,
