@@ -170,11 +170,11 @@ class Plot_Charts(CI_conf_class):
         """
         Returns:
         """
-        if os.path.isfile(self.new_ref_file) is False:
-            print(f'File {self.new_ref_file} directory does not exist.')
+        if os.path.isfile(self.config_ci_new_create_ref_file) is False:
+            print(f'File {self.config_ci_new_create_ref_file} directory does not exist.')
             exit(0)
         else:
-            print(f'Plot results from file {self.new_ref_file}')
+            print(f'Plot results from file {self.config_ci_new_create_ref_file}')
         file = open(self.new_ref_file, "r")
         lines = file.readlines()
         reference_list = []
