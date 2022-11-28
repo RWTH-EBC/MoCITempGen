@@ -394,9 +394,9 @@ RegressionTest_Check_References:
             mkdir -p ../../data ;
             mkdir -p ../../data/reference_result ;
             cp -r $(git ls-files --others --exclude-standard --directory ${library}) ../../data/reference_result  ;
-            cp -r ${library}/simulator-dymola.log data ;
-            cp -r ${library}/unitTests-dymola.log data ;
-            cp -r ${library}/funnel_comp data
+            cp -r ${library}/simulator-dymola.log ../../data ;
+            cp -r ${library}/unitTests-dymola.log ../../data ;
+            cp -r ${library}/funnel_comp ../../data ;
             cp -r ${chart_dir}/* ../../$CI_COMMIT_REF_NAME/plots ;
             git add $push_model ;
             git commit -m "$message";

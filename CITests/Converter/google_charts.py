@@ -39,7 +39,7 @@ class Plot_Charts(CI_conf_class):
             reference_file_list ():
         Returns:
         """
-        update_ref_list = []
+        update_ref_list = list()
         for reference_file in reference_file_list:
             if os.path.isfile(reference_file) is False:
                 print(f'File {reference_file} does not exist.')
@@ -74,7 +74,7 @@ class Plot_Charts(CI_conf_class):
             file = open(self.ci_interact_show_ref_file, "r")
             lines = file.readlines()
             file.close()
-            reference_file_list = []
+            reference_file_list = list()
             for line in lines:
                 if len(line) == 0:
                     continue
@@ -97,14 +97,14 @@ class Plot_Charts(CI_conf_class):
             reference_file ():
         Returns:
         """
-        time_int = []
-        legend_list = []
-        value_list = []
+        time_int = list()
+        legend_list = list()
+        value_list = list()
         distriction_values = {}
-        time_interval_list = []
+        time_interval_list = list()
         time_interval_steps = int
         for line in open(reference_file, 'r'):
-            current_value = []
+            current_value = list()
             if line.find("last-generated=") > -1 or line.find("statistics-simulation=") > -1 or line.find(
                     "statistics-initialization=") > -1:
                 continue
@@ -158,7 +158,7 @@ class Plot_Charts(CI_conf_class):
             print(f'Plot results from file {self.ci_interact_update_ref_file}')
         file = open(self.ci_interact_update_ref_file, "r")
         lines = file.readlines()
-        reference_list = []
+        reference_list = list()
         for line in lines:
             line = line.strip()
             if line.find(".txt") > -1 and line.find("_"):
@@ -178,7 +178,7 @@ class Plot_Charts(CI_conf_class):
             print(f'Plot results from file {self.config_ci_new_create_ref_file}')
         file = open(self.config_ci_new_create_ref_file, "r")
         lines = file.readlines()
-        reference_list = []
+        reference_list = list()
         for line in lines:
             line = line.strip()
             if line.find(".txt") > -1 and line.find("_"):
@@ -196,7 +196,7 @@ class Plot_Charts(CI_conf_class):
         reference_file = open(f'{reference_list}', "r")
         lines = reference_file.readlines()
         reference_file.close()
-        measure_list = []
+        measure_list = list()
         measure_len = int
         time_str = str
         for line in lines:  # searches for values and time intervals
@@ -235,7 +235,7 @@ class Plot_Charts(CI_conf_class):
         time_int = float(time_end) - float(time_beg)
         tim_seq = time_int / float(measure_len)
         time_num = float(time_beg)
-        time_list = []
+        time_list = list()
         for time in range(0, measure_len + 1):
             time_list.append(time_num)
             time_num = time_num + tim_seq
@@ -250,7 +250,7 @@ class Plot_Charts(CI_conf_class):
             self.check_file(file=self.f_log)
             log_file = open(self.f_log, "r")
             lines = log_file.readlines()
-            model_variable_list = []
+            model_variable_list = list()
             for line in lines:
                 if line.find("*** Warning:") > -1:
                     if line.find(".mat") > -1:
@@ -302,12 +302,12 @@ class Plot_Charts(CI_conf_class):
             d = temps.values.tolist()
             test_tmp = var_test[['x', 'y']]
             e = test_tmp.values.tolist()
-            e_list = []
+            e_list = list()
             for i in range(0, len(e)):
                 e_list.append((e[i][1]))
             results = zip(d, e_list)
             result_set = list(results)
-            value_list = []
+            value_list = list()
             for i in result_set:
                 i = str(i)
                 i = i.replace("(", "")
@@ -427,7 +427,7 @@ class Plot_Charts(CI_conf_class):
         """
         Create an index layout from a template
         """
-        html_file_list = []
+        html_file_list = list()
         for file in os.listdir(self.temp_chart_path):
             if file.endswith(".html") and file != "index.html":
                 html_file_list.append(file)
@@ -447,7 +447,7 @@ class Plot_Charts(CI_conf_class):
         """
         Creates a layout index that has all links to the subordinate index files.
         """
-        package_list = []
+        package_list = list()
         for folders in os.listdir(temp_dir):
             if folders == "style.css" or folders == "index.html":
                 continue
