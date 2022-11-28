@@ -732,6 +732,8 @@ if __name__ == '__main__':
                                  action="store_true")
     unit_test_group.add_argument("--validate-html-only", action="store_true")
     unit_test_group.add_argument("--validate-experiment-setup", action="store_true")
+    unit_test_group.add_argument("--report", default=False, action="store_true")
+
     args = parser.parse_args()
 
     _setEnvironmentPath(dymola_version=args.dymola_version)
@@ -764,10 +766,16 @@ if __name__ == '__main__':
         conf = CI_conf_class()
         ref_model = Ref_model(library=args.library)
         package_list = []
+        '''
+        if args.report:
+            u = regression.Tester(tool=args.tool)
+            u.report()
+            exit(0)
+        '''
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-        #dym_interface.dym_check_lic()
+        dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
                                                  n_pro=args.number_of_processors,
@@ -775,6 +783,8 @@ if __name__ == '__main__':
                                                  batch=args.batch,
                                                  show_gui=args.show_gui,
                                                  path=args.path)
+
+
         if args.create_ref:
             package_list = ref_model.get_update_model()
 

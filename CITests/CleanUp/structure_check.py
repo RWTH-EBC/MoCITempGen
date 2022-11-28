@@ -31,9 +31,6 @@ class Structure_check(CI_conf_class):
                 print(f'File: {file} does not exist and will be new created.')
                 file_check.touch(exist_ok=True)
 
-    # Set unique folder
-    # Set User CI folder und files
-    # Set only for CI necessary files, dir: build in ci
     def _create_folder(self, path):
         try:
             if not os.path.exists(path):

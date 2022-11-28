@@ -21,8 +21,6 @@ IBPSA:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
     script:
-        - mkdir Merge_Package
-        - cd Merge_Package
         - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${git_url}
@@ -49,7 +47,7 @@ WhiteList:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - export PYTHONIOENCODING=utf-8
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
@@ -68,7 +66,8 @@ WhiteList:
         - python Dymola_python_tests/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
         - rm  -r ${wh_library}
         - message="${bot_merge_commit}"
-        - git add  .
+        - push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
+        - git add  $push_model
         - git commit -m "$message"
         - git push --force git@github.com:$Github_Repository.git
     only:

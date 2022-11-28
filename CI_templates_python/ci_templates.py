@@ -168,28 +168,79 @@ class CI_yml_templates(CI_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
+    def _write_CI_Whitelist_Setting_template(self):
+        """
+
+        """
+        if self.wh_library is not None:
+            wh_library = self.wh_library
+            filter_flag = "--filter-whitelist"
+            wh_flag = "--wh-library " + self.wh_library
+            merge_branch = f'- {self.wh_library}_Merge'
+            if self.wh_path is not None:
+                wh_path = "--wh-path " + self.wh_path
+                git_url = ""
+            elif self.git_url is not None:
+                git_url = "--git-url " + self.git_url
+                wh_path = ""
+            else:
+                wh_path = ""
+                git_url = ""
+        else:
+            wh_library = self.library
+            wh_flag = ""
+            git_url = ""
+            filter_flag = ""
+            wh_path = ""
+            merge_branch = ""
+
+        my_template = Template(filename=self.temp_ci_build_whitelist_file)
+        yml_text = my_template.render(ci_stage_whitelist_setting=self.ci_stage_whitelist_setting,
+                                      python_version=self.python_version,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep, "/"),
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"),
+                                      dymola_version=self.dymola_version,
+                                      git_url=git_url,
+                                      library=self.library,
+                                      bot_build_whitelist_commit=self.bot_build_whitelist_commit,
+                                      dymola_ci_test_dir=self.dymola_ci_test_dir,
+                                      ci_build_whitelist_structure_commit=self.ci_build_whitelist_structure_commit,
+                                      expire_in_time=self.expire_in_time,
+                                      xvfb_flag=self.xvfb_flag,
+                                      wh_library=wh_library,
+                                      wh_path=wh_path)
+
+        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_build_whitelist_file.split(os.sep)[-2]}'
+        CI_conf_class().check_ci_folder_structure([ci_folder])
+        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_build_whitelist_file.split(os.sep)[-1]}'
+        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
     def _write_merge_template(self):
         """
         Write (IBPSA) Merge template
         """
         merge_branch = f'{self.wh_library}_Merge'
-        mytemplate = Template(filename=self.temp_ci_ibpsa_merge_file)
-        yml_text = mytemplate.render(ci_stage_lib_merge=self.ci_stage_lib_merge,
-                                     ci_stage_update_whitelist=self.ci_stage_update_whitelist,
-                                     ci_stage_open_PR=self.ci_stage_open_PR,
-                                     python_version=self.python_version,
-                                     dymola_python_test_url=self.dymola_python_test_url,
-                                     merge_branch=merge_branch,
-                                     git_url=self.git_url,
-                                     library=self.library,
-                                     ci_trigger_ibpsa_commit=self.ci_trigger_ibpsa_commit,
-                                     expire_in_time=self.expire_in_time,
-                                     dymola_version=self.dymola_version,
-                                     wh_library=self.wh_library,
-                                     bot_merge_commit=self.bot_merge_commit,
-                                     wh_model_file=self.wh_model_file,
-                                     xvfb_flag=self.xvfb_flag,
-                                     dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"))
+        my_template = Template(filename=self.temp_ci_ibpsa_merge_file)
+        yml_text = my_template.render(ci_stage_lib_merge=self.ci_stage_lib_merge,
+                                      ci_stage_update_whitelist=self.ci_stage_update_whitelist,
+                                      ci_stage_open_PR=self.ci_stage_open_PR,
+                                      python_version=self.python_version,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      merge_branch=merge_branch,
+                                      git_url=self.git_url,
+                                      library=self.library,
+                                      ci_trigger_ibpsa_commit=self.ci_trigger_ibpsa_commit,
+                                      expire_in_time=self.expire_in_time,
+                                      dymola_version=self.dymola_version,
+                                      wh_library=self.wh_library,
+                                      bot_merge_commit=self.bot_merge_commit,
+                                      wh_model_file=self.wh_model_file,
+                                      xvfb_flag=self.xvfb_flag,
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(
+                                          os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-2]}'
         CI_conf_class().check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-1]}'
@@ -223,7 +274,8 @@ class CI_yml_templates(CI_template_config):
                                      merge_branch=merge_branch,
                                      config_ci_eof_file=self.config_ci_eof_file.replace(os.sep, "/"),
                                      bot_create_ref_commit=self.bot_create_ref_commit,
-                                     config_ci_new_create_ref_file=self.config_ci_new_create_ref_file.replace(os.sep, "/"),
+                                     config_ci_new_create_ref_file=self.config_ci_new_create_ref_file.replace(os.sep,
+                                                                                                              "/"),
                                      xvfb_flag=self.xvfb_flag,
                                      ci_show_ref_commit=self.ci_show_ref_commit,
                                      dymola_python_test_reference_file=self.dymola_python_test_reference_file.replace(
@@ -515,6 +567,7 @@ class CI_yml_templates(CI_template_config):
                 self._write_style_template()
             if temp == "Merge" and self.wh_library is not None:
                 self._write_merge_template()
+        self._write_CI_Whitelist_Setting_template()
         self._write_page_template()
         self._write_ci_structure_template()
 

@@ -46,6 +46,7 @@ class CI_template_config(CI_conf_class):
         self.ci_stage_update_whitelist = f'update_whiteList'
         self.ci_stage_build_ci_structure = f'build_ci_structure'
         self.ci_stage_deploy = f'deploy'
+        self.ci_stage_whitelist_setting = f'build_ci_whitelist'
         # [Buildingspy upgrade url]
         self.buildingspy_upgrade = f'git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage'
         # [CI_Setting]
@@ -65,6 +66,7 @@ class CI_template_config(CI_conf_class):
         self.temp_ci_main_yml_file = f'{self.temp_ci_dir}{os.sep}.gitlab-ci.txt'
         self.temp_ci_setting_file = f'{self.temp_ci_dir}{os.sep}cleanupscript{os.sep}ci_setting.txt'
         self.temp_ci_deploy_test_file = f'{self.temp_ci_dir}{os.sep}deploy{os.sep}deploy_ci_tests.txt'
+        self.temp_ci_build_whitelist_file = f'{self.temp_ci_dir}{os.sep}cleanupscript{os.sep}ci_build_whitelist.txt'
         # [Created CI_template_folder]
         #self.temp_dir = f'Dymola_python_tests{os.sep}gitlab_ci_templates'
         self.temp_dir = f'dymola-ci-tests{os.sep}ci_templates'
@@ -79,6 +81,7 @@ class CI_template_config(CI_conf_class):
         self.dymola_python_html_tidy_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}html_tidy_errors.py'
         self.dymola_python_syntax_test_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}StyleChecking.py'
         self.dymola_python_configuration_file = f'{self.dymola_python_dir}{os.sep}CI_Configuration{os.sep}configuration.py'
+
         # [Triggers different jobs specifically: Interact CI: User]
         #self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
         self.ci_show_ref_commit = "ci_show_ref"                     # show reference results from list
@@ -96,6 +99,7 @@ class CI_template_config(CI_conf_class):
         self.ci_merge_except_commit = "ci_merge_except"
         self.ci_correct_html_commit = "ci_correct_html"
         self.ci_build_structure_commit = "ci_build_structure"
+        self.ci_build_whitelist_structure_commit = "ci_build_whitelist"
         # [Commits from CI bot: Does not matter for the user, only ci_bot messages]
         self.bot_merge_commit = f'CI message from {self.bot_name}. Merge of {self.wh_library} library. Update files {self.wh_model_file} and {self.wh_html_file}'
         self.bot_push_commit = f'CI message from {self.bot_name}. Automatic push of CI with new regression reference files. Please pull the new files before push again.'
@@ -107,6 +111,7 @@ class CI_template_config(CI_conf_class):
         self.bot_update_example_wh_commit = f'CI message from {self.bot_name}. Update file {self.wh_simulate_file}. Please pull the new files before push again.'
         self.bot_create_structure_commit = f'CI message from {self.bot_name}. Add files for ci structure'
         self.bot_create_html_file_commit = f'CI message from {self.bot_name}. Push new files with corrected html Syntax .'
+        self.bot_build_whitelist_commit = f'CI message from {self.bot_name}. Push new created whitelists.'
         # [Colors]
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'

@@ -105,6 +105,7 @@ if __name__ == '__main__':
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
     check_test_group.add_argument("--ci-interactive", default=False, action="store_true")
     check_test_group.add_argument("--create-ref", default=False, action="store_true")
+    check_test_group.add_argument("--create-whitelist", default=False, action="store_true")
 
     args = parser.parse_args()
     conf = CI_conf_class()
@@ -121,6 +122,10 @@ if __name__ == '__main__':
     if args.create_ref is True:
         folder_list = [conf.config_ci_dir]
         file_list = [conf.config_ci_eof_file, conf.config_ci_exit_file, conf.config_ci_new_create_ref_file]
+        pass
+    if args.create_whitelist is True:
+        folder_list = [conf.dymola_ci_test_dir, conf.wh_ci_dir]
+        file_list = [conf.wh_model_file, conf.wh_simulate_file, conf.wh_html_file, conf.wh_ref_file]
         pass
     conf.check_ci_folder_structure(folders_list=folder_list)
     conf.check_ci_file_structure(files_list=file_list)
