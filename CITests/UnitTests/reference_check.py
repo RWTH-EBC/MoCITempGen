@@ -552,10 +552,8 @@ class Extended_model(CI_conf_class):
         """
         try:
             changed_models = open(self.config_ci_changed_file, "r", encoding='utf8')
-            ref_file = open(self.config_ci_ref_file, "r", encoding='utf8')
             changed_lines = changed_models.readlines()
             changed_models.close()
-            ref_file.close()
             mos_script_list = list()
             modelica_model_list = list()
             reference_list = list()
@@ -588,7 +586,6 @@ class Extended_model(CI_conf_class):
             else:
                 print(f'Number of checked packages: {str(len(changed_list))}')
                 return changed_list
-
         except IOError:
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
 
@@ -770,7 +767,7 @@ if __name__ == '__main__':
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-        dym_interface.dym_check_lic()
+        #dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  package=args.single_package,
                                                  n_pro=args.number_of_processors,

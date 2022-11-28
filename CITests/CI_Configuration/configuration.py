@@ -112,7 +112,7 @@ if __name__ == '__main__':
     file_list = []
     if args.changed_model is True:
         folder_list = [conf.config_ci_dir]
-        file_list = [conf.config_ci_changed_file]
+        file_list = [conf.config_ci_changed_file, conf.config_ci_exit_file]
         pass
     if args.ci_interactive is True:
         folder_list = [conf.config_ci_dir]
