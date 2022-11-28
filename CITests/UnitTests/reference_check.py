@@ -729,7 +729,7 @@ if __name__ == '__main__':
     unit_test_group.add_argument("--update-ref",
                                  help='update all reference files',
                                  action="store_true")
-    unit_test_group.add_argument("--modified-model",
+    unit_test_group.add_argument("--modified-models",
                                  help='Regression test only for modified models',
                                  default=False,
                                  action="store_true")
@@ -740,7 +740,6 @@ if __name__ == '__main__':
     _setEnvironmentPath(dymola_version=args.dymola_version)
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
-
     print(f'1: Starting Dymola instance')
     if platform.system() == "Windows":
         dymola = DymolaInterface()

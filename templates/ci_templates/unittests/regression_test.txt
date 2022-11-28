@@ -265,7 +265,7 @@ prepare_create_plots:
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-model
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip";
@@ -386,13 +386,17 @@ RegressionTest_Check_References:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             echo $push_model ;
-            (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_ref_file} ;
+            (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
             pip install pandas mako matplot;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
             mkdir -p ../../$CI_COMMIT_REF_NAME/plots ;
             mkdir -p ../../data ;
-            cp -r $(git ls-files --others --exclude-standard --directory ${library}) ../../data  ;
+            mkdir -p ../../data/reference_result ;
+            cp -r $(git ls-files --others --exclude-standard --directory ${library}) ../../data/reference_result  ;
+            cp -r ${library}/simulator-dymola.log data ;
+            cp -r ${library}/unitTests-dymola.log data ;
+            cp -r ${library}/funnel_comp data
             cp -r ${chart_dir}/* ../../$CI_COMMIT_REF_NAME/plots ;
             git add $push_model ;
             git commit -m "$message";

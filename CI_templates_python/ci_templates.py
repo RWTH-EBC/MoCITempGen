@@ -223,7 +223,7 @@ class CI_yml_templates(CI_template_config):
                                      merge_branch=merge_branch,
                                      config_ci_eof_file=self.config_ci_eof_file.replace(os.sep, "/"),
                                      bot_create_ref_commit=self.bot_create_ref_commit,
-                                     config_ci_new_ref_file=self.config_ci_new_ref_file.replace(os.sep, "/"),
+                                     config_ci_new_create_ref_file=self.config_ci_new_create_ref_file.replace(os.sep, "/"),
                                      xvfb_flag=self.xvfb_flag,
                                      ci_show_ref_commit=self.ci_show_ref_commit,
                                      dymola_python_test_reference_file=self.dymola_python_test_reference_file.replace(
