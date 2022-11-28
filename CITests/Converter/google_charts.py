@@ -32,7 +32,6 @@ class Plot_Charts(CI_conf_class):
         self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
 
-
     @staticmethod
     def _check_ref_file(reference_file_list):
         """
@@ -58,7 +57,9 @@ class Plot_Charts(CI_conf_class):
         new_ref_list = self._check_ref_file(reference_file_list=reference_file_list)
         for reference_file in new_ref_list:
             results = self._read_data(reference_file=reference_file)
-            self._mako_line_html_new_chart(reference_file=reference_file, value_list=results[0], legend_list=results[1])
+            self._mako_line_html_new_chart(reference_file=reference_file,
+                                           value_list=results[0],
+                                           legend_list=results[1])
             continue
 
     def read_show_reference(self):
@@ -175,7 +176,7 @@ class Plot_Charts(CI_conf_class):
             exit(0)
         else:
             print(f'Plot results from file {self.config_ci_new_create_ref_file}')
-        file = open(self.new_ref_file, "r")
+        file = open(self.config_ci_new_create_ref_file, "r")
         lines = file.readlines()
         reference_list = []
         for line in lines:
@@ -584,6 +585,7 @@ if __name__ == '__main__':
             pass
         if args.update_ref is True:
             ref_list = charts.get_updated_reference_files()
+            print(ref_list)
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.show_ref is True:

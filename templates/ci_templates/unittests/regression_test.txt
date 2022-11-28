@@ -376,7 +376,7 @@ RegressionTest_Check_References:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        - python ${dymola_python_configuration_file} --ci-interactive
+        - python ${dymola_python_configuration_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
@@ -386,7 +386,7 @@ RegressionTest_Check_References:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             echo $push_model ;
-            (git ls-files --others --exclude-standard ${library}) > ${config_ci_new_ref_file} ;
+            (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_ref_file} ;
             message="${bot_create_ref_commit}" ;
             git add $push_model ;
             git commit -m "$message";
@@ -400,10 +400,7 @@ RegressionTest_Check_References:
             cd .. ;
             mkdir -p $CI_COMMIT_REF_NAME/plots ;
             mkdir -p data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/simulator-dymola.log data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/unitTests-dymola.log data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${library}/funnel_comp data ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/Referencefiles data ;
+            cp -r (git ls-files -m --directory ${library}) data  ;
             cp -r CorrectedVersion/$CI_PROJECT_NAME/${chart_dir}/* $CI_COMMIT_REF_NAME/plots ;
             exit 1 ;
           else

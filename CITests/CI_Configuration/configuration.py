@@ -16,7 +16,6 @@ class CI_conf_class(object):
         self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
         self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
         # [Config_files]
-
         self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}Configfiles'
         self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}exit.sh'
         self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_ref_file.txt'
@@ -25,7 +24,7 @@ class CI_conf_class(object):
         self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}ci_reference_list.txt'
         self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}EOF.sh'
         # [templates for plots]
-        self.chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}charts'
+        self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}charts'
         self.temp_chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}google_templates'
         self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}google_chart.txt'
         self.temp_index_file = f'{self.temp_chart_dir}{os.sep}index.txt'
@@ -105,6 +104,7 @@ if __name__ == '__main__':
     check_test_group = parser.add_argument_group("Arguments to build files or folders")
     check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
     check_test_group.add_argument("--ci-interactive", default=False, action="store_true")
+    check_test_group.add_argument("--create-ref", default=False, action="store_true")
 
     args = parser.parse_args()
     conf = CI_conf_class()
@@ -117,6 +117,10 @@ if __name__ == '__main__':
     if args.ci_interactive is True:
         folder_list = [conf.config_ci_dir]
         file_list = [conf.config_ci_eof_file, conf.config_ci_changed_file]
+        pass
+    if args.create_ref is True:
+        folder_list = [conf.config_ci_dir]
+        file_list = [conf.config_ci_eof_file, conf.config_ci_exit_file, conf.config_ci_new_create_ref_file]
         pass
     conf.check_ci_folder_structure(folders_list=folder_list)
     conf.check_ci_file_structure(files_list=file_list)
