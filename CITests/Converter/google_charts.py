@@ -558,7 +558,9 @@ if __name__ == '__main__':
     conf = CI_conf_class()
     conf.check_ci_folder_structure(folders_list=[conf.chart_dir, conf.temp_chart_dir])
     conf.check_ci_file_structure(files_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
-    charts = Plot_Charts(template=Template, package=args.single_package, library=args.library)
+    charts = Plot_Charts(template=Template,
+                         package=args.single_package,
+                         library=args.library)
     if args.line_html is True:
         charts.check_setting()
         charts.delete_folder()
@@ -569,7 +571,8 @@ if __name__ == '__main__':
             for model_variable in model_var_list:
                 model_variable = model_variable.split(":")
                 if args.funnel_comp is True:
-                    charts.mako_line_html_chart(model=model_variable[0], var=model_variable[1])
+                    charts.mako_line_html_chart(model=model_variable[0],
+                                                var=model_variable[1])
                     pass
                 if args.ref_txt is True:
                     ref_file = charts.get_ref_file(model=model_variable[0])
@@ -578,14 +581,14 @@ if __name__ == '__main__':
                         continue
                     else:
                         result = charts.get_values(reference_list=ref_file)
-                        charts.mako_line_ref_chart(model=model_variable[0], var=model_variable[1])
+                        charts.mako_line_ref_chart(model=model_variable[0],
+                                                   var=model_variable[1])
         if args.new_ref is True:
             ref_list = charts.get_new_reference_files()
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.update_ref is True:
             ref_list = charts.get_updated_reference_files()
-            print(ref_list)
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
         if args.show_ref is True:

@@ -25,7 +25,7 @@ stages:
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots ;
+            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
           fi
@@ -73,11 +73,12 @@ CI_Regressiontest_${library}_${package}:
             source activate ${python_version} ;
             pip install pandas mako matplot ;
             mkdir -p data ;
+            mkdir -p data/plots ;
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots ;
+            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
           fi
@@ -149,11 +150,12 @@ CI_create_plots:
             source activate ${python_version} ;
             pip install pandas mako matplot ;
             mkdir -p data ;
+            mkdir -p data/plots ;
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots ;
+            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
           fi
@@ -272,11 +274,12 @@ prepare_create_plots:
             source activate ${python_version};
             pip install pandas mako matplot;
             mkdir -p data ;
+            mkdir -p data/plots ;
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
-             cp -r ${chart_dir}/$lib_package data/plots ;
+            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!";
           fi

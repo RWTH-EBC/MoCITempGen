@@ -152,7 +152,6 @@ class PULL_REQUEST_GITHUB(object):
             'Content-Type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
-        print(response.text)
 
 
 if __name__ == '__main__':
