@@ -202,4 +202,3 @@ whitelist_job:
     except:
         refs:
             - external_pull_requests
-

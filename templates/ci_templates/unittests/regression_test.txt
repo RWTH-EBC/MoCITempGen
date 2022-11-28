@@ -388,15 +388,15 @@ RegressionTest_Check_References:
             echo $push_model ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_ref_file} ;
             message="${bot_create_ref_commit}" ;
+            pip install pandas mako matplot;
+            python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
+            mkdir -p ../../$CI_COMMIT_REF_NAME/plots ;
+            mkdir -p ../../data ;
+            cp -r $(git ls-files --others --exclude-standard --directory ${library}) ../../data  ;
+            cp -r ${chart_dir}/* ../../$CI_COMMIT_REF_NAME/plots ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
-            pip install pandas mako matplot;
-            python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
-            mkdir -p CorrectedVersion/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME/plots ;
-            mkdir -p CorrectedVersion/$CI_PROJECT_NAME/data ;
-            cp -r (git ls-files -m --directory ${library}) CorrectedVersion/$CI_PROJECT_NAME/data  ;
-            cp -r CorrectedVersion/$CI_PROJECT_NAME/${chart_dir}/* CorrectedVersion/$CI_PROJECT_NAME/$CI_COMMIT_REF_NAME/plots ;
             exit 1 ;
           else
             exit 0 ;
