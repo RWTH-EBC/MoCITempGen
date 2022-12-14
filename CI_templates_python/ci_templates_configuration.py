@@ -25,7 +25,7 @@ class CI_template_config(CI_conf_class):
         # [CI fixed arguments]
         self.bot_name = f'ebc-aixlib-bot'
         # [Except branches]
-        self.except_branch_list = ['master', 'development']
+        self.except_branch_list = ['main']
         # [Stages]
         self.ci_stage_check_setting = f'check_setting'
         self.ci_stage_build_templates = f'build_templates'
@@ -81,7 +81,6 @@ class CI_template_config(CI_conf_class):
         self.dymola_python_html_tidy_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}html_tidy_errors.py'
         self.dymola_python_syntax_test_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}StyleChecking.py'
         self.dymola_python_configuration_file = f'{self.dymola_python_dir}{os.sep}CI_Configuration{os.sep}configuration.py'
-
         # [Triggers different jobs specifically: Interact CI: User]
         #self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
         self.ci_show_ref_commit = "ci_show_ref"                     # show reference results from list
