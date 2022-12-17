@@ -322,13 +322,12 @@ class Slack_Notification(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Set Github Environment Variables")  # Configure the argument parser
     check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-    check_test_group.add_argument('-GT', "--github-token", default="${GITHUB_API_TOKEN}", help="Your Set GITHUB Token")
-    check_test_group.add_argument('-BB', "--base-branch", default="development", help="Your Set GITHUB Token")
-    check_test_group.add_argument('-ST', "--slack-token", default="${secrets.SLACK_BOT_TOKEN}", help="Your Set GITHUB Token")
-    check_test_group.add_argument("-GR", "--github-repo", default="SvenHinrichs/GitLabCI",
+    check_test_group.add_argument('-GT', "--github-token", default="${GITHUB_API_TOKEN}", help="Set GITHUB Token")
+    check_test_group.add_argument('-BB', "--base-branch", default="development", help="your base branch")
+    check_test_group.add_argument('-ST', "--slack-token", default="${secrets.SLACK_BOT_TOKEN}", help="Your Set Slack Token")
+    check_test_group.add_argument("-GR", "--github-repo", default="RWTH-EBC/AixLib",
                                   help="Environment Variable owner/RepositoryName")
     args = parser.parse_args()  # Parse the arguments
-    from api_slack import Slack_Notification
     slack = Slack_Notification(github_token=args.github_token, slack_token=args.slack_token, github_repo=args.github_repo, base_branch=args.base_branch)
     slack_user_list = slack._get_user_list()  # Get a list with all slack users
     slack_mail_id = slack._get_slack_mail(slack_user_list)  # Write dictionary with slack_mail: Slack_id
