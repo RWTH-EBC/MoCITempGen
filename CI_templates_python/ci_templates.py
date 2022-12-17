@@ -4,7 +4,6 @@ import argparse
 import toml
 import sys
 from ci_templates_configuration import CI_template_config
-
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
@@ -643,7 +642,6 @@ class Read_config_data(CI_template_config):
     @staticmethod
     def _read_library(data):
         """
-
         @param data:
         @type data:
         @return:

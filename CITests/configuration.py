@@ -1,7 +1,7 @@
 import os
 import argparse
 
-class CI_conf_class(object):
+class CI_config_class(object):
 
     def __init__(self):
         """
@@ -46,17 +46,30 @@ class CI_conf_class(object):
         # [Dymola_Python_Tests] + Parser Commands
         self.dymola_python_test_url = f'https://$CI_TEST_Name:$CI_TEST_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
         # [result folder]
-        #self.result_dir = f'dymola-ci-tests{os.sep}'
+        # self.result_dir = f'dymola-ci-tests{os.sep}'
 
         # [Color]
-        self.CRED = '\033[91m'  # Colors
+        self.CRED = '\033[91m'
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
 
+
+
+    '''
+    def get_files(self):
+        config = toml.load(f'Dymola_python_tests{os.sep}CITests{os.sep}config.toml')
+        for l in config:
+            print(l)
+    '''
+
+
     @staticmethod
     def return_file_list():
+        """
+        Returns:
+        """
         files_list = []
-        file_dic = (vars(CI_conf_class()))
+        file_dic = (vars(CI_config()))
         for file in file_dic:
             if file.find("_file") > -1:
                 files_list.append(file_dic[file])
@@ -65,7 +78,7 @@ class CI_conf_class(object):
     @staticmethod
     def return_file_dir():
         dir_list = []
-        dir_dic = (vars(CI_conf_class()))
+        dir_dic = (vars(CI_config()))
         for dirs in dir_dic:
             if dirs.find("_dir") > -1:
                 dir_list.append(dir_dic[dirs])
@@ -85,6 +98,11 @@ class CI_conf_class(object):
 
 
     def check_ci_file_structure(self, files_list):
+        """
+
+        Args:
+            files_list ():
+        """
         for file in files_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
@@ -97,6 +115,11 @@ class CI_conf_class(object):
 
     @staticmethod
     def create_folder(path):
+        """
+
+        Args:
+            path ():
+        """
         try:
             if not os.path.exists(path):
                 print(f'Create path: {path}')
@@ -115,9 +138,8 @@ if __name__ == '__main__':
     check_test_group.add_argument("--ci-interactive", default=False, action="store_true")
     check_test_group.add_argument("--create-ref", default=False, action="store_true")
     check_test_group.add_argument("--create-whitelist", default=False, action="store_true")
-
     args = parser.parse_args()
-    conf = CI_conf_class()
+    conf = CI_config_class()
     folder_list = []
     file_list = []
     if args.changed_model is True:
