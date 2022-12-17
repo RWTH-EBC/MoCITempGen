@@ -1,0 +1,14 @@
+name = "Github Configuration"
+
+[post_pull_request_comment]
+message = ""
+page_url = ""
+
+
+[create_pull_request]
+working_branch = "Corrected HTML Code in branch {args.working_branch}"
+base_branch = ""
+pull_request_title = ""
+label_name = ""
+pull_request_message = ""
+

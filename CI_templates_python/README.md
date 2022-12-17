@@ -9,3 +9,17 @@ If changes should be made in the settings, these can be made in the toml file.
 
 Then the command `python Dymola_python_tests/python CI_templates_python/ci_templates.py --setting` must be executed. 
 
+
+## Setup your own CI
+
+### Variables
+| CI Pipeline Arguments | Description                                                                        | 
+|-----------------------|------------------------------------------------------------------------------------| 
+| CI_TEST_TOKEN          | Name of the dymola library                                                         |
+| GITHUB_API_TOKEN    | name of the library that is not tested. Faulty models are written to the whitelist |
+| GITHUB_PRIVATE_KEY        | Version of dymola in docker image                                                  |
+
+
+
+For more information look [here](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/wikis/Python-Dymola-CI-Templates).
+

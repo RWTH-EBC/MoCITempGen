@@ -280,8 +280,9 @@ prepare_create_plots:
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
+            exit 0;
           else
-            echo "Test was successful!";
+            exit 0;
           fi
     artifacts:
         when: on_failure

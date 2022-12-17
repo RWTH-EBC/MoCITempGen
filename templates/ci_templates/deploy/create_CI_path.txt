@@ -7,7 +7,6 @@ create_ci_structure_job:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
@@ -31,7 +30,7 @@ create_ci_structure_job:
            
     only:
         variables:
-        - $CI_COMMIT_MESSAGE  =~/${ci_build_structure_commit}/
+            - $CI_COMMIT_MESSAGE  =~/${ci_build_structure_commit}/
     retry:
         max: 2
         when: runner_system_failure  
