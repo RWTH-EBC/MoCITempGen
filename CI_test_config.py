@@ -1,7 +1,7 @@
 import os
 import argparse
 
-class CI_config_class(object):
+class CI_config(object):
 
     def __init__(self):
         """
@@ -47,13 +47,10 @@ class CI_config_class(object):
         self.dymola_python_test_url = f'https://$CI_TEST_Name:$CI_TEST_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
         # [result folder]
         # self.result_dir = f'dymola-ci-tests{os.sep}'
-
         # [Color]
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
-
-
 
     '''
     def get_files(self):
@@ -61,6 +58,9 @@ class CI_config_class(object):
         for l in config:
             print(l)
     '''
+
+    #def read_file_path(self, file):
+
 
 
     @staticmethod

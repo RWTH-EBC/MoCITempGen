@@ -1,4 +1,4 @@
-import CI_config
+from Dymola_python_tests.CI_test_config import CI_config
 
 class Check_Settings(CI_config):
 
@@ -25,6 +25,8 @@ class Check_Settings(CI_config):
 
 
 if __name__ == '__main__':
+
+
     sett_check = Check_Settings()
     #sett_check._check_variables(variable_main_list, github_token=args.github_token, github_private_key=args.github_private_key)
 

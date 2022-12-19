@@ -1,12 +1,9 @@
 import argparse
 import os
 import shutil
-import sys
 from git import Repo
 from tidylib import tidy_document
-
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
@@ -45,7 +42,7 @@ In case of trouble just put the dll in your working dir.
 """
 
 
-class HTML_Tidy(CI_conf_class):
+class HTML_Tidy(CI_config):
     """Class to Check Packages and run CheckModel Tests"""
 
     def __init__(self, package, correct_overwrite, correct_backup, log, correct_view,
@@ -614,7 +611,7 @@ class HTML_Tidy(CI_conf_class):
         return library_list
 
 
-class HTML_whitelist(CI_conf_class):
+class HTML_whitelist(CI_config):
 
     def __init__(self, wh_library, git_url):
         """
@@ -694,7 +691,7 @@ if __name__ == '__main__':
     parser.add_argument("--filter-whitelist", default=False, action="store_true", help="Argument for ")
 
     args = parser.parse_args()
-    conf = CI_conf_class()
+    conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
     conf.check_ci_file_structure(files_list=[conf.config_ci_exit_file])
     if args.whitelist is True:

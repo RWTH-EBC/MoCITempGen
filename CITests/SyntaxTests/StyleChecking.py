@@ -4,11 +4,10 @@ import os
 import platform
 import sys
 import time
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 
-class StyleCheck(CI_conf_class):
+class StyleCheck(CI_config):
 
     def __init__(self, dymola, dymola_exception, package, library, dymola_version, changed_models):
         """

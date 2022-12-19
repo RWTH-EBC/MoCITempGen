@@ -4,11 +4,10 @@ import shutil
 import sys
 import pandas as pd
 from mako.template import Template
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 
-class Plot_Charts(CI_conf_class):
+class Plot_Charts(CI_config):
 
     def __init__(self, template, package, library):
         """
@@ -555,7 +554,7 @@ if __name__ == '__main__':
                                  help="Take the datas from reference datas",
                                  action="store_true")
     args = parser.parse_args()
-    conf = CI_conf_class()
+    conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.chart_dir, conf.temp_chart_dir])
     conf.check_ci_file_structure(files_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
     charts = Plot_Charts(template=Template,

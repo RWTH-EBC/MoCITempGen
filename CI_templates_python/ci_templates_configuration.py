@@ -1,14 +1,10 @@
 import os
-import sys
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
-
-class CI_template_config(CI_conf_class):
+class CI_template_config(CI_config):
 
     def __init__(self):
         """
-
         """
         super().__init__()
         # [CI non fixed Arguments]

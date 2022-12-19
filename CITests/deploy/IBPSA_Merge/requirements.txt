@@ -1,0 +1,4 @@
+natsort
+argparse
+glob2
+pytest-shutil

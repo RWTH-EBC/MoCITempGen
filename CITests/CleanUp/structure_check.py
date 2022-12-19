@@ -1,18 +1,15 @@
 import os
-import sys
 from pathlib import Path
 import argparse
-
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 
-class Structure_check(CI_conf_class):
+class Structure_check(CI_config):
     def __init__(self):
         super().__init__()
 
     def check_ci_folder(self):
-        dir_list = CI_conf_class().return_file_dir()
+        dir_list = self.return_file_dir()
         for directionary in dir_list:
             dir_check = Path(directionary)
             if dir_check.is_dir():
@@ -22,7 +19,7 @@ class Structure_check(CI_conf_class):
                 os.makedirs(directionary)
 
     def check_ci_files(self):
-        file_list = CI_conf_class().return_file_list()
+        file_list = self.return_file_list()
         for file in file_list:
             file_check = Path(file)
             if file_check.is_file():

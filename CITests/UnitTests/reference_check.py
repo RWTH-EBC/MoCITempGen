@@ -6,12 +6,10 @@ import sys
 import time
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
-
-sys.path.append('../Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 
-class Buildingspy_Regression_Check(CI_conf_class):
+class Buildingspy_Regression_Check(CI_config):
 
     def __init__(self, buildingspy_regression, package, n_pro, tool, batch, show_gui, path):
         """

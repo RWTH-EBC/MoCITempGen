@@ -6,8 +6,7 @@ import sys
 import time
 from git import Repo
 from natsort import natsorted
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
-from configuration import CI_conf_class
+from Dymola_python_tests.CI_test_config import CI_config
 
 
 class Git_Repository_Clone(object):
@@ -33,7 +32,7 @@ class Git_Repository_Clone(object):
 
 
 
-class ValidateTest(CI_conf_class):
+class ValidateTest(CI_config):
     def __init__(self, dymola, dymola_exception, single_package, simulate_examples,
                  changed_model, library,
                  wh_library, filter_whitelist):
@@ -149,7 +148,7 @@ class ValidateTest(CI_conf_class):
         self._check_packages()
         python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
-        conf = CI_conf_class()
+        conf = CI_config()
         if self.changed_model is True:
             conf.check_ci_folder_structure(folders_list= [self.config_ci_dir])
             conf.check_ci_file_structure(files_list=[self.config_ci_changed_file])
@@ -175,7 +174,7 @@ class ValidateTest(CI_conf_class):
             error_model_message_dic = self._check_model(model_list=model_list)
             modelica_model.check_result(error_model_message_dic=error_model_message_dic)
 
-class Create_whitelist(CI_conf_class):
+class Create_whitelist(CI_config):
 
     def __init__(self, dymola, dymola_exception, library, wh_library, repo_dir, git_url, simulate_examples):
         """
@@ -340,7 +339,7 @@ class Create_whitelist(CI_conf_class):
         """
         Workflow for creating the whitelist based on a whitelist-library.
         """
-        conf = CI_conf_class()
+        conf = CI_config()
         conf.check_ci_folder_structure(folders_list=[self.config_ci_dir, self.wh_ci_dir])
         self._check_argument_settings()
         if self.simulate_examples is True:
@@ -369,7 +368,7 @@ class Create_whitelist(CI_conf_class):
             exit(0)
 
 
-class get_modelica_models(CI_conf_class):
+class get_modelica_models(CI_config):
 
     def __init__(self, simulate_examples):
         """
@@ -539,11 +538,10 @@ class get_modelica_models(CI_conf_class):
             exit(1)
 
 
-class python_dymola_interface(CI_conf_class):
+class python_dymola_interface(CI_config):
 
     def __init__(self, dymola, dymola_exception):
         """
-
         Args:
             dymola (): python-dymola interface
             dymola_exception ():  python-dymola exception
