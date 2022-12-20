@@ -1,9 +1,9 @@
 # What CI Tests are implemented
 
-### Check, Simulate and Regressiontest: UnitTests
+### Check, Simulate and Regressiontest: [UnitTests](UnitTests)
 With these tests, models are validated or simulated or models will compare and evaluated with stored values by means of a unit test.
 
-### Correct HTML and Style Check: SyntaxTest
+### Correct HTML and Style Check: [SyntaxTest](SyntaxTest)
 
 The html code (documentation) is tested and corrected if necessary. 
 Thus the deposited HTML code is checked for correctness and corrected.

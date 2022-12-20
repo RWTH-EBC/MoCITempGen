@@ -44,7 +44,7 @@ class CI_config(object):
         self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
         # [Dymola_Python_Tests] + Parser Commands
-        self.dymola_python_test_url = f'https://$CI_TEST_Name:$CI_TEST_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
+        self.dymola_python_test_url = f'https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
         # [result folder]
         # self.result_dir = f'dymola-ci-tests{os.sep}'
         # [Color]
