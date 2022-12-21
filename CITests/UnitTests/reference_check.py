@@ -62,8 +62,8 @@ class Buildingspy_Regression_Check(CI_config):
         self.ut.setNumberOfThreads(self.n_pro)
         self.ut.pedanticModelica(False)
         self.ut.showGUI(self.show_gui)
-        err_list = []
-        new_ref_list = []
+        err_list = list()
+        new_ref_list = list()
         if package_list is not None:
             if len(package_list) > 0:
                 for package in package_list:
@@ -836,7 +836,7 @@ if __name__ == '__main__':
             val = ref_check.check_regression_test(package_list=package_list)
             if len(created_ref_list) > 0:
                 for ref in created_ref_list:
-                    print(ref_file)
+                    print(ref)
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref}'
                     conf.prepare_data(path_list=[f'..{os.sep}{conf.result_dir}',
                                                  f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'],
