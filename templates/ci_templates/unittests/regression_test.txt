@@ -16,15 +16,10 @@ stages:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
             pip install pandas mako matplot ;
-            mkdir -p data ;
-            mkdir -p data/plots ;
-            cp -r ${library}/simulator-dymola.log data ;
-            cp -r ${library}/unitTests-dymola.log data ;
-            cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
+            exit 1 ;
           else
-            echo "Test was successful!" ;
+            exit 0 ;
           fi
     artifacts:
         when: on_failure
@@ -64,14 +59,8 @@ CI_Regressiontest_${library}_${package}:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
             pip install pandas mako matplot ;
-            mkdir -p data ;
-            mkdir -p data/plots ;
-            cp -r ${library}/simulator-dymola.log data ;
-            cp -r ${library}/unitTests-dymola.log data ;
-            cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
-            exit 0;
+            exit 1;
           else
             exit 0 ;
           fi
@@ -107,15 +96,12 @@ CI_create_plots:
         - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
     script:
-        - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
-        - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
         untracked: true
         paths:
             - ${result_dir}/
-            - $CI_COMMIT_REF_NAME/plots
     only:
         variables:
             - $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/
@@ -142,7 +128,7 @@ CI_create_plots:
             source activate ${python_version} ;
             pip install pandas mako matplot ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            exit 0;
+            exit 1;
           else
             exit 0 ;
           fi
@@ -216,13 +202,12 @@ prepare_create_plots:
         - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
     script:
-        - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
-        - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
+        untracked: true
         paths:
-         - $CI_COMMIT_REF_NAME/plots
+            - ${result_dir}/
     only:
         refs:
             - external_pull_requests
@@ -257,14 +242,15 @@ prepare_create_plots:
             source activate ${python_version};
             pip install pandas mako matplot;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
-            exit 0;
+            exit 1;
           else
             exit 0;
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - data
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -302,12 +288,11 @@ Changed_create_plots:
         - pip install pandas mako matplot requests toml
         - git clone ${dymola_python_test_url}
     script:
-        - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
-        - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
     artifacts:
+        untracked: true
         paths:
-         - $CI_COMMIT_REF_NAME/plots
+            - ${result_dir}/
     except:
         refs:
             - external_pull_requests
@@ -358,27 +343,26 @@ RegressionTest_Check_References:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
         - source activate ${python_version}
-        - cd CorrectedVersion && cd $CI_PROJECT_NAME
+        - cd CorrectedVersion/$CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
-            echo $push_model ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
             pip install pandas mako matplot;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
-            cp -r ${chart_dir}/* ../../$CI_COMMIT_REF_NAME/plots ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
+            cp -r ${result_dir}/* ../../${result_dir}/*
             exit 1 ;
           else
             exit 0 ;
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - data
-            - $CI_COMMIT_REF_NAME/plots
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -401,14 +385,13 @@ plot_reference_results:
         - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
     script:
-        - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
-        - cp -r ${chart_dir}/* $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
     artifacts:
         when: always
+        untracked: true
         paths:
-            - $CI_COMMIT_REF_NAME/plots
+            - ${result_dir}/
     only:
         variables:
             - $CI_COMMIT_MESSAGE  =~ /${ci_show_ref_commit}/

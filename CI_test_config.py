@@ -75,12 +75,12 @@ class CI_config(object):
             file_path_dict (): {dst:src,}
             del_flag (): True: delete file, False dont delete file
         """
+        print(f'\n**** Prepare Data ****\n')
         self.prepare_data_path(path_list=path_list)
         self.prepare_data_files(file_path_dict=file_path_dict)
         if del_flag is True:
             self.remove_files(file_path_dict=file_path_dict)
-
-
+        print(f'\n**********************\n')
 
     @staticmethod
     def prepare_data_path(path_list):
@@ -119,7 +119,7 @@ class CI_config(object):
                 print(f'Result file {src} was moved to {dst}')
                 continue
             if os.path.isdir(src) is True:
-                print(f'Result Folder {src} was moved to {file_path_dict[src]}')
+                print(f'Result Folder {src} was moved to {file_path_dict[src]}{os.sep}{src}')
                 shutil.copytree(src, f'{file_path_dict[src]}{os.sep}{src}')
                 continue
 
