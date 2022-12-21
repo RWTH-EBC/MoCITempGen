@@ -70,8 +70,7 @@ class CI_config(object):
 
     def prepare_data(self, path_list, file_path_dict, del_flag=False):
         """
-
-        Args:
+            Args:
             path_list (): path where files are saved
             file_path_dict (): {dst:src,}
             del_flag (): True: delete file, False dont delete file
@@ -117,10 +116,10 @@ class CI_config(object):
                 file = src[src.rfind(os.sep)+1:]
                 dst = f'{file_path_dict[src]}{os.sep}{file}'
                 shutil.copyfile(src, dst)
-                print(f'Result file {src} was moved to {file_path_dict[src]}{os.sep}{file}')
+                print(f'Result file {src} was moved to {dst}')
                 continue
             if os.path.isdir(src) is True:
-                print(f'Result Folder {src} was moved to {dst}')
+                print(f'Result Folder {src} was moved to {file_path_dict[src]}')
                 shutil.copytree(src, dst)
                 continue
 

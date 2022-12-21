@@ -76,10 +76,9 @@ class Buildingspy_Regression_Check(CI_config):
                     response = self.ut.run()
                     self.prepare_data(
                         path_list=[f'..{os.sep}{self.result_dir}', f'..{os.sep}{self.result_regression_dir}_{package}'],
-                        file_path_dict={
-                            f'simulator-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
-                            f'unitTests-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
-                            f'funnel_comp': f'..{os.sep}{self.result_regression_dir}_{package}'})
+                        file_path_dict={f'simulator-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
+                                        f'unitTests-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
+                                        f'funnel_comp': f'..{os.sep}{self.result_regression_dir}_{package}'})
                     if response != 0:
                         err_list.append(package)
                         if self.batch is False:
