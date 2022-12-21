@@ -118,10 +118,11 @@ class CI_config(object):
                 dst = f'{file_path_dict[src]}{os.sep}{file}'
                 shutil.copyfile(src, dst)
                 print(f'Result file {src} was moved to {file_path_dict[src]}{os.sep}{file}')
+                continue
             if os.path.isdir(src) is True:
                 shutil.copytree(src, dst)
                 print(f'Result Folder {src} was moved to {dst}')
-
+                continue
 
     @staticmethod
     def return_file_list():
