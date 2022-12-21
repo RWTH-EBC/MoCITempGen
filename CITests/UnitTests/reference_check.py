@@ -6,7 +6,7 @@ import sys
 import time
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
-from Dymola_python_tests.CI_test_config import CI_config
+from ..Dymola_python_tests.CI_test_config import CI_config
 
 
 class Buildingspy_Regression_Check(CI_config):

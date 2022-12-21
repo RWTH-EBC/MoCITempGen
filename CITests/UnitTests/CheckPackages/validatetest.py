@@ -7,7 +7,6 @@ import time
 from git import Repo
 from natsort import natsorted
 from Dymola_python_tests.CI_test_config import CI_config
-#from Dymola_pythpn_tests.CITests.deploy.prepare_result import Prepare_result_class
 
 class Git_Repository_Clone(object):
 
@@ -147,7 +146,7 @@ class ValidateTest(CI_config):
             filter_whitelist: boolean - true  Filter model on whitelist
         """
         self._check_packages()
-        #python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
+        python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
         modelica_model = get_modelica_models(simulate_examples=self.simulate_examples)
         if self.changed_model is True:
             self.check_ci_folder_structure(folders_list= [self.config_ci_dir])
