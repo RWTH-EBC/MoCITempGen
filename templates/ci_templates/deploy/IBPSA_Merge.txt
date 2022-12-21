@@ -6,10 +6,8 @@ stages:
 IBPSA:
     stage: ${ci_stage_lib_merge}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh

@@ -1,5 +1,7 @@
 import os
 import argparse
+import shutil
+
 
 class CI_config(object):
 
@@ -22,7 +24,7 @@ class CI_config(object):
         self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
         self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
         # [Config_files]
-        self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}Configfiles'
+        self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}configfiles'
         self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}exit.sh'
         self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_ref_file.txt'
         self.config_ci_new_create_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_created_reference.txt'
@@ -44,9 +46,16 @@ class CI_config(object):
         self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
         # [Dymola_Python_Tests] + Parser Commands
-        self.dymola_python_test_url = f'https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
+        self.dymola_python_test_url = f'--single-branch --branch 04_Documentation https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
         # [result folder]
-        # self.result_dir = f'dymola-ci-tests{os.sep}'
+        self.result_dir = f'result'
+        self.result_whitelist_dir = f'{self.result_dir}{os.sep}ci_whitelist'
+        self.result_config_dir = f'{self.result_dir}{os.sep}configfiles'
+        self.result_plot_dir = f'{self.result_dir}{os.sep}charts'
+        self.result_regression_dir = f'{self.result_dir}{os.sep}regression'
+        self.result_interact_ci_dir = f'{self.result_dir}{os.sep}interact_CI'
+        self.result_ci_template_dir = f'{self.result_dir}{os.sep}ci_template'
+        self.result_check_result_dir = f'{self.result_dir}{os.sep}Dymola_check'
         # [Color]
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'
@@ -59,8 +68,59 @@ class CI_config(object):
             print(l)
     '''
 
-    #def read_file_path(self, file):
+    def prepare_data(self, path_list, file_path_dict, del_flag=False):
+        """
 
+        Args:
+            path_list (): path where files are saved
+            file_path_dict (): {dst:src,}
+            del_flag (): True: delete file, False dont delete file
+        """
+        self.prepare_data_path(path_list=path_list)
+        self.prepare_data_files(file_path_dict=file_path_dict)
+        if del_flag is True:
+            self.remove_files(file_path_dict=file_path_dict)
+
+
+
+    @staticmethod
+    def prepare_data_path(path_list):
+        for path in path_list:
+            try:
+                if not os.path.exists(path):
+                    print(f'Create path: {path}')
+                    os.makedirs(path)
+                else:
+                    print(f'Path "{path}" exist.')
+            except FileExistsError:
+                print(f'Find no folder')
+                pass
+
+    @staticmethod
+    def remove_files(file_path_dict):
+        for file in file_path_dict:
+            if os.path.exists(file):
+                if os.path.isfile(file) is True:
+                    os.remove(file)
+                    print(f'Remove file: {file}')
+                else:
+                    print(f'File {file} does not exist')
+            if os.path.isdir(file) is True:
+                os.rmdir(file)
+                print(f'Remove folder: {file}')
+
+
+    @staticmethod
+    def prepare_data_files(file_path_dict):
+        for src in file_path_dict:
+            if os.path.isfile(src) is True:
+                file = src[src.rfind(os.sep)+1:]
+                dst = f'{file_path_dict[src]}{os.sep}{file}'
+                shutil.copyfile(src, dst)
+                print(f'Result file {src} was moved to {file_path_dict[src]}{os.sep}{file}')
+            if os.path.isdir(src) is True:
+                shutil.copytree(src, dst)
+                print(f'Result Folder {src} was moved to {dst}')
 
 
     @staticmethod
@@ -139,7 +199,7 @@ if __name__ == '__main__':
     check_test_group.add_argument("--create-ref", default=False, action="store_true")
     check_test_group.add_argument("--create-whitelist", default=False, action="store_true")
     args = parser.parse_args()
-    conf = CI_config_class()
+    conf = CI_config()
     folder_list = []
     file_list = []
     if args.changed_model is True:

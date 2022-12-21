@@ -8,15 +8,12 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            export PIP_CACHE_DIR="/opt/cache/pip" ;
             source activate ${python_version} ;
             pip install pandas mako matplot ;
             mkdir -p data ;
@@ -31,8 +28,9 @@ stages:
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-          - data
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         variables:
@@ -43,8 +41,6 @@ stages:
     retry:
         max: 2
         when: runner_system_failure
-
-
 
 
 %for package in package_list:
@@ -59,17 +55,13 @@ CI_Regressiontest_${library}_${package}:
 .dev_Regressiontest:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
-
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            export PIP_CACHE_DIR="/opt/cache/pip" ;
             source activate ${python_version} ;
             pip install pandas mako matplot ;
             mkdir -p data ;
@@ -79,13 +71,15 @@ CI_Regressiontest_${library}_${package}:
             cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
+            exit 0;
           else
-            echo "Test was successful!" ;
+            exit 0 ;
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-          - data
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         refs:
@@ -111,7 +105,6 @@ CI_create_plots:
         - source activate ${python_version}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
@@ -119,8 +112,10 @@ CI_create_plots:
         - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
+        untracked: true
         paths:
-         - $CI_COMMIT_REF_NAME/plots
+            - ${result_dir}/
+            - $CI_COMMIT_REF_NAME/plots
     only:
         variables:
             - $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/
@@ -137,32 +132,26 @@ CI_create_plots:
 .Regressiontest_job:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            export PIP_CACHE_DIR="/opt/cache/pip" ;
             source activate ${python_version} ;
             pip install pandas mako matplot ;
-            mkdir -p data ;
-            mkdir -p data/plots ;
-            cp -r ${library}/simulator-dymola.log data ;
-            cp -r ${library}/unitTests-dymola.log data ;
-            cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
+            exit 0;
           else
-            echo "Test was successful!" ;
+            exit 0 ;
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-          - data
+            - ${result_dir}/
+
         expire_in: ${expire_in_time}
     only:
         refs:
@@ -191,18 +180,16 @@ Regressiontest_${library}_${package}:
 Regression_overall_coverage:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/simulator-dymola.log
-            - ${library}/unitTests-dymola.log
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         refs:
@@ -227,7 +214,6 @@ prepare_create_plots:
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
@@ -259,10 +245,8 @@ prepare_create_plots:
 .Regressiontest_changed_Job:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
@@ -270,16 +254,9 @@ prepare_create_plots:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            export PIP_CACHE_DIR="/opt/cache/pip";
             source activate ${python_version};
             pip install pandas mako matplot;
-            mkdir -p data ;
-            mkdir -p data/plots ;
-            cp -r ${library}/simulator-dymola.log data ;
-            cp -r ${library}/unitTests-dymola.log data ;
-            cp -r ${library}/funnel_comp data ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
-            cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
             exit 0;
           else
             exit 0;
@@ -323,7 +300,6 @@ Changed_create_plots:
         - source activate ${python_version}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot requests toml
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
@@ -361,12 +337,10 @@ Changed_create_plots:
 RegressionTest_Check_References:
     stage: ${ci_stage_ref_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - export PYTHONIOENCODING=utf-8
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
         - ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -383,9 +357,7 @@ RegressionTest_Check_References:
         - python ${dymola_python_configuration_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - cd CorrectedVersion && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
@@ -394,13 +366,6 @@ RegressionTest_Check_References:
             message="${bot_create_ref_commit}" ;
             pip install pandas mako matplot;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
-            mkdir -p ../../$CI_COMMIT_REF_NAME/plots ;
-            mkdir -p ../../data ;
-            mkdir -p ../../data/reference_result ;
-            cp -r $(git ls-files --others --exclude-standard --directory ${library}) ../../data/reference_result  ;
-            cp -r ${library}/simulator-dymola.log ../../data ;
-            cp -r ${library}/unitTests-dymola.log ../../data ;
-            cp -r ${library}/funnel_comp ../../data ;
             cp -r ${chart_dir}/* ../../$CI_COMMIT_REF_NAME/plots ;
             git add $push_model ;
             git commit -m "$message";
@@ -434,7 +399,6 @@ plot_reference_results:
         - source activate ${python_version}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots

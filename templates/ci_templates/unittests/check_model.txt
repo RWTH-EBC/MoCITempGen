@@ -5,18 +5,16 @@ stages:
 .check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         - external_pull_requests
@@ -44,18 +42,17 @@ Check_${library}_${package}:
 .dev_check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
+
         expire_in: ${expire_in_time}
     only:
         refs:
@@ -77,10 +74,8 @@ Development_Check_${library}_${package}:
 .check_changed_models_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
@@ -88,9 +83,10 @@ Development_Check_${library}_${package}:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
+
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -122,18 +118,17 @@ Check_${library}_${package}_changed_models:
 .CI_check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
+
         expire_in: ${expire_in_time}
     only:
         variables:
@@ -157,10 +152,8 @@ CI_Check_${library}_${package}:
 whitelist_job:
     stage: ${ci_stage_create_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8 
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
@@ -188,9 +181,10 @@ whitelist_job:
             exit 0 ;
           fi
     artifacts:
+        untracked: true
         paths:
-            - whitelist/$CI_PROJECT_NAME/${wh_model_file}
-            - whitelist/$CI_PROJECT_NAME/${wh_library}/${wh_library}-errorlog.txt
+            - ${result_dir}/
+
         expire_in: ${expire_in_time}
     only:
         variables:

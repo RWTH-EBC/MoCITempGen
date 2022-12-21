@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 import glob
 
 
-with open("README.md", 'r') as f:
+with open("CITests/README.md", 'r') as f:
     long_description = f.read()
-with open("requirements.txt", 'r') as f:
+with open("CITests/requirements.txt", 'r') as f:
     required = f.read().splitlines()
 VERSION = "0.1.0"
 
@@ -21,7 +21,6 @@ setup(
     url="https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests",
     packages=find_packages(include=['CITests*']),
     include_package_data=True,
-    data_files=,
     python_requires='>=3.9.0',
     install_requires=[required
     ],

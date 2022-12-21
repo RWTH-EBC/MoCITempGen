@@ -5,18 +5,16 @@ stages:
 .CI_simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git clone ${dymola_python_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         variables:
@@ -39,18 +37,16 @@ CI_simulate_${library}_${package}:
 .dev_simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git clone ${dymola_python_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
         expire_in: 7 day
     only:
         refs:
@@ -79,18 +75,16 @@ Development_simulate_${library}_${package}:
 .simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git clone ${dymola_python_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
         expire_in: 7 day 
     only:
         refs:
@@ -120,21 +114,18 @@ simulate_${library}_${package}:
 .simulate_changed_models_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git clone ${dymola_python_test_url}
-
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/${library}.$lib_package-log.txt
-            - ${library}/${library}.$lib_package-errorlog.txt
+            - ${result_dir}/
         expire_in: 7 day
     except:
         refs:
@@ -167,10 +158,8 @@ simulate_${library}_${package}_changed_models:
 whitelist_example_job:
     stage: ${ci_stage_create_exampeL_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort
-        - export PYTHONIOENCODING=utf-8
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
@@ -202,9 +191,9 @@ whitelist_example_job:
             exit 0 ;
           fi
     artifacts:
+        untracked: true
         paths:
-            - whitelist/$CI_PROJECT_NAME/${wh_simulate_file}
-            - whitelist/$CI_PROJECT_NAME/${wh_library}/${wh_library}-errorlog.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         variables:

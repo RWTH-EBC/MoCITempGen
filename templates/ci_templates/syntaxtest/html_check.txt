@@ -10,9 +10,7 @@ variables:
 Correct_check_HTML:
     stage: ${ci_stage_html_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
@@ -36,7 +34,6 @@ Open_Pull_HTML_Request:
         - source activate ${python_version}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install requests toml
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
@@ -54,9 +51,7 @@ Open_Pull_HTML_Request:
 HTML_PR_Checks:
     stage: ${ci_stage_html_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8 # just in case
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
@@ -91,16 +86,12 @@ HTML_Check:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - if cat ${config_ci_exit_file} | grep "exit 1"; then
             mkdir CorrectedVersion &&  cd CorrectedVersion ;
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
@@ -146,16 +137,12 @@ CI_HTML_Check:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - if cat ${config_ci_exit_file} | grep "exit 1"; then
             mkdir CorrectedVersion &&  cd CorrectedVersion ;
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
@@ -190,9 +177,7 @@ CI_HTML_Check:
 html_whitelist_job:
     stage: ${ci_stage_html_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh

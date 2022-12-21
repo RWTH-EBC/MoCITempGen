@@ -155,6 +155,8 @@ class HTML_Tidy(CI_config):
         """
         err_list = self.read_log_file()
         var = self._write_exit(err_list=err_list)
+        self.prepare_data(path_list=[self.result_dir, self.result_whitelist_dir],
+                          file_path_dict={self.wh_html_file: self.result_whitelist_dir})
         return var
 
     @staticmethod
@@ -630,6 +632,8 @@ class HTML_whitelist(CI_config):
         self._clone_repository()
         model_list = self._get_whitelist_model()
         self._write_whitelist(model_list=model_list)
+        self.prepare_data(path_list=[self.result_dir, self.result_whitelist_dir],
+                          file_path_dict={self.wh_html_file: self.result_whitelist_dir})
 
     def _clone_repository(self):
         """
@@ -700,6 +704,7 @@ if __name__ == '__main__':
         whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
         print(f'Create a whitelist of {args.wh_library} Library')
         whitelist.call_whitelist()
+
         exit(0)
     html_tidy_check = HTML_Tidy(package=args.single_package,
                                 correct_overwrite=args.correct_overwrite,
@@ -712,6 +717,7 @@ if __name__ == '__main__':
     html_tidy_check.run_files()
     if args.log is True:
         variable = html_tidy_check.call_read_log()
+
         exit(variable)
     if args.correct_overwrite is False and args.correct_backup is False and args.log is False and args.correct_view is False:
         print("please use -h or --help for help")

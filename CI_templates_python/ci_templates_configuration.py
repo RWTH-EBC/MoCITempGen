@@ -76,7 +76,7 @@ class CI_template_config(CI_config):
         self.dymola_python_deploy_artifacts_file = f'{self.dymola_python_dir}{os.sep}deploy{os.sep}deploy_artifacts.py'
         self.dymola_python_html_tidy_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}html_tidy_errors.py'
         self.dymola_python_syntax_test_file = f'{self.dymola_python_dir}{os.sep}SyntaxTests{os.sep}StyleChecking.py'
-        self.dymola_python_configuration_file = f'{self.dymola_python_dir}{os.sep}CI_Configuration{os.sep}configuration.py'
+        self.dymola_python_configuration_file = f'Dymola_python_tests{os.sep}CI_test_config.py'
         # [Triggers different jobs specifically: Interact CI: User]
         #self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
         self.ci_show_ref_commit = "ci_show_ref"                     # show reference results from list

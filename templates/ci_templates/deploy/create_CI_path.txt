@@ -4,7 +4,6 @@ stages:
 create_ci_structure_job:
     stage: ${ci_stage_build_ci_structure}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install natsort toml
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'

@@ -4,9 +4,7 @@ stages:
 Style_Check_AixLib:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
@@ -32,9 +30,7 @@ Style_Check_AixLib:
 Development_Style_Check:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
@@ -53,9 +49,7 @@ Development_Style_Check:
 CI_Style_Check:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
@@ -75,9 +69,7 @@ CI_Style_Check:
 Style_Check_ChangedModel:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
         - git clone ${dymola_python_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model

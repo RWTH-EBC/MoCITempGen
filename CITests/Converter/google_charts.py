@@ -28,7 +28,7 @@ class Plot_Charts(CI_config):
         self.test_csv = f'test.csv'
         self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'
         self.funnel_path = f'{self.library}{os.sep}funnel_comp'
-        self.ref_path = f'{self.library}{os.sep}Resources{os.sep}ReferenceResults{os.sep}Dymola'
+        self.ref_path = f'{self.library}{os.sep}{self.library_ref_results_dir}'
         self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
 
     @staticmethod
@@ -555,8 +555,11 @@ if __name__ == '__main__':
                                  action="store_true")
     args = parser.parse_args()
     conf = CI_config()
-    conf.check_ci_folder_structure(folders_list=[conf.chart_dir, conf.temp_chart_dir])
-    conf.check_ci_file_structure(files_list=[conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file])
+    conf.check_ci_folder_structure(folders_list=[conf.chart_dir,
+                                                 conf.temp_chart_dir])
+    conf.check_ci_file_structure(files_list=[conf.temp_chart_file,
+                                             conf.temp_index_file,
+                                             conf.temp_layout_file])
     charts = Plot_Charts(template=Template,
                          package=args.single_package,
                          library=args.library)
@@ -598,10 +601,17 @@ if __name__ == '__main__':
             folder = charts.get_funnel_comp()
             for ref in folder:
                 if args.funnel_comp is True:
-                    charts.mako_line_html_chart(model=ref[:ref.find(".mat")], var=ref[ref.rfind(".mat") + 5:])
+                    charts.mako_line_html_chart(model=ref[:ref.find(".mat")],
+                                                var=ref[ref.rfind(".mat") + 5:])
             pass
         charts.create_index_layout()
-        charts.create_layout(temp_dir=conf.chart_dir, layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
+        charts.create_layout(temp_dir=conf.chart_dir,
+                             layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
+        conf.prepare_data(path_list=[conf.result_dir,
+                                     conf.result_plot_dir],
+                          file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}{os.sep}{args.single_package}'})
     if args.create_layout is True:
         conf.check_ci_folder_structure(folders_list=[f'data{os.sep}plots'])
-        charts.create_layout(temp_dir=f'data{os.sep}plots', layout_html_file=f'data{os.sep}plots{os.sep}index.html')
+        charts.create_layout(temp_dir=f'data{os.sep}plots',
+                             layout_html_file=f'data{os.sep}plots{os.sep}index.html')
+

@@ -11,7 +11,7 @@ from Dymola_python_tests.CI_test_config import CI_config
 
 class Buildingspy_Regression_Check(CI_config):
 
-    def __init__(self, buildingspy_regression, package, n_pro, tool, batch, show_gui, path):
+    def __init__(self, buildingspy_regression, package, n_pro, tool, batch, show_gui, path, library):
         """
         Args:
             buildingspy_regression (): library buildingspy: use for regression tests
@@ -28,6 +28,7 @@ class Buildingspy_Regression_Check(CI_config):
         self.batch = batch
         self.show_gui = show_gui
         self.path = path
+        self.library = library
         super().__init__()
         self.wh_ref_file = f'..{os.sep}{self.wh_ref_file}'
         self.config_ci_exit_file = f'..{os.sep}{self.config_ci_exit_file}'
@@ -72,6 +73,12 @@ class Buildingspy_Regression_Check(CI_config):
                         print(f'{self.green}Regression test for package:{self.CEND} {package}')
                     self.ut.setSinglePackage(package)
                     response = self.ut.run()
+                    self.prepare_data(
+                        path_list=[f'..{os.sep}{self.result_dir}', f'..{os.sep}{self.result_regression_dir}_{package}'],
+                        file_path_dict={
+                            f'simulator-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
+                            f'unitTests-dymola.log': f'..{os.sep}{self.result_regression_dir}_{package}',
+                            f'funnel_comp': f'..{os.sep}{self.result_regression_dir}_{package}'})
                     if response != 0:
                         err_list.append(package)
                         if self.batch is False:
@@ -101,7 +108,7 @@ class Buildingspy_Regression_Check(CI_config):
                 return 1
 
 
-class Ref_model(CI_conf_class):
+class Ref_model(CI_config):
 
     def __init__(self, library):
         """
@@ -168,7 +175,7 @@ class Ref_model(CI_conf_class):
             print(f'{self.green}Generate new reference results for model: {self.CEND} {model}')
             package_list.append(model[:model.rfind(".")])
         package_list = list(set(package_list))
-        return package_list
+        return package_list, model_list
 
     @staticmethod
     def get_update_package(ref_list):
@@ -320,7 +327,7 @@ class Ref_model(CI_conf_class):
             return mos_list
 
 
-class python_dymola_interface(CI_conf_class):
+class python_dymola_interface(CI_config):
 
     def __init__(self, dymola, dymola_exception):
         """
@@ -366,7 +373,7 @@ class python_dymola_interface(CI_conf_class):
             f'2: Using Dymola port   {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
 
-class Extended_model(CI_conf_class):
+class Extended_model(CI_config):
 
     def __init__(self, dymola, dymola_exception, package, library, dymola_version, path):
         """
@@ -588,7 +595,7 @@ class Extended_model(CI_conf_class):
             print(f'Error: File {self.config_ci_changed_file} does not exist.')
 
 
-class Buildingspy_Validate_test(CI_conf_class):
+class Buildingspy_Validate_test(CI_config):
 
     def __init__(self, validate, path):
         """
@@ -614,10 +621,10 @@ class Buildingspy_Validate_test(CI_conf_class):
             else:
                 print(err_msg[i])
         if n_msg == 0:
-            exit(0)
+            return 0
         else:
             print(f'{self.CRED}html check failed.{self.CEND}')
-            exit(1)
+            return 1
 
     def validate_experiment_setup(self):
         """
@@ -625,7 +632,7 @@ class Buildingspy_Validate_test(CI_conf_class):
         """
         valid = self.validate.Validator()
         ret_val = valid.validateExperimentSetup(self.path)
-        exit(ret_val)
+        return ret_val
 
     def run_coverage_only(self, buildingspy_regression, batch, tool, package):
         """
@@ -642,7 +649,7 @@ class Buildingspy_Validate_test(CI_conf_class):
         if package is not None:
             ut.setSinglePackage(package)
         ut.get_test_example_coverage()
-        exit(0)
+        return 0
 
 
 def _setEnvironmentVariables(var, value):  # Add to the environment variable `var` the value `value`
@@ -737,6 +744,7 @@ if __name__ == '__main__':
     _setEnvironmentPath(dymola_version=args.dymola_version)
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException
+
     print(f'1: Starting Dymola instance')
     if platform.system() == "Windows":
         dymola = DymolaInterface()
@@ -746,22 +754,25 @@ if __name__ == '__main__':
         dymola_exception = DymolaException()
 
     if args.validate_html_only:
-        Buildingspy_Validate_test(validate=validate,
-                                  path=args.path).validate_html()
+        var = Buildingspy_Validate_test(validate=validate,
+                                        path=args.path).validate_html()
+        exit(var)
     elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
-        Buildingspy_Validate_test(validate=validate,
-                                  path=args.path).validate_experiment_setup()
+        var = Buildingspy_Validate_test(validate=validate,
+                                        path=args.path).validate_experiment_setup()
+        exit(var)
     elif args.coverage_only:
-        Buildingspy_Validate_test(validate=validate,
-                                  path=args.path).run_coverage_only(buildingspy_regression=regression,
-                                                                    batch=args.batch,
-                                                                    tool=args.tool,
-                                                                    package=args.single_package)
+        var = Buildingspy_Validate_test(validate=validate,
+                                        path=args.path).run_coverage_only(buildingspy_regression=regression,
+                                                                          batch=args.batch,
+                                                                          tool=args.tool,
+                                                                          package=args.single_package)
+        exit(var)
     else:
         dym_interface = python_dymola_interface(dymola=dymola,
                                                 dymola_exception=dymola_exception)
         dym_interface.library_check(library=args.library)
-        conf = CI_conf_class()
+        conf = CI_config()
         ref_model = Ref_model(library=args.library)
         package_list = []
         '''
@@ -780,12 +791,13 @@ if __name__ == '__main__':
                                                  tool=args.tool,
                                                  batch=args.batch,
                                                  show_gui=args.show_gui,
-                                                 path=args.path)
-
-
+                                                 path=args.path,
+                                                 library=args.library)
+        created_ref_list = list()
         if args.create_ref:
-            package_list = ref_model.get_update_model()
-
+            result = ref_model.get_update_model()
+            package_list = result[0]
+            created_ref_list = result[1]
         elif args.update_ref:
             ref_list = ref_model.get_update_ref()
             ref_model.delete_ref_file(ref_list=ref_list)
@@ -798,7 +810,6 @@ if __name__ == '__main__':
             if args.modified_models is True:
                 conf.check_ci_file_structure(
                     files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
-                # ref_model.write_regression_list()
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
                                                 dymola_exception=dymola_exception,
@@ -823,6 +834,12 @@ if __name__ == '__main__':
         else:
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
+            if len(created_ref_list) > 0:
+                for ref in created_ref_list:
+                    ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref}'
+                    conf.prepare_data(path_list=[f'..{os.sep}{conf.result_dir}',
+                                                 f'..{os.sep}{conf.result_regression_dir}_Reference'],
+                                      file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}_Reference'})
 
         ref_check.write_exit_file(var=val)
         exit(val)
