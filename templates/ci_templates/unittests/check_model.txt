@@ -154,7 +154,7 @@ whitelist_job:
     before_script:
         - source activate ${python_version}
         - pip install natsort
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y)'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
         - ssh-keyscan github.com >> ~/.ssh/known_hosts

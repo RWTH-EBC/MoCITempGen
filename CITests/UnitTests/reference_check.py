@@ -836,10 +836,9 @@ if __name__ == '__main__':
             val = ref_check.check_regression_test(package_list=package_list)
             if len(created_ref_list) > 0:
                 for ref in created_ref_list:
+                    print(ref)
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref}'
-                    conf.prepare_data(path_list=[f'..{os.sep}{conf.result_dir}',
-                                                 f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'],
+                    conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'],
                                       file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
-
         ref_check.write_exit_file(var=val)
         exit(val)

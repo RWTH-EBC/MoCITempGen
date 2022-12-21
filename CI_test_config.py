@@ -146,17 +146,18 @@ class CI_config(object):
                 dir_list.append(dir_dic[dirs])
         return dir_list
 
-    @staticmethod
-    def check_ci_folder_structure(folders_list):
+    def check_ci_folder_structure(self, folders_list):
         """
         Check CI Structure
         """
+        print(f'\n\n{self.blue}**** Create folder structure ****{self.CEND}\n')
         for folder in folders_list:
             if not os.path.exists(folder):
                 print(f'Create path: {folder}')
                 os.makedirs(folder)
             else:
                 print(f'Path "{folder}" exist.')
+        print(f'\n{self.blue}**********************{self.CEND}\n\n')
 
 
     def check_ci_file_structure(self, files_list):
@@ -165,6 +166,7 @@ class CI_config(object):
         Args:
             files_list ():
         """
+        print(f'\n\n{self.blue}**** Create file structure ****{self.CEND}\n')
         for file in files_list:
             if os.path.exists(file):
                 print(f'{file} does exist.')
@@ -174,6 +176,7 @@ class CI_config(object):
                 if file is self.config_ci_eof_file:
                     write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
                 write_file.close()
+        print(f'\n{self.blue}**********************{self.CEND}\n\n')
 
     @staticmethod
     def create_folder(path):
@@ -202,8 +205,8 @@ if __name__ == '__main__':
     check_test_group.add_argument("--create-whitelist", default=False, action="store_true")
     args = parser.parse_args()
     conf = CI_config()
-    folder_list = []
-    file_list = []
+    folder_list = list()
+    file_list = list()
     if args.changed_model is True:
         folder_list = [conf.config_ci_dir]
         file_list = [conf.config_ci_changed_file, conf.config_ci_exit_file]
