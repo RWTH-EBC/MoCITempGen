@@ -48,7 +48,7 @@ class CI_config(object):
         # [Dymola_Python_Tests] + Parser Commands
         self.dymola_python_test_url = f'--single-branch --branch 04_Documentation https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
         # [result folder]
-        self.result_dir = f'result'
+        self.result_dir = f'{self.dymola_ci_test_dir}{os.sep}result'
         self.result_whitelist_dir = f'{self.result_dir}{os.sep}ci_whitelist'
         self.result_config_dir = f'{self.result_dir}{os.sep}configfiles'
         self.result_plot_dir = f'{self.result_dir}{os.sep}charts'
@@ -60,6 +60,8 @@ class CI_config(object):
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
+        self.yellow = '\033[33m'
+        self.blue = '\033[44m'
 
     '''
     def get_files(self):
@@ -75,12 +77,12 @@ class CI_config(object):
             file_path_dict (): {dst:src,}
             del_flag (): True: delete file, False dont delete file
         """
-        print(f'\n\n{self.green}**** Prepare Data ****{self.CEND}\n')
+        print(f'\n\n{self.blue}**** Prepare Data ****{self.CEND}\n')
         self.prepare_data_path(path_list=path_list)
         self.prepare_data_files(file_path_dict=file_path_dict)
         if del_flag is True:
             self.remove_files(file_path_dict=file_path_dict)
-        print(f'\n{self.green}**********************{self.CEND}\n\n')
+        print(f'\n{self.blue}**********************{self.CEND}\n\n')
 
     @staticmethod
     def prepare_data_path(path_list):
