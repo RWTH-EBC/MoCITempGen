@@ -126,7 +126,8 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_api_github_file=self.dymola_python_api_github_file.replace(os.sep,
                                                                                                                "/"),
                                       bot_create_html_file_commit=self.bot_create_html_file_commit,
-                                      expire_in_time=self.expire_in_time)
+                                      expire_in_time=self.expire_in_time,
+                                      result_dir=self.result_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_html_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_html_file.split(os.sep)[-1]}'
@@ -156,7 +157,8 @@ class CI_yml_templates(CI_template_config):
                                                                                                                 "/"),
                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
                                          os.sep, "/"),
-                                     html_praefix=self.html_praefix)
+                                     html_praefix=self.html_praefix,
+                                     result_dir=self.result_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-1]}'

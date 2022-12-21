@@ -15,9 +15,9 @@ Correct_check_HTML:
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
+        untracked: true
         paths:
-            - ${library}/HTML_correct_log.txt
-            - ${library}/HTML_error_log.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -57,9 +57,9 @@ HTML_PR_Checks:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/HTML_correct_log.txt
-            - ${library}/HTML_error_log.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     only:
         refs:
@@ -111,9 +111,9 @@ HTML_Check:
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/HTML_correct_log.txt
-            - ${library}/HTML_error_log.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -161,9 +161,9 @@ CI_HTML_Check:
           fi
     artifacts:
         when: on_failure
+        untracked: true
         paths:
-            - ${library}/HTML_correct_log.txt
-            - ${library}/HTML_error_log.txt
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
@@ -198,8 +198,9 @@ html_whitelist_job:
         - git commit -m "$message"
         - git push git@github.com:$Github_Repository.git
     artifacts:
+        untracked: true
         paths:
-            - whitelist/$CI_PROJECT_NAME/${wh_html_file}
+            - ${result_dir}/
         expire_in: 7 day 
     only:
         variables:
