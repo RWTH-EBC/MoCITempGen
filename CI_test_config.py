@@ -120,7 +120,7 @@ class CI_config(object):
                 continue
             if os.path.isdir(src) is True:
                 print(f'Result Folder {src} was moved to {file_path_dict[src]}')
-                shutil.copytree(src, dst)
+                shutil.copytree(src, file_path_dict[src])
                 continue
 
     @staticmethod
