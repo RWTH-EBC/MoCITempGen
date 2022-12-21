@@ -348,12 +348,11 @@ RegressionTest_Check_References:
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
-            pip install pandas mako matplot;
+            pip install pandas mako matplot ;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
-            cp -r ${result_dir}/* ../../${result_dir} ;
             exit 1 ;
           else
             exit 0 ;
@@ -362,7 +361,7 @@ RegressionTest_Check_References:
         when: on_failure
         untracked: true
         paths:
-            - ${result_dir}/
+            - CorrectedVersion/$CI_PROJECT_NAME/${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:

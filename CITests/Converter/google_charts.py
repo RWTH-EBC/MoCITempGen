@@ -1,7 +1,6 @@
 import argparse
 import os
 import shutil
-import sys
 import pandas as pd
 from mako.template import Template
 from Dymola_python_tests.CI_test_config import CI_config

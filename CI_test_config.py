@@ -70,7 +70,7 @@ class CI_config(object):
             print(l)
     '''
 
-    def prepare_data(self, path_list, file_path_dict, del_flag=False):
+    def prepare_data(self, path_list: list, file_path_dict: dict, del_flag=False):
         """
             Args:
             path_list (): path where files are saved
@@ -157,12 +157,10 @@ class CI_config(object):
                 os.makedirs(folder)
             else:
                 print(f'Path "{folder}" exist.')
-        print(f'\n{self.blue}**********************{self.CEND}\n\n')
 
 
     def check_ci_file_structure(self, files_list):
         """
-
         Args:
             files_list ():
         """
