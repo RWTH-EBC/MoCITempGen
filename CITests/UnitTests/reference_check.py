@@ -834,8 +834,8 @@ if __name__ == '__main__':
         else:
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
-            conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'])
             if len(created_ref_list) > 0:
+                conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'])
                 for ref in created_ref_list:
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
                     conf.prepare_data(file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
