@@ -23,7 +23,7 @@ class CI_config(object):
                 toml_file = l
                 break
         else:
-            toml_file = f'..Dymola_python_tests{os.sep}config.toml'
+            toml_file = f'..{os.sep}Dymola_python_tests{os.sep}config.toml'
         data = toml.load(f'{toml_file}')
         self.dymola_ci_test_dir = data["CI_dir"]["dymola_ci_test_dir"].replace("/", os.sep)
         self.dymola_python_test_dir = data["CI_dir"]["dymola_python_test_dir"].replace("/", os.sep)
