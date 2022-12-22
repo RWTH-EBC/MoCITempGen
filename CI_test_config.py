@@ -17,7 +17,7 @@ class CI_config(object):
         [Folder]
         [Dymola_Python_Tests] + Parser Commands
         """
-        toml_files = sorted(pathlib.Path('.').glob('**/config.toml'))
+        toml_files = sorted(pathlib.Path('.').glob('**/**/config.toml'))
         for l in toml_files:
             toml_file = l
             break
