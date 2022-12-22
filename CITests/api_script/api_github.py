@@ -173,7 +173,7 @@ if __name__ == '__main__':
     message = str
    
     if args.post_pr_comment is True:
-        page_url = f'{args.gitlab_page}/{args.working_branch}/plots'
+        page_url = f'{args.gitlab_page}/{args.working_branch}/charts'
         print(f'Setting gitlab page url: {page_url}')
         pr_number = pull_request.get_pr_number()
         if args.prepare_plot is True:
