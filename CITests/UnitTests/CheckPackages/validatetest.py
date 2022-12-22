@@ -367,8 +367,7 @@ class Create_whitelist(CI_config):
                 model_list = modelica_model.get_models(wh_path=self.wh_lib_path, library=self.wh_library)
             python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
             self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
-            self.prepare_data(del_flag=False,
-                              path_list=[f'{self.result_whitelist_dir}_{self.wh_library}'],
+            self.prepare_data(path_list=[f'{self.result_whitelist_dir}_{self.wh_library}'],
                               file_path_dict={wh_file: f'{self.result_whitelist_dir}_{self.wh_library}',
                                               self.err_log: f'{self.result_check_result_dir}_{self.wh_library}',
                                               f'{self.wh_library}{os.sep}{self.dymola_log}': f'{self.result_check_result_dir}_{self.wh_library}'

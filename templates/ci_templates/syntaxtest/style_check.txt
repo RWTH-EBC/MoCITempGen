@@ -10,7 +10,6 @@ Style_Check_AixLib:
         - ${xvfb_flag} python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: 7 day
@@ -37,7 +36,6 @@ Development_Style_Check:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -57,7 +55,6 @@ CI_Style_Check:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -95,7 +92,6 @@ Style_Check_ChangedModel:
             %endfor
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}

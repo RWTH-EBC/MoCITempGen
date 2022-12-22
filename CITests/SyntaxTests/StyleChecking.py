@@ -104,8 +104,8 @@ class StyleCheck(CI_config):
                 all_logs.close()
                 log_file = f'{path}{self.package}_StyleCheckLog.html'
         self.dymola.close()
-        self.prepare_data(path_list=[],
-                          file_path_dict={})
+        self.prepare_data(path_list=[self.result_dir , self.result_syntax_dir],
+                          file_path_dict={log_file: self.result_syntax_dir})
         return log_file
 
     def sort_mo_models(self):

@@ -23,7 +23,6 @@ stages:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -66,7 +65,6 @@ CI_Regressiontest_${library}_${package}:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -99,7 +97,6 @@ CI_create_plots:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
     only:
@@ -134,7 +131,6 @@ CI_create_plots:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
 
@@ -173,7 +169,6 @@ Regression_overall_coverage:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -205,7 +200,6 @@ prepare_create_plots:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
     only:
@@ -248,7 +242,6 @@ prepare_create_plots:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -290,7 +283,6 @@ Changed_create_plots:
     script:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
     except:
@@ -359,7 +351,6 @@ RegressionTest_Check_References:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - CorrectedVersion/$CI_PROJECT_NAME/${result_dir}/
         expire_in: ${expire_in_time}
@@ -388,7 +379,6 @@ plot_reference_results:
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
     artifacts:
         when: always
-        untracked: true
         paths:
             - ${result_dir}/
     only:

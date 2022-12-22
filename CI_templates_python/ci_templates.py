@@ -87,8 +87,11 @@ class CI_yml_templates(CI_template_config):
                                       temp_dir=self.temp_dir,
                                       dymola_python_test_url=self.dymola_python_test_url)
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_setting_file.split(os.sep)[-2]}'
+        print(ci_folder)
+        print(self.temp_ci_setting_file.split(os.sep)[-2])
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_setting_file.split(os.sep)[-1]}'
+        print(yml_file)
         yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()

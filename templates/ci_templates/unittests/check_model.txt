@@ -12,7 +12,6 @@ stages:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -49,7 +48,6 @@ Check_${library}_${package}:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
 
@@ -83,7 +81,6 @@ Development_Check_${library}_${package}:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
 
@@ -125,7 +122,6 @@ Check_${library}_${package}_changed_models:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
 
@@ -181,7 +177,6 @@ whitelist_job:
             exit 0 ;
           fi
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
 

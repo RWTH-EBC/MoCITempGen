@@ -12,7 +12,6 @@ stages:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -44,7 +43,6 @@ CI_simulate_${library}_${package}:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: 7 day
@@ -82,7 +80,6 @@ Development_simulate_${library}_${package}:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: 7 day 
@@ -123,7 +120,6 @@ simulate_${library}_${package}:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: 7 day
@@ -191,7 +187,6 @@ whitelist_example_job:
             exit 0 ;
           fi
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}

@@ -15,7 +15,6 @@ Correct_check_HTML:
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -57,7 +56,6 @@ HTML_PR_Checks:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -111,7 +109,6 @@ HTML_Check:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -161,7 +158,6 @@ CI_HTML_Check:
           fi
     artifacts:
         when: on_failure
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
@@ -198,7 +194,6 @@ html_whitelist_job:
         - git commit -m "$message"
         - git push git@github.com:$Github_Repository.git
     artifacts:
-        untracked: true
         paths:
             - ${result_dir}/
         expire_in: 7 day 

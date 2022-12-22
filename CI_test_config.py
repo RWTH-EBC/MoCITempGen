@@ -1,7 +1,7 @@
 import os
 import argparse
 import shutil
-
+import toml
 
 class CI_config(object):
 
@@ -15,6 +15,59 @@ class CI_config(object):
         [Folder]
         [Dymola_Python_Tests] + Parser Commands
         """
+        data = toml.load(f'Dymola_python_tests/config.toml')
+        self.dymola_ci_test_dir = data["CI_dir"]["dymola_ci_test_dir"].replace("/", os.sep)
+        self.dymola_python_test_dir = data["CI_dir"]["dymola_python_test_dir"].replace("/", os.sep)
+        # [Whitelist_files]
+        self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["whitelist"]["wh_ci_dir"].replace("/", os.sep)}'
+        self.wh_model_file = f'{self.wh_ci_dir}{os.sep}{data["whitelist"]["wh_model_file"].replace("/", os.sep)}'
+        self.wh_simulate_file = f'{self.wh_ci_dir}{os.sep}{data["whitelist"]["wh_simulate_file"].replace("/", os.sep)}'
+        self.wh_html_file = f'{self.wh_ci_dir}{os.sep}{data["whitelist"]["wh_html_file"].replace("/", os.sep)}'
+        self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}{data["whitelist"]["wh_ref_file"].replace("/", os.sep)}'
+        # [Config_files]
+        self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["config_ci"]["config_ci_dir"].replace("/", os.sep)}'
+        self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_exit_file"].replace("/", os.sep)}'
+        self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_new_ref_file"].replace("/", os.sep)}'
+        self.config_ci_new_create_ref_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_new_create_ref_file"].replace("/", os.sep)}'
+        self.config_ci_changed_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_changed_file"].replace("/", os.sep)}'
+        self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_ref_file"].replace("/", os.sep)}'
+        self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_eof_file"].replace("/", os.sep)}'
+        # [templates for plots]
+        self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["plot"]["chart_dir"].replace("/", os.sep)}'
+        self.temp_chart_dir = f'{self.dymola_python_test_dir}{data["plot"]["temp_chart_dir"].replace("/", os.sep)}'
+        self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_chart_file"].replace("/", os.sep)}'
+        self.temp_index_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_index_file"].replace("/", os.sep)}'
+        self.temp_layout_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_layout_file"].replace("/", os.sep)}'
+        # [interact ci lists]
+        self.ci_interact_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["interact_ci_list"]["ci_interact_dir"].replace("/", os.sep)}'
+        self.ci_interact_show_ref_file = f'{self.ci_interact_dir}{os.sep}{data["interact_ci_list"]["ci_interact_show_ref_file"].replace("/", os.sep)}'
+        self.ci_interact_update_ref_file = f'{self.ci_interact_dir}{os.sep}{data["interact_ci_list"]["ci_interact_update_ref_file"].replace("/", os.sep)}'
+        # [Folder]
+        self.artifacts_dir = f'{self.dymola_ci_test_dir}{data["artifcats"]["artifacts_dir"].replace("/", os.sep)}'
+        self.library_ref_results_dir = f'{data["artifcats"]["library_ref_results_dir"].replace("/", os.sep)}'
+        self.library_resource_dir = f'{data["artifcats"]["library_resource_dir"].replace("/", os.sep)}'
+        # [Dymola_Python_Tests] + Parser Commands
+        self.dymola_python_test_url = f'{data["Dymola_Python_Tests"]["dymola_python_test_url"].replace("/", os.sep)}'
+        # [result folder]
+        self.result_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["result"]["result_dir"].replace("/", os.sep)}'
+        self.result_whitelist_dir = f'{self.result_dir}{os.sep}{data["result"]["result_whitelist_dir"].replace("/", os.sep)}'
+        self.result_config_dir = f'{self.result_dir}{os.sep}{data["result"]["result_config_dir"].replace("/", os.sep)}'
+        self.result_plot_dir = f'{self.result_dir}{os.sep}{data["result"]["result_plot_dir"].replace("/", os.sep)}'
+        self.result_syntax_dir = f'{self.result_dir}{os.sep}{data["result"]["result_syntax_dir"].replace("/", os.sep)}'
+        self.result_regression_dir = f'{self.result_dir}{os.sep}{data["result"]["result_regression_dir"].replace("/", os.sep)}'
+        self.result_interact_ci_dir = f'{self.result_dir}{os.sep}{data["result"]["result_interact_ci_dir"].replace("/", os.sep)}'
+        self.result_ci_template_dir = f'{self.result_dir}{os.sep}{data["result"]["result_ci_template_dir"].replace("/", os.sep)}'
+        self.result_check_result_dir = f'{self.result_dir}{os.sep}{data["result"]["result_check_result_dir"].replace("/", os.sep)}'
+        # [Color]
+        self.CRED = f'{data["Color"]["CRED"]}'
+        self.CEND = f'{data["Color"]["CEND"]}'
+        self.green = f'{data["Color"]["green"]}'
+        self.yellow = f'{data["Color"]["yellow"]}'
+        self.blue = f'{data["Color"]["blue"]}'
+
+
+
+        '''
         self.dymola_ci_test_dir = f'dymola-ci-tests'
         self.dymola_python_test_dir = f'Dymola_python_tests'
         # [Whitelist_files]
@@ -52,6 +105,7 @@ class CI_config(object):
         self.result_whitelist_dir = f'{self.result_dir}{os.sep}ci_whitelist'
         self.result_config_dir = f'{self.result_dir}{os.sep}configfiles'
         self.result_plot_dir = f'{self.result_dir}{os.sep}charts'
+        self.result_syntax_dir = f'{self.result_dir}{os.sep}syntax'
         self.result_regression_dir = f'{self.result_dir}{os.sep}regression'
         self.result_interact_ci_dir = f'{self.result_dir}{os.sep}interact_CI'
         self.result_ci_template_dir = f'{self.result_dir}{os.sep}ci_template'
@@ -62,6 +116,7 @@ class CI_config(object):
         self.green = '\033[0;32m'
         self.yellow = '\033[33m'
         self.blue = '\033[44m'
+        '''
 
     '''
     def get_files(self):
@@ -151,13 +206,12 @@ class CI_config(object):
         """
         Check CI Structure
         """
-        print(f'\n{self.blue}**** Create folder structure ****{self.CEND}\n')
         for folder in folders_list:
             if not os.path.exists(folder):
-                print(f'Create path: {folder}')
+                print(f'{self.blue}Create path:{self.CEND} {folder}')
                 os.makedirs(folder)
             else:
-                print(f'Path "{folder}" exist.')
+                print(f'{self.green}Path exist:{self.CEND} {folder} ')
 
 
     def check_ci_file_structure(self, files_list):
