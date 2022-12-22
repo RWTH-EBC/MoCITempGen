@@ -67,7 +67,8 @@ class CI_yml_templates(CI_template_config):
         yml_text = my_template.render(ci_stage_deploy=self.ci_stage_deploy,
                                       expire_in_time=self.expire_in_time,
                                       except_branch_list=self.except_branch_list,
-                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
+                                      result_dir=self.result_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_page_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_page_file.split(os.sep)[-1]}'

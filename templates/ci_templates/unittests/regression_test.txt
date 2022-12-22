@@ -349,7 +349,7 @@ RegressionTest_Check_References:
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
             mkdir -p ../../${result_dir}/ ;
-            cp -r ${result_dir}/* ../../${result_dir}
+            cp -r ${result_dir}/* ../../${result_dir} ;
             exit 1 ;
           else
             exit 0 ;
