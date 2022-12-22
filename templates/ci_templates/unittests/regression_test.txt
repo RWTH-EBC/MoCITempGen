@@ -348,6 +348,8 @@ RegressionTest_Check_References:
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
+            mkdir -p ../../${result_dir}/ ;
+            cp -r ${result_dir}/* ../../${result_dir}
             exit 1 ;
           else
             exit 0 ;
@@ -355,7 +357,7 @@ RegressionTest_Check_References:
     artifacts:
         when: on_failure
         paths:
-            - CorrectedVersion/$CI_PROJECT_NAME/${result_dir}/
+            - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:

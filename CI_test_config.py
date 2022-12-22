@@ -139,7 +139,7 @@ class CI_config(object):
             print(l)
     '''
 
-    def prepare_data(self, path_list: list, file_path_dict: dict, del_flag=False):
+    def prepare_data(self, path_list: list=[], file_path_dict: dict={}, del_flag=False):
         """
             Args:
             path_list (): path where files are saved
@@ -149,7 +149,7 @@ class CI_config(object):
         print(f'\n{self.blue}**** Prepare Data ****{self.CEND}\n')
         if len(path_list) > 0:
             self.prepare_data_path(path_list=path_list)
-        if len(file_path_dict) >0:
+        if len(file_path_dict) > 0:
             self.prepare_data_files(file_path_dict=file_path_dict)
             if del_flag is True:
                 self.remove_files(file_path_dict=file_path_dict)

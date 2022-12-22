@@ -66,6 +66,7 @@ class Buildingspy_Regression_Check(CI_config):
         new_ref_list = list()
         if package_list is not None:
             if len(package_list) > 0:
+                self.prepare_data(path_list=[f'..{os.sep}{self.result_dir}'])
                 for package in package_list:
                     if self.batch is False:
                         new_ref_list.append(package)
@@ -75,7 +76,7 @@ class Buildingspy_Regression_Check(CI_config):
                     self.ut.setSinglePackage(package)
                     response = self.ut.run()
                     self.prepare_data(
-                        path_list=[f'..{os.sep}{self.result_dir}', f'..{os.sep}{self.result_regression_dir}{os.sep}{package}'],
+                        path_list=[f'..{os.sep}{self.result_regression_dir}{os.sep}{package}'],
                         file_path_dict={f'simulator-dymola.log': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}',
                                         f'unitTests-dymola.log': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}',
                                         f'funnel_comp': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}{os.sep}funnel_comp'})
@@ -833,12 +834,10 @@ if __name__ == '__main__':
         else:
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
-            conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'],
-                              file_path_dict={})
+            conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'])
             if len(created_ref_list) > 0:
                 for ref in created_ref_list:
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
-                    conf.prepare_data(path_list=[],
-                                      file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
+                    conf.prepare_data(file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
         ref_check.write_exit_file(var=val)
         exit(val)
