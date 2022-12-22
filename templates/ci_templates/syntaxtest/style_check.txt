@@ -6,6 +6,7 @@ Style_Check_AixLib:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
@@ -32,6 +33,7 @@ Development_Style_Check:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
@@ -51,6 +53,7 @@ CI_Style_Check:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
@@ -71,6 +74,7 @@ Style_Check_ChangedModel:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - (git diff --raw --diff-filter=AMT HEAD^1) > ${config_ci_changed_file}

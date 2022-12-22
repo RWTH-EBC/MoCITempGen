@@ -2,6 +2,8 @@ import os
 import argparse
 import shutil
 import toml
+import glob
+import pathlib
 
 class CI_config(object):
 
@@ -15,7 +17,12 @@ class CI_config(object):
         [Folder]
         [Dymola_Python_Tests] + Parser Commands
         """
-        data = toml.load(f'Dymola_python_tests/config.toml')
+        toml_files = sorted(pathlib.Path('.').glob('**/config.toml'))
+        for l in toml_files:
+            toml_file = l
+            break
+        #Dymola_python_tests / config.toml
+        data = toml.load(f'{toml_file}')
         self.dymola_ci_test_dir = data["CI_dir"]["dymola_ci_test_dir"].replace("/", os.sep)
         self.dymola_python_test_dir = data["CI_dir"]["dymola_python_test_dir"].replace("/", os.sep)
         # [Whitelist_files]
@@ -46,8 +53,8 @@ class CI_config(object):
         self.artifacts_dir = f'{self.dymola_ci_test_dir}{data["artifcats"]["artifacts_dir"].replace("/", os.sep)}'
         self.library_ref_results_dir = f'{data["artifcats"]["library_ref_results_dir"].replace("/", os.sep)}'
         self.library_resource_dir = f'{data["artifcats"]["library_resource_dir"].replace("/", os.sep)}'
-        # [Dymola_Python_Tests] + Parser Commands
-        self.dymola_python_test_url = f'{data["Dymola_Python_Tests"]["dymola_python_test_url"].replace("/", os.sep)}'
+        # [Dymola_Python_Tests]
+        self.dymola_python_test_url = f'{data["Dymola_Python_Tests"]["dymola_python_test_url"]}'
         # [result folder]
         self.result_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["result"]["result_dir"].replace("/", os.sep)}'
         self.result_whitelist_dir = f'{self.result_dir}{os.sep}{data["result"]["result_whitelist_dir"].replace("/", os.sep)}'
@@ -59,12 +66,17 @@ class CI_config(object):
         self.result_ci_template_dir = f'{self.result_dir}{os.sep}{data["result"]["result_ci_template_dir"].replace("/", os.sep)}'
         self.result_check_result_dir = f'{self.result_dir}{os.sep}{data["result"]["result_check_result_dir"].replace("/", os.sep)}'
         # [Color]
-        self.CRED = f'{data["Color"]["CRED"]}'
-        self.CEND = f'{data["Color"]["CEND"]}'
-        self.green = f'{data["Color"]["green"]}'
-        self.yellow = f'{data["Color"]["yellow"]}'
-        self.blue = f'{data["Color"]["blue"]}'
 
+        #self.CRED = f'{data["Color"]["CRED"]}'
+        #self.CEND = f'{data["Color"]["CEND"]}'
+        #self.green = f'{data["Color"]["green"]}'
+        #self.yellow = f'{data["Color"]["yellow"]}'
+        #self.blue = f'{data["Color"]["blue"]}'
+        self.CRED = '\033[91m'
+        self.CEND = '\033[0m'
+        self.green = '\033[0;32m'
+        self.yellow = '\033[33m'
+        self.blue = '\033[44m'
 
 
         '''

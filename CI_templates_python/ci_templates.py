@@ -40,7 +40,8 @@ class CI_yml_templates(CI_template_config):
                                       wh_ref_file=self.wh_ref_file,
                                       ci_interact_show_ref_file=self.ci_interact_show_ref_file,
                                       ci_interact_update_ref_file=self.ci_interact_update_ref_file,
-                                      expire_in_time=self.expire_in_time)
+                                      expire_in_time=self.expire_in_time,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_structure_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_structure_file.split(os.sep)[-1]}'
@@ -65,7 +66,8 @@ class CI_yml_templates(CI_template_config):
         my_template = Template(filename=self.temp_ci_page_file)
         yml_text = my_template.render(ci_stage_deploy=self.ci_stage_deploy,
                                       expire_in_time=self.expire_in_time,
-                                      except_branch_list=self.except_branch_list, )
+                                      except_branch_list=self.except_branch_list,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_page_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_page_file.split(os.sep)[-1]}'
@@ -85,7 +87,8 @@ class CI_yml_templates(CI_template_config):
                                       ci_stage_build_templates=self.ci_stage_build_templates,
                                       bot_create_CI_template_commit=self.bot_create_CI_template_commit,
                                       temp_dir=self.temp_dir,
-                                      dymola_python_test_url=self.dymola_python_test_url)
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_setting_file.split(os.sep)[-2]}'
         print(ci_folder)
         print(self.temp_ci_setting_file.split(os.sep)[-2])
@@ -130,7 +133,8 @@ class CI_yml_templates(CI_template_config):
                                                                                                                "/"),
                                       bot_create_html_file_commit=self.bot_create_html_file_commit,
                                       expire_in_time=self.expire_in_time,
-                                      result_dir=self.result_dir.replace(os.sep, "/"))
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_html_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_html_file.split(os.sep)[-1]}'
@@ -161,7 +165,8 @@ class CI_yml_templates(CI_template_config):
                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
                                          os.sep, "/"),
                                      html_praefix=self.html_praefix,
-                                     result_dir=self.result_dir.replace(os.sep, "/"))
+                                     result_dir=self.result_dir.replace(os.sep, "/"),
+                                     dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-1]}'
@@ -210,7 +215,8 @@ class CI_yml_templates(CI_template_config):
                                       expire_in_time=self.expire_in_time,
                                       xvfb_flag=self.xvfb_flag,
                                       wh_library=wh_library,
-                                      wh_path=wh_path)
+                                      wh_path=wh_path,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
 
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_build_whitelist_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
@@ -241,7 +247,8 @@ class CI_yml_templates(CI_template_config):
                                       wh_model_file=self.wh_model_file,
                                       xvfb_flag=self.xvfb_flag,
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(
-                                          os.sep, "/"))
+                                          os.sep, "/"),
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-1]}'
@@ -291,6 +298,7 @@ class CI_yml_templates(CI_template_config):
                                          os.sep, "/"),
                                      html_praefix=self.html_praefix,
                                      result_dir=self.result_dir.replace(os.sep,  "/"),
+                                     dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/")
                                      )
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_regression_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
@@ -350,7 +358,8 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
                                           os.sep, "/"),
                                       html_praefix=self.html_praefix,
-                                      result_dir=self.result_dir.replace(os.sep, "/"))
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_check_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_check_file.split(os.sep)[-1]}'
@@ -407,7 +416,8 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
                                           os.sep, "/"),
                                       html_praefix=self.html_praefix,
-                                      result_dir=self.result_dir.replace(os.sep, "/"))
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_simulate_file.split(os.sep)[-2]}'
         self.check_ci_folder_structure([ci_folder])
         yml_file = f'{ci_folder}{os.sep}{self.temp_ci_simulate_file.split(os.sep)[-1]}'
@@ -443,7 +453,8 @@ class CI_yml_templates(CI_template_config):
                                       python_version=self.python_version,
                                       wh_path=self.wh_path,
                                       github_repo_name=self.github_repo,
-                                      gitlab_page_name=self.gitlab_page)
+                                      gitlab_page_name=self.gitlab_page,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
         yml_tmp = open(self.toml_ci_setting_file, "w")
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()

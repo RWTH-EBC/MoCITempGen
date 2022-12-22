@@ -10,12 +10,13 @@ stages:
         - git clone ${dymola_python_test_url}
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            pip install pandas mako matplot ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
             exit 1 ;
           else
@@ -52,12 +53,13 @@ CI_Regressiontest_${library}_${package}:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            pip install pandas mako matplot ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
             exit 1;
           else
@@ -90,9 +92,8 @@ CI_create_plots:
     stage: ${ci_stage_prepare}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
@@ -118,12 +119,13 @@ CI_create_plots:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            pip install pandas mako matplot ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
             exit 1;
           else
@@ -165,6 +167,7 @@ Regression_overall_coverage:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -193,9 +196,8 @@ prepare_create_plots:
     before_script:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
         - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
@@ -227,6 +229,7 @@ prepare_create_plots:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
@@ -234,7 +237,7 @@ prepare_create_plots:
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version};
-            pip install pandas mako matplot;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
             exit 1;
           else
@@ -277,9 +280,8 @@ Changed_create_plots:
     stage: ${ci_stage_prepare}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install pandas mako matplot requests toml
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
     artifacts:
@@ -331,6 +333,7 @@ RegressionTest_Check_References:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
         - python ${dymola_python_configuration_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
@@ -340,7 +343,7 @@ RegressionTest_Check_References:
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
-            pip install pandas mako matplot ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
             git add $push_model ;
             git commit -m "$message";
@@ -372,8 +375,8 @@ plot_reference_results:
     before_script:
         - source activate ${python_version}
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install pandas mako matplot toml requests
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot

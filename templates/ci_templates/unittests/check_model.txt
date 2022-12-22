@@ -6,8 +6,8 @@ stages:
     stage: ${ci_stage_model_check}
     before_script:
         - source activate ${python_version}
-        - pip install natsort
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
@@ -42,8 +42,8 @@ Check_${library}_${package}:
     stage: ${ci_stage_model_check}
     before_script:
         - source activate ${python_version}
-        - pip install natsort
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
@@ -73,8 +73,8 @@ Development_Check_${library}_${package}:
     stage: ${ci_stage_model_check}
     before_script:
         - source activate ${python_version}
-        - pip install natsort
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
@@ -116,8 +116,8 @@ Check_${library}_${package}_changed_models:
     stage: ${ci_stage_model_check}
     before_script:
         - source activate ${python_version}
-        - pip install natsort
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
     artifacts:
@@ -149,7 +149,6 @@ whitelist_job:
     stage: ${ci_stage_create_whitelist}
     before_script:
         - source activate ${python_version}
-        - pip install natsort
         - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y)'
         - eval $(ssh-agent -s)
         - mkdir -p ~/.ssh
@@ -164,6 +163,7 @@ whitelist_job:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
         - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

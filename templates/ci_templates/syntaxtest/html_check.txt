@@ -12,6 +12,7 @@ Correct_check_HTML:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
@@ -31,8 +32,7 @@ Open_Pull_HTML_Request:
     stage: ${ci_stage_open_PR}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install requests toml
+        - pip install -r ${dymola_python_dir}/requirements.txt
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
@@ -86,6 +86,7 @@ HTML_Check:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
@@ -136,6 +137,7 @@ CI_HTML_Check:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
@@ -183,6 +185,7 @@ html_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
