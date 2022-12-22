@@ -43,7 +43,7 @@ class CI_config(object):
         self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}{data["config_ci"]["config_ci_eof_file"].replace("/", os.sep)}'
         # [templates for plots]
         self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}{data["plot"]["chart_dir"].replace("/", os.sep)}'
-        self.temp_chart_dir = f'{self.dymola_python_test_dir}{data["plot"]["temp_chart_dir"].replace("/", os.sep)}'
+        self.temp_chart_dir = f'{self.dymola_python_test_dir}{os.sep}{data["plot"]["temp_chart_dir"].replace("/", os.sep)}'
         self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_chart_file"].replace("/", os.sep)}'
         self.temp_index_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_index_file"].replace("/", os.sep)}'
         self.temp_layout_file = f'{self.temp_chart_dir}{os.sep}{data["plot"]["temp_layout_file"].replace("/", os.sep)}'
