@@ -1228,7 +1228,7 @@ if __name__ == '__main__':
                           file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}'})
 
     if args.create_layout is True:
-        conf.check_ci_folder_structure(folders_list=[f'data{os.sep}plots'])
-        charts.create_layout(temp_dir=f'data{os.sep}plots',
-                             layout_html_file=f'data{os.sep}plots{os.sep}index.html')
+        conf.check_ci_folder_structure(folders_list=[f'{conf.result_plot_dir}'])
+        charts.create_layout(temp_dir=f'{conf.result_plot_dir}',
+                             layout_html_file=f'{conf.result_plot_dir}index.html')
 
