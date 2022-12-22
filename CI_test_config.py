@@ -196,6 +196,8 @@ class CI_config(object):
                     print(f'Result Folder {src} was moved to {file_path_dict[src]}')
                     shutil.copytree(src, f'{file_path_dict[src]}')
                     continue
+            else:
+                print(f'File {src} not found')
 
     @staticmethod
     def return_file_list():

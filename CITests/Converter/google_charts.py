@@ -608,7 +608,7 @@ if __name__ == '__main__':
                              layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
         conf.prepare_data(path_list=[conf.result_dir,
                                      conf.result_plot_dir],
-                          file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}'})
+                          file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}{os.sep}{args.single_package}'})
 
     if args.create_layout is True:
         conf.check_ci_folder_structure(folders_list=[f'{conf.result_plot_dir}'])
