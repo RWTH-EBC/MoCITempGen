@@ -837,9 +837,7 @@ if __name__ == '__main__':
                               file_path_dict={})
             if len(created_ref_list) > 0:
                 for ref in created_ref_list:
-                    print(ref)
-                    ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", os.sep)}.txt'
-                    print(ref_file)
+                    ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
                     conf.prepare_data(path_list=[],
                                       file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
         ref_check.write_exit_file(var=val)
