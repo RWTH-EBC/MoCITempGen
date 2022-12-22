@@ -78,7 +78,7 @@ class Buildingspy_Regression_Check(CI_config):
                         path_list=[f'..{os.sep}{self.result_dir}', f'..{os.sep}{self.result_regression_dir}{os.sep}{package}'],
                         file_path_dict={f'simulator-dymola.log': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}',
                                         f'unitTests-dymola.log': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}',
-                                        f'funnel_comp': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}funnel_comp'})
+                                        f'funnel_comp': f'..{os.sep}{self.result_regression_dir}{os.sep}{package}{os.sep}funnel_comp'})
                     if response != 0:
                         err_list.append(package)
                         if self.batch is False:
@@ -839,6 +839,7 @@ if __name__ == '__main__':
                 for ref in created_ref_list:
                     print(ref)
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", os.sep)}.txt'
+                    print(ref_file)
                     conf.prepare_data(path_list=[],
                                       file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})
         ref_check.write_exit_file(var=val)

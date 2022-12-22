@@ -32,10 +32,10 @@ Open_Pull_HTML_Request:
     stage: ${ci_stage_open_PR}
     before_script:
         - source activate ${python_version}
-        - pip install -r ${dymola_python_dir}/requirements.txt
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_api_github_file} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME --github-token $GITHUB_API_TOKEN --create-pr --correct-html
     except:
@@ -52,6 +52,7 @@ HTML_PR_Checks:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
@@ -96,6 +97,7 @@ HTML_Check:
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
             cd $CI_PROJECT_NAME;
             git clone ${dymola_python_test_url} ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
             git checkout -B $Newbranch;
             message="${bot_create_html_file_commit}";
@@ -147,6 +149,7 @@ CI_HTML_Check:
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
             cd $CI_PROJECT_NAME;
             git clone ${dymola_python_test_url} ;
+            pip install -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
             git checkout -B $Newbranch;
             message="${bot_create_html_file_commit}";
@@ -191,6 +194,7 @@ html_whitelist_job:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url} ;
+        - pip install -r ${dymola_python_dir}/requirements.txt
         - python ${dymola_python_html_tidy_file} --whitelist ${git}
         - message="${bot_update_wh_commit}"
         - git add ${wh_html_file}
