@@ -147,10 +147,12 @@ class CI_config(object):
             del_flag (): True: delete file, False dont delete file
         """
         print(f'\n{self.blue}**** Prepare Data ****{self.CEND}\n')
-        self.prepare_data_path(path_list=path_list)
-        self.prepare_data_files(file_path_dict=file_path_dict)
-        if del_flag is True:
-            self.remove_files(file_path_dict=file_path_dict)
+        if len(path_list) > 0:
+            self.prepare_data_path(path_list=path_list)
+        if len(file_path_dict) >0:
+            self.prepare_data_files(file_path_dict=file_path_dict)
+            if del_flag is True:
+                self.remove_files(file_path_dict=file_path_dict)
         print(f'\n{self.blue}**********************{self.CEND}\n')
 
     @staticmethod

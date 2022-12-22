@@ -606,9 +606,6 @@ if __name__ == '__main__':
         charts.create_index_layout()
         charts.create_layout(temp_dir=conf.chart_dir,
                              layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
-        print(f'{conf.result_plot_dir}{os.sep}{args.single_package}')
-        print(conf.chart_dir)
-
         conf.prepare_data(path_list=[conf.result_dir,
                                      conf.result_plot_dir],
                           file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}{os.sep}{args.single_package}'})
