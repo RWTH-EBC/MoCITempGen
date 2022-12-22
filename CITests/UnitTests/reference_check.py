@@ -818,7 +818,6 @@ if __name__ == '__main__':
                                                 dymola_version=args.dymola_version,
                                                 path="package.mo")
                 package_list = list_reg_model.get_changed_regression_models()
-
         # Start regression test
         val = 0
         if package_list is None or len(package_list) == 0:
