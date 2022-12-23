@@ -406,7 +406,7 @@ class Extended_model(CI_config):
             mo_list ():
         Returns:
         """
-        model_list = []
+        model_list = list()
         type_list = ["Modelica", "Real", "Integer", "Boolean", "String"]
         if len(mo_list) > 0:
             if platform.system() == "Windows":
