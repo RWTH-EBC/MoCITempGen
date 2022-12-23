@@ -1,9 +1,9 @@
-import os
 import argparse
+import os
+import pathlib
 import shutil
 import toml
-import glob
-import pathlib
+
 
 class CI_config(object):
 
@@ -18,6 +18,7 @@ class CI_config(object):
         [Dymola_Python_Tests] + Parser Commands
         """
         toml_files = sorted(pathlib.Path('.').glob('**/**/config.toml'))
+        toml_file = f'Dymola_python_tests{os.sep}config.toml'
         if len(toml_files) > 0:
             for l in toml_files:
                 toml_file = l
@@ -69,77 +70,42 @@ class CI_config(object):
         self.result_check_result_dir = f'{self.result_dir}{os.sep}{data["result"]["result_check_result_dir"].replace("/", os.sep)}'
         # [Color]
 
-        #self.CRED = f'{data["Color"]["CRED"]}'
-        #self.CEND = f'{data["Color"]["CEND"]}'
-        #self.green = f'{data["Color"]["green"]}'
-        #self.yellow = f'{data["Color"]["yellow"]}'
-        #self.blue = f'{data["Color"]["blue"]}'
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'
         self.green = '\033[0;32m'
         self.yellow = '\033[33m'
         self.blue = '\033[44m'
 
+    def check_arguments_settings(self, argument_list: list):
+        if len(argument_list) > 0:
+            for arg in argument_list:
+                if arg is None:
+                    print(f'{self.CRED}Error:{self.CEND} {arg} is missing!')
+                    exit(1)
+                else:
+                    print(f'Setting:  {arg}')
 
-        '''
-        self.dymola_ci_test_dir = f'dymola-ci-tests'
-        self.dymola_python_test_dir = f'Dymola_python_tests'
-        # [Whitelist_files]
-        self.wh_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}ci_whitelist'
-        self.wh_model_file = f'{self.wh_ci_dir}{os.sep}ci_check_whitelist.txt'
-        self.wh_simulate_file = f'{self.wh_ci_dir}{os.sep}ci_simulate_whitelist.txt'
-        self.wh_html_file = f'{self.wh_ci_dir}{os.sep}ci_html_whitelist.txt'
-        self.wh_ref_file = f'{self.wh_ci_dir}{os.sep}ci_reference_check_whitelist.txt'
-        # [Config_files]
-        self.config_ci_dir = f'{self.dymola_ci_test_dir}{os.sep}configfiles'
-        self.config_ci_exit_file = f'{self.config_ci_dir}{os.sep}exit.sh'
-        self.config_ci_new_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_ref_file.txt'
-        self.config_ci_new_create_ref_file = f'{self.config_ci_dir}{os.sep}ci_new_created_reference.txt'
-        self.config_ci_changed_file = f'{self.config_ci_dir}{os.sep}ci_changed_model_list.txt'
-        self.config_ci_ref_file = f'{self.config_ci_dir}{os.sep}ci_reference_list.txt'
-        self.config_ci_eof_file = f'{self.config_ci_dir}{os.sep}EOF.sh'
-        # [templates for plots]
-        self.chart_dir = f'{self.dymola_ci_test_dir}{os.sep}charts'
-        self.temp_chart_dir = f'{self.dymola_python_test_dir}{os.sep}templates{os.sep}google_templates'
-        self.temp_chart_file = f'{self.temp_chart_dir}{os.sep}google_chart.txt'
-        self.temp_index_file = f'{self.temp_chart_dir}{os.sep}index.txt'
-        self.temp_layout_file = f'{self.temp_chart_dir}{os.sep}layout_index.txt'
-        # [interact ci lists]
-        self.ci_interact_dir = f'{self.dymola_ci_test_dir}{os.sep}interact_CI'
-        self.ci_interact_show_ref_file = f'{self.ci_interact_dir}{os.sep}show_ref.txt'
-        self.ci_interact_update_ref_file = f'{self.ci_interact_dir}{os.sep}update_ref.txt'
-        # [Folder]
-        self.artifacts_dir = f'{self.dymola_ci_test_dir}{os.sep}templates{os.sep}artifacts'
-        self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
-        self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
-        # [Dymola_Python_Tests] + Parser Commands
-        self.dymola_python_test_url = f'--single-branch --branch 04_Documentation https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
-        # [result folder]
-        self.result_dir = f'{self.dymola_ci_test_dir}{os.sep}result'
-        self.result_whitelist_dir = f'{self.result_dir}{os.sep}ci_whitelist'
-        self.result_config_dir = f'{self.result_dir}{os.sep}configfiles'
-        self.result_plot_dir = f'{self.result_dir}{os.sep}charts'
-        self.result_syntax_dir = f'{self.result_dir}{os.sep}syntax'
-        self.result_regression_dir = f'{self.result_dir}{os.sep}regression'
-        self.result_interact_ci_dir = f'{self.result_dir}{os.sep}interact_CI'
-        self.result_ci_template_dir = f'{self.result_dir}{os.sep}ci_template'
-        self.result_check_result_dir = f'{self.result_dir}{os.sep}Dymola_check'
-        # [Color]
-        self.CRED = '\033[91m'
-        self.CEND = '\033[0m'
-        self.green = '\033[0;32m'
-        self.yellow = '\033[33m'
-        self.blue = '\033[44m'
-        '''
+    @staticmethod
+    def check_path_settings(path_list: list):
+        if len(file_list) > 0:
+            for path in path_list:
+                if os.path.isdir(path) is True:
+                    print(f'Setting path: {path}')
+                else:
+                    print(f'Cannot find  path {path}')
+                    exit(1)
 
-    '''
-    def get_files(self):
-        config = toml.load(f'Dymola_python_tests{os.sep}CITests{os.sep}config.toml')
-        for l in config:
-            print(l)
-    '''
+    @staticmethod
+    def check_file_settings(file_list: list):
+        if len(file_list) > 0:
+            for file in file_list:
+                if os.path.isfile(file) is True:
+                    print(f'Setting path: {file}')
+                else:
+                    print(f'Cannot find  path {file}')
+                    exit(1)
 
-    def prepare_data(self, path_list: list=[], file_path_dict: dict={}, del_flag=False):
+    def prepare_data(self, path_list: list, file_path_dict: dict, del_flag=False):
         """
             Args:
             path_list (): path where files are saved
@@ -154,6 +120,27 @@ class CI_config(object):
             if del_flag is True:
                 self.remove_files(file_path_dict=file_path_dict)
         print(f'\n{self.blue}**********************{self.CEND}\n')
+
+    def check_ci_file_structure(self, files_list):
+        """
+        Args:
+            files_list ():
+        """
+        print(f'\n**** Create file structure ****\n')
+        for file in files_list:
+            if os.path.exists(file):
+                print(f'{file} does exist.')
+            else:
+                print(f'File {file} does not exist. Create a new one under {file}')
+                write_file = open(file, "w+")
+                if file is self.config_ci_eof_file:
+                    write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
+                write_file.close()
+        print(f'\n**********************\n')
+
+    def check_ci_structure(self, files_list, folders_list):
+        self.check_ci_folder_structure(folders_list=folders_list)
+        self.check_ci_file_structure(files_list=files_list)
 
     @staticmethod
     def prepare_data_path(path_list):
@@ -181,12 +168,11 @@ class CI_config(object):
                 os.rmdir(file)
                 print(f'Remove folder: {file}')
 
-
     @staticmethod
     def prepare_data_files(file_path_dict):
         for src in file_path_dict:
             if os.path.isfile(src) is True:
-                file = src[src.rfind(os.sep)+1:]
+                file = src[src.rfind(os.sep) + 1:]
                 dst = f'{file_path_dict[src]}{os.sep}{file}'
                 shutil.copyfile(src, dst)
                 print(f'Result file {src} was moved to {dst}')
@@ -220,34 +206,17 @@ class CI_config(object):
                 dir_list.append(dir_dic[dirs])
         return dir_list
 
-    def check_ci_folder_structure(self, folders_list):
+    @staticmethod
+    def check_ci_folder_structure(folders_list):
         """
         Check CI Structure
         """
         for folder in folders_list:
             if not os.path.exists(folder):
-                print(f'{self.blue}Create path:{self.CEND} {folder}')
+                print(f'Create path:{folder}')
                 os.makedirs(folder)
             else:
-                print(f'{self.green}Path exist:{self.CEND} {folder} ')
-
-
-    def check_ci_file_structure(self, files_list):
-        """
-        Args:
-            files_list ():
-        """
-        print(f'\n{self.blue}**** Create file structure ****{self.CEND}\n')
-        for file in files_list:
-            if os.path.exists(file):
-                print(f'{file} does exist.')
-            else:
-                print(f'File {file} does not exist. Create a new one under {file}')
-                write_file = open(file, "w+")
-                if file is self.config_ci_eof_file:
-                    write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
-                write_file.close()
-        print(f'\n{self.blue}**********************{self.CEND}\n')
+                print(f'Path exist: {folder} ')
 
     @staticmethod
     def create_folder(path):

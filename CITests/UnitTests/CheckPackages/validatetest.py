@@ -8,6 +8,7 @@ from git import Repo
 from natsort import natsorted
 from Dymola_python_tests.CI_test_config import CI_config
 
+
 class Git_Repository_Clone(object):
 
     def __init__(self, repo_dir, git_url):
@@ -30,8 +31,7 @@ class Git_Repository_Clone(object):
             Repo.clone_from(self.git_url, self.repo_dir)
 
 
-
-class ValidateTest(CI_config):
+class Check_python_dymola(CI_config):
     def __init__(self, dymola, dymola_exception, single_package, simulate_examples,
                  changed_model, library,
                  wh_library, filter_whitelist, extended_example, dymola_version):
@@ -64,25 +64,6 @@ class ValidateTest(CI_config):
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
-    def _check_packages(self):
-        """
-            Check CI variables
-        """
-        if self.single_package is None:
-            print(f'{self.CRED}Error:{self.CEND} Package is missing!')
-            exit(1)
-        else:
-            print(f'Setting: Package {self.single_package}')
-        if self.library is None:
-            print(f'{self.CRED}Error:{self.CEND} Library is missing!')
-            exit(1)
-        else:
-            print(f'Setting: library {self.library}')
-        if os.path.isdir(self.root_package) is True:
-            print(f'Setting: Library path {self.root_package}')
-        else:
-            print(f'Cannot find library path {self.root_package}')
-            exit(1)
     def _library_path_check(self):
         """
         Open library in dymola and  checks if the library was opened correctly.
@@ -142,8 +123,36 @@ class ValidateTest(CI_config):
                 exit(0)
         self.dymola.savelog(f'{self.dymola_log}')
         self.dymola.close()
-
         return error_model_message_dic
+
+    def check_result(self, error_model_message_dic):
+        """
+        Args:
+            error_model_message_dic ():  Dictionary with models and its error message.
+        """
+        if len(error_model_message_dic) == 0:
+            print(f'Test was {self.green}Successful!{self.CEND}')
+            return 0
+        if len(error_model_message_dic) > 0:
+            print(f'Test {self.CRED}failed!{self.CEND}')
+            for model in error_model_message_dic:
+                print(f'{self.CRED}Error:{self.CEND} Check Model {model}')
+            return 1
+        if error_model_message_dic is None:
+            print(f'Don´t find models that failed.')
+            return 1
+
+    def _check_structure(self):
+        if self.changed_model is True:
+            self.check_ci_structure(folders_list=[self.config_ci_dir],
+                                    files_list=[self.config_ci_changed_file])
+        elif self.filter_whitelist is True:
+            if self.simulate_examples is True:
+                file_list = [self.wh_simulate_file]
+            else:
+                file_list = [self.wh_model_file]
+            self.check_ci_structure(folders_list=self.wh_ci_dir,
+                                    files_list=file_list)
 
     def check_model_workflow(self):
         """
@@ -151,62 +160,28 @@ class ValidateTest(CI_config):
             changed_model: boolean - true: Test only changed or new models
             filter_whitelist: boolean - true  Filter model on whitelist
         """
-        self._check_packages()
-        #python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
-        modelica_model = get_modelica_models(simulate_examples=self.simulate_examples, extended_example=self.extended_example)
-        if self.changed_model is True:
-            self.check_ci_folder_structure(folders_list= [self.config_ci_dir])
-            self.check_ci_file_structure(files_list=[self.config_ci_changed_file])
-            model_list = modelica_model.get_changed_models(model_file=self.config_ci_changed_file,
-                                                           library=self.library,
-                                                           single_package=self.single_package)
-        elif self.filter_whitelist is True:
-            self.check_ci_folder_structure(folders_list=[self.wh_ci_dir])
-            if self.simulate_examples is True:
-                file_list = [self.wh_simulate_file]
-                ci_wh_file = self.wh_simulate_file
-            else:
-                file_list = [self.wh_model_file]
-                ci_wh_file = self.wh_model_file
-            self.check_ci_file_structure(files_list=file_list)
-            wh_list_models = modelica_model.get_wh_models(wh_file=ci_wh_file,
-                                                          wh_library=self.wh_library,
-                                                          library=self.library,
-                                                          single_package=self.single_package)
+        self.check_arguments_settings(argument_list=[self.single_package, self.library])
+        self.check_path_settings(path_list=[self.root_package])
+        self._check_structure()
+        python_dymola_interface(dymola=self.dymola,
+                                dymola_exception=self.dymola_exception).dym_check_lic()
+        model_list = modelica_model(dymola=self.dymola,
+                                    dymola_exception=self.dymola_exception,
+                                    simulate_examples=self.simulate_examples,
+                                    extended_example=self.extended_example,
+                                    library=self.library,
+                                    single_package=self.single_package,
+                                    wh_library=self.wh_library,
+                                    root_package=self.root_package,
+                                    dymola_version=self.dymola_version).option_get_models()
+        error_model_message_dic = self._check_model(model_list=model_list)
+        self.prepare_data(del_flag=True,
+                          path_list=[f'{self.result_check_result_dir}_{self.single_package}'],
+                          file_path_dict={self.err_log: f'{self.result_check_result_dir}_{self.single_package}',
+                                          f'{self.library}{os.sep}{self.dymola_log}': f'{self.result_check_result_dir}{os.sep}{self.single_package}'})
+        var = self.check_result(error_model_message_dic=error_model_message_dic)
+        return var
 
-            result = modelica_model.get_models(path=self.root_package,
-                                               library=self.library)
-            model_list = result[0]
-            no_simulate_list = result[1]
-            if self.extended_example is True:
-                simulate_list = python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception, dymola_version=self.dymola_version).model_management_structure(model_list=no_simulate_list,
-                                                                                                                                                                                   library=self.library)
-                model_list.extend(simulate_list)
-                model_list = list(set(model_list))
-            model_list = modelica_model.filter_wh_models(models=model_list,
-                                                         wh_list=wh_list_models)
-        else:
-            result = modelica_model.get_models(path=self.root_package,
-                                                   library=self.library)
-            model_list = result[0]
-            no_simulate_list = model[1]
-            if self.extended_example is True:
-                simulate_list = python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception, dymola_version=self.dymola_version).model_management_structure(model_list=no_simulate_list,
-                                                                                                                                                                                   library=self.library)
-                model_list.extend(simulate_list)
-                model_list = list(set(model_list))
-
-        if len(model_list) == 0:
-            print(f'Find no models in package {self.single_package}')
-            return 0
-        else:
-            error_model_message_dic = self._check_model(model_list=model_list)
-            self.prepare_data(del_flag=True,
-                              path_list=[f'{self.result_check_result_dir}_{self.single_package}'],
-                              file_path_dict={self.err_log: f'{self.result_check_result_dir}_{self.single_package}',
-                                              f'{self.library}{os.sep}{self.dymola_log}': f'{self.result_check_result_dir}_{self.single_package}'})
-            var = modelica_model.check_result(error_model_message_dic=error_model_message_dic)
-            return var
 
 class Create_whitelist(CI_config):
 
@@ -317,7 +292,8 @@ class Create_whitelist(CI_config):
         try:
             wh_file = open(wh_file, "w")
             error_log = open(self.err_log, "w")
-            print(f'Write new whitelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
+            print(
+                f'Write new whitelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
             wh_file.write(f'\n{version} \n \n')
             for model in model_list:
                 if self.simulate_examples is True:
@@ -345,37 +321,12 @@ class Create_whitelist(CI_config):
         print(f'Whitelist check finished.')
         return error_model_message_dic
 
-    def _check_argument_settings(self):
-        """
-        Check CI variables
-        """
-        if self.wh_library is None:
-            print(f'{self.CRED}Error:{self.CEND} Whitelist library is missing!')
-            exit(1)
-        else:
-            print(f'Setting: Whitelist library {self.wh_library}')
-        if self.library is None:
-            print(f'{self.CRED}Error{self.CEND}: Library is missing!')
-            exit(1)
-        else:
-            print(f'Setting: Library {self.library}')
-        if self.git_url is None and self.wh_lib_path is None:
-            print(f'{self.CRED}Error:{self.CEND} git url or whitelist path is missing!')
-            exit(1)
-        if self.git_url is not None:
-            print(f'Setting: whitelist git url library {self.git_url}')
-        if self.repo_dir is None:
-            print(f'{self.CRED}Error:{self.CEND} Repository directory is missing!')
-            exit(1)
-        else:
-            print(f'Setting: Repository url: {self.repo_dir}')
-
     def create_wh_workflow(self):
         """
         Workflow for creating the whitelist based on a whitelist-library.
         """
+        self.check_arguments_settings(argument_list=[self.wh_library, self.library, self.git_url, self.repo_dir])
         self.check_ci_folder_structure(folders_list=[self.config_ci_dir, self.wh_ci_dir])
-        self._check_argument_settings()
         if self.simulate_examples is True:
             file_list = [self.wh_simulate_file, self.config_ci_exit_file]
             wh_file = self.wh_simulate_file
@@ -387,14 +338,15 @@ class Create_whitelist(CI_config):
         version_check = self._check_whitelist_version(version=version, wh_file=wh_file)
         self._write_exit_log(version_check=version_check)
         if version_check is False:
-            modelica_model = get_modelica_models(simulate_examples=self.simulate_examples, extended_example=self.extended_example)
+            mo = modelica_model(simulate_examples=self.simulate_examples,
+                                extended_example=self.extended_example)
             model_list = []
             if self.git_url is not None:
                 Git_Repository_Clone(repo_dir=self.repo_dir, git_url=self.git_url).clone_repository()
-                model_list = modelica_model.get_models(path=self.repo_dir, library=self.wh_library)[0]
+                model_list = mo.get_models(path=self.repo_dir, library=self.wh_library)[0]
             elif self.wh_lib_path is not None:
                 print(f'Setting: Whitelist path library {self.wh_lib_path}')
-                model_list = modelica_model.get_models(path=self.wh_lib_path, library=self.wh_library)[0]
+                model_list = mo.get_models(path=self.wh_lib_path, library=self.wh_library)[0]
             python_dymola_interface(dymola=self.dymola, dymola_exception=self.dymola_exception).dym_check_lic()
             self._check_whitelist_model(model_list=model_list, wh_file=wh_file, version=version)
             self.prepare_data(path_list=[f'{self.result_whitelist_dir}_{self.wh_library}'],
@@ -407,18 +359,74 @@ class Create_whitelist(CI_config):
             exit(0)
 
 
-class get_modelica_models(CI_config):
+class modelica_model(CI_config):
 
-    def __init__(self, simulate_examples: bool = False, extended_example: bool = False):
+    def __init__(self, dymola, dymola_exception, simulate_examples: bool = False, extended_example: bool = False,
+                 library: str = "AixLib",
+                 single_package: str = "Airflow", wh_library: str = "IBPSA", dymola_version: int = 2022
+                 ):
         """
         return models or simulates to check
         Args:
             simulate_examples ():  return examples and validation model
         """
         super().__init__()
+        self.dymola = dymola
+        self.dymola_exception = dymola_exception
         self.simulate_examples = simulate_examples
         self.extended_example = extended_example
+        self.library = library
+        self.single_package = single_package
+        self.wh_library = wh_library
+        self.root_package = root_package
+        self.dymola_version = dymola_version
+        self.changed_model = changed_model
+        self.filter_whitelist = filter_whitelist
 
+    def option_get_model(self):
+        if self.changed_model is True:
+            model_list = self.get_changed_models(ch_file=self.config_ci_changed_file,
+                                                 library=self.library,
+                                                 single_package=self.single_package)
+        elif self.filter_whitelist is True:
+            if self.simulate_examples is True:
+                ci_wh_file = [self.wh_simulate_file]
+            else:
+                ci_wh_file = [self.wh_model_file]
+            wh_list_models = self.get_wh_models(wh_file=ci_wh_file,
+                                                wh_library=self.wh_library,
+                                                library=self.library,
+                                                single_package=self.single_package)
+            result = self.get_models(path=self.root_package,
+                                     library=self.library)
+            model_list = result[0]
+            if self.extended_example is True:
+                simulate_list = Model_management(dymola=self.dymola,
+                                                 dymola_exception=self.dymola_exception,
+                                                 dymola_version=self.dymola_version).model_management_structure(
+                    model_list=result[1],
+                    library=self.library)
+                model_list.extend(simulate_list)
+                model_list = list(set(model_list))
+            model_list = self.filter_wh_models(models=model_list,
+                                               wh_list=wh_list_models)
+        else:
+            result = self.get_models(path=self.root_package,
+                                     library=self.library)
+            model_list = result[0]
+            if self.extended_example is True:
+                simulate_list = Model_management(dymola=self.dymola,
+                                                 dymola_exception=self.dymola_exception,
+                                                 dymola_version=self.dymola_version).model_management_structure(
+                    model_list=result[1],
+                    library=self.library)
+                model_list.extend(simulate_list)
+                model_list = list(set(model_list))
+        if len(model_list) == 0 or model_list is None:
+            print(f'Find no models in package {self.single_package}')
+            exit(0)
+        else:
+            return model_list
 
     @staticmethod
     def get_wh_models(wh_file, wh_library, library, single_package):
@@ -453,7 +461,7 @@ class get_modelica_models(CI_config):
         Returns:
             return models from library who are not on the whitelist.
         """
-        wh_list_mo = []
+        wh_list_mo = list()
         if len(models) == 0:
             print(f'No examples models in package: {single_package}')
             exit(0)
@@ -466,6 +474,20 @@ class get_modelica_models(CI_config):
             for example in wh_list_mo:
                 models.remove(example)
             return models
+
+    @staticmethod
+    def extended_simulate(simulate_list):
+        for simulate in simulate_list:
+            print(f'Extended model {simulate} ')
+            filepath = f'{simulate.replace(".", os.sep)}.mo'
+            example_test = modelica_model(simulate_examples=True,
+                                          extended_example=True)._get_icon_example(filepath=filepath,
+                                                                                   library=library)
+            if example_test is None:
+                print(f'File {filepath} is no example.')
+            else:
+                simulate_list.append(model)
+                simulate_list.append(ext)
 
     @staticmethod
     def _get_icon_example(filepath, library):
@@ -487,23 +509,22 @@ class get_modelica_models(CI_config):
                     return example
         except IOError:
             print(f'Error: File {filepath} does not exist.')
-            #exit(0)
 
-    def get_changed_models(self, model_file, library, single_package):
+    def get_changed_models(self, ch_file, library, single_package):
         """
         Returns: return a list with changed models.
         """
         try:
-            file = open(model_file, "r", encoding='utf8', errors='ignore')
+            file = open(ch_file, "r", encoding='utf8', errors='ignore')
             lines = file.readlines()
-            modelica_models = []
+            modelica_models = list()
             for line in lines:
                 line = line.lstrip()
                 line = line.strip().replace("\n", "")
                 if line.rfind(".mo") > -1 and line.find("package") == -1:
                     if line.find(f'{library}{os.sep}{single_package}') > -1 and line.find("ReferenceResults") == -1:
                         if self.simulate_examples is True:
-                            model_name = line[line.rfind(library):line.rfind('.mo')+3]
+                            model_name = line[line.rfind(library):line.rfind('.mo') + 3]
                             example_test = self._get_icon_example(filepath=model_name, library=library)
                             if example_test is None:
                                 print(
@@ -526,7 +547,6 @@ class get_modelica_models(CI_config):
         except IOError:
             print(f'Error: File {model_file} does not exist.')
             exit(0)
-
 
     def get_models(self, path, library):
         """
@@ -566,23 +586,6 @@ class get_modelica_models(CI_config):
         else:
             return model_list, no_example_list
 
-    def check_result(self, error_model_message_dic):
-        """
-        Args:
-            error_model_message_dic ():  Dictionary with models and its error message.
-        """
-        if len(error_model_message_dic) == 0:
-            print(f'Test was {self.green}Successful!{self.CEND}')
-            return 0
-        if len(error_model_message_dic) > 0:
-            print(f'Test {self.CRED}failed!{self.CEND}')
-            for model in error_model_message_dic:
-                print(f'{self.CRED}Error:{self.CEND} Check Model {model}')
-            return 1
-        if error_model_message_dic is None:
-            print(f'Don´t find models that failed.')
-            return 1
-
 
 class python_dymola_interface(CI_config):
 
@@ -619,7 +622,14 @@ class python_dymola_interface(CI_config):
             f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
 
 
+class Model_management(CI_config):
 
+    def __init__(self, dymola, dymola_exception, dymola_version: int = 2022):
+        super().__init__()
+        self.dymola = dymola
+        self.dymola_exception = dymola_exception
+        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        self.dymola_version = dymola_version
 
     def model_management_structure(self, model_list, library):
         '''
@@ -635,43 +645,39 @@ class python_dymola_interface(CI_config):
         for model in model_list:
             print(f' **** Check structure of model {model} ****')
             extended_list = self._get_extended_examples(model=model)
+            used_list = self._get_used_models(model=model)
+            extended_list.extend(used_list)
             for ext in extended_list:
                 print(f'Extended model {ext} ')
                 filepath = f'{ext.replace(".", os.sep)}.mo'
-                example_test = get_modelica_models(simulate_examples = True,
-                                                   extended_example = True)._get_icon_example(filepath=filepath,
-                                                                                              library=library)
+                example_test = modelica_model(simulate_examples=True,
+                                              extended_example=True)._get_icon_example(filepath=filepath,
+                                                                                       library=library)
                 if example_test is None:
                     print(f'File {filepath} is no example.')
                 else:
                     simulate_list.append(model)
                     simulate_list.append(ext)
-
-            used_list = self._get_used_models(model=model)
-            for use in used_list:
-                print(f'Used model {use} ')
-                filepath = f'{use.replace(".", os.sep)}.mo'
-                example_test = get_modelica_models(simulate_examples = True,
-                                                   extended_example = True)._get_icon_example(filepath=filepath,
-                                                                                              library=library)
-                if example_test is None:
-                    print(f'File {filepath} is no example.')
-                else:
-                    simulate_list.append(model)
-                    simulate_list.append(use)
         simulate_list = list(set(simulate_list))
         return simulate_list
 
     def _load_modelmanagement(self):
         if platform.system() == "Windows":
             self.dymola.ExecuteCommand(
-                'cd("C:\Program Files\Dymola ' + self.dymola_version + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
+                'cd("C:\Program Files\Dymola ' + str(
+                    self.dymola_version) + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
         else:
             self.dymola.ExecuteCommand(
-                'cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
+                'cd("/opt/dymola-' + str(
+                    self.dymola_version) + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
 
-    def _get_extended_examples(self, model: str = "", type_list: list = ["Modelica", "Real", "Integer", "Boolean", "String"]):
+    def _get_extended_examples(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.AST.Classes.ExtendsInClass("{model}");')
+        extended_list = self._filter_modelica_types(model_list=model_list)
+        return extended_list
+
+    def _filter_modelica_types(self, model_list: list,
+                               type_list: list = ["Modelica", "Real", "Integer", "Boolean", "String"]):
         extended_list = list()
         if model_list is not None:
             for extended_model in model_list:
@@ -687,23 +693,317 @@ class python_dymola_interface(CI_config):
         model_list = list(set(model_list))
         return model_list
 
-    def _get_used_models(self, model: str = "", type_list: list = ["Modelica", "Real", "Integer", "Boolean", "String",  "SI.", "Modelica.Blocks"]):
+    def _get_used_models(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
-        used_list = list()
-        if model_list is not None:
-            for use_model in model_list:
-                use_model = use_model.strip()
-                for types in type_list:
-                    if use_model.find(f'{types}') > -1:
-                        used_list.append(use_model)
-                        continue
-                    else:
-                        continue
-        used_list = list(set(used_list))
-        for use in used_list:
-            model_list.remove(use)
-        model_list = list(set(model_list))
+        extended_list = self._filter_modelica_types(model_list=model_list)
+        return extended_list
+
+
+class Check_openModelica(CI_config):
+
+    def __init__(self, package, om_options, library):
+        """
+        Args:
+
+        """
+        super().__init__()
+        self.package = package
+        self.om_options = om_options
+        self.library = library
+
+    def check_OM_workflow(self):
+
+        if self.om_options == "OM_SIM":
+            check_model_test.simulate_example_workflow()
+        elif self.om_options == "DYMOLA_SIM":
+            check_model_test.sim_with_dymola()
+        elif self.om_options == "OM_CHECK":
+            check_model_test.check_model_workflow()
+        elif self.om_options == "COMPARE":
+            ERROR_DATA[PACKAGE], STATS = check_model_test.compare_dym_to_om(stats=STATS)
+        else:
+            raise ValueError(f"{CHECK_SIM} not supported")
+
+    def _write_errorlog(self, error_model,
+                        error_message):
+        os.makedirs(pathlib.Path(self.err_log).parent, exist_ok=True)
+        error_log = open(self.err_log, "w")
+        for model, message in zip(error_model, error_message):
+            error_log.write(f'\n \n Error in model:  {model} \n')
+            for line in message.split("\n"):
+                if "Warning: Conversion-annotation contains unknown element: nonFromVersion" not in line:
+                    error_log.write(line + "\n")
+        error_log.close()
+
+    @staticmethod
+    def _get_model(dir, library_name, single_package):  # list all models in package
+        model_list = []
+        for subdir, dirs, files in os.walk(dir):
+            for file in files:
+                filepath = subdir + os.sep + file
+                if filepath.endswith(".mo") and file != "package.mo":
+                    model = filepath.replace(os.sep, ".")
+                    model = model[model.rfind(library_name):model.rfind(".mo")]
+                    if model.startswith(single_package):
+                        model_list.append(model)
         return model_list
+
+    def _load_library(self):
+        if self.omc is not None:
+            return self.omc
+        t0 = time.time()
+        omc = OMCSessionZMQ()
+        omc.sendExpression('installPackage(Modelica_DeviceDrivers, "2.0.0", exactMatch=true)')
+        if self.for_bes_mod:
+            omc.sendExpression('loadFile("C://Program Files//Dymola 2023//Modelica//Library//SDF 0.4.2//package.mo")')
+            omc.sendExpression(f'loadFile("{self.library_dir}//installed_dependencies//IBPSA//IBPSA//package.mo")')
+            omc.sendExpression(f'loadFile("{self.library_dir}//installed_dependencies//AixLib//AixLib//package.mo")')
+            omc.sendExpression(
+                f'loadFile("{self.library_dir}//installed_dependencies//Buildings//Buildings//package.mo")')
+            omc.sendExpression(
+                f'loadFile("{self.library_dir}//installed_dependencies//BuildingSystems//BuildingSystems//package.mo")')
+            omc.sendExpression(f'loadFile("{self.library_dir}//BESMod//package.mo")')
+        else:
+            pack_check = omc.sendExpression(f'loadFile("{self.lib_path}")')
+            self._library_path_check(pack_check=pack_check)
+        print(omc.sendExpression("getErrorString()"))
+        return omc
+
+    def _checkmodel(self, model_list):  # Check models and return a Error Log, if the check failed
+        print(f'Check models')
+        error_model = []
+        error_message = []
+        for model in model_list:
+            error_msg = self._perform_omc_check(model=model)
+            if error_msg is not None:
+                error_model.append(model)
+                error_message.append(error_msg)
+        self.omc.sendExpression("quit()")
+        return error_model, error_message
+
+    def _simulate_examples(self, example_list):  # Simulate examples or validations
+        print(f'Simulate examples and validations')
+        error_model = []
+        error_message = []
+        if len(example_list) == 0:
+            print(f'{self.CRED}Error:{self.CEND} Found no examples')
+            exit(0)
+        else:
+            for model in example_list:
+                error_msg = self._perform_omc_simulation(model=model)
+                if error_msg is not None:
+                    error_model.append(model)
+                    error_message.append(error_msg)
+        self.omc.sendExpression("quit()")
+        return error_model, error_message
+
+    def _perform_omc_check(self, model):
+        self.omc = self._load_library()
+        if self.omc.isPackage(model).startswith("true") or self.omc.isFunction(model).startswith("true"):
+            return
+        print(f"checking model ", model)
+        result = self.omc.sendExpression(f"checkModel({model})")
+        success = "completed successfully" in result
+        if success:
+            print(f'{self.green} Successful: {self.CEND} {model}')
+            return
+        print(f'{self.CRED}  Error:   {self.CEND}  {model}')
+        _err_msg = self.omc.sendExpression("getErrorString()")
+        print(f'{result}')
+        return _err_msg
+
+    def _perform_omc_simulation(self, model):
+        self.omc = self._load_library()
+        print(f'Simulate model: {model}')
+        # simulate(className, [startTime], [stopTime],
+        # [numberOfIntervals], [tolerance],
+        # [method], [fileNamePrefix], [options], [outputFormat],
+        # [variableFilter], [cflags], [simflags])
+        result = self.omc.sendExpression(f"simulate({model})")
+        success = "The simulation finished successfully" in result["messages"]
+        if success:
+            print(f'\n {self.green}Successful:{self.CEND} {model}\n')
+            shutil.copy(result["resultFile"], self.all_sims_dir.joinpath(model + ".mat"))
+            return
+        print(f'\n {self.CRED} Error: {self.CEND} {model}\n')
+        _err_msg = result["messages"]
+        _err_msg += "\n" + self.omc.sendExpression("getErrorString()")
+        print(f'{_err_msg}')
+        return _err_msg
+
+    def _get_ibpsa_whitelist(self):
+        ibpsa_model_list = self._get_model(
+            dir=self.root_package_ibpsa,
+            library_name="IBPSA",
+            single_package="IBPSA." + self.single_package
+        )
+        _models = []
+        for m in ibpsa_model_list:
+            _models.append(m.replace("IBPSA", self.library))
+        return _models
+
+    def _filter_whitelist(self, model_list):
+        models_causing_om_to_crash = [
+            "AixLib.Fluid.Storage.Examples.TwoPhaseSeparator"
+        ]
+        ibpsa_models = self._get_ibpsa_whitelist()
+        ibpsa_models.extend(models_causing_om_to_crash)
+        return list(set(model_list).difference(ibpsa_models))
+
+    def simulate_example_workflow(self):
+        self._check_packages()
+        simulate_example_list = self._get_simulate_examples()
+        simulate_example_list = self._filter_whitelist(simulate_example_list)
+        simulate_example_list.sort()
+        result = self._simulate_examples(example_list=simulate_example_list)
+        self._write_errorlog(error_model=result[0], error_message=result[1])
+        # self._check_result(error_model=result[0])
+
+    def check_model_workflow(self):
+        self._check_packages()
+        model_list = self._get_model(
+            dir=self.root_package,
+            library_name=self.library,
+            single_package=self.library + "." + self.single_package
+        )
+        model_list = self._filter_whitelist(model_list)
+        model_list.sort()
+        result = self._checkmodel(model_list=model_list)
+        self._write_errorlog(error_model=result[0], error_message=result[1])
+        # self._check_result(error_model=result[0])
+
+    def sim_with_dymola(self):
+        self._check_packages()
+        simulate_example_list = self._get_simulate_examples()
+        simulate_example_list = self._filter_whitelist(simulate_example_list)
+        simulate_example_list.sort()
+        if self.dym_api is None:
+            self.dym_api = DymolaAPI(
+                cd=os.getcwd(),
+                model_name=simulate_example_list[0],
+                packages=[self.lib_path],
+                extract_variables=True,
+                load_experiment_setup=True
+            )
+        for model in simulate_example_list:
+            print(f'Simulate model: {model}')
+            try:
+                self.dym_api.model_name = model
+                print("Setup", self.dym_api.sim_setup)
+                result = self.dym_api.simulate(return_option="savepath")
+            except Exception as err:
+                print("Simulation failed: " + str(err))
+                continue
+            print(f'\n {self.green}Successful:{self.CEND} {model}\n')
+            shutil.copy(result,
+                        self.all_sims_dir.parent.joinpath("dym", model + ".mat"))
+        self.dym_api.close()
+
+    def compare_dym_to_om(self, stats=None, with_plot=True):
+        if stats is None:
+            stats = {
+                "om": {
+                    "failed": 0,
+                    "success": 0,
+                    "to_big_to_compare": 0
+                },
+                "dymola": {
+                    "failed": 0,
+                    "success": 0,
+                    "to_big_to_compare": 0
+                }
+            }
+        errors = {}
+        simulate_example_list = self._get_simulate_examples()
+        simulate_example_list = self._filter_whitelist(simulate_example_list)
+        simulate_example_list.sort()
+        om_dir = self.all_sims_dir
+        dym_dir = self.all_sims_dir.parent.joinpath("dym")
+        plot_dir = self.all_sims_dir.parent.joinpath("plots", self.single_package)
+        _tol = 0.0001
+        for model in simulate_example_list:
+            continue_after_for = False
+            for tool, _dir in zip(["om", "dymola"], [om_dir, dym_dir]):
+                path_mat = _dir.joinpath(model + ".mat")
+                if not os.path.exists(path_mat):
+                    stats[tool]["failed"] += 1
+                    continue_after_for = True
+                    continue
+                if os.stat(path_mat).st_size / (1024 * 1024) > 400:
+                    stats[tool]["to_big_to_compare"] += 1
+                    continue_after_for = True
+                stats[tool]["success"] += 1
+            if continue_after_for:
+                continue
+
+            om_tsd = TimeSeriesData(om_dir.joinpath(model + ".mat")).to_df()
+            dym_tsd = TimeSeriesData(dym_dir.joinpath(model + ".mat")).to_df()
+            om_tsd_ref = om_tsd.copy()
+
+            cols = {}
+            for c in dym_tsd.columns:
+                cols[c] = c.replace(" ", "")
+            dym_tsd = dym_tsd.rename(columns=cols)
+            dym_tsd_ref = dym_tsd.copy()
+            # Round index, sometimes it's 0.99999999995 instead of 1 e.g.
+            om_tsd.index = np.round(om_tsd.index, 4)
+            dym_tsd.index = np.round(dym_tsd.index, 4)
+            # Drop duplicate rows, e.g. last point is often duplicate.
+            om_tsd = om_tsd.drop_duplicates()
+            dym_tsd = dym_tsd.drop_duplicates()
+            idx_to_remove = []
+            _n_diff_idx = 0
+            for idx in om_tsd.index:
+                if idx not in dym_tsd.index:
+                    idx_to_remove.append(idx)
+            om_tsd = om_tsd.drop(idx_to_remove)
+            _n_diff_idx += len(idx_to_remove)
+            idx_to_remove = []
+            for idx in dym_tsd.index:
+                if idx not in om_tsd.index:
+                    idx_to_remove.append(idx)
+            dym_tsd = dym_tsd.drop(idx_to_remove)
+            _n_diff_idx += len(idx_to_remove)
+            _col_err = {}
+            _n_diff_cols = 0
+            cols_to_plot = []
+            for col in om_tsd.columns:
+                if col not in dym_tsd.columns:
+                    _n_diff_cols += 1
+                    continue
+                dym = dym_tsd.loc[:, col].values
+                om = om_tsd.loc[:, col].values
+                if np.std(om) + np.std(dym) <= 1e-5:
+                    continue  # Stationary
+                cols_to_plot.append(col)
+                try:
+                    _col_err[col] = StatisticsAnalyzer.calc_rmse(dym, om)
+                except ValueError as err:
+                    print(f"Index still differs {model}: {err}")
+                    break
+            for c in dym_tsd.columns:
+                if c not in _col_err:
+                    _n_diff_cols += 1
+            if with_plot:
+                _dir = plot_dir.joinpath(model)
+                if cols_to_plot:
+                    os.makedirs(_dir, exist_ok=True)
+                for col in cols_to_plot:
+                    plt.plot(om_tsd_ref.loc[:, col], label="OM")
+                    plt.plot(dym_tsd_ref.loc[:, col], label="Dymola")
+                    plt.legend()
+                    plt.xlabel("Time in s")
+                    plt.savefig(_dir.joinpath(col + ".png"))
+                    plt.cla()
+
+            errors[model] = {
+                "average": np.mean(list(_col_err.values())),
+                "detailed": _col_err,
+                "n_diff_events": _n_diff_idx,
+                "n_different_cols": _n_diff_cols
+            }
+
+        return errors, stats
 
 
 def _setEnvironmentVariables(var, value):
@@ -770,41 +1070,54 @@ if __name__ == '__main__':
     check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                                   help="url repository of whitelist library")
     check_test_group.add_argument("--extended-example", default=False, action="store_true")
-
-
+    check_test_group.add_argument("--tool", default="dymola",
+                                  help="Chose between dymola or openModelica")
+    check_test_group.add_argument("--om-options", default="om_check",
+                                  help="Chose between openmodelica check, compare or simulate")
     args = parser.parse_args()
-    _setEnvironmentPath(dymola_version=args.dymola_version)
-    from dymola.dymola_interface import DymolaInterface
-    from dymola.dymola_exception import DymolaException
-    print(f'1: Starting Dymola instance')
-    if platform.system() == "Windows":
-        dymola = DymolaInterface()
-        dymola_exception = DymolaException()
-    else:
-        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
-        dymola_exception = DymolaException()
 
-    if args.whitelist is True:
-        wh = Create_whitelist(dymola=dymola,
-                              dymola_exception=dymola_exception,
-                              library=args.library,
-                              wh_library=args.wh_library,
-                              repo_dir=args.repo_dir,
-                              git_url=args.git_url,
-                              simulate_examples=args.simulate_examples)
-        wh.create_wh_workflow()
+    if args.tool == "dymola":
+        _setEnvironmentPath(dymola_version=args.dymola_version)
+        from dymola.dymola_interface import DymolaInterface
+        from dymola.dymola_exception import DymolaException
+
+        print(f'1: Starting Dymola instance')
+        if platform.system() == "Windows":
+            dymola = DymolaInterface()
+            dymola_exception = DymolaException()
+        else:
+            dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+            dymola_exception = DymolaException()
+
+        if args.whitelist is True:
+            wh = Create_whitelist(dymola=dymola,
+                                  dymola_exception=dymola_exception,
+                                  library=args.library,
+                                  wh_library=args.wh_library,
+                                  repo_dir=args.repo_dir,
+                                  git_url=args.git_url,
+                                  simulate_examples=args.simulate_examples)
+            wh.create_wh_workflow()
 
 
-    else:
-        CheckModelTest = ValidateTest(dymola=dymola,
-                                      dymola_exception=dymola_exception,
-                                      single_package=args.single_package,
-                                      simulate_examples=args.simulate_examples,
-                                      changed_model=args.changed_model,
-                                      library=args.library,
-                                      wh_library=args.wh_library,
-                                      filter_whitelist=args.filter_whitelist,
-                                      extended_example=args.extended_example,
-                                      dymola_version=args.dymola_version)
-        var = CheckModelTest.check_model_workflow()
-        exit(var)
+        else:
+            Check = Check_python_dymola(dymola=dymola,
+                                        dymola_exception=dymola_exception,
+                                        single_package=args.single_package,
+                                        simulate_examples=args.simulate_examples,
+                                        changed_model=args.changed_model,
+                                        library=args.library,
+                                        wh_library=args.wh_library,
+                                        filter_whitelist=args.filter_whitelist,
+                                        extended_example=args.extended_example,
+                                        dymola_version=args.dymola_version)
+            #Check.check_arguments_settings
+
+
+            var = Check.check_model_workflow()
+            exit(var)
+    if args.tool == "openModelica":
+        om = Check_openModelica(package=args.single_package,
+                                om_options=args.om_options,
+                                library=args.library)
+        om.check_OM_workflow()
