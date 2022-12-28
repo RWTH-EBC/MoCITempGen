@@ -4,34 +4,34 @@ dymola_python_test_dir = 'Dymola_python_tests'
 
 [whitelist]
 wh_ci_dir = "ci_whitelist"
-wh_model_file = 'ci_check_whitelist.txt'
-wh_simulate_file = 'ci_simulate_whitelist.txt'
-wh_html_file = 'ci_html_whitelist.txt'
-wh_ref_file = 'ci_reference_check_whitelist.txt'
+wh_model_file = 'ci_whitelist/ci_check_whitelist.txt'
+wh_simulate_file = 'ci_whitelist/ci_simulate_whitelist.txt'
+wh_html_file = 'ci_whitelist/ci_html_whitelist.txt'
+wh_ref_file = 'ci_whitelist/ci_reference_check_whitelist.txt'
 
 [config_ci]
 config_ci_dir = 'Configfiles'
-config_ci_exit_file = 'exit.sh'
-config_ci_new_ref_file = 'ci_new_ref_file.txt'
-config_ci_new_create_ref_file = 'ci_new_created_reference.txt'
-config_ci_changed_file = 'ci_changed_model_list.txt'
-config_ci_ref_file = 'ci_reference_list.txt'
-config_ci_eof_file = 'EOF.sh'
+config_ci_exit_file = 'Configfiles/exit.sh'
+config_ci_new_ref_file = 'Configfiles/ci_new_ref_file.txt'
+config_ci_new_create_ref_file = 'Configfiles/ci_new_created_reference.txt'
+config_ci_changed_file = 'Configfiles/ci_changed_model_list.txt'
+config_ci_ref_file = 'Configfiles/ci_reference_list.txt'
+config_ci_eof_file = 'Configfiles/EOF.sh'
 
 [plot]
-chart_dir = 'charts'
-temp_chart_dir = 'templates/google_templates'
-temp_chart_file = 'google_chart.txt'
-temp_index_file = 'index.txt'
-temp_layout_file = 'layout_index.txt'
+chart_dir = 'dymola-ci-tests/charts'
+temp_chart_dir = 'Dymola_python_tests/templates/google_templates'
+temp_chart_file = 'Dymola_python_tests/templates/google_templates/google_chart.txt'
+temp_index_file = 'Dymola_python_tests/templates/google_templates/index.txt'
+temp_layout_file = 'Dymola_python_tests/templates/google_templates/layout_index.txt'
 
 [interact_ci_list]
-ci_interact_dir = 'interact_CI'
-ci_interact_show_ref_file = 'ci_interact_dir/show_ref.txt'
-ci_interact_update_ref_file = 'ci_interact_dir/update_ref.txt'
+ci_interact_dir = 'dymola-ci-tests/interact_CI'
+ci_interact_show_ref_file = 'dymola-ci-tests/interact_CI/show_ref.txt'
+ci_interact_update_ref_file = 'dymola-ci-tests/interact_CI/update_ref.txt'
 
 [artifcats]
-artifacts_dir = 'templates/artifacts'
+artifacts_dir = 'dymola-ci-tests/templates/artifacts'
 library_ref_results_dir = 'Resources/ReferenceResults/Dymola'
 library_resource_dir = 'Resources/Scripts/Dymola'
 
@@ -39,15 +39,15 @@ library_resource_dir = 'Resources/Scripts/Dymola'
 dymola_python_test_url = '--single-branch --branch 04_Documentation https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
 
 [result]
-result_dir = 'result'
-result_whitelist_dir = 'ci_whitelist'
-result_config_dir = 'configfiles'
-result_plot_dir = 'charts'
-result_syntax_dir = 'syntax'
-result_regression_dir = 'regression'
-result_interact_ci_dir = 'interact_CI'
-result_ci_template_dir = 'ci_template'
-result_check_result_dir = 'Dymola_check'
+result_dir = 'dymola-ci-tests/result'
+result_whitelist_dir = 'dymola-ci-tests/result/ci_whitelist'
+result_config_dir = 'dymola-ci-tests/result/configfiles'
+result_plot_dir = 'dymola-ci-tests/result/charts'
+result_syntax_dir = 'dymola-ci-tests/result/syntax'
+result_regression_dir = 'dymola-ci-tests/result/regression'
+result_interact_ci_dir = 'dymola-ci-tests/result/interact_CI'
+result_ci_template_dir = 'dymola-ci-tests/result/ci_template'
+result_check_result_dir = 'dymola-ci-tests/result/Dymola_check'
 
 [Color]
 CRED = '\033[91m'

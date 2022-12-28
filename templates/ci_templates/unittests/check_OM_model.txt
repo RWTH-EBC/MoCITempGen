@@ -1,0 +1,182 @@
+stages:
+    - ${ci_stage_OM_model_check}
+    - ${ci_stage_OM_create_whitelist}
+
+.check_model_job:
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    only:
+        - external_pull_requests
+    retry:
+        max: 2
+        when: runner_system_failure
+    except:
+        variables:
+            %for commit in except_commit_list:
+            - $CI_COMMIT_MESSAGE  =~ /${commit}/
+            %endfor
+        refs:
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+
+%for package in package_list:
+Check_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .check_model_job
+
+%endfor
+
+.dev_check_model_job:
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+
+        expire_in: ${expire_in_time}
+    only:
+        refs:
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+Development_Check_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .dev_check_model_job
+
+%endfor
+
+.check_changed_models_job:
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - python ${dymola_python_configuration_file} --changed-model
+        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+
+        expire_in: ${expire_in_time}
+    except:
+        refs:
+            - external_pull_requests
+            ${merge_branch}
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+            - /^${html_praefix}.*$/
+        variables:
+            %for commit in except_commit_list:
+            - $CI_COMMIT_MESSAGE  =~ /${commit}/
+            %endfor
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+Check_${library}_${package}_changed_models:
+    variables:
+        lib_package: ${package}
+    only:
+        changes:
+            - ${library}/${package}/**/*
+    extends: .check_changed_models_job
+
+%endfor
+
+.CI_check_model_job:
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+
+        expire_in: ${expire_in_time}
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/
+    except:
+        refs:
+            - external_pull_requests
+    retry:
+        max: 2
+        when: runner_system_failure
+
+
+%for package in package_list:
+CI_Check_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .CI_check_model_job
+
+%endfor
+
+whitelist_job:
+    stage: ${ci_stage_OM_create_whitelist}
+    before_script:
+        - source activate ${python_version}
+        - chmod +x ci_config/github_clone.sh
+        - sh ci_config/github_clone.sh
+    script:
+        - mkdir whitelist && cd whitelist
+        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
+        - cd $CI_PROJECT_NAME
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
+    after_script:
+        - cd whitelist && cd $CI_PROJECT_NAME
+        - if cat ${config_ci_exit_file} | grep "FAIL"; then
+            message="${bot_update_model_wh_commit}" ;
+            git add ${wh_model_file} ;
+            git commit -m "$message" ;
+            git push git@github.com:$Github_Repository.git ;
+            exit 0;
+          else
+            exit 0 ;
+          fi
+    artifacts:
+        paths:
+            - ${result_dir}/
+
+        expire_in: ${expire_in_time}
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /${ci_create_model_wh_commit}/
+    except:
+        refs:
+            - external_pull_requests
