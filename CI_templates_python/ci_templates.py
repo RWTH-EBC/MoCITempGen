@@ -308,6 +308,107 @@ class CI_yml_templates(CI_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
+
+    def _write_OM_simulate_template(self):
+        if self.wh_library is not None:
+            filter_flag = "--filter-whitelist"
+            wh_flag = "--wh-library " + self.wh_library
+            merge_branch = "- " + self.merge_branch
+            if self.wh_path is not None:
+                wh_path = "--wh-path " + self.wh_path
+                git_url = ""
+            elif self.git_url is not None:
+                git_url = "--git-url " + self.git_url
+                wh_path = ""
+            else:
+                wh_path = ""
+                git_url = ""
+        else:
+            merge_branch = ""
+            filter_flag = ""
+            wh_flag = ""
+            wh_path = ""
+            git_url = ""
+        my_template = Template(filename=self.temp_ci_OM_simulate_file)
+        yml_text = my_template.render(ci_stage_OM_simulate=self.ci_stage_OM_simulate,
+                                      python_version=self.python_version,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
+                                      xvfb_flag=self.xvfb_flag,
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"),
+                                      library=self.library,
+                                      dymola_version=self.dymola_version,
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      except_branch_list=self.except_branch_list,
+                                      html_praefix=self.html_praefix,
+                                      except_commit_list=self.except_commit_list,
+                                      package_list=self.package_list,
+                                      expire_in_time=self.expire_in_time,
+                                      merge_branch=merge_branch,
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep,"/"),
+                                      config_ci_changed_file=self.config_ci_changed_file.replace(os.sep,"/"),
+                                      ci_simulate_commit=self.ci_simulate_commit,
+                                      wh_flag=wh_flag,
+                                      filter_flag=filter_flag        )
+        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_simulate_file.split(os.sep)[-2]}'
+        self.check_ci_folder_structure([ci_folder])
+        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_simulate_file.split(os.sep)[-1]}'
+        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
+
+    def _write_OM_check_template(self):
+        if self.wh_library is not None:
+            wh_library = self.wh_library
+            filter_flag = "--filter-whitelist"
+            wh_flag = "--wh-library " + self.wh_library
+            merge_branch = f'- {self.wh_library}_Merge'
+            if self.wh_path is not None:
+                wh_path = "--wh-path " + self.wh_path
+                git_url = ""
+            elif self.git_url is not None:
+                git_url = "--git-url " + self.git_url
+                wh_path = ""
+            else:
+                wh_path = ""
+                git_url = ""
+        else:
+            wh_library = self.library
+            wh_flag = ""
+            git_url = ""
+            filter_flag = ""
+            wh_path = ""
+            merge_branch = ""
+        my_template = Template(filename=self.temp_ci_OM_check_file)
+        yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+                                      xvfb_flag=self.xvfb_flag,
+                                      python_version=self.python_version,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
+                                      library=self.library,
+                                      dymola_version=self.dymola_version,
+                                      wh_flag=wh_flag,
+                                      merge_branch=self.merge_branch,
+                                      ci_check_commit=self.ci_check_commit,
+                                      filter_flag=filter_flag,
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      except_commit_list=self.except_commit_list,
+                                      except_branch_list=self.except_branch_list,
+                                      package_list=self.package_list,
+                                      expire_in_time=self.expire_in_time,
+                                      config_ci_changed_file=self.config_ci_changed_file.replace(os.sep, "/"),
+                                      html_praefix=self.html_praefix,
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"),
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep, "/")
+                                      )
+        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
+        self.check_ci_folder_structure([ci_folder])
+        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
+        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
     def _write_check_template(self):
         if self.wh_library is not None:
             wh_library = self.wh_library
@@ -573,8 +674,10 @@ class CI_yml_templates(CI_template_config):
         for temp in config_list:
             if temp == "check":
                 self._write_check_template()
+                self._write_OM_check_template()
             if temp == "simulate":
                 self._write_simulate_template()
+                self._write_OM_simulate_template()
             if temp == "regression":
                 self._write_regression_template()
             if temp == "html":
@@ -592,7 +695,6 @@ class Read_config_data(CI_template_config):
 
     def __init__(self):
         """
-
         """
         super().__init__()
 

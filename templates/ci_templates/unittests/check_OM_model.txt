@@ -1,6 +1,6 @@
+image:  openmodelica/openmodelica
 stages:
     - ${ci_stage_OM_model_check}
-    - ${ci_stage_OM_create_whitelist}
 
 .check_model_job:
     stage: ${ci_stage_OM_model_check}
@@ -9,7 +9,7 @@ stages:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --tool openModelica --om-option OM_CHECK
     artifacts:
         when: on_failure
         paths:
@@ -45,7 +45,7 @@ Check_${library}_${package}:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --tool openModelica --om-option OM_CHECK
     artifacts:
         when: on_failure
         paths:
@@ -78,7 +78,7 @@ Development_Check_${library}_${package}:
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --tool openModelica --om-option OM_CHECK
     artifacts:
         when: on_failure
         paths:
@@ -144,39 +144,3 @@ CI_Check_${library}_${package}:
     extends: .CI_check_model_job
 
 %endfor
-
-whitelist_job:
-    stage: ${ci_stage_OM_create_whitelist}
-    before_script:
-        - source activate ${python_version}
-        - chmod +x ci_config/github_clone.sh
-        - sh ci_config/github_clone.sh
-    script:
-        - mkdir whitelist && cd whitelist
-        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
-    after_script:
-        - cd whitelist && cd $CI_PROJECT_NAME
-        - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            message="${bot_update_model_wh_commit}" ;
-            git add ${wh_model_file} ;
-            git commit -m "$message" ;
-            git push git@github.com:$Github_Repository.git ;
-            exit 0;
-          else
-            exit 0 ;
-          fi
-    artifacts:
-        paths:
-            - ${result_dir}/
-
-        expire_in: ${expire_in_time}
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /${ci_create_model_wh_commit}/
-    except:
-        refs:
-            - external_pull_requests

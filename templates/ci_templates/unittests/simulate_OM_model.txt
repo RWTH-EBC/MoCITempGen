@@ -1,0 +1,153 @@
+image:  openmodelica/openmodelica
+
+stages:
+    - ${ci_stage_OM_simulate}
+
+.CI_simulate_model_job:
+    stage: ${ci_stage_OM_simulate}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /${ci_simulate_commit}/
+    except:
+        refs:
+            - external_pull_requests
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+CI_simulate_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .CI_simulate_model_job
+
+%endfor
+
+.dev_simulate_model_job:
+    stage: ${ci_stage_OM_simulate}
+    before_script:
+        - source activate ${python_version}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+        - git clone ${dymola_python_test_url}
+    script:
+        -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    only:
+        refs:
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+    except:
+        variables:
+            %for commit in except_commit_list:
+            - $CI_COMMIT_MESSAGE  =~ /${commit}/
+            %endfor
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+Development_simulate_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .dev_simulate_model_job
+
+%endfor
+
+
+
+.simulate_model_job:
+    stage: ${ci_stage_OM_simulate}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in:${expire_in_time}
+    only:
+        refs:
+            - external_pull_requests
+    except:
+        variables:
+            %for commit in except_commit_list:
+            - $CI_COMMIT_MESSAGE  =~ /${commit}/
+            %endfor
+        refs:
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+simulate_${library}_${package}:
+    variables:
+        lib_package: ${package}
+    extends: .simulate_model_job
+
+%endfor
+
+.simulate_changed_models_job:
+    stage: ${ci_stage_OM_simulate}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - python ${dymola_python_configuration_file} --changed-model
+        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples --tool openModelica --om-option OM_SIM
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    except:
+        refs:
+            - external_pull_requests
+            ${merge_branch}
+            %for branch in except_branch_list:
+            - ${branch}
+            %endfor
+            - /^${html_praefix}.*$/
+        variables:
+            %for commit in except_commit_list:
+            - $CI_COMMIT_MESSAGE  =~ /${commit}/
+            %endfor
+    retry:
+        max: 2
+        when: runner_system_failure
+
+%for package in package_list:
+simulate_${library}_${package}_changed_models:
+    variables:
+        lib_package: ${package}
+    only:
+        changes:
+            - ${library}/${package}/**/*
+    extends: .simulate_changed_models_job
+
+%endfor
+

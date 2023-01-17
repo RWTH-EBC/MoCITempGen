@@ -67,6 +67,8 @@ class CI_template_config(CI_config):
         self.ci_stage_build_ci_structure = data['ci_stages']['ci_stage_build_ci_structure']
         self.ci_stage_deploy = data['ci_stages']['ci_stage_deploy']
         self.ci_stage_whitelist_setting = data['ci_stages']['ci_stage_whitelist_setting']
+        self.ci_stage_OM_model_check = data['ci_stages']['ci_stage_OM_model_check']
+        self.ci_stage_OM_simulate = data['ci_stages']['ci_stage_OM_simulate']
 
         # [Buildingspy upgrade url]
         self.buildingspy_upgrade = data['Buildingspy_upgrade_url']['buildingspy_upgrade']
@@ -78,18 +80,20 @@ class CI_template_config(CI_config):
 
         # [CI_Templates_file]
         self.temp_ci_dir = f'{data["ci_templates_file"]["temp_ci_dir"]}'
-        self.temp_ci_regression_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_regression_file"].replace("/", os.sep)}'
-        self.temp_ci_check_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_check_file"].replace("/", os.sep)}'
-        self.temp_ci_simulate_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_simulate_file"].replace("/", os.sep)}'
-        self.temp_ci_page_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_page_file"].replace("/", os.sep)}'
-        self.temp_ci_ibpsa_merge_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_ibpsa_merge_file"].replace("/", os.sep)}'
-        self.temp_ci_html_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_html_file"].replace("/", os.sep)}'
-        self.temp_ci_style_check_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_style_check_file"].replace("/", os.sep)}'
-        self.temp_ci_structure_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_structure_file"].replace("/", os.sep)}'
-        self.temp_ci_main_yml_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_main_yml_file"].replace("/", os.sep)}'
-        self.temp_ci_setting_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_setting_file"].replace("/", os.sep)}'
-        self.temp_ci_deploy_test_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_deploy_test_file"].replace("/", os.sep)}'
-        self.temp_ci_build_whitelist_file = f'{self.temp_ci_dir}{os.sep}{data["ci_templates_file"]["temp_ci_build_whitelist_file"].replace("/", os.sep)}'
+        self.temp_ci_regression_file = f'{data["ci_templates_file"]["temp_ci_regression_file"].replace("/", os.sep)}'
+        self.temp_ci_check_file = f'{data["ci_templates_file"]["temp_ci_check_file"].replace("/", os.sep)}'
+        self.temp_ci_simulate_file = f'{data["ci_templates_file"]["temp_ci_simulate_file"].replace("/", os.sep)}'
+        self.temp_ci_page_file = f'{data["ci_templates_file"]["temp_ci_page_file"].replace("/", os.sep)}'
+        self.temp_ci_ibpsa_merge_file = f'{data["ci_templates_file"]["temp_ci_ibpsa_merge_file"].replace("/", os.sep)}'
+        self.temp_ci_html_file = f'{data["ci_templates_file"]["temp_ci_html_file"].replace("/", os.sep)}'
+        self.temp_ci_style_check_file = f'{data["ci_templates_file"]["temp_ci_style_check_file"].replace("/", os.sep)}'
+        self.temp_ci_structure_file = f'{data["ci_templates_file"]["temp_ci_structure_file"].replace("/", os.sep)}'
+        self.temp_ci_main_yml_file = f'{data["ci_templates_file"]["temp_ci_main_yml_file"].replace("/", os.sep)}'
+        self.temp_ci_setting_file = f'{data["ci_templates_file"]["temp_ci_setting_file"].replace("/", os.sep)}'
+        self.temp_ci_deploy_test_file = f'{data["ci_templates_file"]["temp_ci_deploy_test_file"].replace("/", os.sep)}'
+        self.temp_ci_build_whitelist_file = f'{data["ci_templates_file"]["temp_ci_build_whitelist_file"].replace("/", os.sep)}'
+        self.temp_ci_OM_check_file = f'{data["ci_templates_file"]["temp_ci_OM_check_file"].replace("/", os.sep)}'
+        self.temp_ci_OM_simulate_file = f'{data["ci_templates_file"]["temp_ci_OM_simulate_file"].replace("/", os.sep)}'
         # [Created CI_template_folder]
         self.temp_dir = f'{data["ci_template_folder"]["temp_dir"].replace("/", os.sep)}'
 

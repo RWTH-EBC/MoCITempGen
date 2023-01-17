@@ -45,7 +45,7 @@ CI_simulate_${library}_${package}:
         when: on_failure
         paths:
             - ${result_dir}/
-        expire_in: 7 day
+        expire_in: ${expire_in_time}
     only:
         refs:
             %for branch in except_branch_list:
@@ -82,7 +82,7 @@ Development_simulate_${library}_${package}:
         when: on_failure
         paths:
             - ${result_dir}/
-        expire_in: 7 day 
+        expire_in: ${expire_in_time}
     only:
         refs:
             - external_pull_requests
@@ -122,7 +122,7 @@ simulate_${library}_${package}:
         when: on_failure
         paths:
             - ${result_dir}/
-        expire_in: 7 day
+        expire_in: ${expire_in_time}
     except:
         refs:
             - external_pull_requests
