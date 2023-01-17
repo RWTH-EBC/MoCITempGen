@@ -1,3 +1,4 @@
+image: ${image_name}
 stages:
     - ${ci_stage_html_check}
     - ${ci_stage_html_whitelist}

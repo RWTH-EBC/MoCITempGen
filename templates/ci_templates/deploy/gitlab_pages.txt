@@ -1,4 +1,5 @@
-stages:        
+image: ${image_name}
+stages:
     - ${ci_stage_deploy}
 pages:
     stage: ${ci_stage_deploy}

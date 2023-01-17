@@ -1,3 +1,4 @@
+image: ${image_name}
 stages:
     - deploy_ci_tests
 

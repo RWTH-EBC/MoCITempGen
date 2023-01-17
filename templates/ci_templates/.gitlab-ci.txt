@@ -1,4 +1,3 @@
-image: ${image_name}
 
 stages:
     %for stage in stage_list:

@@ -30,7 +30,8 @@ class CI_yml_templates(CI_template_config):
 
         """
         my_template = Template(filename=self.temp_ci_structure_file)
-        yml_text = my_template.render(ci_stage_build_ci_structure=self.ci_stage_build_ci_structure,
+        yml_text = my_template.render(image_name=self.image_name,
+                                      ci_stage_build_ci_structure=self.ci_stage_build_ci_structure,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       bot_create_structure_commit=self.bot_create_structure_commit,
@@ -64,7 +65,8 @@ class CI_yml_templates(CI_template_config):
         Write page template, deploy artifacts, plots, reference results
         """
         my_template = Template(filename=self.temp_ci_page_file)
-        yml_text = my_template.render(ci_stage_deploy=self.ci_stage_deploy,
+        yml_text = my_template.render(image_name=self.image_name,
+                                        ci_stage_deploy=self.ci_stage_deploy,
                                       expire_in_time=self.expire_in_time,
                                       except_branch_list=self.except_branch_list,
                                       dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
@@ -81,7 +83,8 @@ class CI_yml_templates(CI_template_config):
         Write setting template, create template with own Syntax
         """
         my_template = Template(filename=self.temp_ci_setting_file)
-        yml_text = my_template.render(github_repo=self.github_repo,
+        yml_text = my_template.render(image_name=self.image_name,
+            github_repo=self.github_repo,
                                       ci_setting_commit=self.ci_setting_commit,
                                       python_version=self.python_version,
                                       ci_stage_check_setting=self.ci_stage_check_setting,
@@ -111,7 +114,8 @@ class CI_yml_templates(CI_template_config):
             git = ""
             merge_branch = ""
         my_template = Template(filename=self.temp_ci_html_file)
-        yml_text = my_template.render(ci_stage_html_check=self.ci_stage_html_check,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_html_check=self.ci_stage_html_check,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
@@ -149,7 +153,8 @@ class CI_yml_templates(CI_template_config):
         """
         merge_branch = f'- {self.wh_library}_Merge'
         mytemplate = Template(filename=self.temp_ci_style_check_file)
-        yml_text = mytemplate.render(ci_stage_style_check=self.ci_stage_style_check,
+        yml_text = mytemplate.render(image_name=self.image_name,
+            ci_stage_style_check=self.ci_stage_style_check,
                                      python_version=self.python_version,
                                      dymola_python_test_url=self.dymola_python_test_url,
                                      dymola_version=self.dymola_version,
@@ -202,7 +207,8 @@ class CI_yml_templates(CI_template_config):
             merge_branch = ""
 
         my_template = Template(filename=self.temp_ci_build_whitelist_file)
-        yml_text = my_template.render(ci_stage_whitelist_setting=self.ci_stage_whitelist_setting,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_whitelist_setting=self.ci_stage_whitelist_setting,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep, "/"),
@@ -232,7 +238,8 @@ class CI_yml_templates(CI_template_config):
         """
         merge_branch = f'{self.wh_library}_Merge'
         my_template = Template(filename=self.temp_ci_ibpsa_merge_file)
-        yml_text = my_template.render(ci_stage_lib_merge=self.ci_stage_lib_merge,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_lib_merge=self.ci_stage_lib_merge,
                                       ci_stage_update_whitelist=self.ci_stage_update_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
@@ -263,7 +270,8 @@ class CI_yml_templates(CI_template_config):
         else:
             merge_branch = ""
         mytemplate = Template(filename=self.temp_ci_regression_file)
-        yml_text = mytemplate.render(ci_stage_regression_test=self.ci_stage_regression_test,
+        yml_text = mytemplate.render(image_name=self.image_name,
+            ci_stage_regression_test=self.ci_stage_regression_test,
                                      ci_stage_ref_check=self.ci_stage_ref_check,
                                      ci_stage_plot_ref=self.ci_stage_plot_ref,
                                      ci_stage_prepare=self.ci_stage_prepare,
@@ -330,7 +338,8 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             git_url = ""
         my_template = Template(filename=self.temp_ci_OM_simulate_file)
-        yml_text = my_template.render(ci_stage_OM_simulate=self.ci_stage_OM_simulate,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_OM_simulate=self.ci_stage_OM_simulate,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
@@ -381,7 +390,8 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             merge_branch = ""
         my_template = Template(filename=self.temp_ci_OM_check_file)
-        yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_OM_model_check=self.ci_stage_OM_model_check,
                                       xvfb_flag=self.xvfb_flag,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -432,7 +442,8 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             merge_branch = ""
         my_template = Template(filename=self.temp_ci_check_file)
-        yml_text = my_template.render(ci_stage_model_check=self.ci_stage_model_check,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_model_check=self.ci_stage_model_check,
                                       ci_stage_create_whitelist=self.ci_stage_create_whitelist,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -490,7 +501,8 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             git_url = ""
         my_template = Template(filename=self.temp_ci_simulate_file)
-        yml_text = my_template.render(ci_stage_simulate=self.ci_stage_simulate,
+        yml_text = my_template.render(image_name=self.image_name,
+            ci_stage_simulate=self.ci_stage_simulate,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       library=self.library,
@@ -540,7 +552,8 @@ class CI_yml_templates(CI_template_config):
         @type git_url:
         """
         my_template = Template(filename=self.temp_toml_ci_setting_file)
-        yml_text = my_template.render(library=self.library,
+        yml_text = my_template.render(
+            library=self.library,
                                       wh_library=self.wh_library,
                                       dymola_version=self.dymola_version,
                                       package_list=self.package_list,

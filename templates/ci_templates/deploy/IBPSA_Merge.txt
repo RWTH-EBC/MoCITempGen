@@ -1,3 +1,4 @@
+image: ${image_name}
 stages:
     - ${ci_stage_lib_merge}
     - ${ci_stage_update_whitelist}
