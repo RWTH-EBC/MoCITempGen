@@ -15,6 +15,7 @@ glob2
 GitPython==3.1.29
 pytidylib
 OMPython
+ebcpy
 
 
 
