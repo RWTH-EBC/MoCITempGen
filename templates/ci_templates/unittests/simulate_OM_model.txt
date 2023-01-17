@@ -3,7 +3,7 @@ image:  openmodelica/openmodelica
 stages:
     - ${ci_stage_OM_simulate}
 
-.CI_simulate_model_job:
+.OM_CI_simulate_model_job:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - source activate ${python_version}
@@ -27,14 +27,14 @@ stages:
         when: runner_system_failure
 
 %for package in package_list:
-CI_simulate_${library}_${package}:
+OM_CI_simulate_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .CI_simulate_model_job
+    extends: .OM_CI_simulate_model_job
 
 %endfor
 
-.dev_simulate_model_job:
+.OM_dev_simulate_model_job:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - source activate ${python_version}
@@ -62,16 +62,16 @@ CI_simulate_${library}_${package}:
         when: runner_system_failure
 
 %for package in package_list:
-Development_simulate_${library}_${package}:
+OM_Development_simulate_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .dev_simulate_model_job
+    extends: .OM_dev_simulate_model_job
 
 %endfor
 
 
 
-.simulate_model_job:
+.OM_simulate_model_job:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - source activate ${python_version}
@@ -83,7 +83,7 @@ Development_simulate_${library}_${package}:
         when: on_failure
         paths:
             - ${result_dir}/
-        expire_in:${expire_in_time}
+        expire_in: ${expire_in_time}
     only:
         refs:
             - external_pull_requests
@@ -102,14 +102,14 @@ Development_simulate_${library}_${package}:
         when: runner_system_failure
 
 %for package in package_list:
-simulate_${library}_${package}:
+OM_simulate_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .simulate_model_job
+    extends: .OM_simulate_model_job
 
 %endfor
 
-.simulate_changed_models_job:
+.OM_simulate_changed_models_job:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - source activate ${python_version}
@@ -141,13 +141,13 @@ simulate_${library}_${package}:
         when: runner_system_failure
 
 %for package in package_list:
-simulate_${library}_${package}_changed_models:
+OM_simulate_${library}_${package}_changed_models:
     variables:
         lib_package: ${package}
     only:
         changes:
             - ${library}/${package}/**/*
-    extends: .simulate_changed_models_job
+    extends: .OM_simulate_changed_models_job
 
 %endfor
 

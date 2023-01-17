@@ -2,7 +2,7 @@ image:  openmodelica/openmodelica
 stages:
     - ${ci_stage_OM_model_check}
 
-.check_model_job:
+.OM_check_model_job:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - source activate ${python_version}
@@ -31,14 +31,14 @@ stages:
             %endfor
 
 %for package in package_list:
-Check_${library}_${package}:
+OM_Check_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .check_model_job
+    extends: .OM_check_model_job
 
 %endfor
 
-.dev_check_model_job:
+.OM_dev_check_model_job:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - source activate ${python_version}
@@ -62,14 +62,14 @@ Check_${library}_${package}:
         when: runner_system_failure
 
 %for package in package_list:
-Development_Check_${library}_${package}:
+OM_Development_Check_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .dev_check_model_job
+    extends: .OM_dev_check_model_job
 
 %endfor
 
-.check_changed_models_job:
+.OM_check_changed_models_job:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - source activate ${python_version}
@@ -102,17 +102,17 @@ Development_Check_${library}_${package}:
         when: runner_system_failure
 
 %for package in package_list:
-Check_${library}_${package}_changed_models:
+OM_Check_${library}_${package}_changed_models:
     variables:
         lib_package: ${package}
     only:
         changes:
             - ${library}/${package}/**/*
-    extends: .check_changed_models_job
+    extends: .OM_check_changed_models_job
 
 %endfor
 
-.CI_check_model_job:
+.OM_CI_check_model_job:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - source activate ${python_version}
@@ -138,9 +138,9 @@ Check_${library}_${package}_changed_models:
 
 
 %for package in package_list:
-CI_Check_${library}_${package}:
+OM_CI_Check_${library}_${package}:
     variables:
         lib_package: ${package}
-    extends: .CI_check_model_job
+    extends: .OM_CI_check_model_job
 
 %endfor

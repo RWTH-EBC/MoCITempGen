@@ -116,7 +116,11 @@ class CI_template_config(CI_config):
         self.ci_create_html_wh_commit = data["interactive_ci_commit"]["ci_create_html_wh_commit"]
         self.ci_create_simulate_wh_commit = data["interactive_ci_commit"]["ci_create_simulate_wh_commit"]
         self.ci_simulate_commit = data["interactive_ci_commit"]["ci_simulate_commit"]
+        self.ci_OM_simulate_commit = data["interactive_ci_commit"]["ci_OM_simulate_commit"]
+
         self.ci_check_commit = data["interactive_ci_commit"]["ci_check_commit"]
+        self.ci_OM_check_commit = data["interactive_ci_commit"]["ci_OM_check_commit"]
+
         self.ci_regression_test_commit = data["interactive_ci_commit"]["ci_regression_test_commit"]
         self.ci_html_commit = data["interactive_ci_commit"]["ci_html_commit"]
         self.ci_setting_commit = data["interactive_ci_commit"]["ci_setting_commit"]

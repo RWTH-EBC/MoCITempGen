@@ -347,7 +347,7 @@ class CI_yml_templates(CI_template_config):
                                       merge_branch=merge_branch,
                                       dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep,"/"),
                                       config_ci_changed_file=self.config_ci_changed_file.replace(os.sep,"/"),
-                                      ci_simulate_commit=self.ci_simulate_commit,
+                                      ci_simulate_commit=self.ci_OM_simulate_commit,
                                       wh_flag=wh_flag,
                                       filter_flag=filter_flag        )
         ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_simulate_file.split(os.sep)[-2]}'
@@ -389,8 +389,8 @@ class CI_yml_templates(CI_template_config):
                                       library=self.library,
                                       dymola_version=self.dymola_version,
                                       wh_flag=wh_flag,
-                                      merge_branch=self.merge_branch,
-                                      ci_check_commit=self.ci_check_commit,
+                                      merge_branch=merge_branch,
+                                      ci_check_commit=self.ci_OM_check_commit,
                                       filter_flag=filter_flag,
                                       result_dir=self.result_dir.replace(os.sep, "/"),
                                       except_commit_list=self.except_commit_list,
