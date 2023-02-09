@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import argparse
 import glob
 import os
@@ -40,10 +41,17 @@ class Git_Repository_Clone(object):
 
 class Check_python_dymola(CI_config):
 
-    def __init__(self, dymola, dymola_exception, dymola_version: int = 2022, single_package: str = "Airflow",
+    def __init__(self,
+                 dymola,
+                 dymola_exception,
+                 dymola_version: int = 2022,
+                 single_package: str = "Airflow",
                  simulate_examples: bool = False,
-                 changed_model: bool = False, library: str = "AixLib", wh_library: str = "IBPSA",
-                 filter_whitelist: bool = False, extended_example: bool = False):
+                 changed_model: bool = False,
+                 library: str = "AixLib",
+                 wh_library: str = "IBPSA",
+                 filter_whitelist: bool = False,
+                 extended_example: bool = False):
         """
         The class check or simulate models. Return an error-log. Can filter models from a whitelist
         Args:
@@ -1141,6 +1149,7 @@ if __name__ == '__main__':
                                             extended_example=args.extended_example,
                                             dymola_version=args.dymola_version)
                 var = Check.check_model_workflow()
+
                 exit(var)
 
         if args.tool == "openModelica":

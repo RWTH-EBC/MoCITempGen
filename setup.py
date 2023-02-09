@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 import glob
+import os
 
-
-with open("CITests/README.md", 'r') as f:
+with open(f'CITests{os.sep}README.md', 'r') as f:
     long_description = f.read()
-with open("CITests/requirements.txt", 'r') as f:
+with open(f"CITests{os.sep}requirements.txt", 'r') as f:
     required = f.read().splitlines()
 VERSION = "0.1.0"
 
