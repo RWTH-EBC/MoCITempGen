@@ -86,7 +86,7 @@ class CI_config(object):
                     print(f'Setting:  {arg}')
 
     # ******************************
-    def check_structure_setting(self, path_list=None, file_list=None):
+    def check_structure_setting(self, path_list: str = None, file_list: str = None):
         if file_list is None:
             file_list = []
         if path_list is None:
@@ -118,8 +118,8 @@ class CI_config(object):
                     print(f'Cannot find path {file}')
                     exit(1)
 
-    # ******************************
-    def prepare_data(self, path_list: list, file_path_dict: dict, del_flag=False):
+    #  ******************************
+    def prepare_data(self, path_list: list, file_path_dict: dict, del_flag: bool = False):
         """
             Args:
             path_list (): path where files are saved
