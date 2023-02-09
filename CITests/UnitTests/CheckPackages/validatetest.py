@@ -1,4 +1,4 @@
-#/bin/bash
+# /bin/bash
 import argparse
 import glob
 import os
@@ -7,6 +7,9 @@ import sys
 import time
 from git import Repo
 from natsort import natsorted
+
+sys.path.append(f'Dymola_python_tests{os.sep}CITests{os.sep}CI_Configuration')
+
 from Dymola_python_tests.CI_test_config import CI_config
 import matplotlib.pyplot as plt
 import numpy as np
@@ -820,7 +823,7 @@ class Check_openModelica(CI_config):
             if platform.system() == "Windows":
                 omc.sendExpression(
                     f'loadFile("C://Program Files//Dymola {self.dymola_version}//Modelica//Library//SDF 0.4.2//package.mo")')
-            #omc.sendExpression(f'loadFile("AixLib//package.mo")')
+            # omc.sendExpression(f'loadFile("AixLib//package.mo")')
             for lib_dir in self.lib_dir_dict:
                 omc.sendExpression(
                     f'loadFile("{lib_dir}//installed_dependencies//{self.lib_dir_dict[lib_dir]}//{self.lib_dir_dict[lib_dir]}//package.mo")')
@@ -838,7 +841,6 @@ class Check_openModelica(CI_config):
                 print(f'Cant load {self.lib_path}')
             else:
                 print(f'Load {self.lib_path}')
-
 
         print(omc.sendExpression("getErrorString()"))
         return omc
