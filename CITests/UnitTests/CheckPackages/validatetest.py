@@ -7,7 +7,7 @@ import sys
 import time
 from git import Repo
 from natsort import natsorted
-sys.path.append(f'Dymola_python_tests/CITests/CI_Configuration')
+#sys.path.append(f'Dymola_python_tests/CITests/CI_Configuration')
 from Dymola_python_tests.CI_test_config import CI_config
 import matplotlib.pyplot as plt
 import numpy as np
