@@ -1,3 +1,4 @@
+#/bin/bash
 import argparse
 import os
 import pathlib
