@@ -273,6 +273,8 @@ class Check_OpenModelica(CI_config):
         Returns:
         """
         self.create_path([self.all_sims_dir, self.temp_result_folder])
+        self.delete_files_in_path([self.all_sims_dir])
+
         print(f'{self.green}Simulate examples and validations{self.CEND}')
         error_model_dict = {}
         for example in example_list:
@@ -306,6 +308,7 @@ class Check_OpenModelica(CI_config):
                     print(f'{self.yellow}  Warning:   {self.CEND}  {example}')
                     print(f'{_err_msg}')
                 error_model_dict[example] = _err_msg
+            self.delete_spec_file(root=os.getcwd(), pattern=example)
         self.omc.sendExpression("quit()")
         return error_model_dict
 

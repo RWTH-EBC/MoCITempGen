@@ -6,7 +6,7 @@ import shutil
 import toml
 import inspect
 import re
-
+import fnmatch
 class CI_config(object):
 
     def __init__(self):
@@ -151,6 +151,22 @@ class CI_config(object):
                     except Exception as e:
                         print('Failed to delete %s. Reason: %s' % (file_path, e))
             print(f'\n**** ----------- ****\n')
+
+    def delete_spec_file(self, root: str = None, pattern: str = None):
+        if root is not None and pattern is not None:
+            for filename in os.listdir(root):
+                file = os.path.join(root, filename)
+                if os.path.isfile(file) and filename.find(pattern) > -1:
+                    print(file)
+            """for path, dirs, files in os.walk(os.path.abspath(root)):
+                print(files)
+            """
+                #for filename in fnmatch.filter(files, pattern):
+                #    print(filename)
+
+
+
+
 
     #  ******************************
     def prepare_data(self, path_list: list, file_path_dict: dict, del_flag: bool = False):
