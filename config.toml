@@ -48,6 +48,8 @@ result_regression_dir = 'dymola-ci-tests/result/regression'
 result_interact_ci_dir = 'dymola-ci-tests/result/interact_CI'
 result_ci_template_dir = 'dymola-ci-tests/result/ci_template'
 result_check_result_dir = 'dymola-ci-tests/result/Dymola_check'
+result_OM_check_result_dir = 'dymola-ci-tests/result/OM_check'
+
 
 [Color]
 CRED = '\033[91m'

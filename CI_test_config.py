@@ -4,7 +4,8 @@ import os
 import pathlib
 import shutil
 import toml
-
+import inspect
+import re
 
 class CI_config(object):
 
@@ -69,6 +70,7 @@ class CI_config(object):
         self.result_interact_ci_dir = f'{data["result"]["result_interact_ci_dir"].replace("/", os.sep)}'
         self.result_ci_template_dir = f'{data["result"]["result_ci_template_dir"].replace("/", os.sep)}'
         self.result_check_result_dir = f'{data["result"]["result_check_result_dir"].replace("/", os.sep)}'
+        self.result_OM_check_result_dir = f'{data["result"]["result_OM_check_result_dir"].replace("/", os.sep)}'
         # [Color]
         self.CRED = '\033[91m'
         self.CEND = '\033[0m'
@@ -76,48 +78,79 @@ class CI_config(object):
         self.yellow = '\033[33m'
         self.blue = '\033[44m'
 
-    # ******************************
-    def check_arguments_settings(self, argument_list: list):
-        if len(argument_list) > 0:
-            for arg in argument_list:
-                if arg is None:
-                    print(f'{self.CRED}Error:{self.CEND} {arg} is missing!')
-                    exit(1)
-                else:
-                    print(f'Setting:  {arg}')
 
-    # ******************************
-    def check_structure_setting(self, path_list: str = None, file_list: str = None):
-        if file_list is None:
-            file_list = []
-        if path_list is None:
-            path_list = []
-        if isinstance(path_list, list) is False:
-            path_list = [path_list]
-        self.check_path_settings(path_list=path_list)
-        if isinstance(file_list, list) is False:
-            file_list = [file_list]
-        self.check_file_settings(file_list=file_list)
+    # *********** Checking structure *******************
+    def check_arguments_settings(self, *args):
+        frame = inspect.currentframe().f_back
+        s = inspect.getframeinfo(frame).code_context[0]
+        r = re.search(r"\((.*)\)", s).group(1)
+        var_names = r.split(", ")
+        print(f'***--- Argument setting---****')
+        for i, (var, val) in enumerate(zip(var_names, args)):
+            if val is None:
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
+                print(f'***------****')
+                exit(1)
+            else:
+                print(f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
+        print(f'***------****')
 
-    @staticmethod
-    def check_path_settings(path_list: list):
-        if len(path_list) > 0:
+    def check_path_setting(self, *args: str):
+        frame = inspect.currentframe().f_back
+        s = inspect.getframeinfo(frame).code_context[0]
+        r = re.search(r"\((.*)\)", s).group(1)
+        var_names = r.split(", ")
+        print(f'***--- Check path setting---****')
+        for i, (var, path) in enumerate(zip(var_names, args)):
+            if os.path.isdir(path) is True:
+                print(f'{self.green}Setting:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
+            else:
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
+                print(f'***------****')
+                exit(1)
+        print(f'***------****')
+
+    def check_file_setting(self, *args):
+        frame = inspect.currentframe().f_back
+        s = inspect.getframeinfo(frame).code_context[0]
+        r = re.search(r"\((.*)\)", s).group(1)
+        var_names = r.split(", ")
+        print(f'***--- Check file setting---****')
+        for i, (var, file) in enumerate(zip(var_names, args)):
+            if os.path.isfile(file) is True:
+                print(f'{self.green}Setting:{self.CEND} {self.blue}File "{var}"{self.CEND} is set as: {self.blue}"{file}"{self.CEND} and exists.')
+            else:
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"{self.CEND} does not exist.')
+                print(f'***------****')
+                exit(1)
+        print(f'***------****')
+
+    ############# Create Structure ##############
+    def create_path(self, path_list: list = None):
+        if path_list is not None:
+            print(f'\n**** Create folder ****\n')
             for path in path_list:
-                if os.path.isdir(path) is True:
-                    print(f'Setting path: {path}')
-                else:
-                    print(f'Cannot find path {path}')
-                    exit(1)
+                print(f'{self.green}Create Folder:{self.CEND} {path}')
+                os.makedirs(path, exist_ok=True)
 
-    @staticmethod
-    def check_file_settings(file_list: list):
-        if len(file_list) > 0:
-            for file in file_list:
-                if os.path.isfile(file) is True:
-                    print(f'Setting path: {file}')
-                else:
-                    print(f'Cannot find path {file}')
-                    exit(1)
+            print(f'\n**** ----------- ****\n')
+
+    ############# Remove Structure ##############
+    def delete_files_in_path(self, path_list: list = None):
+        if path_list is not None:
+            print(f'\n**** Delete folder ****\n')
+            for path in path_list:
+                print(f'{self.green}Delete Folder:{self.CEND} {path}')
+                for filename in os.listdir(path):
+                    file_path = os.path.join(path, filename)
+                    try:
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
+                            os.unlink(file_path)
+                        elif os.path.isdir(file_path):
+                            shutil.rmtree(file_path)
+                    except Exception as e:
+                        print('Failed to delete %s. Reason: %s' % (file_path, e))
+            print(f'\n**** ----------- ****\n')
 
     #  ******************************
     def prepare_data(self, path_list: list, file_path_dict: dict, del_flag: bool = False):
@@ -197,32 +230,21 @@ class CI_config(object):
                 write_file.close()
         print(f'\n**********************\n')
 
-    def check_ci_structure(self, files_list=None, folders_list=None):
-        """
-        Args:
-            files_list ():
-            folders_list ():
-        """
-        if folders_list is None:
-            folders_list = []
-        if files_list is None:
-            files_list = []
-        if isinstance(folders_list, list) is False:
-            folders_list = [folders_list]
-        if len(folders_list) > 0:
-            self.check_ci_folder_structure(folders_list=folders_list)
-        if isinstance(files_list, list) is False:
-            files_list = [files_list]
-        if len(files_list) > 0:
-            self.check_ci_file_structure(files_list=files_list)
+
+
+
+    def create_folder(*args):
+        pass
 
     @staticmethod
-    def check_ci_folder_structure(folders_list):
+    def check_ci_folder_structure(*args):
         """
         Check CI Structure
         """
-        for folder in folders_list:
+        for folder in args:
             os.makedirs(folder, exist_ok=True)
+        #for folder in folders_list:
+        #    os.makedirs(folder, exist_ok=True)
             """
             if not os.path.exists(folder):
                 print(f'Create path:{folder}')
