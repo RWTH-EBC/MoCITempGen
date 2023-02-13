@@ -158,6 +158,8 @@ class CI_config(object):
                 file = os.path.join(root, filename)
                 if os.path.isfile(file) and filename.find(pattern) > -1:
                     print(file)
+                    os.remove(file)
+
             """for path, dirs, files in os.walk(os.path.abspath(root)):
                 print(files)
             """

@@ -44,7 +44,8 @@ class Check_OpenModelica(CI_config):
 
         self.omc = OMCSessionZMQ()
         print(f'{self.green}OpenModelica Version number:{self.CEND} {self.omc.sendExpression("getVersion()")}')
-        load_modelica = self.omc.sendExpression("loadModel(Modelica)")
+        #load_modelica = self.omc.sendExpression("loadModel(Modelica)")
+        load_modelica = self.omc.sendExpression(f'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true)')
         if load_modelica is True:
             print(f'Load library modelica in Openmodelica.')
         else:
