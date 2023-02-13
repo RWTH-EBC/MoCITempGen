@@ -47,7 +47,7 @@ class Check_OpenModelica(CI_config):
         #load_modelica = self.omc.sendExpression("loadModel(Modelica)")
         load_modelica = self.omc.sendExpression(f'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true)')
         if load_modelica is True:
-            print(f'Load library modelica in Openmodelica.')
+            print(f'{self.green}Load library modelica in Openmodelica.{self.CEND}')
         else:
             print(f'Load of modelica has failed.')
             exit(1)
@@ -489,8 +489,8 @@ if __name__ == '__main__':
     except_list = ["Warning: Conversion-annotation contains unknown element: nonFromVersion",
                    "failed with no error message."]
 
-    additional_libraries = {args.wh_library: os.path.join(os.path.abspath("."), "modelica-ibpsa")}
-
+    #additional_libraries = {args.wh_library: os.path.join(os.path.abspath("."), "modelica-ibpsa")}
+    additional_libraries = None
     if args.om_options == "OM_CHECK":
         OM._load_library(library=args.library, add_libraries=additional_libraries)
         OM._install_library(install_libraries)
@@ -508,8 +508,6 @@ if __name__ == '__main__':
         exit_var = OM.read_error_log()
         exit(exit_var)
     if args.om_options == "OM_SIM":
-        #os.chdir("_temp_results")
-        #print(os.getcwd())
         OM._load_library(library=args.library,
                          add_libraries=additional_libraries)
         OM._install_library(install_libraries)
