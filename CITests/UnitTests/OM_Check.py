@@ -3,7 +3,8 @@ import sys
 from ebcpy import DymolaAPI, TimeSeriesData
 from ebcpy.utils.statistics_analyzer import StatisticsAnalyzer
 from OMPython import OMCSessionZMQ
-#sys.path.append()
+sys.path.append('Dymola_python_tests')
+sys.path.append('Dymola_python_tests/CITests/structure')
 from Dymola_python_tests.CI_test_config import CI_config
 from Dymola_python_tests.CITests.structure.sort_mo_model import modelica_model
 
