@@ -1,6 +1,10 @@
 import os
-from Dymola_python_tests.CI_test_config import CI_config
-from Dymola_python_tests.CITests.structure.model_management import Model_Management
+import sys
+sys.path.append('Dymola_python_tests')
+from CI_test_config import CI_config
+#from Dymola_python_tests.CI_test_config import CI_config
+sys.path.append('Dymola_python_tests/CITests/structure')
+from model_management import Model_Management
 
 
 class modelica_model(CI_config):

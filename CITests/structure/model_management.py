@@ -1,6 +1,9 @@
 import os
 import platform
-from Dymola_python_tests.CI_test_config import CI_config
+import sys
+sys.path.append('Dymola_python_tests')
+from CI_test_config import CI_config
+#from Dymola_python_tests.CI_test_config import CI_config
 
 
 class Model_Management(CI_config):
