@@ -30,6 +30,7 @@ class CI_template_config(CI_config):
         # [CI non fixed Arguments]
         self.gitlab_page = data['arguments']['gitlab_page']
         self.image_name = data['arguments']['image_name']
+        self.OM_Image =  data['arguments']['OM_Image']
         self.github_repo = data['arguments']['github_repo']
         self.wh_library = data['arguments']['wh_library']
         self.html_praefix = data['arguments']['html_praefix']
@@ -45,7 +46,8 @@ class CI_template_config(CI_config):
 
         # [Except branches]
         self.except_branch_list = data['except_branches']['except_branch_list']
-
+        # [main_branches]
+        self.main_branch_list = data['main_branches']['main_branch_list']
         # [Stages]
         self.ci_stage_check_setting = data['ci_stages']['ci_stage_check_setting']
         self.ci_stage_build_templates = data['ci_stages']['ci_stage_build_templates']
@@ -107,7 +109,7 @@ class CI_template_config(CI_config):
         self.dymola_python_html_tidy_file = f'{self.dymola_python_dir}{os.sep}{data["dymola_python_scripts"]["dymola_python_html_tidy_file"].replace("/", os.sep)}'
         self.dymola_python_syntax_test_file = f'{self.dymola_python_dir}{os.sep}{data["dymola_python_scripts"]["dymola_python_syntax_test_file"].replace("/", os.sep)}'
         self.dymola_python_configuration_file = f'{data["dymola_python_scripts"]["dymola_python_configuration_file"].replace("/", os.sep)}'
-
+        self.OM_python_check_model_file = f'{data["dymola_python_scripts"]["OM_python_check_model_file"].replace("/", os.sep)}'
         # [Triggers different jobs specifically: Interact CI: User]
         self.ci_update_ref_commit = data["interactive_ci_commit"]["ci_update_ref_commit"]
         self.ci_show_ref_commit = data["interactive_ci_commit"]["ci_show_ref_commit"]

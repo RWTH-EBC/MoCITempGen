@@ -1,6 +1,7 @@
 [arguments]
-gitlab_page = 'https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib'
 image_name = 'registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda'
+OM_Image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:master'
+gitlab_page = 'https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib'
 github_repo = 'RWTH-EBC/AixLib'
 wh_library = 'IBPSA'
 html_praefix = 'correct_HTML_'
@@ -15,7 +16,10 @@ xvfb_flag = 'xvfb-run -n 77'
 bot_name = 'ebc-aixlib-bot'
 
 [except_branches]
-except_branch_list = ['main']
+except_branch_list = ['IBPSA']
+[main_branches]
+main_branch_list = ['main, development']
+
 
 [ci_stages]
 ci_stage_check_setting = 'check_setting'
@@ -79,6 +83,7 @@ dymola_python_deploy_artifacts_file = 'deploy/deploy_artifacts.py'
 dymola_python_html_tidy_file = 'SyntaxTests/html_tidy_errors.py'
 dymola_python_syntax_test_file = 'SyntaxTests/StyleChecking.py'
 dymola_python_configuration_file = 'Dymola_python_tests/CI_test_config.py'
+OM_python_check_model_file = 'Dymola_python_tests/CITests/UnitTests/OM_Check.py'
 
 [interactive_ci_commit]
 ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
@@ -100,6 +105,7 @@ ci_merge_except_commit = "ci_merge_except"
 ci_correct_html_commit = "ci_correct_html"
 ci_build_structure_commit = "ci_build_structure"
 ci_build_whitelist_structure_commit = "ci_build_whitelist"
+
 
 [ci_commit_bot]
 bot_merge_commit = 'CI message from {self.bot_name}. Merge of {self.wh_library} library. Update files {self.wh_model_file} and {self.wh_html_file}'

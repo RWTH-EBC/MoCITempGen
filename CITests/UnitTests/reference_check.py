@@ -806,10 +806,10 @@ if __name__ == '__main__':
         else:
             conf.check_ci_folder_structure(folders_list=[f'..{os.sep}{conf.config_ci_dir}'])
             if args.modified_models is False:
-                conf.check_ci_file_structure(files_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
+                conf.create_files(files_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
                 package_list = [args.single_package]
             if args.modified_models is True:
-                conf.check_ci_file_structure(
+                conf.create_files(
                     files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,

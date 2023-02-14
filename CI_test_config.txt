@@ -1,0 +1,29 @@
+#/bin/bash
+import argparse
+import os
+import pathlib
+import shutil
+import toml
+import inspect
+import re
+import fnmatch
+
+class CI_config(object):
+
+    def __init__(self):
+        %for package in package_list:
+        self.
+        %endfor
+
+
+
+        self.CRED = '\033[91m'
+        self.CEND = '\033[0m'
+        self.green = '\033[0;32m'
+        self.yellow = '\033[33m'
+        self.blue = '\033[44m'
+
+
+
+
+

@@ -700,10 +700,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
-    conf.check_ci_file_structure(files_list=[conf.config_ci_exit_file])
+    conf.create_files(files_list=[conf.config_ci_exit_file])
     if args.whitelist is True:
         conf.check_ci_folder_structure(folders_list=[conf.wh_ci_dir])
-        conf.check_ci_file_structure(files_list=[conf.wh_html_file])
+        conf.create_files(files_list=[conf.wh_html_file])
         whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
         print(f'Create a whitelist of {args.wh_library} Library')
         whitelist.call_whitelist()

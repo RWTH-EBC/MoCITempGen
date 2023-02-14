@@ -1,146 +1,80 @@
-image: registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:latest
+image: ${OM_Image}
 stages:
     - ${ci_stage_OM_model_check}
 
-.OM_check_model_job:
+.OM_check_rules:PR:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+          changes:
+            - ${library}/
+          when: on_success
+        %for branch in except_branch_list:
+        - if: $CI_PIPELINE_SOURCE == "push"  && $CI_COMMIT_BRANCH  =~ /${branch}/
+          when: never
+        %endfor
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+.OM_check_rules:push:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+          changes:
+            - ${library}/
+          when: on_success
+        %for branch in except_branch_list:
+        - if:  $CI_COMMIT_BRANCH  =~ /${branch}/
+          when: never
+        %endfor
+
+
+.OM_check_model_job:PR:
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --tool openModelica --om-option OM_CHECK
+        - python3 ${OM_python_check_model_file}  --package $lib_package --library ${library} ${wh_flag} ${filter_flag} --om-option OM_CHECK
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        - external_pull_requests
-    retry:
-        max: 2
-        when: runner_system_failure
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
+    rules:
+        - !reference [.OM_check_rules:PR, rules]
 
-%for package in package_list:
-OM_Check_${library}_${package}:
-    variables:
-        lib_package: ${package}
-    extends: .OM_check_model_job
 
-%endfor
 
-.OM_dev_check_model_job:
+
+.OM_check_model_job:push:
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --tool openModelica --om-option OM_CHECK
+        - python3 ${OM_python_check_model_file}  --changed-flag --package $lib_package --library ${library} ${wh_flag} ${filter_flag} --om-option OM_CHECK
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
-
         expire_in: ${expire_in_time}
-    only:
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.OM_check_rules:push, rules]
 
-%for package in package_list:
-OM_Development_Check_${library}_${package}:
-    variables:
-        lib_package: ${package}
-    extends: .OM_dev_check_model_job
-
-%endfor
-
-.OM_check_changed_models_job:
-    stage: ${ci_stage_OM_model_check}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_configuration_file} --changed-model
-        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --tool openModelica --om-option OM_CHECK
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-
-        expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
-            ${merge_branch}
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-            - /^${html_praefix}.*$/
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
-
-%for package in package_list:
-OM_Check_${library}_${package}_changed_models:
-    variables:
-        lib_package: ${package}
-    only:
-        changes:
-            - ${library}/${package}/**/*
-    extends: .OM_check_changed_models_job
-
-%endfor
-
-.OM_CI_check_model_job:
-    stage: ${ci_stage_OM_model_check}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-
-        expire_in: ${expire_in_time}
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/
-    except:
-        refs:
-            - external_pull_requests
-    retry:
-        max: 2
-        when: runner_system_failure
 
 
 %for package in package_list:
-OM_CI_Check_${library}_${package}:
+OM_Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
-    extends: .OM_CI_check_model_job
-
+    extends: .OM_check_model_job:PR
 %endfor
+
+
+%for package in package_list:
+OM_Check_${library}_${package}:push:
+    variables:
+        lib_package: ${package}
+    extends: .OM_check_model_job:push
+%endfor
+
+

@@ -556,9 +556,9 @@ if __name__ == '__main__':
     conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.chart_dir,
                                                  conf.temp_chart_dir])
-    conf.check_ci_file_structure(files_list=[conf.temp_chart_file,
-                                             conf.temp_index_file,
-                                             conf.temp_layout_file])
+    conf.create_files(files_list=[conf.temp_chart_file,
+                                  conf.temp_index_file,
+                                  conf.temp_layout_file])
     charts = Plot_Charts(template=Template,
                          package=args.single_package,
                          library=args.library)
