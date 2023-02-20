@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 import glob
 import os
 
-with open(f'CITests{os.sep}README.md', 'r') as f:
+with open(f'ci_tests{os.sep}README.md', 'r') as f:
     long_description = f.read()
-with open(f"CITests{os.sep}requirements.txt", 'r') as f:
+with open(f"ci_tests{os.sep}requirements.txt", 'r') as f:
     required = f.read().splitlines()
 VERSION = "0.1.0"
 
@@ -19,7 +19,7 @@ setup(
     author='Sven Hinrichs',
     author_email='sven.hinrichs@eonerc.rwth-aachen.de',
     url="https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests",
-    packages=find_packages(include=['CITests*']),
+    packages=find_packages(include=['ci_tests*']),
     include_package_data=True,
     python_requires='>=3.9.0',
     install_requires=[required
