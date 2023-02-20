@@ -3,8 +3,8 @@ import os
 import shutil
 from git import Repo
 from tidylib import tidy_document
-from Dymola_python_tests.CI_test_config import CI_config
-
+from CI_test_config import CI_config
+import sys
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -673,31 +673,38 @@ class HTML_whitelist(CI_config):
                     model_list.append(model)
         return model_list
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(
+            description='Run HTML correction on files')
+        parser.add_argument("--correct-overwrite", action="store_true", default=False,
+                            help="correct html code in modelica files and overwrite old files")
+        parser.add_argument("--correct-backup", action="store_true", default=False,
+                            help="backup old files")
+        parser.add_argument("--log", action="store_true",
+                            default=False, help="create logfile of model with errors")
+        parser.add_argument('-s', "--single-package", metavar="AixLib.Package",
+                            help="Package to test for a html test")
+        parser.add_argument("-p", "--path", default=".",
+                            help="Path where top-level package.mo of the library is located")
+        parser.add_argument("--whitelist", action="store_true", default=False,
+                            help="Create a new whitelist for a Library")
+        parser.add_argument("--correct-view", action="store_true", default=False,
+                            help="Check and print the Correct HTML Code")
+        parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
+        parser.add_argument("--wh-library", default="IBPSA", help="Library that is written to a whitelist")
+        parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
+                            help="url repository of library for whitelist")
+        parser.add_argument("--filter-whitelist", default=False, action="store_true", help="Argument for ")
+        args = parser.parse_args()
+        return args
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Run HTML correction on files')
-    parser.add_argument("--correct-overwrite", action="store_true", default=False,
-                        help="correct html code in modelica files and overwrite old files")
-    parser.add_argument("--correct-backup", action="store_true", default=False,
-                        help="backup old files")
-    parser.add_argument("--log", action="store_true",
-                        default=False, help="create logfile of model with errors")
-    parser.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                        help="Package to test for a html test")
-    parser.add_argument("-p", "--path", default=".",
-                        help="Path where top-level package.mo of the library is located")
-    parser.add_argument("--whitelist", action="store_true", default=False,
-                        help="Create a new whitelist for a Library")
-    parser.add_argument("--correct-view", action="store_true", default=False,
-                        help="Check and print the Correct HTML Code")
-    parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    parser.add_argument("--wh-library", default="IBPSA", help="Library that is written to a whitelist")
-    parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
-                        help="url repository of library for whitelist")
-    parser.add_argument("--filter-whitelist", default=False, action="store_true", help="Argument for ")
+    args = Parser(sys.argv[1:]).main()
 
-    args = parser.parse_args()
     conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
     conf.create_files(files_list=[conf.config_ci_exit_file])

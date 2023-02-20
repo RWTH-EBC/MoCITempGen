@@ -435,7 +435,6 @@ class Check_OpenModelica(CI_config):
 class Parser:
     def __init__(self, args):
         self.args = args
-        pass
 
     def main(self):
         parser = argparse.ArgumentParser(description="Check and validate single packages")

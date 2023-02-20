@@ -3,6 +3,67 @@ from mako.template import Template
 import argparse
 import toml
 from ci_templates_configuration import CI_template_config
+from CITests.structure.arg_parser import argpaser_toml
+from pathlib import Path
+import sys
+
+
+class CI_temp_struc(object):
+
+    def __init__(self):
+        pass
+
+    def w_pars_args(self, file: Path = None, replace_dict: dict = None):
+        #try:
+
+
+        arg_to = argpaser_toml()
+        data = arg_to.load_argparser_toml()
+        argparser = data[file]["Parser"]
+        parser_str = ""
+        for var in argparser:
+            if replace_dict is not None:
+                repl = True
+                if repl is True:
+                    for rep in replace_dict:
+                        if rep == var:
+                            arg = f'--{var.replace("_", "-")} {replace_dict[rep]} '
+                            #print(arg)
+                            parser_str = arg + parser_str
+                            break
+                    repl = False
+                else:
+                    arg = f'--{var.replace("_", "-")} {argparser[var]} '
+
+            else:
+                arg = f'--{var.replace("_", "-")} {argparser[var]} '
+            parser_str = arg + parser_str
+        #print(parser_str)
+        return parser_str
+        #except Exception as err:
+            #print(err)
+
+    def write_multiple_rules(self, rule_list: list = None,
+                             except_string: str = None,
+                             rule_option: str = "&&",
+                             compare_str: str = "!~",
+                             ci_variable: str = None):
+        if rule_list is not None:
+            if except_string is not None:
+                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list if value != except_string]
+            else:
+                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list]
+            rule_string = ""
+            for rule in rule_list:
+                if rule == rule_list[0]:
+                    rule_string = f'{rule}  '
+                else:
+                    rule_string = f'{rule_string} {rule_option} {rule}'
+            return rule_string
+        else:
+            print("Rule is None")
+            exit(1)
+
 
 
 class CI_yml_templates(CI_template_config):
@@ -24,6 +85,7 @@ class CI_yml_templates(CI_template_config):
         self.image_name = image_name
         self.gitlab_page = gitlab_page
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
+        self.rule = CI_temp_struc()
 
         if self.wh_library is not None:
             #wh_library = self.wh_library
@@ -47,68 +109,46 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             merge_branch = ""
 
-    def _write_multiple_rules(self,
-                              rule_list: list = None,
-                              except_string: str = None,
-                              rule_option: str = "&&",
-                              compare_str: str = "!~",
-                              ci_variable: str = None):
-        if rule_list is not None:
-            if except_string is not None:
-                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list if value != except_string]
-            else:
-                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list]
-            rule_string = ""
-            for rule in rule_list:
-                if rule == rule_list[0]:
-                    rule_string = f'{rule}  '
-                else:
-                    rule_string = f'{rule_string} {rule_option} {rule}'
-            return rule_string
-        else:
-            print("Rule is None")
-            exit(1)
 
-    def _write_OM_check_template(self):
+
+    def write_OM_check_template(self):
         my_template = Template(filename=self.temp_ci_OM_check_file)
-        commit_string = self._write_multiple_rules(rule_list=self.except_commit_list,
-                                                   rule_option="&&",
-                                                   compare_str="!~",
-                                                   ci_variable="$CI_COMMIT_MESSAGE")
-        PR_main_branch_rule = self._write_multiple_rules(rule_list=self.main_branch_list,
+        commit_string = self.rule.write_multiple_rules(rule_list=self.except_commit_list,
+                                                  rule_option="&&",
+                                                  compare_str="!~",
+                                                  ci_variable="$CI_COMMIT_MESSAGE")
+        PR_main_branch_rule = self.rule.write_multiple_rules(rule_list=self.main_branch_list,
                                                          rule_option="||",
                                                          compare_str="==",
                                                          ci_variable="$CI_COMMIT_BRANCH")
 
-        yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
-                                      commit_string=commit_string,
-                                      library=self.library,
-                                      PR_main_branch_rule=PR_main_branch_rule,
-                                      ci_OM_check_commit=self.ci_OM_check_commit,
-                                      OM_Image=self.OM_Image,
-                                      dymola_python_test_url=self.dymola_python_test_url,
-                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
-                                      OM_python_check_model_file=self.OM_python_check_model_file.replace(os.sep, "/"),
-                                      result_dir=self.result_dir.replace(os.sep, "/"),
-                                      expire_in_time=self.expire_in_time,
-                                      package_list=self.package_list,
-                                      commit_list=[value for value in self.except_commit_list if value != self.ci_OM_check_commit],
-                                      except_branch_list=self.except_branch_list,
-                                      wh_flag=wh_flag,
-
-                                      filter_flag=filter_flag,
-                                      ci_OM_check_commit=self.ci_OM_check_commit,
-                                      except_commit_list=self.except_commit_list,
-
-
-                                      )
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
-        self.check_path_setting(ci_folder)
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        try:
+            yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+                                          commit_string=commit_string,
+                                          library=self.library,
+                                          PR_main_branch_rule=PR_main_branch_rule,
+                                          ci_OM_check_commit=self.ci_OM_check_commit,
+                                          OM_Image=self.OM_Image,
+                                          dymola_python_test_url=self.dymola_python_test_url,
+                                          dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
+                                          OM_python_check_model_file=self.OM_python_check_model_file.replace(os.sep, "/"),
+                                          result_dir=self.result_dir.replace(os.sep, "/"),
+                                          expire_in_time=self.expire_in_time,
+                                          package_list=self.package_list,
+                                          commit_list=[value for value in self.except_commit_list if value != self.ci_OM_check_commit],
+                                          except_branch_list=self.except_branch_list,
+                                          wh_flag=wh_flag,
+                                          filter_flag=filter_flag,
+                                          except_commit_list=self.except_commit_list
+                                          )
+            ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
+            self.check_path_setting(ci_folder)
+            yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
+            yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+            yml_tmp.write(yml_text.replace('\n', ''))
+            yml_tmp.close()
+        except Exception as err:
+            print(err)
 
     def _write_ci_structure_template(self):
         """
@@ -727,7 +767,7 @@ class CI_yml_templates(CI_template_config):
         for temp in config_list:
             if temp == "check":
                 self._write_check_template()
-                self._write_OM_check_template()
+                self.write_OM_check_template()
             if temp == "simulate":
                 self._write_simulate_template()
                 self._write_OM_simulate_template()
@@ -1190,14 +1230,27 @@ class Set_CI_Settings_interactive(CI_template_config):
         return image_name
 
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description="Set Github Environment Variables")
+        check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
+        check_test_group.add_argument("--setting",
+                                      help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
+                                      action="store_true")
+        args = parser.parse_args()
+        return args
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Set Github Environment Variables")
-    check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-    check_test_group.add_argument("--setting",
-                                  help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
-                                  action="store_true")
-    args = parser.parse_args()
-    Conf = Read_config_data()
+    args = Parser(sys.argv[1:]).main()
+    struc = CI_temp_struc()
+    file = "api_github"
+    replace_dict = {}
+    replace_dict["base_branch"] = "dev"
+    struc.w_pars_args(file=file,replace_dict=replace_dict  )
+    """Conf = Read_config_data()
     Conf.delte_yml_files()
 
     if args.setting is False:
@@ -1234,4 +1287,4 @@ if __name__ == '__main__':
                                     image_name=result[11],
                                     gitlab_page=result[12])
         CI_Class.write_ci_templates(config_list=result[7])
-        CI_Class.write_main_yml(stage_list=result[8], ci_template_list=result[9])
+        CI_Class.write_main_yml(stage_list=result[8], ci_template_list=result[9])"""

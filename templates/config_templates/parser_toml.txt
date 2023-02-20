@@ -1,5 +1,0 @@
-%for pars in parser_list:
-${pars}
-%endfor
-
-

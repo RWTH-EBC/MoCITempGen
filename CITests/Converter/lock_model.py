@@ -2,6 +2,8 @@ import argparse
 import os
 from pathlib import Path
 from Dymola_python_tests.CI_test_config import CI_config
+import sys
+
 
 class Lock_model(CI_config):
 
@@ -143,11 +145,21 @@ class Lock_model(CI_config):
             exit(1)
 
 
+class Parser:
+
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description='Lock models.')
+        unit_test_group = parser.add_argument_group("arguments to run class Lock_model")
+        unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
+        unit_test_group.add_argument("-wh-l", "--lock-library", help="Library to lock")
+        args = parser.parse_args()
+        return args
+
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Lock models.')
-    unit_test_group = parser.add_argument_group("arguments to run class Lock_model")
-    unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    unit_test_group.add_argument("-wh-l", "--lock-library", help="Library to lock")
-    args = parser.parse_args()
+    args = Parser(sys.argv[1:]).main()
     lock = Lock_model(library=args.library, lock_library=args.lock_library)
     lock.call_lock_model()

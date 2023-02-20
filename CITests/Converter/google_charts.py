@@ -4,7 +4,7 @@ import shutil
 import pandas as pd
 from mako.template import Template
 from Dymola_python_tests.CI_test_config import CI_config
-
+import sys
 
 class Plot_Charts(CI_config):
 
@@ -515,44 +515,55 @@ class Plot_Charts(CI_config):
             print(f'Setting package: {self.package}\n')
 
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description='Plot diagramms')
+        unit_test_group = parser.add_argument_group("arguments to plot diagrams")
+        unit_test_group.add_argument("--line-html",
+                                     help='plot a google html chart in line form',
+                                     action="store_true")
+        unit_test_group.add_argument("--create-layout",
+                                     help='Create a layout with a plots',
+                                     action="store_true")
+        unit_test_group.add_argument("--line-matplot",
+                                     help='plot a matlab chart ',
+                                     action="store_true")
+        unit_test_group.add_argument("--new-ref",
+                                     help="Plot new models with new created reference files",
+                                     action="store_true")
+        unit_test_group.add_argument("-e", "--error",
+                                     help='Plot only model with errors',
+                                     action="store_true")
+        unit_test_group.add_argument("--show-ref",
+                                     help='Plot only model on the interact ci list',
+                                     action="store_true")
+        unit_test_group.add_argument("--update-ref",
+                                     help='Plot only updated models',
+                                     action="store_true")
+        unit_test_group.add_argument("--show-package",
+                                     help='Plot only updated models',
+                                     action="store_true")
+        unit_test_group.add_argument('-s', "--single-package",
+                                     metavar="Modelica.Package",
+                                     help="Test only the Modelica package Modelica.Package")
+        unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
+        unit_test_group.add_argument('-fun', "--funnel-comp",
+                                     help="Take the datas from funnel_comp",
+                                     action="store_true")
+        unit_test_group.add_argument('-ref', "--ref-txt",
+                                     help="Take the datas from reference datas",
+                                     action="store_true")
+        args = parser.parse_args()
+        return args
+
+
+
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Plot diagramms')
-    unit_test_group = parser.add_argument_group("arguments to plot diagrams")
-    unit_test_group.add_argument("--line-html",
-                                 help='plot a google html chart in line form',
-                                 action="store_true")
-    unit_test_group.add_argument("--create-layout",
-                                 help='Create a layout with a plots',
-                                 action="store_true")
-    unit_test_group.add_argument("--line-matplot",
-                                 help='plot a matlab chart ',
-                                 action="store_true")
-    unit_test_group.add_argument("--new-ref",
-                                 help="Plot new models with new created reference files",
-                                 action="store_true")
-    unit_test_group.add_argument("-e", "--error",
-                                 help='Plot only model with errors',
-                                 action="store_true")
-    unit_test_group.add_argument("--show-ref",
-                                 help='Plot only model on the interact ci list',
-                                 action="store_true")
-    unit_test_group.add_argument("--update-ref",
-                                 help='Plot only updated models',
-                                 action="store_true")
-    unit_test_group.add_argument("--show-package",
-                                 help='Plot only updated models',
-                                 action="store_true")
-    unit_test_group.add_argument('-s', "--single-package",
-                                 metavar="Modelica.Package",
-                                 help="Test only the Modelica package Modelica.Package")
-    unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-    unit_test_group.add_argument('-fun', "--funnel-comp",
-                                 help="Take the datas from funnel_comp",
-                                 action="store_true")
-    unit_test_group.add_argument('-ref', "--ref-txt",
-                                 help="Take the datas from reference datas",
-                                 action="store_true")
-    args = parser.parse_args()
+    args = Parser(sys.argv[1:]).main()
     conf = CI_config()
     conf.check_ci_folder_structure(folders_list=[conf.chart_dir,
                                                  conf.temp_chart_dir])

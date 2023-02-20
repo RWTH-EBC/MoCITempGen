@@ -199,17 +199,26 @@ def _setEnvironmentPath(dymola_version):
     sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
 
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description="Check the Style of Packages")
+        check_test_group = parser.add_argument_group("Arguments to start style tests")
+        check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
+                                      help="Test only the Modelica package AixLib.Package")
+        check_test_group.add_argument("-p", "--library", default=".",
+                                      help="Path where top-level package.mo of the library is located")
+        check_test_group.add_argument("-DS", "--dymola-version", default="2022",
+                                      help="Version of Dymola(Give the number e.g. 2022")
+        check_test_group.add_argument("-CM", "--changed-models", default=False, action="store_true")
+        args = parser.parse_args()
+        return args
+
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Check the Style of Packages")
-    check_test_group = parser.add_argument_group("Arguments to start style tests")
-    check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                                  help="Test only the Modelica package AixLib.Package")
-    check_test_group.add_argument("-p", "--library", default=".",
-                                  help="Path where top-level package.mo of the library is located")
-    check_test_group.add_argument("-DS", "--dymola-version", default="2022",
-                                  help="Version of Dymola(Give the number e.g. 2022")
-    check_test_group.add_argument("-CM", "--changed-models", default=False, action="store_true")
-    args = parser.parse_args()
+    args = Parser(sys.argv[1:]).main()
     _setEnvironmentPath(dymola_version=args.dymola_version)
     from dymola.dymola_interface import DymolaInterface
     from dymola.dymola_exception import DymolaException

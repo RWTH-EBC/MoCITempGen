@@ -3,6 +3,7 @@ import os
 import glob
 import shutil
 from natsort import natsorted
+import sys
 
 
 class Library_Merge(object):
@@ -197,32 +198,40 @@ class Library_Merge(object):
             else:
                 new_conversion_script = self._copy_library_mos(file_new_conversion=conv_data[0])
                 self._add_conv_to_package(l_library_conv=last_library_conversion,
-                                         new_conversion_script=new_conversion_script,
-                                         old_to_numb=conv_data[1],
-                                         new_to_numb=conv_data[3])
+                                          new_conversion_script=new_conversion_script,
+                                          old_to_numb=conv_data[1],
+                                          new_to_numb=conv_data[3])
                 print(f'New {self.library} Conversion scrip was created: {conv_data[0]}')
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Variables to start a library merge")
-    check_test_group = parser.add_argument_group("Arguments to set environment variables")
-    check_test_group.add_argument("--library-dir",
-                                  default="AixLib\\Resources\\Scripts",
-                                  help="path to the library scripts")
-    check_test_group.add_argument("--merge-library-dir",
-                                  default='modelica-ibpsa\\IBPSA\\Resources\\Scripts\\Dymola\\ConvertIBPSA_*',
-                                  help="path to the merge library scripts")
-    check_test_group.add_argument("--mos-path",
-                                  default="Convertmos",
-                                  help="Folder where the conversion scripts are stored temporarily")
-    check_test_group.add_argument("--library",
-                                  default="AixLib",
-                                  help="Library to be merged into")
-    check_test_group.add_argument("--merge-library",
-                                  default='IBPSA',
-                                  help="Library to be merged")
+class Parser:
+    def __init__(self, args):
+        self.args = args
 
-    args = parser.parse_args()
+    def main(self):
+        parser = argparse.ArgumentParser(description="Variables to start a library merge")
+        check_test_group = parser.add_argument_group("Arguments to set environment variables")
+        check_test_group.add_argument("--library-dir",
+                                      default="AixLib\\Resources\\Scripts",
+                                      help="path to the library scripts")
+        check_test_group.add_argument("--merge-library-dir",
+                                      default='modelica-ibpsa\\IBPSA\\Resources\\Scripts\\Dymola\\ConvertIBPSA_*',
+                                      help="path to the merge library scripts")
+        check_test_group.add_argument("--mos-path",
+                                      default="Convertmos",
+                                      help="Folder where the conversion scripts are stored temporarily")
+        check_test_group.add_argument("--library",
+                                      default="AixLib",
+                                      help="Library to be merged into")
+        check_test_group.add_argument("--merge-library",
+                                      default='IBPSA',
+                                      help="Library to be merged")
+        args = parser.parse_args()
+        return args
+
+
+if __name__ == '__main__':
+    args = Parser(sys.argv[1:]).main()
     merge = Library_Merge(library_dir=args.library_dir,
                           merge_library_dir=args.merge_library_dir,
                           mos_path=args.mos_path,

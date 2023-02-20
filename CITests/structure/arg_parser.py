@@ -9,7 +9,7 @@ import glob
 import tomli_w as tomlwriter
 import importlib.util
 import inspect
-
+import toml
 
 class CI_templates_structure(CI_config):
 
@@ -18,34 +18,8 @@ class CI_templates_structure(CI_config):
         self.toml_file = Path(Path.cwd(), "python_arg_config.toml")
         pass
 
-    def read_argparser_argument(self):
-        # python_arg_script = Path(Path.cwd() , self.dymola_python_test_dir)
-        # path = glob.glob(f'{self.dymola_python_test_dir}/**/*.py', recursive=True)
-        file = 'Dymola_python_tests\\CITests\\UnitTests\\CheckPackages\\validatetest.py'
-        open()
 
-    def write_python_toml(self):
-        config = {
-            "user": {
-                "player_x": {"symbol": "X", "color": "blue", "ai": True},
-                "player_o": {"symbol": "O", "color": "green", "ai": False},
-                "ai_skill": 0.85,
-            },
-            "board_size": 3,
-            "server": {"url": "https://tictactoe.example.com"},
-        }
-        cont = (tomli_w.dumps(config))
-        file = open(self.toml_file, "w")
-        file.write(cont)
-        file.close()
 
-    def load_toml(self):
-        pass
-
-    '''
-    class load_parser_args():
-    
-    def __init__(self):'''
 
 
 class StoreDictKeyPair(argparse.Action):
@@ -116,11 +90,11 @@ def write_toml():
     return config_list
 
 
-class write_argpaser_toml(object):
+class argpaser_toml(object):
 
     def __init__(self,
-                 f_path: Path = None,
-                 toml_file: Path = None):
+                 f_path: Path = Path("CITests"),
+                 toml_file: Path = Path("config", "toml_files", "parser.toml")):
         self.f_path = f_path
         self.toml_file = toml_file
         pass
@@ -158,8 +132,8 @@ class write_argpaser_toml(object):
                         #arguments = obj.main(sys.argv[1:])
                         sys.argv[1:] = []
                         arguments = obj.main([])
-                        for arg in vars(arguments):
-                            pars_arg_dict[arg] = str(getattr(arguments, arg))
+                        for args in vars(arguments):
+                            pars_arg_dict[args] = str(getattr(arguments, args))
                         class_modul_dict["Parser"] = pars_arg_dict
                         modul_dict[filename] = class_modul_dict
             except Exception as err:
@@ -167,6 +141,14 @@ class write_argpaser_toml(object):
                 exit(1)
                 continue
         return modul_dict
+
+
+    def load_argparser_toml(self):
+          try:
+              data = toml.load(self.toml_file)
+              return data
+          except Exception as err:
+              print(err)
 
     def write_python_parser_config(self):
         path_list = ["CITests.UnitTests.OM_Check", "CITests.UnitTests.CheckPackages.validatetest",
@@ -185,6 +167,8 @@ class write_argpaser_toml(object):
         yml_tmp.close()
 
 
+
+
 class Pars:
     def __init__(self, args):
         self.args = args
@@ -197,6 +181,14 @@ class Pars:
         check_test_group.add_argument("--create-par-toml",
                                       default=False,
                                       action="store_true")
+        check_test_group.add_argument("--read-par-toml",
+                                      default=False,
+                                      action="store_true")
+        check_test_group.add_argument("--file-path",
+                                      default=Path("CITests"))
+        check_test_group.add_argument("--par-toml-file",
+                                      default=Path("config", "toml_files", "parser.toml"))
+
         args = parser.parse_args()
         return args
 
@@ -210,13 +202,15 @@ if __name__ == '__main__':
     # _load_parser_arg()
     # write_toml()
     # write_python_parser_config()
-
+    to = argpaser_toml(f_path=arg.file_path,
+                       toml_file=arg.par_toml_file)
     if arg.create_par_toml is True:
-        to = write_argpaser_toml(f_path=Path("CITests"),
-                                 toml_file=Path("templates", "config_templates", "parser.toml"))
+
         python_files = to.load_python_modules()
         parser_dict = to.read_python_modules(module_files=python_files)
 
         to.write_toml_arg_parser(parser_dict=parser_dict)
+    if arg.read_par_toml is True:
+        to.load_argparser_toml()
 
 

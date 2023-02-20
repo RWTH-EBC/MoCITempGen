@@ -1,0 +1,112 @@
+[api_github.Parser]
+correct_branch = "${Newbranch}"
+github_repo = "RWTH-EBC/AixLib"
+working_branch = "${TARGET_BRANCH}"
+base_branch = "main"
+github_token = "${GITHUB_API_TOKEN}"
+prepare_plot = "False"
+show_plot = "False"
+post_pr_comment = "False"
+create_pr = "False"
+correct_html = "False"
+ibpsa_merge = "False"
+merge_request = "False"
+gitlab_page = "${GITLAB_Page}"
+
+[api_slack.Parser]
+github_token = "${GITHUB_API_TOKEN}"
+base_branch = "development"
+slack_token = "${secrets.SLACK_BOT_TOKEN}"
+github_repo = "RWTH-EBC/AixLib"
+
+[structure_check.Parser]
+config_dir = "False"
+create_path = "False"
+
+[google_charts.Parser]
+line_html = "False"
+create_layout = "False"
+line_matplot = "False"
+new_ref = "False"
+error = "False"
+show_ref = "False"
+update_ref = "False"
+show_package = "False"
+single_package = "None"
+library = "AixLib"
+funnel_comp = "False"
+ref_txt = "False"
+
+[lock_model.Parser]
+library = "AixLib"
+lock_library = "None"
+
+[library_merge.Parser]
+library_dir = "AixLib\\Resources\\Scripts"
+merge_library_dir = "modelica-ibpsa\\IBPSA\\Resources\\Scripts\\Dymola\\ConvertIBPSA_*"
+mos_path = "Convertmos"
+library = "AixLib"
+merge_library = "IBPSA"
+
+[html_tidy_errors.Parser]
+correct_overwrite = "False"
+correct_backup = "False"
+log = "False"
+single_package = "None"
+path = "."
+whitelist = "False"
+correct_view = "False"
+library = "AixLib"
+wh_library = "IBPSA"
+git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
+filter_whitelist = "False"
+
+[StyleChecking.Parser]
+single_package = "None"
+library = "."
+dymola_version = "2022"
+changed_models = "False"
+
+[OM_Check.Parser]
+library_dict = "None"
+package_dict = "None"
+wh_library = "IBPSA"
+changed_flag = "False"
+filter_wh_flag = "False"
+extended_ex_flag = "False"
+load_setting_flag = "True"
+om_options = "om_check"
+
+[reference_check.Parser]
+batch = "False"
+show_gui = "False"
+single_package = "None"
+path = "."
+library = "AixLib"
+number_of_processors = "16"
+tool = "dymola"
+dymola_version = "2022"
+coverage_only = "False"
+create_ref = "False"
+ref_list = "False"
+update_ref = "False"
+modified_models = "False"
+validate_html_only = "False"
+validate_experiment_setup = "False"
+report = "False"
+
+[validatetest.Parser]
+library_dict = "None"
+package_dict = "None"
+wh_library = "IBPSA"
+dymola_version = "2022"
+changed_flag = "False"
+filter_wh_flag = "False"
+extended_ex_flag = "False"
+create_wh_flag = "False"
+simulate_flag = "False"
+load_setting_flag = "False"
+dym_options = "om_check"
+repo_dir = "None"
+git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
+dymola_options = "dym_check"

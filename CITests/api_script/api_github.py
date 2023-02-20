@@ -1,5 +1,6 @@
 import requests
 import argparse
+import sys
 
 class PULL_REQUEST_GITHUB(object):
 
@@ -135,42 +136,47 @@ class PULL_REQUEST_GITHUB(object):
         }
         response = requests.request("POST", url, headers=headers, data=payload)
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description="Set Github Environment Variables")
+        check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
+        check_test_group.add_argument("-CB", "--correct-branch", default="${Newbranch}",
+                                      help="Branch to correct your Code")
+        check_test_group.add_argument("-GR", "--github-repo", default="RWTH-EBC/AixLib",
+                                      help="Environment Variable owner/RepositoryName")
+        check_test_group.add_argument('-WB', "--working-branch", default="${TARGET_BRANCH}",
+                                      help="Your current working Branch")
+        check_test_group.add_argument("--base-branch", default="main",
+                                      help="your base branch (main)")
+        check_test_group.add_argument('-GT', "--github-token", default="${GITHUB_API_TOKEN}",
+                                      help="Your Set GITHUB Token")
+        check_test_group.add_argument("--prepare-plot", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--show-plot", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--post-pr-comment", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--create-pr", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--correct-html", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--ibpsa-merge", help="Plot new models with new created reference files",
+                                      action="store_true")
+        check_test_group.add_argument("--merge-request", help="Comment for a IBPSA Merge request", action="store_true")
+        check_test_group.add_argument('-GP', "--gitlab-page", default="${GITLAB_Page}", help="Set your gitlab page url")
+        args = parser.parse_args()
+        return args
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Set Github Environment Variables")  # Configure the argument parser
-    check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-    check_test_group.add_argument("-CB", "--correct-branch", default="${Newbranch}", help="Branch to correct your Code")
-    check_test_group.add_argument("-GR", "--github-repo", default="RWTH-EBC/AixLib",
-                                  help="Environment Variable owner/RepositoryName")
-    check_test_group.add_argument('-WB', "--working-branch", default="${TARGET_BRANCH}",
-                                  help="Your current working Branch")
-    check_test_group.add_argument("--base-branch", default="main",
-                                  help="your base branch (main)")
-    check_test_group.add_argument('-GT', "--github-token", default="${GITHUB_API_TOKEN}", help="Your Set GITHUB Token")
-    check_test_group.add_argument("--prepare-plot", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--show-plot", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--post-pr-comment", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--create-pr", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--correct-html", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--ibpsa-merge", help="Plot new models with new created reference files",
-                                  action="store_true")
-    check_test_group.add_argument("--merge-request", help="Comment for a IBPSA Merge request", action="store_true")
-    check_test_group.add_argument('-GP', "--gitlab-page", default="${GITLAB_Page}", help="Set your gitlab page url")
-    args = parser.parse_args()
-    #data = toml.load(f'Dymola_python_tests{os.sep}CITests{os.sep}api_script{os.sep}docs{os.sep}pull_request_template.toml')
-    #print(data["correct_html"])
-
-
-
+    args = Parser(sys.argv[1:]).main()
     pull_request = PULL_REQUEST_GITHUB(github_repo=args.github_repo,
                                        working_branch=args.working_branch,
                                        github_token=args.github_token)
-    message = str
+    message = ""
    
     if args.post_pr_comment is True:
         page_url = f'{args.gitlab_page}/{args.working_branch}/charts'

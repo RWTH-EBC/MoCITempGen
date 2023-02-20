@@ -26,8 +26,7 @@ class Prepare_result_class(CI_config):
     def prepare_data_files(self, file_path_dict):
         for file in file_path_dict:
             print(file)
-            #shutil.copy(path, file)
-            #print(f'Result file {file} was moved to {path}')
+
 
 
 

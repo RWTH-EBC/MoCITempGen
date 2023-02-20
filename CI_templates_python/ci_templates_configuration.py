@@ -1,6 +1,8 @@
 import os
 from Dymola_python_tests.CI_test_config import CI_config
 import toml
+
+
 class CI_template_config(CI_config):
 
     def __init__(self):

@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append('Dymola_python_tests')
 from CI_test_config import CI_config
 import inspect
 import re

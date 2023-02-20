@@ -1,5 +1,4 @@
 import os
-
 from CI_test_config import CI_config
 from CITests.structure.model_management import Model_Management
 from pathlib import Path

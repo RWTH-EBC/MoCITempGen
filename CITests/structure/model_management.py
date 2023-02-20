@@ -1,9 +1,6 @@
 import os
 import platform
-import sys
-sys.path.append('Dymola_python_tests')
 from CI_test_config import CI_config
-#from Dymola_python_tests.CI_test_config import CI_config
 
 
 class Model_Management(CI_config):
@@ -17,39 +14,6 @@ class Model_Management(CI_config):
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
         self.dymola_version = dymola_version
-
-    def model_management_structure(self,
-                                   model_list: list,
-                                   library: str = "AixLib"):
-        """
-        model = get_models(self,
-                           path=self.single_package,
-                           library=self.library)
-        model_list = model[0]
-        no_simulate_list = model[1]
-        """
-
-        #self._load_model_management()
-        simulate_list = list()
-        for model in model_list:
-            print(f' **** Check structure of model {model} ****')
-            extended_list = self._get_extended_examples(model=model)
-            used_list = self._get_used_models(model=model)
-            extended_list.extend(used_list)
-
-
-            for ext in extended_list:
-                print(f'Extended model {ext} ')
-                filepath = f'{ext.replace(".", os.sep)}.mo'
-                example_test = modelica_model()._get_icon_example(filepath=filepath,
-                                                                  library=library)
-                if example_test is None:
-                    print(f'File {filepath} is no example.')
-                else:
-                    simulate_list.append(model)
-                    simulate_list.append(ext)
-        simulate_list = list(set(simulate_list))
-        return simulate_list
 
     def load_model_management(self):
         if platform.system() == "Windows":
@@ -80,12 +44,12 @@ class Model_Management(CI_config):
         model_list = list(set(model_list))
         return model_list
 
-    def get_extended_examples(self, model: str = ""):
+    def _get_extended_examples(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.AST.Classes.ExtendsInClass("{model}");')
         extended_list = self._filter_modelica_types(model_list=model_list)
         return extended_list
 
-    def get_used_models(self, model: str = ""):
+    def _get_used_models(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
         extended_list = self._filter_modelica_types(model_list=model_list)
         return extended_list

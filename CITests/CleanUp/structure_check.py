@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import argparse
 from Dymola_python_tests.CI_test_config import CI_config
-
+import sys
 
 class Structure_check(CI_config):
     def __init__(self):
@@ -39,12 +39,20 @@ class Structure_check(CI_config):
             print(f'Find no folder')
             pass
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+
+    def main(self):
+        parser = argparse.ArgumentParser(description="Config files for the CI")  # Configure the argument parser
+        check_test_group = parser.add_argument_group("Arguments to build the CI structure")
+        check_test_group.add_argument("--config-dir", default=False, action="store_true")
+        check_test_group.add_argument("--create-path", default=False, action="store_true")
+        args = parser.parse_args()  # Parse the arguments
+        return args
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Config files for the CI")  # Configure the argument parser
-    check_test_group = parser.add_argument_group("Arguments to build the CI structure")
-    check_test_group.add_argument("--config-dir", default=False, action="store_true")
-    check_test_group.add_argument("--create-path", default=False, action="store_true")
-    args = parser.parse_args()  # Parse the arguments
+    args = Parser(sys.argv[1:]).main()
     check = Structure_check()
     if args.create_path is True:
         if args.config_dir is True:
