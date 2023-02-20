@@ -1,10 +1,8 @@
 import os
-import sys
-sys.path.append('Dymola_python_tests')
+
 from CI_test_config import CI_config
-#from Dymola_python_tests.CI_test_config import CI_config
-sys.path.append('Dymola_python_tests/CITests/structure')
-from model_management import Model_Management
+from CITests.structure.model_management import Model_Management
+from pathlib import Path
 
 
 class modelica_model(CI_config):
@@ -23,23 +21,23 @@ class modelica_model(CI_config):
                          wh_library: str = "IBPSA",
                          extended_ex_flag: bool = False,
                          dymola_version: int = 2022,
-                         path_dir: str = os.path.abspath("."),
-                         root_package: str = None,
-                         root_library: str = None):
+                         path_dir: str = Path.home(),
+                         root_package: Path = None,
+                         root_library: Path = None):
 
         self.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)
         if root_package is None:
-            root_package = os.path.join(path_dir, library, package.replace(".", os.sep))
+            root_package = Path(path_dir, library, package.replace(".", os.sep))
         self.check_path_setting(root_package)
         if root_library is None:
-            root_library = os.path.join(path_dir, library, "package.mo")
+            root_library = Path(path_dir, library, "package.mo")
         self.check_file_setting(root_library)
 
         if dymola is None:
             extended_ex_flag = False
         if changed_flag is True:
-            self.check_ci_structure(folders_list=[self.config_ci_dir],
-                                    files_list=[self.config_ci_changed_file])
+            self.check_path_setting(self.config_ci_dir)
+            self.check_file_setting(self.config_ci_changed_file)
             model_list = self.get_changed_models(ch_file=self.config_ci_changed_file,
                                                  library=library,
                                                  single_package=package,
@@ -47,12 +45,12 @@ class modelica_model(CI_config):
         elif filter_wh_flag is True:
             if simulate_flag is True:
                 ci_wh_file = self.wh_simulate_file
-                file_list = [self.wh_simulate_file]
+                file_list = self.wh_simulate_file
             else:
                 ci_wh_file = self.wh_model_file
-                file_list = [self.wh_model_file]
-            self.check_ci_structure(folders_list=self.wh_ci_dir,
-                                    files_list=file_list)
+                file_list = self.wh_model_file
+            self.check_path_setting(self.wh_ci_dir)
+            self.check_file_setting(file_list)
             wh_list_models = self.get_wh_models(wh_file=ci_wh_file,
                                                 wh_library=wh_library,
                                                 library=library,
@@ -233,7 +231,7 @@ class modelica_model(CI_config):
             exit(0)
 
     def get_models(self,
-                   path: str,
+                   path: Path,
                    library: str = "AixLib",
                    simulate_flag: bool = False,
                    extended_ex_flag: bool = False):

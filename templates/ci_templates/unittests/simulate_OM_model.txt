@@ -1,9 +1,23 @@
-image: registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:latest
-
 stages:
     - ${ci_stage_OM_simulate}
 
+.OM_simulate_rules:PR:
+       rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+          changes:
+            - ${library}/
+          when: on_success
+        %for branch in except_branch_list:
+        - if: $CI_PIPELINE_SOURCE == "push"  && $CI_COMMIT_BRANCH  =~ /${branch}/
+          when: never
+        %endfor
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+
+
 .OM_CI_simulate_model_job:
+    name: ${OM_Image}
     stage: ${ci_stage_OM_simulate}
     before_script:
         - pip install -r ${dymola_python_dir}/requirements.txt

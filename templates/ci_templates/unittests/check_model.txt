@@ -2,7 +2,22 @@ image: ${image_name}
 stages:
     - ${ci_stage_model_check}
     - ${ci_stage_create_whitelist}
-    
+
+.check_rules:dymola:PR:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+          changes:
+            - ${library}/
+          when: on_success
+        %for branch in main_branch_list:
+        - if: $CI_PIPELINE_SOURCE == "push"  && $CI_COMMIT_BRANCH  =~ /${branch}/
+          when: on_success
+        %endfor
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+
+
 .check_model_job:
     stage: ${ci_stage_model_check}
     before_script:

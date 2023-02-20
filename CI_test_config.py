@@ -7,6 +7,8 @@ import toml
 import inspect
 import re
 import fnmatch
+from pathlib import Path
+
 class CI_config(object):
 
     def __init__(self):
@@ -95,7 +97,7 @@ class CI_config(object):
                 print(f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
         print(f'***------****')
 
-    def check_path_setting(self, *args: str):
+    def check_path_setting(self, *args: Path):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)

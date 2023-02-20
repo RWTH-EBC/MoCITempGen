@@ -25,6 +25,91 @@ class CI_yml_templates(CI_template_config):
         self.gitlab_page = gitlab_page
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
 
+        if self.wh_library is not None:
+            #wh_library = self.wh_library
+            filter_flag = "--filter-wh-flag"
+            wh_flag = "--wh-library " + self.wh_library
+            merge_branch = f'- {self.wh_library}_Merge'
+            if self.wh_path is not None:
+                wh_path = "--wh-path " + self.wh_path
+                git_url = ""
+            elif self.git_url is not None:
+                git_url = "--git-url " + self.git_url
+                wh_path = ""
+            else:
+                wh_path = ""
+                git_url = ""
+        else:
+            wh_library = self.library
+            wh_flag = ""
+            git_url = ""
+            filter_flag = ""
+            wh_path = ""
+            merge_branch = ""
+
+    def _write_multiple_rules(self,
+                              rule_list: list = None,
+                              except_string: str = None,
+                              rule_option: str = "&&",
+                              compare_str: str = "!~",
+                              ci_variable: str = None):
+        if rule_list is not None:
+            if except_string is not None:
+                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list if value != except_string]
+            else:
+                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list]
+            rule_string = ""
+            for rule in rule_list:
+                if rule == rule_list[0]:
+                    rule_string = f'{rule}  '
+                else:
+                    rule_string = f'{rule_string} {rule_option} {rule}'
+            return rule_string
+        else:
+            print("Rule is None")
+            exit(1)
+
+    def _write_OM_check_template(self):
+        my_template = Template(filename=self.temp_ci_OM_check_file)
+        commit_string = self._write_multiple_rules(rule_list=self.except_commit_list,
+                                                   rule_option="&&",
+                                                   compare_str="!~",
+                                                   ci_variable="$CI_COMMIT_MESSAGE")
+        PR_main_branch_rule = self._write_multiple_rules(rule_list=self.main_branch_list,
+                                                         rule_option="||",
+                                                         compare_str="==",
+                                                         ci_variable="$CI_COMMIT_BRANCH")
+
+        yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+                                      commit_string=commit_string,
+                                      library=self.library,
+                                      PR_main_branch_rule=PR_main_branch_rule,
+                                      ci_OM_check_commit=self.ci_OM_check_commit,
+                                      OM_Image=self.OM_Image,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
+                                      OM_python_check_model_file=self.OM_python_check_model_file.replace(os.sep, "/"),
+                                      result_dir=self.result_dir.replace(os.sep, "/"),
+                                      expire_in_time=self.expire_in_time,
+                                      package_list=self.package_list,
+                                      commit_list=[value for value in self.except_commit_list if value != self.ci_OM_check_commit],
+                                      except_branch_list=self.except_branch_list,
+                                      wh_flag=wh_flag,
+
+                                      filter_flag=filter_flag,
+                                      ci_OM_check_commit=self.ci_OM_check_commit,
+                                      except_commit_list=self.except_commit_list,
+
+
+                                      )
+        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
+        self.check_path_setting(ci_folder)
+        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
+        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
+
     def _write_ci_structure_template(self):
         """
 
@@ -335,8 +420,8 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             git_url = ""
         my_template = Template(filename=self.temp_ci_OM_simulate_file)
-        yml_text = my_template.render(image_name=self.image_name,
-            ci_stage_OM_simulate=self.ci_stage_OM_simulate,
+        yml_text = my_template.render(OM_Image=self.OM_Image,
+                                      ci_stage_OM_simulate=self.ci_stage_OM_simulate,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
@@ -364,69 +449,8 @@ class CI_yml_templates(CI_template_config):
         yml_tmp.close()
 
 
-    def _write_OM_check_template(self):
-        if self.wh_library is not None:
-            wh_library = self.wh_library
-            filter_flag = "--filter-whitelist"
-            wh_flag = "--wh-library " + self.wh_library
-            merge_branch = f'- {self.wh_library}_Merge'
-            if self.wh_path is not None:
-                wh_path = "--wh-path " + self.wh_path
-                git_url = ""
-            elif self.git_url is not None:
-                git_url = "--git-url " + self.git_url
-                wh_path = ""
-            else:
-                wh_path = ""
-                git_url = ""
-        else:
-            wh_library = self.library
-            wh_flag = ""
-            git_url = ""
-            filter_flag = ""
-            wh_path = ""
-            merge_branch = ""
-        my_template = Template(filename=self.temp_ci_OM_check_file)
-        commit_string = self._write_multiple_rules(rule_list=self.except_commit_list, except_string=self.ci_OM_check_commit)
 
-        yml_text = my_template.render(OM_Image=self.OM_Image,
-                                      ci_stage_OM_model_check=self.ci_stage_OM_model_check,
-                                      dymola_python_test_url=self.dymola_python_test_url,
-                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
-                                      OM_python_check_model_file=self.OM_python_check_model_file.replace(os.sep, "/"),
-                                      result_dir=self.result_dir.replace(os.sep, "/"),
-                                      expire_in_time=self.expire_in_time,
-                                      package_list=self.package_list,
-                                      commit_list=[value for value in self.except_commit_list if value != self.ci_OM_check_commit],
-                                      except_branch_list=self.except_branch_list,
-                                      wh_flag=wh_flag,
-                                      library=self.library,
-                                      filter_flag=filter_flag,
-                                      ci_OM_check_commit=self.ci_OM_check_commit,
-                                      except_commit_list=self.except_commit_list,
 
-                                      commit_string=commit_string
-                                      )
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
-        self.check_path_setting(ci_folder)
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
-    def _write_multiple_rules(self, rule_list: list = None, except_string: str = None):
-        if rule_list is not None:
-            if except_string is not None:
-                rule_list = [f'$CI_COMMIT_MESSAGE  !~ /{value}/' for value in rule_list if value != except_string]
-            else:
-                rule_list = [f'$CI_COMMIT_MESSAGE  !~ /{value}/' for value in rule_list]
-            rule_string = ""
-            for rule in rule_list:
-                if rule == rule_list[0]:
-                    rule_string = f'{rule}  '
-                else:
-                    rule_string = f'{rule_string} && {rule}'
-            return rule_string
 
 
     def _write_check_template(self):
@@ -451,9 +475,15 @@ class CI_yml_templates(CI_template_config):
             filter_flag = ""
             wh_path = ""
             merge_branch = ""
+        commit_string = self._write_multiple_rules(rule_list=self.except_commit_list,
+                                                   except_string=self.ci_OM_check_commit)
+
+
         my_template = Template(filename=self.temp_ci_check_file)
         yml_text = my_template.render(image_name=self.image_name,
-            ci_stage_model_check=self.ci_stage_model_check,
+                                      ci_stage_model_check=self.ci_stage_model_check,
+                                      main_branch_list=self.main_branch_list,
+                                      commit_string=commit_string,
                                       ci_stage_create_whitelist=self.ci_stage_create_whitelist,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,

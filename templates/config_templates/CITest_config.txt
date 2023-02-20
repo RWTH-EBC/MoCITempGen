@@ -1,0 +1,8 @@
+class CI_config(object):
+
+
+    def __init__(self):
+
+        %for config in config_list:
+        ${config}
+        %endfor

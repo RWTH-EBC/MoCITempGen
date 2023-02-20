@@ -1,14 +1,19 @@
-from Dymola_python_tests.CI_test_config import CI_config
+import sys
+
+sys.path.append('Dymola_python_tests')
+from CI_test_config import CI_config
+import inspect
+import re
+import os
+import shutil
 
 
-
-class data_strucutre(CI_config):
+class data_structure(CI_config):
 
     def __init__(self):
         super().__init__()
 
-
-# *********** Checking structure *******************
+    # *********** Checking structure *******************
     def check_arguments_settings(self, *args):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
@@ -17,11 +22,13 @@ class data_strucutre(CI_config):
         print(f'***--- Argument setting---****')
         for i, (var, val) in enumerate(zip(var_names, args)):
             if val is None:
-                print(f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
+                print(
+                    f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
                 print(f'***------****')
                 exit(1)
             else:
-                print(f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
+                print(
+                    f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
         print(f'***------****')
 
     def check_path_setting(self, *args: str):
@@ -32,9 +39,11 @@ class data_strucutre(CI_config):
         print(f'***--- Check path setting---****')
         for i, (var, path) in enumerate(zip(var_names, args)):
             if os.path.isdir(path) is True:
-                print(f'{self.green}Setting:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
+                print(
+                    f'{self.green}Setting:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
             else:
-                print(f'{self.CRED}Error:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
+                print(
+                    f'{self.CRED}Error:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
                 print(f'***------****')
                 exit(1)
         print(f'***------****')
@@ -47,14 +56,16 @@ class data_strucutre(CI_config):
         print(f'***--- Check file setting---****')
         for i, (var, file) in enumerate(zip(var_names, args)):
             if os.path.isfile(file) is True:
-                print(f'{self.green}Setting:{self.CEND} {self.blue}File "{var}"{self.CEND} is set as: {self.blue}"{file}"{self.CEND} and exists.')
+                print(
+                    f'{self.green}Setting:{self.CEND} {self.blue}File "{var}"{self.CEND} is set as: {self.blue}"{file}"{self.CEND} and exists.')
             else:
-                print(f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"{self.CEND} does not exist.')
+                print(
+                    f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"{self.CEND} does not exist.')
                 print(f'***------****')
                 exit(1)
         print(f'***------****')
 
-    ############# Create Structure ##############
+    #  [Create Structure]
     def create_path(self, path_list: list = None):
         if path_list is not None:
             print(f'\n**** Create folder ****\n')
@@ -68,7 +79,7 @@ class data_strucutre(CI_config):
         Args:
             files_list ():
         """
-        if folder_list is not None:
+        if files_list is not None:
             print(f'\n**** Create file structure ****\n')
             for file in files_list:
                 if os.path.exists(file):
@@ -81,9 +92,7 @@ class data_strucutre(CI_config):
                     write_file.close()
             print(f'\n**********************\n')
 
-
-
-    ############# Remove Structure ##############
+    # [Remove Structure]
     def delete_files_in_path(self, path_list: list = None):
         if path_list is not None:
             print(f'\n**** Delete folder ****\n')
@@ -118,7 +127,6 @@ class data_strucutre(CI_config):
                     else:
                         print(f'File {file} does not exist')
 
-
     def remove_path(self, path_list: list = None):
         if path_list is not None:
             for path in path_list:
@@ -128,7 +136,7 @@ class data_strucutre(CI_config):
                 else:
                     print(f'Path {path} does not exist.')
 
-    ############# Prepare Result ##############
+    # [Prepare Result]
 
     def prepare_data(self,
                      source_target_dict: dict = None,
@@ -153,12 +161,12 @@ class data_strucutre(CI_config):
                     if del_flag is True:
                         self.remove_files([source])
                 if os.path.isdir(source) is True:
-                    print(f'Result Folder {self.blue}{source}{self.CEND} was moved to {self.blue}{target_path}{self.CEND}')
+                    print(
+                        f'Result Folder {self.blue}{source}{self.CEND} was moved to {self.blue}{target_path}{self.CEND}')
                     shutil.copytree(source, target_path)
                     if del_flag is True:
                         self.remove_path([source])
         print(f'{self.blue}**********************{self.CEND}\n')
-
 
     # *******************************
     @staticmethod
