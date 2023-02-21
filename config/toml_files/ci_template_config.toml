@@ -54,7 +54,7 @@ temp_toml_ci_setting_file = 'Setting/CI_setting_template.txt'
 toml_ci_setting_file = 'Setting/CI_setting.toml'
 
 [ci_templates_file]
-temp_ci_dir = 'Dymola_python_tests/templates/ci_templates'
+temp_ci_dir = 'templates/ci_templates'
 temp_ci_regression_file = 'templates/ci_templates/UnitTests/regression_test.txt'
 temp_ci_check_file = 'templates/ci_templates/UnitTests/check_model.txt'
 temp_ci_simulate_file = 'templates/ci_templates/UnitTests/simulate_model.txt'

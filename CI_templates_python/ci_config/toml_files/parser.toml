@@ -11,7 +11,7 @@ create_pr = "False"
 correct_html = "False"
 ibpsa_merge = "False"
 merge_request = "False"
-gitlab_page = "${GITLAB_Page}"
+gitlab_page = "pages"
 
 [api_slack.Parser]
 github_token = "${GITHUB_API_TOKEN}"
@@ -68,9 +68,7 @@ dymola_version = "2022"
 changed_models = "False"
 
 [OM_Check.Parser]
-libraries = "None"
 packages = "None"
-wh_libraries = "IBPSA"
 changed_flag = "False"
 filter_wh_flag = "False"
 extended_ex_flag = "False"
@@ -110,3 +108,10 @@ dym_options = "om_check"
 repo_dir = "None"
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
 dymola_options = "dym_check"
+
+[OM_Check.Parser.libraries]
+AixLib = "..\\AixLib\\package.mo"
+IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"
+
+[OM_Check.Parser.wh_libraries]
+IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"

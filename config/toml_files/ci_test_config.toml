@@ -20,10 +20,10 @@ config_ci_eof_file = 'Configfiles/EOF.sh'
 
 [plot]
 chart_dir = 'dymola-ci-tests/charts'
-temp_chart_dir = 'Dymola_python_tests/templates/google_templates'
-temp_chart_file = 'Dymola_python_tests/templates/google_templates/google_chart.txt'
-temp_index_file = 'Dymola_python_tests/templates/google_templates/index.txt'
-temp_layout_file = 'Dymola_python_tests/templates/google_templates/layout_index.txt'
+temp_chart_dir = 'templates/google_templates'
+temp_chart_file = 'templates/google_templates/google_chart.txt'
+temp_index_file = 'templates/google_templates/index.txt'
+temp_layout_file = 'templates/google_templates/layout_index.txt'
 
 [interact_ci_list]
 ci_interact_dir = 'dymola-ci-tests/interact_CI'

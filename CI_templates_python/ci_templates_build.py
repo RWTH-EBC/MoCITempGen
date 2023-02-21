@@ -4,8 +4,8 @@ import argparse
 import toml
 from ci_templates_python.ci_templates_config import ci_template_config
 from ci_templates_python.ci_templates_structure import templates_structure
-
-from ci_tests.structure.arg_parser import argpaser_toml
+import glob
+#from ci_tests.structure.arg_parser import argpaser_toml
 from ci_tests.structure.config_structure import data_structure
 from pathlib import Path
 import sys
@@ -17,7 +17,7 @@ class CI_temp_struc(object):
         pass
 
     @staticmethod
-    def w_pars_args(py_file: Path = None, repl_parser_arg: dict = None):
+    def write_parser_args(py_file: Path = None, repl_parser_arg: dict = None):
         arg_to = argpaser_toml()
         data = arg_to.load_argparser_toml()
         arg_parser = data[py_file]["Parser"]
@@ -63,28 +63,48 @@ class CI_temp_struc(object):
             print("Rule is None")
             exit(1)
 
-    def overwrite_parser_toml(self, file_parser_dict):
+    def overwrite_ci_parser_toml(self, file_parser_dict):
         #file_parser_dict: {file: {parser_arg1: overwrite1, parser_arg2:overwrite2}}
         to = argpaser_toml()
         for file in file_parser_dict:
             to.overwrite_parser_toml(file=file, parser_dict=file_parser_dict[file])
         print("overwrite sucessful.")
 
+
     def overwrite_arg(self):
-        pass
+        file_dict = {}
+        to = argpaser_toml()
+        parser_data  = to.load_argparser_toml()
+        ci_data = CI_toml_parser().read_ci_template_toml()
+        _dict = {}
+        for file in parser_data:
+            _list = []
+            arg_dict = parser_data[file]["Parser"]
+            for arg in arg_dict:
+                _list.append(arg)
+            _dict[file] = _list
+        for d in ci_data:
+            file = ci_data[d]
+            for cont in file:
+                for arg in cont:
+                    value = cont[arg]
+                    for ci_file in _dict:
+                        for pars in _dict[ci_file]:
+                            if arg == pars:
+                                parser_data[ci_file]["Parser"][arg] = value
+                                pass
+        return parser_data
 
-        #return file_parser_dict: {file: {parser_arg1: overwrite1, parser_arg2:overwrite2}}
 
 
 
-
-class CI_yml_templates(ci_template_config):
+class ci_templates(ci_template_config):
 
     def __init__(self, library, package_list, dymola_version, wh_library, git_url, wh_path, python_version, github_repo,
-                 image_name, gitlab_page):
+                 image_name, gitlab_page, except_commit_list, stage_list):
         super().__init__()
-        self.except_commit_list = templates_structure().create_except_commit_list()
-        self.stage_list = templates_structure()._create_stage_list()
+        self.except_commit_list = except_commit_list
+        self.stage_list = stage_list
         self.library = library
         self.package_list = package_list
         self.dymola_version = dymola_version
@@ -99,7 +119,7 @@ class CI_yml_templates(ci_template_config):
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
         self.rule = CI_temp_struc()
 
-        if self.wh_library is not None:
+        """if self.wh_library is not None:
             filter_flag = "--filter-wh-flag"
             wh_flag = "--wh-library " + self.wh_library
             merge_branch = f'- {self.wh_library}_Merge'
@@ -120,7 +140,7 @@ class CI_yml_templates(ci_template_config):
             wh_path = ""
             merge_branch = ""
 
-
+            """
 
     def write_OM_check_template(self):
         my_template = Template(filename=self.temp_ci_OM_check_file)
@@ -161,7 +181,7 @@ class CI_yml_templates(ci_template_config):
         except Exception as err:
             print(err)
 
-    def _write_ci_structure_template(self):
+    def write_ci_structure_template(self):
         """
 
         """
@@ -173,7 +193,7 @@ class CI_yml_templates(ci_template_config):
                                       bot_create_structure_commit=self.bot_create_structure_commit,
                                       ci_build_structure_commit=self.ci_build_structure_commit,
                                       wh_model_file=self.wh_model_file,
-                                      wh_html_file=self.wh_html_file,
+                                      wh_html_file=  wh_html_file,
                                       wh_ref_file=self.wh_ref_file,
                                       ci_interact_show_ref_file=self.ci_interact_show_ref_file,
                                       ci_interact_update_ref_file=self.ci_interact_update_ref_file,
@@ -196,7 +216,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.close()
     '''
 
-    def _write_page_template(self):
+    def write_page_template(self):
         """
         Write page template, deploy artifacts, plots, reference results
         """
@@ -236,7 +256,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_html_template(self):
+    def write_html_template(self):
         """
          Write HTML template
         """
@@ -248,7 +268,7 @@ class CI_yml_templates(ci_template_config):
             merge_branch = ""
         my_template = Template(filename=self.temp_ci_html_file)
         yml_text = my_template.render(image_name=self.image_name,
-            ci_stage_html_check=self.ci_stage_html_check,
+                                      ci_stage_html_check=self.ci_stage_html_check,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
@@ -280,7 +300,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_style_template(self):
+    def write_style_template(self):
         """
         Write Style Check template
         """
@@ -313,7 +333,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_CI_Whitelist_Setting_template(self):
+    def write_ci_whitelist_setting_template(self):
         """
 
         """
@@ -365,7 +385,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_merge_template(self):
+    def write_merge_template(self):
         """
         Write (IBPSA) Merge template
         """
@@ -397,7 +417,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_regression_template(self):
+    def write_regression_template(self):
         if self.merge_branch is not None:
             merge_branch = f'- {self.wh_library}_Merge'
         else:
@@ -450,7 +470,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.close()
 
 
-    def _write_OM_simulate_template(self):
+    def write_OM_simulate_template(self):
         if self.wh_library is not None:
             filter_flag = "--filter-whitelist"
             wh_flag = "--wh-library " + self.wh_library
@@ -504,7 +524,7 @@ class CI_yml_templates(ci_template_config):
 
 
 
-    def _write_check_template(self):
+    def write_check_template(self):
         if self.wh_library is not None:
             wh_library = self.wh_library
             filter_flag = "--filter-whitelist"
@@ -571,7 +591,7 @@ class CI_yml_templates(ci_template_config):
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
 
-    def _write_simulate_template(self):
+    def write_simulate_template(self):
         if self.wh_library is not None:
             filter_flag = "--filter-whitelist"
             wh_flag = "--wh-library " + self.wh_library
@@ -706,27 +726,20 @@ class CI_yml_templates(ci_template_config):
         print(f'Setting image: {image_name}')
         return image_name
 
-    def get_yml_templates(self):
+    def get_ci_templates(self):
         """
         @return:
         @rtype:
         """
-        ci_template_list = []
-        for subdir, dirs, files in os.walk(self.temp_dir):
-            for file in files:
-                filepath = f'{subdir}{os.sep}{file}'
-                if filepath.endswith(".yml") and file != ".gitlab-ci.yml":
-                    filepath = filepath.replace(os.sep, "/")
-                    ci_template_list.append(filepath)
-        if len(ci_template_list) == 0:
-            print(f'No templates')
-            exit(1)
-        else:
-            for yml_files in ci_template_list:
-                print(f'Setting yml files: {yml_files}')
-            return ci_template_list
+        py_f = glob.glob(f'{self.temp_dir}/**/*.yml', recursive=True)
+        mo_py_files = []
+        for file in py_f:
+            if file.find(".gitlab-ci.yml") == -1:
+                mo_py_files.append(file)
+        return mo_py_files
 
-    def get_stages(self, file_list):
+
+    def get_ci_stages(self, file_list):
         """
 
         @param file_list:
@@ -765,32 +778,6 @@ class CI_yml_templates(ci_template_config):
         for stage in new_list:
             print(f'Setting stages: {stage}')
         return new_list
-
-    def write_ci_templates(self, config_list):
-        """
-        @param config_list:
-        @type config_list:
-        """
-        self._write_setting_template()
-        for temp in config_list:
-            if temp == "check":
-                self._write_check_template()
-                self.write_OM_check_template()
-            if temp == "simulate":
-                self._write_simulate_template()
-                self._write_OM_simulate_template()
-            if temp == "regression":
-                self._write_regression_template()
-            if temp == "html":
-                self._write_html_template()
-            if temp == "style":
-                self._write_style_template()
-            if temp == "Merge" and self.wh_library is not None:
-                self._write_merge_template()
-        self._write_CI_Whitelist_Setting_template()
-        self._write_page_template()
-        self._write_ci_structure_template()
-
 
 class Read_config_data(ci_template_config):
 
@@ -1100,7 +1087,6 @@ class settings_ci_interactive(ci_template_config):
 
     def setting_ci_libraries(self):
         """
-
         @return:
         @rtype:
         """
@@ -1143,7 +1129,7 @@ class settings_ci_interactive(ci_template_config):
                     continue
             lib_pack_dict[lib] = package_lib
         print(f'Setting packages: {lib_pack_dict}')
-        package_dict["Package"] = lib_pack_dict
+        package_dict["package"] = lib_pack_dict
         return package_dict
 
     def setting_ci_dymola_version(self):
@@ -1209,7 +1195,7 @@ class settings_ci_interactive(ci_template_config):
         @rtype:
         """
         github_repo_dict = {}
-        github_repo = input(f'Which github repository in your CI should be used? (e.g {self.github_repo}): ')
+        github_repo = input(f'Which github repository in your CI should be used? (e.g {self.github_repository}): ')
         print(f'Setting github repository: {github_repo}')
         github_repo_dict["github_repository"] = github_repo
         return github_repo_dict
@@ -1256,11 +1242,15 @@ class CI_toml_parser(object):
             print("No toml content.")
 
     def read_ci_template_toml(self):
+        _dict = {}
         data = toml.load(self.ci_template_toml_file)
-        print(f'Toml Load')
-        t = (data["CI_setting"])
-        for l in t:
-            print(l)
+        data = data["CI_setting"]
+        for d in data:
+            for t in d:
+                _dict[t] = d[t]
+        return _dict
+
+
 
 
 
@@ -1271,9 +1261,14 @@ class Parser:
     def main(self):
         parser = argparse.ArgumentParser(description="Set Github Environment Variables")
         check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-        check_test_group.add_argument("--setting",
+        check_test_group.add_argument("--set-setting",
                                       help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
                                       action="store_true")
+        check_test_group.add_argument("--write-templates",
+                                      default=False,
+                                      action="store_true")
+
+
         args = parser.parse_args()
         return args
 
@@ -1284,7 +1279,8 @@ if __name__ == '__main__':
                                        pattern=".yml",
                                        subfolder=True)
     Conf = Read_config_data()
-    if args.setting is False:
+
+    if args.set_setting is True:
         libraries_dict = {}
         struc = templates_structure()
         ci_set = settings_ci_interactive()
@@ -1302,45 +1298,48 @@ if __name__ == '__main__':
         commit_dict = struc.get_variables(pattern="_commit", to_group="ci_commit_message")
         python_file_dict = struc.get_variables(pattern="_commit", to_group="ci_commit_message")
         file_dict = struc.get_files(pattern_1="python", pattern_2="file" , to_group="dymola_python_script")
+        except_commit_list = struc.get_files(pattern_1="ci_", pattern_2="_commit" , to_group="except_commit_list")
+
         toml = CI_toml_parser()
         ci_temp_dict = toml.return_toml_content(file_config_dict, libraries_dict, package_dict, dymola_dict,
                                                 conda_env, wh_library_dict, github_repo, gitlab_page, dymola_image,
-                                                stage_dict, commit_dict, file_dict)
+                                                stage_dict, commit_dict, file_dict, except_commit_list)
         toml.write_ci_template_toml(ci_temp_dict=ci_temp_dict)
 
+    if args.write_templates is True:
+        data_dict = CI_toml_parser().read_ci_template_toml()
+        ci = ci_templates(library=data_dict["libraries"],
+                          package_list=data_dict["package"],
+                          dymola_version=data_dict["dymola_version"],
+                          python_version=data_dict["conda_environment"],
+                          wh_library=data_dict["wh_libraries"],
+                          git_url=data_dict["conda_environment"],
+                          wh_path=data_dict["conda_environment"],
+                          github_repo=data_dict["github_repository"],
+                          gitlab_page=data_dict["gitlab_page"],
+                          image_name=data_dict["dymola_image"],
+                          except_commit_list=data_dict["except_commit_list"],
+                          stage_list=data_dict["stages"])
+        for temp in data_dict["config_stages"]:
+            if temp == "check":
+                ci.write_check_template()
+                ci.write_OM_check_template()
+            if temp == "simulate":
+                ci.write_simulate_template()
+                ci.write_OM_simulate_template()
+            if temp == "regression":
+                ci.write_regression_template()
+            if temp == "html":
+                ci.write_html_template()
+            if temp == "style":
+                ci.write_style_template()
+            if temp == "Merge" and data_dict["wh_libraries"] is not None:
+                ci.write_merge_template()
+        ci.write_ci_whitelist_setting_template()
+        ci.write_page_template()
+        ci.write_ci_structure_template()
+        ci_template_list = ci.get_ci_templates()
+        stage_list = ci.get_ci_stages(file_list=ci_template_list)
+        ci.write_main_yml(stage_list=stage_list,
+                          ci_template_list=ci_template_list)
 
-        #CI_toml_parser().read_ci_template_toml()
-        """
-        CI_Class = CI_yml_templates(library=result[1],
-                                    package_list=result[2],
-                                    dymola_version=result[3],
-                                    python_version=result[4],
-                                    wh_library=result[5][0],
-                                    git_url=result[5][1],
-                                    wh_path=result[5][2],
-                                    github_repo=result[6],
-                                    gitlab_page=result[7],
-                                    image_name=result[8])
-        CI_Class.write_ci_templates(config_list=result[0])
-        ci_template_list = CI_Class.get_yml_templates()
-        stage_list = CI_Class.get_stages(file_list=ci_template_list)
-        CI_Class.write_main_yml(stage_list=stage_list,
-                                ci_template_list=ci_template_list)
-        CI_Class.write_toml_settings(stage_list=stage_list,
-                                     file_list=ci_template_list,
-                                     config_list=result[0])
-    
-    if args.setting is True:
-        result = Conf.call_toml_data()
-        CI_Class = CI_yml_templates(library=result[0],
-                                    package_list=result[1],
-                                    dymola_version=result[2],
-                                    wh_library=result[3],
-                                    git_url=result[4],
-                                    wh_path=result[5],
-                                    python_version=result[6],
-                                    github_repo=result[10],
-                                    image_name=result[11],
-                                    gitlab_page=result[12])
-        CI_Class.write_ci_templates(config_list=result[7])
-        CI_Class.write_main_yml(stage_list=result[8], ci_template_list=result[9])"""

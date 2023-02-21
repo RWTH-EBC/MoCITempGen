@@ -10,51 +10,35 @@ config_stages = [
 
 [[CI_setting]]
 
-[CI_setting.Libraries]
+[CI_setting.libraries]
 AixLib = "..\\AixLib\\package.mo"
-IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"
 
 [[CI_setting]]
 
-[CI_setting.Package]
+[CI_setting.package]
 AixLib = [
     "Airflow",
     "BoundaryConditions",
-    "DataBase",
-    "Systems",
-    "ThermalZones",
-    "Types",
-    "UsersGuide",
-    "Utilities",
-]
-IBPSA = [
-    "BoundaryConditions",
-    "Controls",
-    "Experimental",
-    "Fluid",
-    "Types",
-    "Utilities",
 ]
 
 [[CI_setting]]
 dymola_version = "2022"
 
 [[CI_setting]]
-conda_environment = "myenv"
+conda_environment = "dfg"
 
 [[CI_setting]]
 
 [CI_setting.wh_libraries]
-IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"
 
 [[CI_setting]]
-repository_name = "rwth-ebc/aixlib"
+github_repository = "tert"
 
 [[CI_setting]]
-gitlab_page = "pages"
+gitlab_page = "hgnhng"
 
 [[CI_setting]]
-dymola_image = "image:dymola_2022-miniconda"
+dymola_image = "hgfh"
 
 [[CI_setting]]
 
@@ -127,3 +111,26 @@ dymola_python_html_tidy_file = "SyntaxTests/html_tidy_errors.py"
 dymola_python_syntax_test_file = "SyntaxTests/StyleChecking.py"
 dymola_python_configuration_file = "Dymola_python_tests/CI_test_config.py"
 OM_python_check_model_file = "Dymola_python_tests/CITests/UnitTests/OM_Check.py"
+
+[[CI_setting]]
+
+[CI_setting.except_commit_list]
+ci_update_ref_commit = "ci_update_ref"
+ci_show_ref_commit = "ci_show_ref"
+ci_dif_ref_commit = "ci_dif_ref"
+ci_create_model_wh_commit = "ci_create_model_wh"
+ci_create_html_wh_commit = "ci_create_html_wh"
+ci_create_simulate_wh_commit = "ci_create_example_wh"
+ci_simulate_commit = "ci_simulate"
+ci_OM_simulate_commit = "ci_OM_simulate"
+ci_check_commit = "ci_check"
+ci_OM_check_commit = "ci_OM_check"
+ci_regression_test_commit = "ci_regression_test"
+ci_html_commit = "ci_html"
+ci_setting_commit = "ci_setting"
+ci_style_commit = "ci_style_check"
+ci_trigger_ibpsa_commit = "ci_trigger_ibpsa"
+ci_merge_except_commit = "ci_merge_except"
+ci_correct_html_commit = "ci_correct_html"
+ci_build_structure_commit = "ci_build_structure"
+ci_build_whitelist_structure_commit = "ci_build_whitelist"

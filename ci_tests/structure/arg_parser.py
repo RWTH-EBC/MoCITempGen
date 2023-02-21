@@ -9,6 +9,7 @@ import tomli_w as tomlwriter
 import importlib.util
 import inspect
 import toml
+from  ci_templates_python.ci_templates_build  import CI_toml_parser
 
 class CI_templates_structure(ci_config):
 
@@ -90,14 +91,15 @@ class argpaser_toml(object):
             print("No toml content.")
 
 
-    def overwrite_parser_toml(self, file:str, parser_dict: dict):
-        data = toml.load(self.toml_file)
+    def overwrite_parser_toml(self, parser_data):
+        """data = toml.load(self.toml_file)
         for parser in parser_dict:
             #data[file]["Parser"][parser_arg] = overwrite_arg
-            data[file]["Parser"][parser] = parser_dict[parser]
+            data[file]["Parser"][parser] = parser_dict[parser]"""
         f = open(self.toml_file, 'w')
-        toml.dump(data, f)
+        toml.dump(parser_data, f)
         f.close()
+        print("Overwrite of toml file {self.toml_file} successful")
 
     def read_python_modules(self, module_files):
         modul_dict = {}
@@ -127,11 +129,34 @@ class argpaser_toml(object):
 
 
     def load_argparser_toml(self):
-          try:
-              data = toml.load(self.toml_file)
-              return data
-          except Exception as err:
-              print(err)
+        data = toml.load(self.toml_file)
+        return data
+
+    def overwrite_argparser_toml(self):
+        parser_data  = self.load_argparser_toml()
+        ci_data = CI_toml_parser().read_ci_template_toml()
+        _dict = {}
+        for file in parser_data:
+            _list = []
+            arg_dict = parser_data[file]["Parser"]
+            for arg in arg_dict:
+                _list.append(arg)
+            _dict[file] = _list
+        for d in ci_data:
+            file = ci_data[d]
+            for cont in file:
+                for arg in cont:
+                    value = cont[arg]
+                    for ci_file in _dict:
+                        for pars in _dict[ci_file]:
+                            if arg == pars:
+                                #print(arg)
+                                #print(value)
+                                print(f"Change for {ci_file} in {arg} with value {value}")
+                                parser_data[ci_file]["Parser"][arg] = value
+                                pass
+        return parser_data
+
 
 
 class Pars:
@@ -178,8 +203,8 @@ if __name__ == '__main__':
     if arg.read_parse_toml is True:
         to.load_argparser_toml()
     if arg.overwrite_parse_toml is True:
-
-        to.overwrite_parser_toml(file=arg.python_file, parser_arg=arg.parser_arg, overwrite_arg=arg.over_arg)
+        parser_data = to.overwrite_argparser_toml()
+        to.overwrite_parser_toml(parser_data=parser_data)
 
 
 
