@@ -99,7 +99,7 @@ class argpaser_toml(object):
         f = open(self.toml_file, 'w')
         toml.dump(parser_data, f)
         f.close()
-        print("Overwrite of toml file {self.toml_file} successful")
+        print(f"Overwrite of toml file {self.toml_file} successful")
 
     def read_python_modules(self, module_files):
         modul_dict = {}

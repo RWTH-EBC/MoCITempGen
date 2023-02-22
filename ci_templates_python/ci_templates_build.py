@@ -20,7 +20,7 @@ class CI_temp_struc(object):
 
 
     @staticmethod
-    def write_parser_args(py_file: Path = None, repl_parser_arg: dict = None):
+    def write_parser_args(py_file: str = None, repl_parser_arg: dict = None):
         arg_to = argpaser_toml()
         data = arg_to.load_argparser_toml()
         arg_parser = data[py_file]["Parser"]
@@ -122,67 +122,43 @@ class ci_templates(ci_template_config):
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
         self.rule = CI_temp_struc()
 
-        """if self.wh_library is not None:
-            filter_flag = "--filter-wh-flag"
-            wh_flag = "--wh-library " + self.wh_library
-            merge_branch = f'- {self.wh_library}_Merge'
-            if self.wh_path is not None:
-                wh_path = "--wh-path " + self.wh_path
-                git_url = ""
-            elif self.git_url is not None:
-                git_url = "--git-url " + self.git_url
-                wh_path = ""
-            else:
-                wh_path = ""
-                git_url = ""
-        else:
-            wh_library = self.library
-            wh_flag = ""
-            git_url = ""
-            filter_flag = ""
-            wh_path = ""
-            merge_branch = ""
-
-            """
 
     def write_OM_check_template(self):
-        my_template = Template(filename=self.temp_ci_OM_check_file)
+        ci_temp = Path(self.temp_ci_dir, self.temp_ci_OM_check_file)
+        my_template = Template(filename=str(ci_temp))
         commit_string = self.rule.write_multiple_rules(rule_list=self.except_commit_list,
                                                   rule_option="&&",
                                                   compare_str="!~",
                                                   ci_variable="$CI_COMMIT_MESSAGE")
-        PR_main_branch_rule = self.rule.write_multiple_rules(rule_list=self.main_branch_list,
+        pr_main_branch_rule = self.rule.write_multiple_rules(rule_list=self.main_branch_list,
                                                          rule_option="||",
                                                          compare_str="==",
                                                          ci_variable="$CI_COMMIT_BRANCH")
 
-        try:
-            yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
-                                          commit_string=commit_string,
-                                          library=self.library,
-                                          PR_main_branch_rule=PR_main_branch_rule,
-                                          ci_OM_check_commit=self.ci_OM_check_commit,
-                                          OM_Image=self.OM_Image,
-                                          dymola_python_test_url=self.dymola_python_test_url,
-                                          dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"),
-                                          OM_python_check_model_file=self.OM_python_check_model_file.replace(os.sep, "/"),
-                                          result_dir=self.result_dir.replace(os.sep, "/"),
-                                          expire_in_time=self.expire_in_time,
-                                          package_list=self.package_list,
-                                          commit_list=[value for value in self.except_commit_list if value != self.ci_OM_check_commit],
-                                          except_branch_list=self.except_branch_list,
-                                          wh_flag=wh_flag,
-                                          filter_flag=filter_flag,
-                                          except_commit_list=self.except_commit_list
-                                          )
-            ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-2]}'
-            self.check_path_setting(ci_folder)
-            yml_file = f'{ci_folder}{os.sep}{self.temp_ci_OM_check_file.split(os.sep)[-1]}'
-            yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-            yml_tmp.write(yml_text.replace('\n', ''))
-            yml_tmp.close()
-        except Exception as err:
-            print(err)
+        _dict = {"libraries": "AixLib", "packages": "$lib_package"}
+        arg_PR = self.rule.write_parser_args(py_file=Path(self.OM_python_check_model_file).name.replace(".py", ""),
+                                             repl_parser_arg=_dict)
+        print(self.library.values())
+        print(arg_PR)
+        yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+                                      commit_string=commit_string,
+                                      library=self.library,
+                                      PR_main_branch_rule=pr_main_branch_rule,
+                                      ci_OM_check_commit=self.ci_OM_check_commit,
+                                      OM_Image=self.OM_Image,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      OM_python_check_model_file=self.OM_python_check_model_file,
+                                      result_dir=self.result_dir,
+                                      expire_in_time=self.expire_in_time,
+                                      arg_PR=arg_PR,
+                                      arg_push="2",
+                                      packages=self.package_list,
+                                      dymola_python_dir=self.dymola_python_dir)
+        ci_folder = Path(self.temp_dir, self.temp_ci_OM_check_file).parent
+        data_structure().create_path(ci_folder)
+        yml_tmp = open(Path(ci_folder, Path(self.temp_ci_OM_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
 
     def write_ci_structure_template(self):
         """
@@ -1316,8 +1292,8 @@ if __name__ == '__main__':
         stage_dict = struc.get_variables(pattern="_stage_", to_group="stages")
         commit_dict = struc.get_variables(pattern="_commit", to_group="ci_commit_message")
         python_file_dict = struc.get_variables(pattern="_commit", to_group="ci_commit_message")
-        file_dict = struc.get_files(pattern_1="python", pattern_2="file" , to_group="dymola_python_script")
-        except_commit_list = struc.get_files(pattern_1="ci_", pattern_2="_commit" , to_group="except_commit_list")
+        file_dict = struc.get_toml_var(pattern_1="python", pattern_2="file", to_group="dymola_python_script")
+        except_commit_list = struc.get_toml_var(pattern_1="ci_", pattern_2="_commit", to_group="except_commit_list")
 
         to_parser = CI_toml_parser()
         ci_temp_dict = to_parser.return_toml_content(file_config_dict, libraries_dict, package_dict, dymola_dict,
@@ -1327,7 +1303,7 @@ if __name__ == '__main__':
     to_parser = CI_toml_parser()
     to_parser.overwrite_arg_parser_toml()
 
-    """if args.write_templates is True:
+    if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
         ci = ci_templates(library=data_dict["libraries"],
                           package_list=data_dict["package"],
@@ -1346,7 +1322,7 @@ if __name__ == '__main__':
                 #ci.write_check_template()
                 ci.write_OM_check_template() 
             
-            if temp == "simulate":
+            """if temp == "simulate":
                 ci.write_simulate_template()
                 ci.write_OM_simulate_template()
             if temp == "regression":

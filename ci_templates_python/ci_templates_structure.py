@@ -15,7 +15,7 @@ class templates_structure(ci_template_config):
         return except_commit_list
 
 
-    def get_files(self, pattern_1: str, pattern_2: str, to_group: str):
+    def get_toml_var(self, pattern_1: str, pattern_2: str, to_group: str):
         _list = {}
         var_dict = vars(ci_template_config())
         _dict = {}

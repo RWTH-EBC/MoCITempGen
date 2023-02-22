@@ -10,7 +10,10 @@
 # ${result_dir}
 # ${expire_in_time}
 # ${arg_PR}
-$ {arg_push}
+# ${arg_push}
+# ${packages}
+# ${dymola_python_dir}
+
 
 stages:
     - ${ci_stage_OM_model_check}
@@ -74,15 +77,18 @@ stages:
     rules:
         - !reference [.OM_check_rules:push, rules]
 
-%for package in package_list:
+
+
+%for package in packages:
+%for library in libraries:
 OM_Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
     extends: .OM_check_model_job:PR
 %endfor
+%endfor
 
-
-%for package in package_list:
+%for package in packages:
 OM_Check_${library}_${package}:push:
     variables:
         lib_package: ${package}

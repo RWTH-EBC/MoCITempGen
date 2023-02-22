@@ -4,7 +4,7 @@ import re
 import os
 import shutil
 import glob
-
+from pathlib import Path
 class data_structure(ci_config):
 
     def __init__(self):
@@ -63,13 +63,12 @@ class data_structure(ci_config):
         print(f'***------****')
 
     #  [Create Structure]
-    def create_path(self, path_list: list = None):
-        if path_list is not None:
-            print(f'\n**** Create folder ****\n')
-            for path in path_list:
-                print(f'{self.green}Create Folder:{self.CEND} {path}')
-                os.makedirs(path, exist_ok=True)
-            print(f'\n**** ----------- ****\n')
+    def create_path(self, *args: Path):
+        print(f'\n**** Create folder ****\n')
+        for arg in args:
+            print(f'{self.green}Create Folder:{self.CEND} {arg}')
+            os.makedirs(arg, exist_ok=True)
+        print(f'\n**** ----------- ****\n')
 
     def create_files(self, files_list: list = None):
         """
