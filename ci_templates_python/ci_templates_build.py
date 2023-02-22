@@ -5,7 +5,7 @@ import toml
 from ci_templates_python.ci_templates_config import ci_template_config
 from ci_templates_python.ci_templates_structure import templates_structure
 import glob
-#from ci_tests.structure.arg_parser import argpaser_toml
+from ci_tests.structure.arg_parser import argpaser_toml
 from ci_tests.structure.config_structure import data_structure
 from pathlib import Path
 import sys
@@ -15,6 +15,9 @@ class CI_temp_struc(object):
 
     def __init__(self):
         pass
+
+
+
 
     @staticmethod
     def write_parser_args(py_file: Path = None, repl_parser_arg: dict = None):
@@ -1250,6 +1253,22 @@ class CI_toml_parser(object):
                 _dict[t] = d[t]
         return _dict
 
+    def overwrite_arg_parser_toml(self):
+        parser_data = argpaser_toml().load_argparser_toml()
+        ci_data = self.read_ci_template_toml()
+        for ci_group in ci_data:
+            for file in parser_data:
+                parser_arguments = parser_data[file]["Parser"]
+                for arg_group in parser_arguments:
+                    if ci_group == arg_group:
+                        value = ci_data[ci_group]
+                        print(f"Change for parser arguments in file {file} in group {ci_group} with value {value}")
+                        parser_data[file]["Parser"][ci_group] = value
+        argpaser_toml().overwrite_parser_toml(parser_data=parser_data)
+
+
+
+
 
 
 
@@ -1300,13 +1319,15 @@ if __name__ == '__main__':
         file_dict = struc.get_files(pattern_1="python", pattern_2="file" , to_group="dymola_python_script")
         except_commit_list = struc.get_files(pattern_1="ci_", pattern_2="_commit" , to_group="except_commit_list")
 
-        toml = CI_toml_parser()
-        ci_temp_dict = toml.return_toml_content(file_config_dict, libraries_dict, package_dict, dymola_dict,
+        to_parser = CI_toml_parser()
+        ci_temp_dict = to_parser.return_toml_content(file_config_dict, libraries_dict, package_dict, dymola_dict,
                                                 conda_env, wh_library_dict, github_repo, gitlab_page, dymola_image,
                                                 stage_dict, commit_dict, file_dict, except_commit_list)
-        toml.write_ci_template_toml(ci_temp_dict=ci_temp_dict)
+        to_parser.write_ci_template_toml(ci_temp_dict=ci_temp_dict)
+    to_parser = CI_toml_parser()
+    to_parser.overwrite_arg_parser_toml()
 
-    if args.write_templates is True:
+    """if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
         ci = ci_templates(library=data_dict["libraries"],
                           package_list=data_dict["package"],
@@ -1322,8 +1343,9 @@ if __name__ == '__main__':
                           stage_list=data_dict["stages"])
         for temp in data_dict["config_stages"]:
             if temp == "check":
-                ci.write_check_template()
-                ci.write_OM_check_template()
+                #ci.write_check_template()
+                ci.write_OM_check_template() 
+            
             if temp == "simulate":
                 ci.write_simulate_template()
                 ci.write_OM_simulate_template()
@@ -1341,5 +1363,5 @@ if __name__ == '__main__':
         ci_template_list = ci.get_ci_templates()
         stage_list = ci.get_ci_stages(file_list=ci_template_list)
         ci.write_main_yml(stage_list=stage_list,
-                          ci_template_list=ci_template_list)
+                          ci_template_list=ci_template_list)"""
 

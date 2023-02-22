@@ -9,7 +9,7 @@ import tomli_w as tomlwriter
 import importlib.util
 import inspect
 import toml
-from  ci_templates_python.ci_templates_build  import CI_toml_parser
+
 
 class CI_templates_structure(ci_config):
 
@@ -132,30 +132,7 @@ class argpaser_toml(object):
         data = toml.load(self.toml_file)
         return data
 
-    def overwrite_argparser_toml(self):
-        parser_data  = self.load_argparser_toml()
-        ci_data = CI_toml_parser().read_ci_template_toml()
-        _dict = {}
-        for file in parser_data:
-            _list = []
-            arg_dict = parser_data[file]["Parser"]
-            for arg in arg_dict:
-                _list.append(arg)
-            _dict[file] = _list
-        for d in ci_data:
-            file = ci_data[d]
-            for cont in file:
-                for arg in cont:
-                    value = cont[arg]
-                    for ci_file in _dict:
-                        for pars in _dict[ci_file]:
-                            if arg == pars:
-                                #print(arg)
-                                #print(value)
-                                print(f"Change for {ci_file} in {arg} with value {value}")
-                                parser_data[ci_file]["Parser"][arg] = value
-                                pass
-        return parser_data
+
 
 
 

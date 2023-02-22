@@ -1,6 +1,6 @@
 [api_github.Parser]
 correct_branch = "${Newbranch}"
-github_repository = "RWTH-EBC/AixLib"
+github_repository = "tert"
 working_branch = "${TARGET_BRANCH}"
 base_branch = "main"
 github_token = "${GITHUB_API_TOKEN}"
@@ -11,13 +11,13 @@ create_pr = "False"
 correct_html = "False"
 ibpsa_merge = "False"
 merge_request = "False"
-gitlab_page = "pages"
+gitlab_page = "hgnhng"
 
 [api_slack.Parser]
 github_token = "${GITHUB_API_TOKEN}"
 base_branch = "development"
 slack_token = "${secrets.SLACK_BOT_TOKEN}"
-github_repository = "RWTH-EBC/AixLib"
+github_repository = "tert"
 
 [structure_check.Parser]
 config_dir = "False"
@@ -111,7 +111,6 @@ dymola_options = "dym_check"
 
 [OM_Check.Parser.libraries]
 AixLib = "..\\AixLib\\package.mo"
-IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"
+IBPSA = "..\\IBPSA\\package.mo"
 
 [OM_Check.Parser.wh_libraries]
-IBPSA = "..\\modelica-ibpsa\\IBPSA\\package.mo"

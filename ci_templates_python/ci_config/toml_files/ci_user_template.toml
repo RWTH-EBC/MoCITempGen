@@ -12,6 +12,7 @@ config_stages = [
 
 [CI_setting.libraries]
 AixLib = "..\\AixLib\\package.mo"
+IBPSA = "..\\IBPSA\\package.mo"
 
 [[CI_setting]]
 

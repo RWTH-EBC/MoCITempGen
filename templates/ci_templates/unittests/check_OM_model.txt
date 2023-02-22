@@ -1,3 +1,17 @@
+# Variables:
+# ${ci_stage_OM_model_check},
+# ${commit_string},
+# ${library},
+# (${PR_main_branch_rule})
+# ${ci_OM_check_commit}
+# ${OM_Image}
+# ${dymola_python_test_url}
+# ${OM_python_check_model_file}
+# ${result_dir}
+# ${expire_in_time}
+# ${arg_PR}
+$ {arg_push}
+
 stages:
     - ${ci_stage_OM_model_check}
 
@@ -35,7 +49,7 @@ stages:
         - cd /builds/EBC/EBC_all/github_ci/AixLib
 
     script:
-        - python3 ${OM_python_check_model_file}  --package $lib_package --library ${library} ${wh_flag} ${filter_flag} --om-option OM_CHECK
+        - python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -51,7 +65,7 @@ stages:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python3 ${OM_python_check_model_file}  --changed-flag --package $lib_package --library ${library} ${wh_flag} ${filter_flag} --om-option OM_CHECK
+        - python3 ${OM_python_check_model_file}  ${arg_push}
     artifacts:
         when: on_failure
         paths:
