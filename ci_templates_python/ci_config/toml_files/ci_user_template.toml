@@ -39,7 +39,10 @@ IBPSA = [
     { git_url = "fdgfdsg" },
     { repo_dir = "modelica-ibpsa" },
 ]
-
+AixLib = [
+    { git_url = "test" },
+    { repo_dir = "AixLib-ibpsa" },
+]
 
 [[CI_setting]]
 filter_wh_flag = true

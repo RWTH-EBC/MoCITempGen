@@ -114,6 +114,12 @@ git_url = "fdgfdsg"
 [[html_tidy_errors.Parser.wh_library.IBPSA]]
 repo_dir = "modelica-ibpsa"
 
+[[html_tidy_errors.Parser.wh_library.AixLib]]
+git_url = "test"
+
+[[html_tidy_errors.Parser.wh_library.AixLib]]
+repo_dir = "AixLib-ibpsa"
+
 [OM_Check.Parser.root_library]
 AixLib = "..\\AixLib\\AixLib\\package.mo"
 
@@ -124,6 +130,12 @@ git_url = "fdgfdsg"
 [[OM_Check.Parser.wh_library.IBPSA]]
 repo_dir = "modelica-ibpsa"
 
+[[OM_Check.Parser.wh_library.AixLib]]
+git_url = "test"
+
+[[OM_Check.Parser.wh_library.AixLib]]
+repo_dir = "AixLib-ibpsa"
+
 [validatetest.Parser.root_library]
 AixLib = "..\\AixLib\\AixLib\\package.mo"
 
@@ -133,4 +145,10 @@ git_url = "fdgfdsg"
 
 [[validatetest.Parser.wh_library.IBPSA]]
 repo_dir = "modelica-ibpsa"
+
+[[validatetest.Parser.wh_library.AixLib]]
+git_url = "test"
+
+[[validatetest.Parser.wh_library.AixLib]]
+repo_dir = "AixLib-ibpsa"
 

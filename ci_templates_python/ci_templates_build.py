@@ -28,11 +28,30 @@ class CI_temp_struc(object):
             value_str = f'{value_str} {_dict[value]} '
         return value_str
 
-
-
+    def rekursive_type(self, arg):
+        """if isinstance(arg, arg.values()):
+            print(arg)
+        """
+        if isinstance(arg, dict):
+            for a in arg:
+                if isinstance(arg[a], dict):
+                    pass
+                if isinstance(arg[a], list):
+                    #print(arg[a])
+                    pass
+            return self.rekursive_type(arg.values())
+        if isinstance(arg, list):
+            pass
+            #print(arg)
+        else:
+            pass
+            #print("test\n")
+            #print((arg))
+            #print(type(arg))
     def write_parser_args(self, py_file: str = None, repl_parser_arg: dict = None, out:list = None):
         arg_to = argpaser_toml()
         data = arg_to.load_argparser_toml()
+        ci_data = CI_toml_parser().read_ci_template_toml()
         arg_parser = data[py_file]["Parser"]
         parser_str = ""
         for var in arg_parser:
@@ -42,51 +61,56 @@ class CI_temp_struc(object):
                     if o == var:
                         out_flag = True
                         break
-            if out_flag is False:
-                rep_flag = True
-                if repl_parser_arg is not None:
-                    while rep_flag is True:
-                        for rep in repl_parser_arg:
-                            print(var)
-                            print(type(var))
-                            if rep == var:
-                                if isinstance(repl_parser_arg[rep], dict):
+            for ci in ci_data:
+                if isinstance(ci_data[ci], dict):
+                    self.rekursive_type(ci_data[ci])
+                """if isinstance(ci_data[ci], dict):
+                    if isinstance(ci_data.keys(), dict):
+                 """
+                if out_flag is False:
+                    rep_flag = True
+                    if repl_parser_arg is not None:
+                        while rep_flag is True:
+                            for rep in repl_parser_arg:
+                                if rep == var:
+                                    if isinstance(repl_parser_arg[rep], dict):
+                                        value_str = self._arg_dict(arg_parser[var])
+                                        arg = f'--{var.replace("_", "-")} {value_str} '
+                                    elif isinstance(repl_parser_arg[rep], list):
+                                        value_str = self._arg_list(repl_parser_arg[rep])
+                                        arg = f'--{var.replace("_", "-")} {value_str} '
+                                    else:
+                                        arg = f'--{var.replace("_", "-")} {repl_parser_arg[rep]} '
+                                    parser_str = arg + parser_str
+                                    rep_flag = False
+                                    break
+                            if rep_flag is True:
+                                if ci == var:
+                                    pass
+                                    #print(ci_data[ci])
+                                    #print(ci)
+                                if arg_parser[var] is None or arg_parser[var] == "None":
+                                    break
+                                elif isinstance(arg_parser[var], dict):
                                     value_str = self._arg_dict(arg_parser[var])
                                     arg = f'--{var.replace("_", "-")} {value_str} '
-                                elif isinstance(repl_parser_arg[rep], list):
-                                    value_str = self._arg_list(repl_parser_arg[rep])
+                                elif isinstance(arg_parser[var], list):
+                                    value_str = self._arg_list(arg_parser[var])
                                     arg = f'--{var.replace("_", "-")} {value_str} '
                                 else:
-                                    arg = f'--{var.replace("_", "-")} {repl_parser_arg[rep]} '
+                                    arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
                                 parser_str = arg + parser_str
                                 rep_flag = False
-                                break
-                        if rep_flag is True:
-                            if arg_parser[var] is None or arg_parser[var] == "None":
-                                break
-                            elif isinstance(arg_parser[var], dict):
-                                #print(arg_parser[var])
-                                #print(var)
-                                value_str = self._arg_dict(arg_parser[var])
-                                arg = f'--{var.replace("_", "-")} {value_str} '
-                            elif isinstance(arg_parser[var], list):
-                                value_str = self._arg_list(arg_parser[var])
-                                arg = f'--{var.replace("_", "-")} {value_str} '
-                            else:
-                                arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
-                            parser_str = arg + parser_str
-                            rep_flag = False
-
-                else:
-                    if arg_parser[var] is None or arg_parser[var] == "None":
-                        continue
-                    if isinstance(arg_parser[var], list):
-                        value_str = self._arg_list(arg_parser[var])
-                        arg = f'--{var.replace("_", "-")} {value_str} '
 
                     else:
-                        arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
-                    parser_str = arg + parser_str
+                        if arg_parser[var] is None or arg_parser[var] == "None":
+                            continue
+                        if isinstance(arg_parser[var], list):
+                            value_str = self._arg_list(arg_parser[var])
+                            arg = f'--{var.replace("_", "-")} {value_str} '
+                        else:
+                            arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
+                        parser_str = arg + parser_str
         return parser_str
 
     @staticmethod
@@ -1332,7 +1356,6 @@ class CI_toml_parser(object):
                                     for li in ci_data[ci_group][data]:
                                         print(li)
                                         #print(ci_data[ci_group][data])"""
-
                         value = ci_data[ci_group]
                         print(f"Change for parser arguments in file {file} in group {ci_group} with value {value}")
                         parser_data[file]["Parser"][ci_group] = value
@@ -1403,8 +1426,6 @@ if __name__ == '__main__':
 
     if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
-        print(data_dict["wh_library"].keys())
-        #print(data_dict["wh_library"].values().keys())
 
         print(data_dict["library"])
         ci = ci_templates(library=data_dict["library"],
@@ -1422,7 +1443,7 @@ if __name__ == '__main__':
         for temp in data_dict["config_stages"]:
             if temp == "check":
                 ci.write_check_template()
-                ci.write_OM_check_template()
+                #ci.write_OM_check_template()
                 pass
             """if temp == "simulate":
                 ci.write_simulate_template()
