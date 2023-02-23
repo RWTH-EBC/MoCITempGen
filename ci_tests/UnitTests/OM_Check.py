@@ -444,8 +444,8 @@ class Parser:
                                       metavar="Library1=Path_Lib1 Library2=Path_Lib2")
         check_test_group.add_argument("--package", dest="packages", action=StoreDictKeyPair_list, nargs="*",
                                       metavar="Library1=Package1,Package2 Library2=Package3,Package4")"""
-        check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g." )
-        check_test_group.add_argument("--packages", default="[Airflow]", nargs="+", help="Library to test (e.g. Airflow.Multizone)")
+        check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
+        check_test_group.add_argument("--packages", default=["Airflow"], nargs="+", help="Library to test (e.g. Airflow.Multizone)")
         check_test_group.add_argument("--root-library", default=Path(Path.cwd().parent, "AixLib", "package.mo"), help="root of library",
                                       type=Path)
         check_test_group.add_argument("--wh-library",
@@ -521,8 +521,6 @@ if __name__ == '__main__':
                                              error_dict=error_model_dict,
                                              exception_list=except_list,
                                              options="check")
-
-                #exit(exit_var)
             if options == "OM_SIM":
                 model_list = model.get_option_model(library=args.library,
                                                     package=package,

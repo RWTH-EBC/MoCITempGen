@@ -70,23 +70,22 @@ class data_structure(ci_config):
             os.makedirs(arg, exist_ok=True)
         print(f'\n**** ----------- ****\n')
 
-    def create_files(self, files_list: list = None):
+    def create_files(self, *args: Path):
         """
         Args:
             files_list ():
         """
-        if files_list is not None:
-            print(f'\n**** Create file structure ****\n')
-            for file in files_list:
-                if os.path.exists(file):
-                    print(f'{file} does exist.')
-                else:
-                    print(f'File {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
-                    write_file = open(file, "w+")
-                    if file is self.config_ci_eof_file:
-                        write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
-                    write_file.close()
-            print(f'\n**********************\n')
+        print(f'\n**** Create file structure ****\n')
+        for file in args:
+            if os.path.exists(file):
+                print(f'{file} does exist.')
+            else:
+                print(f'File {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
+                write_file = open(file, "w+")
+                if file is self.config_ci_eof_file:
+                    write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
+                write_file.close()
+        print(f'\n**********************\n')
 
     # [Remove Structure]
     def delete_files_in_path(self, *args: Path):

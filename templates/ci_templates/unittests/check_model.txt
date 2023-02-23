@@ -63,7 +63,7 @@ stages:
     rules:
         - !reference [.check_rules:PR , rules]
 
-.check_model_job:push:
+.check_model_job:Push:
     image: ${dym_image_name}
     stage: ${ci_stage_model_check}
     before_script:
