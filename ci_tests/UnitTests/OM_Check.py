@@ -8,6 +8,7 @@ from ci_tests.structure.sort_mo_model import modelica_model
 from ci_tests.structure.toml_to_py import Convert_types
 from ci_tests.structure.arg_parser import StoreDictKeyPair, StoreDictKeyPair_list, StoreDictKey
 from pathlib import Path
+from ci_tests.structure.config_structure import data_structure
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
@@ -19,31 +20,25 @@ import os
 class Check_OpenModelica(ci_config):
 
     def __init__(self,
-                 lib_name: str = None,
-                 working_path: Path = Path.home(),
+                 library: str,
+                 root_library: Path,
                  add_libraries_loc: dict = None,
-                 inst_libraries: list = None):
+                 inst_libraries: list = None,
+                 working_path: Path = Path(Path.cwd().parent)):
         """
         Args:
             add_libraries_loc ():
             inst_libraries ():
-            lib_name ():
-            working_path ():
+            library ():
+            root_library ():
         """
         super().__init__()
-        self.check_arguments_settings(lib_name)
-        root_library = Path(working_path, lib_name, "package.mo")
-        self.check_file_setting(root_library)
         self.root_library = root_library
-        if add_libraries_loc is not None:
-            for lib in add_libraries_loc:
-                add_lib_path = Path(add_libraries_loc[lib], lib, "package.mo")
-                self.check_file_setting(add_lib_path)
         self.add_libraries_loc = add_libraries_loc
         self.install_libraries = inst_libraries
-
-        self.library = lib_name
         self.working_path = working_path
+
+        self.library = library
         # [start openModelica]
         self.omc = OMCSessionZMQ()
         print(f'{self.green}OpenModelica Version number:{self.CEND} {self.omc.sendExpression("getVersion()")}')
@@ -51,7 +46,9 @@ class Check_OpenModelica(ci_config):
         self.dym_api = None
 
     def __call__(self):
-        self.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
+        self.load_library(root_library=self.root_library,
+                          library=self.library,
+                          add_libraries_loc=self.add_libraries_loc)
         self.install_library(libraries=self.install_libraries)
 
     def simulate_examples(self, example_list: list = None, exception_list: list = None):
@@ -63,10 +60,10 @@ class Check_OpenModelica(ci_config):
         Returns:
         """
 
-        all_sims_dir = Path(self.working_path, self.result_OM_check_result_dir, f'{self.library}.{package}')
+        all_sims_dir = Path(self.working_path, self.result_OM_check_result_dir, "simulate", f'{self.library}.{package}')
         API_log = Path(self.working_path, "DymolaAPI.log")
-        self.create_path([all_sims_dir])
-        self.delete_files_in_path([all_sims_dir])
+        data_structure().create_path(all_sims_dir)
+        data_structure().delete_files_in_path(all_sims_dir)
         if example_list is not None:
             print(f'{self.green}Simulate examples and validations{self.CEND}')
             error_model = {}
@@ -76,7 +73,7 @@ class Check_OpenModelica(ci_config):
                 result = self.omc.sendExpression(f"simulate({example})")
                 if "The simulation finished successfully" in result["messages"]:
                     print(f'\n {self.green}Successful:{self.CEND} {example}\n')
-                    self.prepare_data(source_target_dict={result["resultFile"]: all_sims_dir})
+                    data_structure().prepare_data(source_target_dict={result["resultFile"]: all_sims_dir})
                 else:
                     _err_msg = result["messages"]
                     _err_msg += "\n" + self.omc.sendExpression("getErrorString()")
@@ -99,9 +96,8 @@ class Check_OpenModelica(ci_config):
                         print(f'{self.yellow}  Warning:   {self.CEND}  {example}')
                         print(f'{_err_msg}')
                     error_model[example] = _err_msg
-                self.delete_spec_file(root=os.getcwd(), pattern=example)
-            self.omc.sendExpression("quit()")
-            self.prepare_data(source_target_dict={
+                data_structure().delete_spec_file(root=os.getcwd(), pattern=example)
+            data_structure().prepare_data(source_target_dict={
                 API_log: Path(self.result_OM_check_result_dir, f'{self.library}.{package}')},
                 del_flag=True)
             return error_model
@@ -148,16 +144,19 @@ class Check_OpenModelica(ci_config):
                         print(f'{self.yellow}  Warning:   {self.CEND}  {m}')
                         print(f'{_err_msg}')
                     error_model[m] = _err_msg
-            self.omc.sendExpression("quit()")
             return error_model
         else:
             print(f'No models to check')
             exit(0)
 
+    def close_OM(self):
+        self.omc.sendExpression("quit()")
+
     def write_errorlog(self,
                        pack: str = None,
                        error_dict: dict = None,
-                       exception_list: list = None):
+                       exception_list: list = None,
+                       options: str = None):
         """
         Write an error log with all models, that don´t pass the check
         Args:
@@ -167,9 +166,9 @@ class Check_OpenModelica(ci_config):
         """
         if error_dict is not None:
             if pack is not None:
-                ch_log = Path(self.working_path, self.result_OM_check_result_dir,
+                ch_log = Path(self.working_path, self.result_OM_check_result_dir, options,
                               f'{self.library}.{pack}-check_log.txt')
-                error_log = Path(self.working_path, self.result_OM_check_result_dir,
+                error_log = Path(self.working_path, self.result_OM_check_result_dir, options,
                                  f'{self.library}.{pack}-error_log.txt')
                 os.makedirs(Path(ch_log).parent, exist_ok=True)
                 check_log = open(ch_log, "w")
@@ -210,7 +209,10 @@ class Check_OpenModelica(ci_config):
                                 check_log.write(warning + "\n")
                 check_log.close()
                 err_log.close()
-                var = self._read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
+                var = self._read_error_log(pack=pack, err_log=error_log, check_log=ch_log,
+                                           options=options)
+                if var != 0:
+                    exit(var)
                 return var
             else:
                 print(f'Package is not set.')
@@ -219,7 +221,7 @@ class Check_OpenModelica(ci_config):
             print(f"{self.green}Check was successful.{self.CEND}")
             exit(0)
 
-    def _read_error_log(self, pack: str, err_log, check_log):
+    def _read_error_log(self, pack: str, err_log, check_log, options: str = None):
         error_log = open(err_log, "r")
         lines = error_log.readlines()
         error_log_list = []
@@ -229,15 +231,15 @@ class Check_OpenModelica(ci_config):
                 line = line.strip("\n")
                 print(f'{self.CRED}{line}{self.CEND}')
         if len(error_log_list) > 0:
-            print(f'{self.CRED}Open Modelica check failed{self.CEND}')
+            print(f'{self.CRED}Open Modelica for package {pack}check failed{self.CEND}')
             var = 1
         else:
             print(f'{self.green}Open Modelica check was successful{self.CEND}')
             var = 0
         error_log.close()
-        self.prepare_data(source_target_dict={
-            check_log: Path(self.result_OM_check_result_dir, f'{self.library}.{pack}'),
-            err_log: Path(self.result_OM_check_result_dir, f'{self.library}.{pack}')},
+        data_structure().prepare_data(source_target_dict={
+            check_log: Path(self.working_path, self.result_OM_check_result_dir, options, f'{self.library}.{pack}'),
+            err_log: Path(self.working_path, self.result_OM_check_result_dir, options,  f'{self.library}.{pack}')},
             del_flag=True)
         return var
 
@@ -262,7 +264,7 @@ class Check_OpenModelica(ci_config):
                     exit(1)
         print(self.omc.sendExpression("getErrorString()"))
 
-    def load_library(self, root_library: Path = None, add_libraries_loc: dict = None):
+    def load_library(self, root_library: Path = None, library:str = None, add_libraries_loc: dict = None):
         if root_library is not None:
             load_bib = self.omc.sendExpression(f'loadFile("{root_library}")')
             if load_bib is True:
@@ -285,10 +287,10 @@ class Check_OpenModelica(ci_config):
         print(self.omc.sendExpression("getErrorString()"))
 
     def sim_with_dymola(self, pack: str = None, example_list: list = None):
-        all_sims_dir = Path(self.working_path, self.result_OM_check_result_dir, f'{self.library}.{pack}')
+        all_sims_dir = Path(self.root_library, self.result_OM_check_result_dir, f'{self.library}.{pack}')
         if example_list is not None:
             if self.dym_api is None:
-                lib_path = Path(self.working_path, self.library, "package.mo")
+                lib_path = Path(self.root_library, self.library, "package.mo")
                 self.dym_api = DymolaAPI(
                     cd=os.getcwd(),
                     model_name=example_list[0],
@@ -309,7 +311,7 @@ class Check_OpenModelica(ci_config):
                 print(f'\n {self.green}Successful:{self.CEND} {example}\n')
                 self.prepare_data(source_target_dict={result: Path(all_sims_dir, "dym")})
             self.dym_api.close()
-            API_log = Path(self.working_path, "DymolaAPI.log")
+            API_log = Path(self.root_library, "DymolaAPI.log")
             self.prepare_data(source_target_dict={
                 API_log: Path(self.result_OM_check_result_dir, f'{self.library}.{pack}')},
                 del_flag=True)
@@ -337,7 +339,7 @@ class Check_OpenModelica(ci_config):
                     }
                 }
             errors = {}
-            all_sims_dir = Path(self.working_path, self.result_OM_check_result_dir, f'{self.library}.{pack}')
+            all_sims_dir = Path(self.root_library, self.result_OM_check_result_dir, f'{self.library}.{pack}')
             om_dir = all_sims_dir
             dym_dir = Path(all_sims_dir, "dym")
             plot_dir = Path(all_sims_dir, "plots", pack)
@@ -438,11 +440,15 @@ class Parser:
         parser = argparse.ArgumentParser(description="Check and validate single packages")
         check_test_group = parser.add_argument_group("Arguments to run check tests")
         # [Library - settings]
-        check_test_group.add_argument("--library", dest="libraries", action=StoreDictKeyPair, nargs="*",
+        """check_test_group.add_argument("--library", dest="libraries", action=StoreDictKeyPair, nargs="*",
                                       metavar="Library1=Path_Lib1 Library2=Path_Lib2")
         check_test_group.add_argument("--package", dest="packages", action=StoreDictKeyPair_list, nargs="*",
-                                      metavar="Library1=Package1,Package2 Library2=Package3,Package4")
-        check_test_group.add_argument("--wh_libraries",
+                                      metavar="Library1=Package1,Package2 Library2=Package3,Package4")"""
+        check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g." )
+        check_test_group.add_argument("--packages", default="[Airflow]", nargs="+", help="Library to test (e.g. Airflow.Multizone)")
+        check_test_group.add_argument("--root-library", default=Path(Path.cwd().parent, "AixLib", "package.mo"), help="root of library",
+                                      type=Path)
+        check_test_group.add_argument("--wh-library",
                                       default="IBPSA",
                                       help="Library on whitelist")
         # [ bool - flag]
@@ -455,14 +461,13 @@ class Parser:
         check_test_group.add_argument("--extended-ex-flag",
                                       default=False,
                                       action="store_true")
-        check_test_group.add_argument("--load-setti"
-                                      "ng-flag",
-                                      default=True,
-
+        check_test_group.add_argument("--load-setting-flag",
+                                      default=False,
                                       action="store_true")
         # [OM - Options: OM_CHECK, OM_SIM, DYMOLA_SIM, COMPARE]
         check_test_group.add_argument("--om-options",
-                                      default="om_check",
+                                      nargs="+",
+                                      default=["OM_CHECK"],
                                       help="Chose between openmodelica check, compare or simulate")
         args = parser.parse_args()
         return args
@@ -484,71 +489,76 @@ if __name__ == '__main__':
         install_libraries = None
         except_list = None
         additional_libraries_local = None
+    # [Check arguments, files, path]
+    check = data_structure()
+    check.check_arguments_settings(args.library, args.packages)
+    check.check_file_setting(args.root_library)
+    if additional_libraries_local is not None:
+        for lib in additional_libraries_local:
+            add_lib_path = Path(additional_libraries_local[lib], lib, "package.mo")
+            check.check_file_setting(add_lib_path)
 
-    if args.library_dict is not None:
-        if args.package_dict is not None:
-            for library in args.library_dict:
-                try:
-                    packages = args.package_dict[library]
-                    OM = Check_OpenModelica(lib_name=library,
-                                            working_path=args.library_dict[library],
-                                            add_libraries_loc=additional_libraries_local,
-                                            inst_libraries=install_libraries)
-                    OM()
-                    model = modelica_model()
-                    for package in packages:
-                        if args.om_options == "OM_CHECK":
-                            model_list = model.get_option_model(library=library,
-                                                                package=package,
-                                                                wh_library=args.wh_library,
-                                                                changed_flag=args.changed_flag,
-                                                                simulate_flag=False,
-                                                                filter_wh_flag=args.filter_wh_flag)
-                            error_model_dict = OM.OM_check_model(check_model_list=model_list,
-                                                                 exception_list=except_list)
-                            exit_var = OM.write_errorlog(pack=package,
-                                                         error_dict=error_model_dict,
-                                                         exception_list=except_list)
+    OM = Check_OpenModelica(library=args.library,
+                            root_library=args.root_library,
+                            add_libraries_loc=additional_libraries_local,
+                            inst_libraries=install_libraries)
+    OM()
+    model = modelica_model()
 
-                            exit(exit_var)
-                        if args.om_options == "OM_SIM":
-                            model_list = model.get_option_model(library=library,
-                                                                package=package,
-                                                                wh_library=args.wh_library,
-                                                                changed_flag=args.changed_flag,
-                                                                simulate_flag=True,
-                                                                filter_wh_flag=args.filter_wh_flag)
-                            error_model_dict = OM.simulate_examples(example_list=model_list,
-                                                                    exception_list=except_list)
-                            exit_var = OM.write_errorlog(pack=package,
-                                                         error_dict=error_model_dict,
-                                                         exception_list=except_list)
-                            exit(exit_var)
-                        if args.om_options == "DYMOLA_SIM":
-                            model_list = model.get_option_model(library=library,
-                                                                package=package,
-                                                                wh_library=args.wh_library,
-                                                                changed_flag=args.changed_flag,
-                                                                simulate_flag=True,
-                                                                filter_wh_flag=args.filter_wh_flag)
-                            OM.sim_with_dymola(example_list=model_list, pack=package)
-                        if args.om_options == "COMPARE":
-                            ERROR_DATA = {}
-                            STATS = None
-                            model_list = model.get_option_model(library=library,
-                                                                package=package,
-                                                                wh_library=args.wh_library,
-                                                                changed_flag=args.changed_flag,
-                                                                simulate_flag=True,
-                                                                filter_wh_flag=args.filter_wh_flag)
-                            STATS = OM.compare_dym_to_om(pack=package,
-                                                         example_list=model_list,
-                                                         stats=STATS)
-                        else:
-                            raise ValueError(f"{args.om_options} not supported")
+    for package in args.packages:
+        for options in args.om_options:
+            if options == "OM_CHECK":
+                model_list = model.get_option_model(library=args.library,
+                                                    package=package,
+                                                    wh_library=args.wh_library,
+                                                    changed_flag=args.changed_flag,
+                                                    simulate_flag=False,
+                                                    filter_wh_flag=args.filter_wh_flag,
+                                                    root_library=args.root_library)
+                error_model_dict = OM.OM_check_model(check_model_list=model_list,
+                                                     exception_list=except_list)
+                exit_var = OM.write_errorlog(pack=package,
+                                             error_dict=error_model_dict,
+                                             exception_list=except_list,
+                                             options="check")
 
-                except KeyError:
-                    print(f"For library {library} is not Package set.")
-        else:
-            print("Package not set")
+                #exit(exit_var)
+            if options == "OM_SIM":
+                model_list = model.get_option_model(library=args.library,
+                                                    package=package,
+                                                    wh_library=args.wh_library,
+                                                    changed_flag=args.changed_flag,
+                                                    simulate_flag=True,
+                                                    filter_wh_flag=args.filter_wh_flag,
+                                                    root_library=args.root_library)
+                error_model_dict = OM.simulate_examples(example_list=model_list,
+                                                        exception_list=except_list)
+                exit_var = OM.write_errorlog(pack=package,
+                                             error_dict=error_model_dict,
+                                             exception_list=except_list,
+                                             options="simulate")
 
+            if options == "DYMOLA_SIM":
+                model_list = model.get_option_model(library=args.library,
+                                                    package=package,
+                                                    wh_library=args.wh_library,
+                                                    changed_flag=args.changed_flag,
+                                                    simulate_flag=True,
+                                                    filter_wh_flag=args.filter_wh_flag,
+                                                    root_library=args.root_library)
+                OM.sim_with_dymola(example_list=model_list, pack=package)
+            if args.om_options == "COMPARE":
+                ERROR_DATA = {}
+                STATS = None
+                model_list = model.get_option_model(library=args.library,
+                                                    package=package,
+                                                    wh_library=args.wh_library,
+                                                    changed_flag=args.changed_flag,
+                                                    simulate_flag=True,
+                                                    filter_wh_flag=args.filter_wh_flag,
+                                                    root_library=args.root_library)
+                STATS = OM.compare_dym_to_om(pack=package,
+                                             example_list=model_list,
+                                             stats=STATS)
+
+    OM.close_OM()

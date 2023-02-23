@@ -9,10 +9,17 @@ config_stages = [
 ]
 
 [[CI_setting]]
+dymola_version = "n"
 
-[CI_setting.libraries]
-AixLib = "..\\AixLib\\package.mo"
-IBPSA = "..\\IBPSA\\package.mo"
+[[CI_setting]]
+
+[CI_setting.root_library]
+AixLib = "..\\AixLib\\AixLib\\package.mo"
+
+[[CI_setting]]
+library = [
+    "AixLib",
+]
 
 [[CI_setting]]
 
@@ -20,26 +27,44 @@ IBPSA = "..\\IBPSA\\package.mo"
 AixLib = [
     "Airflow",
     "BoundaryConditions",
+    "Controls",
+    "DataBase",
+    "Electrical",
+    "Fluid",
+    "Media",
+    "Obsolete",
+    "Resources",
+    "Systems",
+    "ThermalZones",
+    "Types",
+    "UsersGuide",
 ]
 
 [[CI_setting]]
-dymola_version = "2022"
-
-[[CI_setting]]
-conda_environment = "dfg"
+conda_environment = "myenv"
 
 [[CI_setting]]
 
 [CI_setting.wh_libraries]
+IBPSA = "https://github.com/ibpsa/modelica-ibpsa.git"
 
 [[CI_setting]]
-github_repository = "tert"
+filter_wh_flag = true
 
 [[CI_setting]]
-gitlab_page = "hgnhng"
+changed_flag = true
 
 [[CI_setting]]
-dymola_image = "hgfh"
+extended_ex_flag = true
+
+[[CI_setting]]
+github_repository = "RWTH-EBC/AixLib"
+
+[[CI_setting]]
+gitlab_page = "https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
+
+[[CI_setting]]
+dymola_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
 
 [[CI_setting]]
 
@@ -110,8 +135,8 @@ dymola_python_api_github_file = "api_script/api_github.py"
 dymola_python_deploy_artifacts_file = "deploy/deploy_artifacts.py"
 dymola_python_html_tidy_file = "SyntaxTests/html_tidy_errors.py"
 dymola_python_syntax_test_file = "SyntaxTests/StyleChecking.py"
-dymola_python_configuration_file = "Dymola_python_tests/CI_test_config.py"
-OM_python_check_model_file = "Dymola_python_tests/CITests/UnitTests/OM_Check.py"
+dymola_python_configuration_file = "CI_test_config.py"
+OM_python_check_model_file = "CITests/UnitTests/OM_Check.py"
 
 [[CI_setting]]
 

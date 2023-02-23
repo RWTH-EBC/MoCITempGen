@@ -20,7 +20,13 @@ class toml_to_py():
             docu = f"# [{d}]"
             config_list.append(docu)
             for var in toml_cont:
-                conf = f'self.{var} = f"{toml_cont[var]}"'
+                conf = ""
+                if isinstance(toml_cont[var], str):
+                    conf = f'self.{var} = f"{toml_cont[var]}"'
+                if isinstance(toml_cont[var], list):
+                    conf = f'self.{var} = {toml_cont[var]}'
+                if isinstance(toml_cont[var], dict):
+                    conf = f'self.{var} = {toml_cont[var]}'
                 config_list.append(conf)
         return config_list
 

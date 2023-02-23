@@ -89,13 +89,12 @@ class data_structure(ci_config):
             print(f'\n**********************\n')
 
     # [Remove Structure]
-    def delete_files_in_path(self, path_list: list = None):
-        if path_list is not None:
+    def delete_files_in_path(self, *args: Path):
             print(f'\n**** Delete folder ****\n')
-            for path in path_list:
-                print(f'{self.green}Delete files:{self.CEND} {path}')
-                for filename in os.listdir(path):
-                    file_path = os.path.join(path, filename)
+            for arg in args:
+                print(f'{self.green}Delete files:{self.CEND} {arg}')
+                for filename in os.listdir(arg):
+                    file_path = os.path.join(arg, filename)
                     try:
                         if os.path.isfile(file_path) or os.path.islink(file_path):
                             os.unlink(file_path)
@@ -182,7 +181,7 @@ class data_structure(ci_config):
         Returns:
         """
         files_list = []
-        file_dic = (vars(CI_config()))
+        file_dic = (vars(ci_config()))
         for file in file_dic:
             if file.find("_file") > -1:
                 files_list.append(file_dic[file])
@@ -191,7 +190,7 @@ class data_structure(ci_config):
     @staticmethod
     def return_file_dir():
         dir_list = []
-        dir_dic = (vars(CI_config()))
+        dir_dic = (vars(ci_config()))
         for dirs in dir_dic:
             if dirs.find("_dir") > -1:
                 dir_list.append(dir_dic[dirs])

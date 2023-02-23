@@ -118,7 +118,10 @@ class argpaser_toml(object):
                         sys.argv[1:] = []
                         arguments = obj.main([])
                         for args in vars(arguments):
-                            pars_arg_dict[args] = str(getattr(arguments, args))
+                            if getattr(arguments, args) is None or isinstance(getattr(arguments, args), Path):
+                                pars_arg_dict[args] = str(getattr(arguments, args))
+                            else:
+                                pars_arg_dict[args] = getattr(arguments, args)
                         class_modul_dict["Parser"] = pars_arg_dict
                         modul_dict[filename] = class_modul_dict
             except Exception as err:

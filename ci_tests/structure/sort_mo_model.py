@@ -2,6 +2,7 @@ import os
 from ci_test_config import ci_config
 from ci_tests.structure.model_management import Model_Management
 from pathlib import Path
+from ci_tests.structure.config_structure import data_structure
 
 
 class modelica_model(ci_config):
@@ -20,23 +21,21 @@ class modelica_model(ci_config):
                          wh_library: str = "IBPSA",
                          extended_ex_flag: bool = False,
                          dymola_version: int = 2022,
-                         path_dir: str = Path.home(),
-                         root_package: Path = None,
+                         path_dir: Path = Path.cwd().parent,
                          root_library: Path = None):
-
-        self.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)
-        if root_package is None:
-            root_package = Path(path_dir, library, package.replace(".", os.sep))
-        self.check_path_setting(root_package)
+        check = data_structure()
+        check.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)
         if root_library is None:
             root_library = Path(path_dir, library, "package.mo")
-        self.check_file_setting(root_library)
+        check.check_file_setting(root_library)
+        root_package = Path(root_library.parent, package.replace(".", os.sep))
+        check.check_path_setting(root_package)
 
         if dymola is None:
             extended_ex_flag = False
         if changed_flag is True:
-            self.check_path_setting(self.config_ci_dir)
-            self.check_file_setting(self.config_ci_changed_file)
+            check.check_path_setting(self.config_ci_dir)
+            check.check_file_setting(self.config_ci_changed_file)
             model_list = self.get_changed_models(ch_file=self.config_ci_changed_file,
                                                  library=library,
                                                  single_package=package,
@@ -48,8 +47,8 @@ class modelica_model(ci_config):
             else:
                 ci_wh_file = self.wh_model_file
                 file_list = self.wh_model_file
-            self.check_path_setting(self.wh_ci_dir)
-            self.check_file_setting(file_list)
+            check.check_path_setting(self.wh_ci_dir)
+            check.check_file_setting(file_list)
             wh_list_models = self.get_wh_models(wh_file=ci_wh_file,
                                                 wh_library=wh_library,
                                                 library=library,

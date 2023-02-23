@@ -22,7 +22,7 @@ stages:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
           changes:
-            - ${library}/
+            -  ${library}/
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -33,12 +33,10 @@ stages:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
           changes:
-            - ${library}/
+            -  ${library}/
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
-
-
 
 .OM_check_model_job:PR:
     image: ${OM_Image}
@@ -50,7 +48,6 @@ stages:
         - su -l openmodelicausers -s /bin/bash
         - id
         - cd /builds/EBC/EBC_all/github_ci/AixLib
-
     script:
         - python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
@@ -59,7 +56,9 @@ stages:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.OM_check_rules:PR, rules]
+        - !reference [.OM_check_rules:PR , rules]
+
+
 
 .OM_check_model_job:push:
     image: ${OM_Image}
@@ -79,20 +78,23 @@ stages:
 
 
 
+
+
 %for package in packages:
-%for library in libraries:
 OM_Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
     extends: .OM_check_model_job:PR
+
 %endfor
-%endfor
+
 
 %for package in packages:
 OM_Check_${library}_${package}:push:
     variables:
         lib_package: ${package}
     extends: .OM_check_model_job:push
+
 %endfor
 
 

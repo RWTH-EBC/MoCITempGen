@@ -1,8 +1,8 @@
 [arguments]
-image_name = 'registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda'
+dym_image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda'
 OM_Image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:master'
 gitlab_page = 'https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib'
-github_repo = 'RWTH-EBC/AixLib'
+github_repository = 'RWTH-EBC/AixLib'
 wh_library = 'IBPSA'
 html_praefix = 'correct_HTML_'
 expire_in_time = '7h'
@@ -18,7 +18,7 @@ bot_name = 'ebc-aixlib-bot'
 [except_branches]
 except_branch_list = ['IBPSA']
 [main_branches]
-main_branch_list = ['main, development']
+main_branch_list = ['main', 'development']
 
 
 [ci_stages]
