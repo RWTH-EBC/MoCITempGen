@@ -1,11 +1,66 @@
-image: ${image_name}
+# dym_image: ${dym_image}
+# ci_stage_regression_test: ${ci_stage_regression_test}
+# ci_stage_ref_check :${ci_stage_ref_check}
+# ci_stage_plot_ref : ${ci_stage_plot_ref}
+# ci_stage_prepare : ${ci_stage_prepare}
+# dymola_python_test_url_  ${dymola_python_test_url}
+# python_version : ${python_version}
+# buildingspy_upgrade : ${buildingspy_upgrade}
+# ${dymola_python_dir} : dymola_python_dir
+# dymola_python_test_reference_file: ${dymola_python_test_reference_file}
+# dymola_python_google_chart_file : ${dymola_python_google_chart_file}
+# config_ci_exit_file : ${config_ci_exit_file}
+# result_dir : ${result_dir}
+# arg_chart : ${arg_chart}
+# ci_regression_test_commit : $ {ci_regression_test_commit}
+# expire_in_time : ${expire_in_time}
+# arg_PR: ${arg_PR}
+# arg_push: ${arg_push}
+# arg_chart: ${arg_chart}
+# package_list: ${package_list}
+# dymola_python_api_github_file: ${dymola_python_api_github_file}
+# {arg_create_plots} : ${arg_create_plots}
+# api_github_arg: ${api_github_arg}
+# commit_string = ${commit_string}
+# PR_main_branch_rule : &{PR_main_branch_rule}
+# library: ${library}
+# ci_regression_test_commit :  ${ci_regression_test_commit}
+# xvfb_flag: ${xvfb_flag}
+# dymola_python_structure_file: ${dymola_python_structure_file}
+# arg_ref: ${arg_ref}
+# config_ci_eof_file: ${config_ci_eof_file}
+# config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
+# bot_create_ref_commit: ${bot_create_ref_commit}
+# ci_show_ref_commit: ${ci_show_ref_commit}
 stages:
     - ${ci_stage_regression_test}
     - ${ci_stage_ref_check}
     - ${ci_stage_plot_ref}
     - ${ci_stage_prepare}
 
-.CI_Regressiontest:
+.regression_rules:PR:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+          changes:
+            -  ${library}/
+          when: on_success
+        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
+          when: on_success
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+.regression_rules:Push:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+          changes:
+            -  ${library}/
+          when: on_success
+        - if:  (${PR_main_branch_rule})
+          when: never
+
+
+.Regressiontest:PR:
+    image: ${dym_image}
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
@@ -13,12 +68,12 @@ stages:
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} ${arg_PR}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
             pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
+            python ${dymola_python_google_chart_file} ${arg_chart} ;
             exit 1 ;
           else
             exit 0 ;
@@ -28,41 +83,26 @@ stages:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/
-    except:
-        refs:
-            - external_pull_requests
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.regression_rules:PR , rules]
 
 
-%for package in package_list:
-CI_Regressiontest_${library}_${package}:
-    variables:
-        lib_package: ${library}.${package}
-    extends: .CI_Regressiontest
-%endfor
-
-
-
-.dev_Regressiontest:
+.Regressiontest:Push:
+    image: ${dym_image}
     stage: ${ci_stage_regression_test}
     before_script:
+        - git clone ${dymola_python_test_url}
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
-        - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} ${arg_push}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
             pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            exit 1;
+            python ${dymola_python_google_chart_file} ${arg_chart} ;
+            exit 1 ;
           else
             exit 0 ;
           fi
@@ -71,98 +111,28 @@ CI_Regressiontest_${library}_${package}:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.regression_rules:Push , rules]
+
 
 %for package in package_list:
-Development_Regressiontest_${library}_${package}:
+Regressiontest_${library}_${package}:PR:
     variables:
         lib_package: ${library}.${package}
-    extends: .dev_Regressiontest
+    extends: .Regressiontest:PR
+
+%endfor
+
+%for package in package_list:
+Regressiontest_${library}_${package}:Push:
+    variables:
+        lib_package: ${library}.${package}
+    extends: .Regressiontest:Push
 
 %endfor
 
 
-CI_create_plots:
-    stage: ${ci_stage_prepare}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
-        - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
-    artifacts:
-        paths:
-            - ${result_dir}/
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/
-    except:
-        refs:
-            - external_pull_requests
-    when: on_failure
-    needs:
-    %for package in package_list:
-    - job: CI_Regressiontest_${library}_${package}
-      artifacts: true
-    %endfor
-
-.Regressiontest_job:
-    stage: ${ci_stage_regression_test}
-    before_script:
-        - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
-    after_script:
-        - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            source activate ${python_version} ;
-            pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
-            exit 1;
-          else
-            exit 0 ;
-          fi
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-
-        expire_in: ${expire_in_time}
-    only:
-        refs:
-            - external_pull_requests
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
-
-%for package in package_list:
-Regressiontest_${library}_${package}:
-    variables:
-        lib_package: ${library}.${package}
-    extends: .Regressiontest_job
-
-%endfor
-
-Regression_overall_coverage:
+Regression_overall_coverage:PR:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
@@ -176,55 +146,11 @@ Regression_overall_coverage:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        refs:
-            - external_pull_requests
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.regression_rules:PR , rules]
 
-prepare_create_plots:
-    stage: ${ci_stage_prepare}
-    before_script:
-        - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
-        - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
-    artifacts:
-        paths:
-            - ${result_dir}/
-    only:
-        refs:
-            - external_pull_requests
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    when: on_failure
-    needs:
-    %for package in package_list:
-    - job: Regressiontest_${library}_${package}
-      artifacts: true
-    %endfor
 
-.Regressiontest_changed_Job:
+Regression_overall_coverage:Push:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
@@ -232,86 +158,58 @@ prepare_create_plots:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python ${dymola_python_configuration_file} --changed-model
-        - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models
-    after_script:
-        - if cat ${config_ci_exit_file} | grep "FAIL"; then
-            source activate ${python_version};
-            pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
-            exit 1;
-          else
-            exit 0;
-          fi
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
-            ${merge_branch}
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-            - /^${html_praefix}.*$/
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    only:    
-        changes:
-            - ${library}/**/*
-    retry:
-        max: 2
-        when: runner_system_failure
-
-%for package in package_list:
-Changed_Regressiontest_${library}_${package}:
-    variables:
-        lib_package: ${library}.${package}
-    extends: .Regressiontest_changed_Job
-
-%endfor
+    rules:
+        - !reference [.regression_rules:Push , rules]
 
 
-Changed_create_plots:
+prepare_create_plots:Push:
     stage: ${ci_stage_prepare}
     before_script:
         - source activate ${python_version}
+        - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
+        - python ${dymola_python_google_chart_file} ${arg_create_plots}
+        - python ${dymola_python_api_github_file}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
-    except:
-        refs:
-            - external_pull_requests
-            ${merge_branch}
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-            - /^${html_praefix}.*$/
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    only:    
-        changes:
-            - ${library}/**/*
-    retry:
-        max: 2
-        when: runner_system_failure
-    when: on_failure
+    rules:
+        - !reference [.regression_rules:Push , rules]
     needs:
     %for package in package_list:
-    - job: Changed_Regressiontest_${library}_${package}
+    - job: Regressiontest_${library}_${package}:Push
       artifacts: true
     %endfor
+
+prepare_create_plots:PR:
+    stage: ${ci_stage_prepare}
+    before_script:
+        - source activate ${python_version}
+        - pip install --upgrade ${buildingspy_upgrade}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - python ${dymola_python_google_chart_file} ${arg_create_plots}
+        - python ${dymola_python_api_github_file}   ${api_github_arg}
+    artifacts:
+        paths:
+            - ${result_dir}/
+    rules:
+        - !reference [.regression_rules:PR , rules]
+    needs:
+    %for package in package_list:
+    - job: Regressiontest_${library}_${package}:PR
+      artifacts: true
+    %endfor
+
 
 
 RegressionTest_Check_References:
@@ -335,8 +233,8 @@ RegressionTest_Check_References:
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
-        - python ${dymola_python_configuration_file} --create-ref
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
+        - python ${dymola_python_structure_file} --create-ref
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} ${arg_ref}  -n 4 < ../${config_ci_eof_file}
     after_script:
         - source activate ${python_version}
         - cd CorrectedVersion/$CI_PROJECT_NAME
@@ -360,24 +258,13 @@ RegressionTest_Check_References:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    except:
-        refs:
-            ${merge_branch}
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    only:
-        - external_pull_requests
+    rules:
+        - !reference [.regression_rules:PR , rules]
 
 plot_reference_results:
     stage: plot_ref
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
@@ -387,8 +274,6 @@ plot_reference_results:
         when: always
         paths:
             - ${result_dir}/
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_show_ref_commit}/
-        refs:
-            - external_pull_requests
+    rules:
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_show_ref_commit}/
+          when: always

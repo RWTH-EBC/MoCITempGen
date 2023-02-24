@@ -21,7 +21,7 @@ class modelica_model(ci_config):
                          wh_library: str = "IBPSA",
                          extended_ex_flag: bool = False,
                          dymola_version: int = 2022,
-                         path_dir: Path = Path.cwd().parent,
+                         path_dir: Path = Path.cwd(),
                          root_library: Path = None):
         check = data_structure()
         check.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)

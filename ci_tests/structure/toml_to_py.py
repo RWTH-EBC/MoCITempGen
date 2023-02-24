@@ -83,16 +83,16 @@ if __name__ == '__main__':
     arg = Pars(sys.argv[1:]).main()
     if arg.create_ci_test_config is True:
         to = toml_to_py()
-        config = to.load_toml(toml_file=Path(Path.cwd(), "config", "toml_files", "ci_test_config.toml"))
+        config = to.load_toml(toml_file=Path(Path.cwd(), "Dymola_python_tests" ,"config", "toml_files", "ci_test_config.toml"))
         to.write_python_ci_test_config(config_list=config,
-                                       temp_file=os.path.join(Path.cwd(), "templates", "config_templates",
+                                       temp_file=os.path.join(Path.cwd(),"Dymola_python_tests", "templates", "config_templates",
                                                               "ci_test_config.txt"),
                                        py_file=Path(Path.cwd(), "ci_test_config.py"))
     if arg.create_ci_temp_config is True:
         to = toml_to_py()
-        config = to.load_toml(toml_file=Path(Path.cwd(), "ci_templates_python", "ci_config", "toml_files",
+        config = to.load_toml(toml_file=Path(Path.cwd(), "Dymola_python_tests", "ci_templates_python", "ci_config", "toml_files",
                                              "ci_template_config.toml"))
         to.write_python_ci_test_config(config_list=config,
-                                       temp_file=os.path.join(Path.cwd(), "templates", "config_templates",
+                                       temp_file=os.path.join(Path.cwd(),"Dymola_python_tests", "templates", "config_templates",
                                                               "ci_templates_config.txt"),
-                                       py_file=Path(Path.cwd(), "ci_templates_python", "ci_templates_config.py"))
+                                       py_file=Path(Path.cwd(),"Dymola_python_tests", "ci_templates_python", "ci_templates_config.py"))

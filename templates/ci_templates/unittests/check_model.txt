@@ -96,7 +96,8 @@ Check_${library}_${package}:Push:
 
 %endfor
 
-whitelist_job:
+check_whitelist_job:
+    image: ${dym_image_name}
     stage: ${ci_stage_create_whitelist}
     before_script:
         - source activate ${python_version}

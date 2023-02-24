@@ -1,165 +1,101 @@
+# ci_stage_OM_simulate: ${ci_stage_OM_simulate}
+# commit_string: ${commit_string}
+# library: ${library}
+# PR_main_branch_rule : ${PR_main_branch_rule}
+# ci_OM_sim_commit: ${ci_OM_sim_commit}
+# dymola_python_test_url : ${dymola_python_test_url}
+# dymola_python_dir: ${dymola_python_dir}
+# OM_python_check_model_file: ${OM_python_check_model_file}
+# arg_PR : ${arg_PR}
+# arg_push: ${arg_push}
+# result_dir: ${result_dir}
+# OM_Image:  ${OM_Image}
+# expire_in_time: ${expire_in_time}
+# packages: ${packages}
+
 stages:
     - ${ci_stage_OM_simulate}
 
-.OM_simulate_rules:PR:
-       rules:
+
+.OM_sim_rules:PR:
+    rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
           changes:
-            - ${library}/
+            -  ${library}/
           when: on_success
-        %for branch in except_branch_list:
-        - if: $CI_PIPELINE_SOURCE == "push"  && $CI_COMMIT_BRANCH  =~ /${branch}/
-          when: never
-        %endfor
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
+          when: on_success
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_sim_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
 
+.OM_sim_rules:push:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+          changes:
+            -  ${library}/
+          when: on_success
+        - if:  (${PR_main_branch_rule})
+          when: never
 
 
-.OM_CI_simulate_model_job:
-    name: ${OM_Image}
+.OM_simulate_model_job:PR:
+    image: ${OM_Image}
     stage: ${ci_stage_OM_simulate}
     before_script:
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - id
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+        - su -l openmodelicausers -s /bin/bash
+        - id
+        - cd /builds/EBC/EBC_all/github_ci/AixLib
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
+        - python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /${ci_simulate_commit}/
-    except:
-        refs:
-            - external_pull_requests
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.OM_sim_rules:PR , rules]
 
-%for package in package_list:
-OM_CI_simulate_${library}_${package}:
-    variables:
-        lib_package: ${package}
-    extends: .OM_CI_simulate_model_job
 
-%endfor
 
-.OM_dev_simulate_model_job:
+.OM_simulate_model_job:push:
+    image: ${OM_Image}
     stage: ${ci_stage_OM_simulate}
     before_script:
-        - pip install -r ${dymola_python_dir}/requirements.txt
         - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
+        - python3 ${OM_python_check_model_file}  ${arg_push}
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    only:
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
+    rules:
+        - !reference [.OM_sim_rules:push, rules]
 
-%for package in package_list:
-OM_Development_simulate_${library}_${package}:
+
+
+
+
+%for package in packages:
+OM_Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
-    extends: .OM_dev_simulate_model_job
+    extends: .OM_simulate_model_job:PR
 
 %endfor
 
 
-
-.OM_simulate_model_job:
-    stage: ${ci_stage_OM_simulate}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples --tool openModelica --om-option OM_SIM
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    only:
-        refs:
-            - external_pull_requests
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-
-    retry:
-        max: 2
-        when: runner_system_failure
-
-%for package in package_list:
-OM_simulate_${library}_${package}:
+%for package in packages:
+OM_Check_${library}_${package}:push:
     variables:
         lib_package: ${package}
-    extends: .OM_simulate_model_job
+    extends: .OM_simulate_model_job:push
 
 %endfor
 
-.OM_simulate_changed_models_job:
-    stage: ${ci_stage_OM_simulate}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_configuration_file} --changed-model
-        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples --tool openModelica --om-option OM_SIM
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
-            ${merge_branch}
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-            - /^${html_praefix}.*$/
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-    retry:
-        max: 2
-        when: runner_system_failure
 
-%for package in package_list:
-OM_simulate_${library}_${package}_changed_models:
-    variables:
-        lib_package: ${package}
-    only:
-        changes:
-            - ${library}/${package}/**/*
-    extends: .OM_simulate_changed_models_job
-
-%endfor
 

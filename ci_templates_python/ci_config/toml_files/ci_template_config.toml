@@ -49,12 +49,12 @@ ci_stage_OM_simulate = 'OM_simulate'
 buildingspy_upgrade = 'git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage'
 
 [ci_setting]
-temp_ci_template_dir = 'CI_templates_python'
+temp_ci_template_dir = 'Dymola_python_tests/ci_templates_python'
 temp_toml_ci_setting_file = 'Setting/CI_setting_template.txt'
 toml_ci_setting_file = 'Setting/CI_setting.toml'
 
 [ci_templates_file]
-temp_ci_dir = 'templates/ci_templates'
+temp_ci_dir = 'Dymola_python_tests/templates/ci_templates'
 temp_ci_regression_file = 'UnitTests/regression_test.txt'
 temp_ci_check_file = 'UnitTests/check_model.txt'
 temp_ci_simulate_file = 'UnitTests/simulate_model.txt'
@@ -71,19 +71,20 @@ temp_ci_OM_check_file = 'UnitTests/check_OM_model.txt'
 temp_ci_OM_simulate_file = 'UnitTests/simulate_OM_model.txt'
 
 [ci_template_folder]
-temp_dir = '../dymola-ci-tests/ci_templates'
+temp_dir = 'dymola-ci-tests/ci_templates'
 
 [dymola_python_scripts]
 dymola_python_dir = 'ci_tests'
-dymola_python_test_validate_file = 'UnitTests/CheckPackages/validatetest.py'
-dymola_python_test_reference_file = 'UnitTests/reference_check.py'
-dymola_python_google_chart_file = 'Converter/google_charts.py'
-dymola_python_api_github_file = 'api_script/api_github.py'
-dymola_python_deploy_artifacts_file = 'deploy/deploy_artifacts.py'
-dymola_python_html_tidy_file = 'SyntaxTests/html_tidy_errors.py'
-dymola_python_syntax_test_file = 'SyntaxTests/StyleChecking.py'
-dymola_python_configuration_file = 'CI_test_config.py'
-OM_python_check_model_file = 'CITests/UnitTests/OM_Check.py'
+dymola_python_test_validate_file = 'Dymola_python_tests/ci_tests/UnitTests/CheckPackages/validatetest.py'
+dymola_python_test_reference_file = 'Dymola_python_tests/ci_tests/UnitTests/reference_check.py'
+dymola_python_google_chart_file = 'Dymola_python_tests/ci_tests/Converter/google_charts.py'
+dymola_python_api_github_file = 'Dymola_python_tests/ci_tests/api_script/api_github.py'
+dymola_python_deploy_artifacts_file = 'Dymola_python_tests/ci_tests/deploy/deploy_artifacts.py'
+dymola_python_html_tidy_file = 'Dymola_python_tests/ci_tests/SyntaxTests/html_tidy_errors.py'
+dymola_python_syntax_test_file = 'Dymola_python_tests/ci_tests/SyntaxTests/StyleChecking.py'
+dymola_python_configuration_file = 'Dymola_python_tests/CI_test_config.py'
+OM_python_check_model_file = 'Dymola_python_tests/ci_tests/UnitTests/OM_Check.py'
+dymola_python_structure_file = 'Dymola_python_tests/ci_tests/structure/config_structure.py'
 
 [interactive_ci_commit]
 ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list

@@ -24,7 +24,7 @@ class Check_OpenModelica(ci_config):
                  root_library: Path,
                  add_libraries_loc: dict = None,
                  inst_libraries: list = None,
-                 working_path: Path = Path(Path.cwd().parent)):
+                 working_path: Path = Path(Path.cwd())):
         """
         Args:
             add_libraries_loc ():
@@ -446,7 +446,7 @@ class Parser:
                                       metavar="Library1=Package1,Package2 Library2=Package3,Package4")"""
         check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         check_test_group.add_argument("--packages", default=["Airflow"], nargs="+", help="Library to test (e.g. Airflow.Multizone)")
-        check_test_group.add_argument("--root-library", default=Path(Path.cwd().parent, "AixLib", "package.mo"), help="root of library",
+        check_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"), help="root of library",
                                       type=Path)
         check_test_group.add_argument("--wh-library",
                                       default="IBPSA",

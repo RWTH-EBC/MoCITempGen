@@ -7,6 +7,8 @@ import time
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
 from ci_test_config import ci_config
+from ci_tests.structure.config_structure import data_structure
+from pathlib import Path
 
 
 class Buildingspy_Regression_Check(ci_config):
@@ -709,9 +711,8 @@ class Parser:
         unit_test_group.add_argument("--show-gui",
                                      help='Show the GUI of the simulator',
                                      action="store_true")
-        unit_test_group.add_argument('-s', "--single-package",
-                                     metavar="Modelica.Package",
-                                     help="Test only the Modelica package Modelica.Package")
+        unit_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
+                                      help="Library to test (e.g. Airflow.Multizone)")
         unit_test_group.add_argument("-p", "--path",
                                      default=".",
                                      help="Path where top-level package.mo of the library is located")
@@ -734,7 +735,7 @@ class Parser:
         unit_test_group.add_argument("--update-ref",
                                      help='update all reference files',
                                      action="store_true")
-        unit_test_group.add_argument("--modified-models",
+        unit_test_group.add_argument("--changed-flag",
                                      help='Regression test only for modified models',
                                      default=False,
                                      action="store_true")
@@ -778,6 +779,7 @@ if __name__ == '__main__':
                                                 dymola_exception=dymola_exception)
         dym_interface.library_check(library=args.library)
         conf = ci_config()
+        check = data_structure()
         ref_model = Ref_model(library=args.library)
         package_list = []
         '''
@@ -808,13 +810,12 @@ if __name__ == '__main__':
             ref_model.delete_ref_file(ref_list=ref_list)
             package_list = ref_model.get_update_package(ref_list=ref_list)
         else:
-            conf.check_ci_folder_structure(folders_list=[f'..{os.sep}{conf.config_ci_dir}'])
+            check.check_path_setting(conf.config_ci_dir)
             if args.modified_models is False:
-                conf.create_files(files_list=[f'..{os.sep}{conf.config_ci_exit_file}'])
+                check.create_files(Path("..", conf.config_ci_exit_file))
                 package_list = [args.single_package]
             if args.modified_models is True:
-                conf.create_files(
-                    files_list=[f'..{os.sep}{conf.config_ci_changed_file}', f'..{os.sep}{conf.config_ci_exit_file}'])
+                check.create_files(Path("..", conf.config_ci_changed_file),Path("..", conf.config_ci_exit_file))
                 package = args.single_package[args.single_package.rfind(".") + 1:]
                 list_reg_model = Extended_model(dymola=dymola,
                                                 dymola_exception=dymola_exception,
@@ -839,7 +840,10 @@ if __name__ == '__main__':
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
             if len(created_ref_list) > 0:
-                conf.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'])
+                """ self.prepare_data(source_target_dict={
+                    API_log: Path(self.result_OM_check_result_dir, f'{self.library}.{pack}')},
+                    del_flag=True)"""
+                check.prepare_data(path_list=[f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'])
                 for ref in created_ref_list:
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
                     conf.prepare_data(file_path_dict={ref_file: f'..{os.sep}{conf.result_regression_dir}{os.sep}referencefiles'})

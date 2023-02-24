@@ -5,6 +5,12 @@ import os
 import shutil
 import glob
 from pathlib import Path
+import argparse
+
+
+
+
+
 class data_structure(ci_config):
 
     def __init__(self):
@@ -194,3 +200,33 @@ class data_structure(ci_config):
             if dirs.find("_dir") > -1:
                 dir_list.append(dir_dic[dirs])
         return dir_list
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Set files or dictionaries")
+    check_test_group = parser.add_argument_group("Arguments to build files or folders")
+    check_test_group.add_argument("-CM", "--changed-model", default=False, action="store_true")
+    check_test_group.add_argument("--ci-interactive", default=False, action="store_true")
+    check_test_group.add_argument("--create-ref", default=False, action="store_true")
+    check_test_group.add_argument("--create-whitelist", default=False, action="store_true")
+
+    args = parser.parse_args()
+    conf = ci_config()
+    folder_list = []
+    file_list = []
+    if args.changed_model is True:
+        data_structure().create_path(Path(conf.config_ci_dir))
+        data_structure().create_files(Path(conf.config_ci_changed_file), Path(conf.config_ci_exit_file))
+        pass
+    if args.ci_interactive is True:
+        data_structure().create_path(Path(conf.config_ci_dir))
+        data_structure().create_files(Path(conf.config_ci_eof_file), Path(conf.config_ci_changed_file))
+        pass
+    if args.create_ref is True:
+        data_structure().create_path(Path(conf.config_ci_dir))
+        data_structure().create_files(Path(conf.config_ci_eof_file), Path(conf.config_ci_exit_file), Path(conf.config_ci_new_create_ref_file))
+        pass
+    if args.create_whitelist is True:
+        data_structure().create_path(Path(conf.dymola_ci_test_dir), Path(conf.wh_ci_dir))
+        data_structure().create_files(Path(conf.wh_model_file), Path(conf.wh_simulate_file), Path(conf.wh_html_file), Path(conf.wh_ref_file))
+        pass
+

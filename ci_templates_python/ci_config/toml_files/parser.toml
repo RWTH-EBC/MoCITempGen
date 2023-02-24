@@ -1,6 +1,6 @@
 [api_github.Parser]
 correct_branch = "${Newbranch}"
-github_repository = "df"
+github_repository = "RWTH-EBC/AixLib"
 working_branch = "${TARGET_BRANCH}"
 base_branch = "main"
 github_token = "${GITHUB_API_TOKEN}"
@@ -11,13 +11,13 @@ create_pr = false
 correct_html = false
 ibpsa_merge = false
 merge_request = false
-gitlab_page = "fdg"
+gitlab_page = " https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
 
 [api_slack.Parser]
 github_token = "${GITHUB_API_TOKEN}"
 base_branch = "development"
 slack_token = "${secrets.SLACK_BOT_TOKEN}"
-github_repository = "df"
+github_repository = "RWTH-EBC/AixLib"
 
 [structure_check.Parser]
 config_dir = false
@@ -57,6 +57,7 @@ path = "."
 whitelist = false
 correct_view = false
 library = [ "AixLib",]
+wh_library = [ "IBPSA",]
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
 filter_whitelist = false
 
@@ -68,7 +69,9 @@ changed_models = false
 
 [OM_Check.Parser]
 library = [ "AixLib",]
-packages = [ "Airflow",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
+root_library = [ "..\\AixLib\\package.mo",]
+wh_library = [ "IBPSA",]
 changed_flag = true
 filter_wh_flag = true
 extended_ex_flag = true
@@ -81,7 +84,7 @@ show_gui = false
 single_package = "None"
 path = "."
 library = [ "AixLib",]
-number_of_processors = 8
+number_of_processors = 16
 tool = "dymola"
 dymola_version = "2022"
 coverage_only = false
@@ -95,7 +98,9 @@ report = false
 
 [validatetest.Parser]
 library = [ "AixLib",]
-packages = [ "Airflow",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
+root_library = [ "..\\AixLib\\package.mo",]
+wh_library = [ "IBPSA",]
 root_wh_library = "None"
 dymola_version = "2022"
 changed_flag = true
@@ -104,51 +109,5 @@ extended_ex_flag = true
 create_wh_flag = false
 load_setting_flag = false
 dym_options = [ "DYM_CHECK",]
-repo_dir = "None"
+repo_dir = "modelica-ibpsa"
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
-
-[html_tidy_errors.Parser.wh_library]
-[[html_tidy_errors.Parser.wh_library.IBPSA]]
-git_url = "fdgfdsg"
-
-[[html_tidy_errors.Parser.wh_library.IBPSA]]
-repo_dir = "modelica-ibpsa"
-
-[[html_tidy_errors.Parser.wh_library.AixLib]]
-git_url = "test"
-
-[[html_tidy_errors.Parser.wh_library.AixLib]]
-repo_dir = "AixLib-ibpsa"
-
-[OM_Check.Parser.root_library]
-AixLib = "..\\AixLib\\AixLib\\package.mo"
-
-[OM_Check.Parser.wh_library]
-[[OM_Check.Parser.wh_library.IBPSA]]
-git_url = "fdgfdsg"
-
-[[OM_Check.Parser.wh_library.IBPSA]]
-repo_dir = "modelica-ibpsa"
-
-[[OM_Check.Parser.wh_library.AixLib]]
-git_url = "test"
-
-[[OM_Check.Parser.wh_library.AixLib]]
-repo_dir = "AixLib-ibpsa"
-
-[validatetest.Parser.root_library]
-AixLib = "..\\AixLib\\AixLib\\package.mo"
-
-[validatetest.Parser.wh_library]
-[[validatetest.Parser.wh_library.IBPSA]]
-git_url = "fdgfdsg"
-
-[[validatetest.Parser.wh_library.IBPSA]]
-repo_dir = "modelica-ibpsa"
-
-[[validatetest.Parser.wh_library.AixLib]]
-git_url = "test"
-
-[[validatetest.Parser.wh_library.AixLib]]
-repo_dir = "AixLib-ibpsa"
-

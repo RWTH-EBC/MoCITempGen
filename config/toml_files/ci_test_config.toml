@@ -3,20 +3,20 @@ dymola_ci_test_dir = 'dymola-ci-tests'
 dymola_python_test_dir = 'Dymola_python_tests'
 
 [whitelist]
-wh_ci_dir = "ci_whitelist"
-wh_model_file = 'ci_whitelist/ci_check_whitelist.txt'
-wh_simulate_file = 'ci_whitelist/ci_simulate_whitelist.txt'
-wh_html_file = 'ci_whitelist/ci_html_whitelist.txt'
-wh_ref_file = 'ci_whitelist/ci_reference_check_whitelist.txt'
+wh_ci_dir = "dymola-ci-tests/ci_whitelist"
+wh_model_file = 'dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt'
+wh_simulate_file = 'dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt'
+wh_html_file = 'dymola-ci-tests/ci_whitelist/ci_html_whitelist.txt'
+wh_ref_file = 'dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt'
 
 [config_ci]
-config_ci_dir = 'Configfiles'
-config_ci_exit_file = 'Configfiles/exit.sh'
-config_ci_new_ref_file = 'Configfiles/ci_new_ref_file.txt'
-config_ci_new_create_ref_file = 'Configfiles/ci_new_created_reference.txt'
-config_ci_changed_file = 'Configfiles/ci_changed_model_list.txt'
-config_ci_ref_file = 'Configfiles/ci_reference_list.txt'
-config_ci_eof_file = 'Configfiles/EOF.sh'
+config_ci_dir = 'dymola-ci-tests/Configfiles'
+config_ci_exit_file = 'dymola-ci-tests/Configfiles/exit.sh'
+config_ci_new_ref_file = 'dymola-ci-tests/Configfiles/ci_new_ref_file.txt'
+config_ci_new_create_ref_file = 'dymola-ci-tests/Configfiles/ci_new_created_reference.txt'
+config_ci_changed_file = 'dymola-ci-tests/Configfiles/ci_changed_model_list.txt'
+config_ci_ref_file = 'dymola-ci-tests/Configfiles/ci_reference_list.txt'
+config_ci_eof_file = 'dymola-ci-tests/Configfiles/EOF.sh'
 
 [plot]
 chart_dir = 'dymola-ci-tests/charts'

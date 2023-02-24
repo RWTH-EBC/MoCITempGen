@@ -14,7 +14,7 @@ dymola_version = "2022"
 [[CI_setting]]
 
 [CI_setting.root_library]
-AixLib = "..\\AixLib\\AixLib\\package.mo"
+AixLib = "..\\AixLib\\package.mo"
 
 [[CI_setting]]
 library = [
@@ -23,10 +23,16 @@ library = [
 
 [[CI_setting]]
 
-[CI_setting.package]
+[CI_setting.packages]
 AixLib = [
     "Airflow",
     "BoundaryConditions",
+    "Controls",
+    "DataBase",
+    "Electrical",
+    "Fluid",
+    "Media",
+    "Obsolete",
 ]
 
 [[CI_setting]]
@@ -34,15 +40,9 @@ conda_environment = "myenv"
 
 [[CI_setting]]
 
-[CI_setting.wh_library]
-IBPSA = [
-    { git_url = "fdgfdsg" },
-    { repo_dir = "modelica-ibpsa" },
-]
-AixLib = [
-    { git_url = "test" },
-    { repo_dir = "AixLib-ibpsa" },
-]
+[CI_setting.wh_library.IBPSA]
+git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
+repo_dir = "modelica-ibpsa"
 
 [[CI_setting]]
 filter_wh_flag = true
@@ -54,13 +54,13 @@ changed_flag = true
 extended_ex_flag = true
 
 [[CI_setting]]
-github_repository = "df"
+github_repository = "RWTH-EBC/AixLib"
 
 [[CI_setting]]
-gitlab_page = "fdg"
+gitlab_page = " https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
 
 [[CI_setting]]
-dymola_image = "fdg"
+dymola_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
 
 [[CI_setting]]
 
