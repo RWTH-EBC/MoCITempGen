@@ -1,13 +1,13 @@
 import os
 from ci_test_config import ci_config
-from ci_tests.structure.modelmanagement import ModelManagement
+from ci_tests.py_dym_interface.modelmanagement import ModelManagement
 from pathlib import Path
 from ci_tests.structure.config_structure import data_structure
 
 
 class modelica_model(ci_config):
 
-    def __init__(self, library:str = "AixLib", package:str = "Airflow"):
+    def __init__(self, library: str = "AixLib", package: str = "Airflow"):
         self.library = library
         self.package = package
         super().__init__()

@@ -1,6 +1,32 @@
 import requests
 import argparse
 import sys
+from pathlib import Path
+import os
+from git import Repo
+
+
+class GitRepository(object):
+
+    def __init__(self, repo_dir: Path, git_url: str):
+        """
+        Args:
+            repo_dir ():  Folder of the cloned project.
+            git_url (): Git url of the cloned project.
+        """
+        self.repo_dir = repo_dir
+        self.git_url = git_url
+
+    def clone_repository(self):
+        """
+        Pull git repository.
+        """
+        if os.path.exists(self.repo_dir):
+            print(f'{self.repo_dir} folder already exists.')
+        else:
+            print(f'Clone {self.repo_dir} Repo')
+            Repo.clone_from(self.git_url, self.repo_dir)
+
 
 class PULL_REQUEST_GITHUB(object):
 
@@ -90,7 +116,7 @@ class PULL_REQUEST_GITHUB(object):
         headers = {
             'Authorization': 'Bearer ' + self.github_token,
             'Content-Type': 'application/json'
-                  }
+        }
         response = requests.request("POST", url, headers=headers, data=payload)
         return response
 
@@ -109,7 +135,7 @@ class PULL_REQUEST_GITHUB(object):
         headers = {
             'Authorization': 'Bearer ' + self.github_token,
             'Content-Type': 'application/json'
-                   }
+        }
         response = requests.request("PATCH", url, headers=headers, data=payload)
         if str(response).find(f'<Response [422]>') > -1:
             assignees_owner = "ebc-aixlib-bot"
@@ -117,7 +143,6 @@ class PULL_REQUEST_GITHUB(object):
             payload = "{\r\n" + assignees + ",\r\n" + labels + "\r\n}"
             requests.request("PATCH", url, headers=headers, data=payload)
         print(f'User {assignees_owner} assignee to pull request Number {str(pull_request_number)}')
-
 
     def post_pull_request_comment(self, pull_request_number, post_message):
         """
@@ -135,6 +160,7 @@ class PULL_REQUEST_GITHUB(object):
             'Content-Type': 'application/json'
         }
         response = requests.request("POST", url, headers=headers, data=payload)
+
 
 class Parser:
     def __init__(self, args):
@@ -177,7 +203,7 @@ if __name__ == '__main__':
                                        working_branch=args.working_branch,
                                        github_token=args.github_token)
     message = ""
-   
+
     if args.post_pr_comment is True:
         page_url = f'{args.gitlab_page}/{args.working_branch}/charts'
         print(f'Setting gitlab page url: {page_url}')
@@ -207,8 +233,10 @@ if __name__ == '__main__':
 
         assignees_owner = pull_request.get_github_username(branch=working_branch)
         owner = pull_request.return_owner()
-        pr_response = pull_request.post_pull_request(owner=owner, base_branch=base_branch, pull_request_title=pull_request_title, pull_request_message=message)
+        pr_response = pull_request.post_pull_request(owner=owner, base_branch=base_branch,
+                                                     pull_request_title=pull_request_title,
+                                                     pull_request_message=message)
         pr_number = pull_request.get_pr_number()
-        pull_request.update_pull_request_assignees(pull_request_number=pr_number, assignees_owner=assignees_owner, label_name=label_name)
+        pull_request.update_pull_request_assignees(pull_request_number=pr_number, assignees_owner=assignees_owner,
+                                                   label_name=label_name)
         exit(0)
-

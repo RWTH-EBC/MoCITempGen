@@ -5,132 +5,52 @@ import platform
 import sys
 import time
 from ci_test_config import ci_config
+from ci_tests.py_dym_interface.modelmanagement import ModelManagement
+from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterface
+from ci_tests.structure.sort_mo_model import modelica_model
+from ci_tests.structure.config_structure import data_structure
+from pathlib import Path
 
 
 class StyleCheck(ci_config):
 
-    def __init__(self, dymola, dymola_exception, package, library, dymola_version, changed_models):
+    def __init__(self,
+                 dymola,
+                 dymola_exception,
+                 library: str,
+                 dymola_version: int,
+                 root_library: Path,
+                 working_path: Path = Path(Path.cwd().parent),
+                 add_libraries_loc: dict = None,
+                 inst_libraries: list = None
+                 ):
         """
         Class to Check the style of packages and models.
         Export HTML-Log File.
         Args:
             dymola (): dymola_python interface class
             dymola_exception (): dymola_exception class
-            package (): package to test
             library (): library to test
             dymola_version (): dymola version (e.g. 2022)
-            changed_models (): boolean - True: Check only changed models, False: Check library
         """
-        self.package = package
         self.library = library
         self.dymola_version = dymola_version
-        self.changed_models = changed_models
+        self.working_path = working_path
+        self.add_libraries_loc = add_libraries_loc
+        self.inst_libraries = inst_libraries
+        self.root_library = root_library
         super().__init__()
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
-    def dym_check_lic(self):
-        """
-        Check the dymola license.
-        """
-        dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-        lic_counter = 0
-        while dym_sta_lic_available is False:
-            print(f'{self.CRED} No Dymola License is available {self.CEND} \n Check Dymola license after 180.0 seconds')
-            self.dymola.close()
-            time.sleep(180.0)
-            dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-            lic_counter += 1
-            if lic_counter > 10:
-                if dym_sta_lic_available is False:
-                    print(f'There are currently no available Dymola licenses available. Please try again later.')
-                    self.dymola.close()
-                    exit(1)
-        print(f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
-
-    def _check_library(self):
-        """
-        Load AixLib and check library.
-        """
-        library_check = self.dymola.openModel(self.library)
-        if library_check:
-            print(f'Found {self.library} library and start style check.')
-        elif not library_check:
-            print(f'Path of library {self.library} is wrong. Please Check Path.')
-            exit(1)
-
-    def _set_library_model_management(self):
-        """
-        Load ModelManagement.
-        """
-        if platform.system() == "Windows":
-            self.dymola.ExecuteCommand(
-                'cd("C:\Program Files\Dymola ' + self.dymola_version + '\Modelica\Library\ModelManagement 1.1.8\package.moe");')
-        else:
-            self.dymola.ExecuteCommand(
-                'cd("/opt/dymola-' + self.dymola_version + '-x86_64/Modelica/Library/ModelManagement 1.1.8/package.moe");')
-
-    def style_check(self, models_list):
-        """
-        Start CheckLibrary in ModelManagement.
-        Returns: return a log_file for each model tested
-        """
-        self._check_library()
-        self._set_library_model_management()
-        if self.changed_models is False:
-            print(f'Check package or model: {self.package}')
-            self.dymola.ExecuteCommand('ModelManagement.Check.checkLibrary(false, false, false, true, "' + self.package + '", translationStructure=false);')
-            log_file = self.library.replace("package.mo", self.package + "_StyleCheckLog.html")
-        else:
-            if len(models_list) > 100:
-                print(f'Over 100 changed models. Check all models in AixLib Library\nCheck AixLib Library: {self.package}')
-                self.dymola.ExecuteCommand('ModelManagement.Check.checkLibrary(false, false, false, true, "' + self.package +'", translationStructure=false);')
-                log_file = self.library.replace("package.mo", self.package + "_StyleCheckLog.html")
-            else:
-                changed_model_list = []
-                path = self.library.replace("package.mo", "")
-                for model in models_list:
-                    print(f'Check package or model {model}')
-                    self.dymola.ExecuteCommand('ModelManagement.Check.checkLibrary(false, false, false, true, "' + model + '", translationStructure=false);')
-                    log = codecs.open(f'{path}{model}_StyleCheckLog.html', "r", encoding='utf8')
-                    for line in log:
-                        changed_model_list.append(line)
-                    log.close()
-                    os.remove(f'{path}{model}_StyleCheckLog.html')
-                all_logs = codecs.open(f'{path}{self.package}_StyleCheckLog.html', "w", encoding='utf8')
-                for model in changed_model_list:
-                    all_logs.write(model)
-                all_logs.close()
-                log_file = f'{path}{self.package}_StyleCheckLog.html'
-        self.dymola.close()
-        self.prepare_data(path_list=[self.result_dir , self.result_syntax_dir],
-                          file_path_dict={log_file: self.result_syntax_dir})
-        return log_file
-
-    def sort_mo_models(self):
-        """
-        Returns: return changed models with the last commit push.
-        """
-        try:
-            models_list = []
-            changed_file = codecs.open(self.config_ci_changed_file, "r", encoding='utf8')
-            lines = changed_file.readlines()
-            for line in lines:
-                if line.rfind(".mo") > -1:
-                    model = line[line.rfind(self.package):line.rfind(".mo")].replace(os.sep, ".").lstrip()
-                    models_list.append(model)
-                    continue
-            changed_file.close()
-            if len(models_list) == 0:
-                print("No Models to check")
-                exit(0)
-            else:
-                return models_list
-        except IOError:
-            print(f'Error: File {self.config_ci_changed_file} does not exist.')
-            exit(0)
-
+    def __call__(self):
+        dym_int = PythonDymolaInterface(dymola=self.dymola,
+                                        dymola_exception=self.dymola_exception,
+                                        dymola_version=self.dymola_version)
+        # dym_int.dym_check_lic()
+        dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
+        dym_int.install_library(libraries=self.inst_libraries)
 
     def read_log(self, file):
         """
@@ -147,56 +67,13 @@ class StyleCheck(ci_config):
                 print(f'{self.CRED}Error in model: {self.CEND}{line.lstrip()}')
                 error_list.append(line)
         log_file.close()
+        data_structure().prepare_data(source_target_dict={file: self.result_syntax_dir})
         if len(error_list) == 0:
-            print(f'{self.green}Style check of model or package {self.package} was successful{self.CEND}')
+            print(f'{self.green}Style check for library {self.library} was successful{self.CEND}')
             return 0
         elif len(error_list) > 0:
-            print(f'{self.CRED}Test failed. Look in {self.package}_StyleErrorLog.html{self.CEND}')
+            print(f'{self.CRED}Test failed. Look in {self.library}_StyleErrorLog.html{self.CEND}')
             return 1
-
-def _setEnvironmentVariables(var, value):
-    """
-    Add to the environment variable 'var' the value 'value'
-    Args:
-        var ():
-        value ():
-    """
-    if var in os.environ:
-        if platform.system() == "Windows":
-            os.environ[var] = value + ";" + os.environ[var]
-        else:
-            os.environ[var] = value + ":" + os.environ[var]
-    else:
-        os.environ[var] = value
-
-
-def _setEnvironmentPath(dymola_version):
-    """
-    Checks the Operating System, Important for the Python-Dymola Interface
-    Args:
-        dymola_version (): number of dymola version (e.g. 2023, depends on dymola image)
-    """
-    if platform.system() == "Windows":
-        _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
-        sys.path.insert(0, os.path.join('C:\\',
-                                        'Program Files',
-                                        'Dymola ' + dymola_version,
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    else:
-        _setEnvironmentVariables("LD_LIBRARY_PATH",
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
-        sys.path.insert(0, os.path.join('opt',
-                                        'dymola-' + dymola_version + '-x86_64',
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    print(f'operating system {platform.system()}')
-    sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
 
 
 class Parser:
@@ -206,41 +83,45 @@ class Parser:
     def main(self):
         parser = argparse.ArgumentParser(description="Check the Style of Packages")
         check_test_group = parser.add_argument_group("Arguments to start style tests")
-        check_test_group.add_argument('-s', "--single-package", metavar="AixLib.Package",
-                                      help="Test only the Modelica package AixLib.Package")
-        check_test_group.add_argument("-p", "--library", default=".",
+        check_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
+                                      help="Library to test (e.g. Airflow.Multizone)")
+        check_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"),
+                                      help="root of library",
+                                      type=Path)
+        check_test_group.add_argument("--library", default="AixLib",
                                       help="Path where top-level package.mo of the library is located")
-        check_test_group.add_argument("-DS", "--dymola-version", default="2022",
+        check_test_group.add_argument("--dymola-version", default="2022",
                                       help="Version of Dymola(Give the number e.g. 2022")
-        check_test_group.add_argument("-CM", "--changed-models", default=False, action="store_true")
+        check_test_group.add_argument("--changed-flag", default=False, action="store_true")
         args = parser.parse_args()
         return args
 
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    _setEnvironmentPath(dymola_version=args.dymola_version)
-    from dymola.dymola_interface import DymolaInterface
-    from dymola.dymola_exception import DymolaException
-    print(f'1: Starting Dymola instance')
-    if platform.system() == "Windows":
-        dymola = DymolaInterface()
-        dymola_exception = DymolaException()
-    else:
-        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
-        dymola_exception = DymolaException()
+    dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
+    dymola = dym[0]
+    dymola_exception = dym[1]
+
+    mm = ModelManagement(dymola=dymola,
+                         dymola_exception=dymola_exception,
+                         dymola_version=args.dymola_version)
+    mm.load_model_management()
     CheckStyle = StyleCheck(dymola=dymola,
                             dymola_exception=dymola_exception,
-                            package=args.single_package,
                             library=args.library,
                             dymola_version=args.dymola_version,
-                            changed_models=args.changed_models)
-    CheckStyle.dym_check_lic()
-    model_list = []
-    if args.changed_models is False:
-        model_list = [args.single_package]
-    if args.changed_models is True:
-        model_list = CheckStyle.sort_mo_models()
-    logfile = CheckStyle.style_check(models_list=model_list)
+                            root_library=args.root_library,
+                            working_path=Path(Path.cwd().parent),
+                            add_libraries_loc=None,
+                            inst_libraries=None)
+    CheckStyle()
+    mo = modelica_model()
+    model_list = mo.get_option_model(library=args.library,
+                                     package="",
+                                     changed_flag=args.changed_flag)
+    logfile = mm.mm_style_check(models_list=model_list,
+                                library=args.library,
+                                changed_flag=args.changed_flag)
     var = CheckStyle.read_log(file=logfile)
     exit(var)

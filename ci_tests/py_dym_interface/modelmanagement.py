@@ -1,7 +1,8 @@
 import os
 import platform
 from ci_test_config import ci_config
-
+from pathlib import Path
+import codecs
 
 class ModelManagement(ci_config):
 
@@ -41,6 +42,37 @@ class ModelManagement(ci_config):
             model_list.remove(ext)
         model_list = list(set(model_list))
         return model_list
+
+    def mm_style_check(self, library: str, models_list: list = None, changed_flag: bool = False):
+        log_file = Path(Path.cwd(), library, f'{library}_StyleCheckLog.html')
+        if changed_flag is True:
+            if len(models_list) > 100:
+                print(f'Check all models in {library} library\n')
+                sm = f'ModelManagement.Check.checkLibrary(false, false, false, true, "{library}", translationStructure=false);'
+                self.dymola.ExecuteCommand(sm)
+                self.dymola.close()
+            else:
+                changed_model_list = []
+                for model in models_list:
+                    print(f'Check model {model} \n')
+                    sm = f'ModelManagement.Check.checkLibrary(false, false, false, true, "{model}", translationStructure=false);'
+                    self.dymola.ExecuteCommand(sm)
+                    log = codecs.open(str(Path(Path.cwd(), library, f'{model}_StyleCheckLog.html')), "r", encoding='utf8')
+                    for line in log:
+                        changed_model_list.append(line)
+                    log.close()
+                    os.remove(Path(Path.cwd(), library, f'{model}_StyleCheckLog.html'))
+                all_logs = codecs.open(str(log_file), "w", encoding='utf8')
+                for model in changed_model_list:
+                    all_logs.write(model)
+                all_logs.close()
+
+        else:
+            print(f'Check all models in {library} library\n')
+            sm = f'ModelManagement.Check.checkLibrary(false, false, false, true, "{library}", translationStructure=false);'
+            self.dymola.ExecuteCommand(sm)
+            self.dymola.close()
+        return log_file
 
     def get_extended_examples(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.AST.Classes.ExtendsInClass("{model}");')

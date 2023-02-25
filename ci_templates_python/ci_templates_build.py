@@ -401,26 +401,25 @@ class ci_templates(ci_template_config):
         ci_temp = Path(self.temp_ci_dir, self.temp_ci_style_check_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
-        yml_text = my_template.render(image_name=self.image_name,
-                                     ci_stage_style_check=self.ci_stage_style_check,
-                                     python_version=self.python_version,
-                                     dymola_python_test_url=self.dymola_python_test_url,
-                                     dymola_version=self.dymola_version,
-                                     library=self.library,
-                                     except_commit_list=self.except_commit_list,
-                                     except_branch_list=self.except_branch_list,
-                                     config_ci_changed_file=self.config_ci_changed_file.replace(os.sep, "/"),
-                                     merge_branch=merge_branch,
-                                     expire_in_time=self.expire_in_time,
-                                     xvfb_flag=self.xvfb_flag,
-                                     ci_style_commit=self.ci_style_commit,
-                                     dymola_python_syntax_test_file=self.dymola_python_syntax_test_file.replace(os.sep,
-                                                                                                                "/"),
-                                     dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
-                                         os.sep, "/"),
-                                     html_praefix=self.html_praefix,
-                                     result_dir=self.result_dir.replace(os.sep, "/"),
-                                     dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
+        arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_syntax_test_file).name.replace(".py", ""),
+                                             repl_parser_arg={"changed_flag": False})
+        arg_push = self.rule.write_parser_args(py_file=Path(self.dymola_python_syntax_test_file).name.replace(".py", ""),
+                                               repl_parser_arg={"changed_flag": True})
+
+        yml_text = my_template.render(image_name=self.dym_image,
+                                      ci_stage_style_check=self.ci_stage_style_check,
+                                      python_version=self.python_version,
+                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      dymola_python_dir=self.dymola_python_dir,
+                                      dymola_python_syntax_test_file=self.dymola_python_syntax_test_file,
+                                      xvfb_flag=self.xvfb_flag,
+                                      library=self.library[0],
+                                      commit_string=self.commit_string,
+                                      PR_main_branch_rule=self.pr_main_branch_rule,
+                                      ci_style_commit=self.ci_style_commit,
+                                      result_dir=self.result_dir,
+                                      arg_PR=arg_PR,
+                                      arg_Push=arg_push)
         ci_folder = Path(self.temp_dir, self.temp_ci_style_check_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_style_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")

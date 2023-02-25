@@ -9,8 +9,8 @@ import buildingspy.development.regressiontest as regression
 from ci_test_config import ci_config
 from ci_tests.structure.config_structure import data_structure
 from pathlib import Path
-from Dymola_python_tests.ci_tests.structure.modelmanagement import ModelManagement
 from Dymola_python_tests.ci_tests.structure.sort_mo_model import modelica_model
+from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterface
 
 
 class Buildingspy_Regression_Check(ci_config):
@@ -328,54 +328,6 @@ class Ref_model(ci_config):
             return mos_list
 
 
-class python_dymola_interface(ci_config):
-
-    def __init__(self, dymola, dymola_exception):
-        """
-
-        Args:
-            dymola (): python-dymola interface
-            dymola_exception (): python-exception interface
-        """
-        super().__init__()
-        self.dymola = dymola
-        self.dymola_exception = dymola_exception
-        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
-
-    def library_check(self, library):
-        """
-        Check, if library is existing and opened correctly
-        """
-        library_check = self.dymola.openModel("package.mo")
-        if library_check is True:
-            print(f'Found {library}{os.sep}package.mo Library. Start regression test.')
-        elif library_check is False:
-            print(f'Library Path "{library}{os.sep}package.mo" is wrong. Please Check Path of {library} Library Path')
-            exit(1)
-
-    def dym_check_lic(self):
-        """
-        check dymola license.
-        """
-        dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-        lic_counter = 0
-        while dym_sta_lic_available is False:
-            print(f'{self.CRED} No Dymola License is available {self.CEND} \n Check Dymola license after 180.0 seconds')
-            self.dymola.close()
-            time.sleep(180.0)
-            dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-            lic_counter += 1
-            if lic_counter > 30:
-                if dym_sta_lic_available is False:
-                    print(f'There are currently no available Dymola licenses available. Please try again later.')
-                    self.dymola.close()
-                    exit(1)
-        print(
-            f'2: Using Dymola port   {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
-
-
-
-
 
 
 
@@ -441,51 +393,6 @@ class Buildingspy_Validate_test(ci_config):
         return 0
 
 
-def _setEnvironmentVariables(var, value):  # Add to the environment variable `var` the value `value`
-    """
-
-    Args:
-        var ():
-        value ():
-    """
-    if var in os.environ:
-        if platform.system() == "Windows":
-            os.environ[var] = value + ";" + os.environ[var]
-        else:
-            os.environ[var] = value + ":" + os.environ[var]
-    else:
-        os.environ[var] = value
-
-
-def _setEnvironmentPath(dymola_version):
-    """
-    Checks the Operating System, Important for the Python-Dymola Interface
-    Args:
-        dymola_version ():
-    """
-    if platform.system() == "Windows":
-        _setEnvironmentVariables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
-        sys.path.insert(0, os.path.join('C:\\',
-                                        'Program Files',
-                                        'Dymola ' + dymola_version,
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    else:
-        _setEnvironmentVariables("LD_LIBRARY_PATH",
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
-                                 os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
-        sys.path.insert(0, os.path.join('opt',
-                                        'dymola-' + dymola_version + '-x86_64',
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    print(f'operating system {platform.system()}')
-    sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
-
-
 class Parser:
     def __init__(self, args):
         self.args = args
@@ -498,8 +405,12 @@ class Parser:
         unit_test_group.add_argument("--show-gui",
                                      help='Show the GUI of the simulator',
                                      action="store_true")
+        unit_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         unit_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
                                       help="Library to test (e.g. Airflow.Multizone)")
+        unit_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"),
+                                      help="root of library",
+                                      type=Path)
         unit_test_group.add_argument("-p", "--path",
                                      default=".",
                                      help="Path where top-level package.mo of the library is located")
@@ -534,17 +445,9 @@ class Parser:
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    _setEnvironmentPath(dymola_version=args.dymola_version)
-    from dymola.dymola_interface import DymolaInterface
-    from dymola.dymola_exception import DymolaException
-
-    print(f'1: Starting Dymola instance')
-    if platform.system() == "Windows":
-        dymola = DymolaInterface()
-        dymola_exception = DymolaException()
-    else:
-        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
-        dymola_exception = DymolaException()
+    dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
+    dymola = dym[0]
+    dymola_exception = dym[1]
 
     if args.validate_html_only:
         var = Buildingspy_Validate_test(validate=validate,
@@ -562,19 +465,16 @@ if __name__ == '__main__':
                                                                           package=args.packages)
         exit(var)
     else:
-        dym_interface = python_dymola_interface(dymola=dymola,
-                                                dymola_exception=dymola_exception)
-        dym_interface.library_check(library=args.library)
+        dym_interface = PythonDymolaInterface(dymola=dymola,
+                                              dymola_exception=dymola_exception,
+                                              dymola_version=args.dymola_version)
+        dym_interface.dym_check_lic()
+        dym_interface.load_library(root_library=args.root_library,
+                                   add_libraries_loc=None)
         conf = ci_config()
         check = data_structure()
         ref_model = Ref_model(library=args.library)
         package_list = []
-        '''
-        if args.report:
-            u = regression.Tester(tool=args.tool)
-            u.report()
-            exit(0)
-        '''
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)

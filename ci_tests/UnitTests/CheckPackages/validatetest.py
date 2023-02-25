@@ -4,37 +4,15 @@ import glob
 import os
 import platform
 import sys
-import time
-from git import Repo
+import toml
 from natsort import natsorted
 from pathlib import Path
 from ci_test_config import ci_config
 from ci_tests.structure.sort_mo_model import modelica_model
 from ci_tests.structure.toml_to_py import Convert_types
 from ci_tests.structure.config_structure import data_structure
-import toml
-
-
-class GitRepository(object):
-
-    def __init__(self, repo_dir: Path, git_url: str):
-        """
-        Args:
-            repo_dir ():  Folder of the cloned project.
-            git_url (): Git url of the cloned project.
-        """
-        self.repo_dir = repo_dir
-        self.git_url = git_url
-
-    def clone_repository(self):
-        """
-        Pull git repository.
-        """
-        if os.path.exists(self.repo_dir):
-            print(f'{self.repo_dir} folder already exists.')
-        else:
-            print(f'Clone {self.repo_dir} Repo')
-            Repo.clone_from(self.git_url, self.repo_dir)
+from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterface
+from ci_tests.api_script.api_github import GitRepository
 
 
 class CheckPythonDymola(ci_config):
@@ -45,7 +23,7 @@ class CheckPythonDymola(ci_config):
                  library: str,
                  root_library: Path,
                  dymola_version: int = 2022,
-                 working_path: Path = Path(Path.cwd().parent),
+                 working_path: Path = Path(Path.cwd()),
                  add_libraries_loc: dict = None,
                  inst_libraries: list = None):
         """
@@ -69,10 +47,12 @@ class CheckPythonDymola(ci_config):
         self.dymola = dym
         self.dymola_exception = dym_exp
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        self.dymola_log = Path(self.root_library, f'{self.library}-log.txt')
 
     def __call__(self):
         dym_int = PythonDymolaInterface(dymola=self.dymola,
-                                        dymola_exception=self.dymola_exception)
+                                        dymola_exception=self.dymola_exception,
+                                        dymola_version=self.dymola_version)
         dym_int.dym_check_lic()
         dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
@@ -92,7 +72,7 @@ class CheckPythonDymola(ci_config):
         """
         error_model_message_dic = {}
         if len(check_model_list) == 0 or check_model_list is None:
-            print(f'{self.CRED}Error:{self.CEND} Found no models in {self.single_package}.')
+            print(f'{self.CRED}Error:{self.CEND} Found no models.')
             exit(0)
         else:
             for model in check_model_list:
@@ -228,7 +208,7 @@ class CheckPythonDymola(ci_config):
             print(f'{self.green}Dymola check was successful{self.CEND}')
             e_var = 0
         error_log.close()
-        self.prepare_data(source_target_dict={
+        data_structure().prepare_data(source_target_dict={
             check_log: Path(self.result_check_result_dir, f'{self.library}.{pack}'),
             err_log: Path(self.result_check_result_dir, f'{self.library}.{pack}')},
             del_flag=True)
@@ -247,7 +227,8 @@ class CreateWhitelist(ci_config):
                  add_libraries_loc: dict = None,
                  inst_libraries: list = None,
                  repo_dir: Path = None,
-                 git_url: str = None):
+                 git_url: str = None,
+                 root_wh_library: Path = None):
         """
         The class creates a whitelist of faulty models based on wh_library.
         Args:
@@ -260,13 +241,16 @@ class CreateWhitelist(ci_config):
 
         """
         super().__init__()
-        self.wh_root_library = wh_root_library
 
         self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
         self.git_url = git_url
         self.working_path = working_path
+        if git_url is not None and repo_dir is not None:
+            self.root_library = Path(working_path, repo_dir, wh_library, "package.mo")
+        else:
+            self.root_library = root_wh_library
         # [Libraries]
         self.add_libraries_loc = add_libraries_loc
         self.install_libraries = inst_libraries
@@ -279,10 +263,10 @@ class CreateWhitelist(ci_config):
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
     def __call__(self):
-
-        dym_int = PythonDymolaInterface(dymola=self.dymola, dymola_exception=self.dymola_exception)
+        dym_int = PythonDymolaInterface(dymola=self.dymola, dymola_exception=self.dymola_exception,
+                                        dymola_version=self.dymola_version)
         dym_int.dym_check_lic()
-        dym_int.load_library(root_library=root_library, add_libraries_loc=self.add_libraries_loc)
+        dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
 
     def write_exit_log(self, vers_check: bool):
@@ -354,7 +338,7 @@ class CreateWhitelist(ci_config):
         Args:
             model_list (): List of models that are being tested
             version (): version number of whitelist based on the latest Aixlib conversion script.
-            wh_files (): Path to withelist file
+            wh_files (): Path to whitelist file
             simulate_examples() : bool simulate or not
         """
         error_model_message_dic = {}
@@ -390,7 +374,7 @@ class CreateWhitelist(ci_config):
             self.dymola.savelog(f'{dymola_log}')
             self.dymola.close()
             print(f'Whitelist check finished.')
-            self.prepare_data(source_target_dict={
+            data_structure().prepare_data(source_target_dict={
                 err_log: Path(self.result_whitelist_dir, f'{self.wh_library}'),
                 dymola_log: Path(self.result_whitelist_dir, f'{self.wh_library}'),
                 wh_files: Path(self.result_whitelist_dir, f'{self.wh_library}')})
@@ -401,121 +385,6 @@ class CreateWhitelist(ci_config):
             exit(1)
 
 
-class PythonDymolaInterface(ci_config):
-
-    def __init__(self, dymola, dymola_exception, dymola_version: int = 2022):
-        """
-        Args:
-            dymola (): python-dymola interface
-            dymola_exception ():  python-dymola exception
-        """
-        super().__init__()
-        self.dymola = dymola
-        self.dymola_exception = dymola_exception
-        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
-        self.dymola_version = dymola_version
-
-    def dym_check_lic(self):
-        """
-            Check dymola license.
-        """
-        lic_counter = 0
-        dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-        while dym_sta_lic_available is False:
-            print(f'{self.CRED} No Dymola License is available {self.CEND} \n Check Dymola license after 180.0 seconds')
-            self.dymola.close()
-            time.sleep(180.0)
-            dym_sta_lic_available = self.dymola.ExecuteCommand('RequestOption("Standard");')
-            lic_counter += 1
-            if lic_counter > 10:
-                if dym_sta_lic_available is False:
-                    print(f'There are currently no available Dymola licenses available. Please try again later.')
-                    self.dymola.close()
-                    exit(1)
-        print(
-            f'2: Using Dymola port {str(self.dymola._portnumber)} \n {self.green} Dymola License is available {self.CEND}')
-
-    def install_library(self, libraries: list = None):
-        """
-        Args:
-            libraries ():
-        """
-        # Add function if necessary
-        pass
-
-    def load_library(self, root_library: Path = None, add_libraries_loc: dict = None):
-        """
-        Open library in dymola and  checks if the library was opened correctly.
-
-        Args:
-            root_library ():
-            add_libraries_loc ():
-        """
-        if root_library is not None:
-            pack_check = self.dymola.openModel(root_library)
-            print(f'Library path: {self.lib_path}')
-            if pack_check is True:
-                print(
-                    f'Found {self.library} Library and start check model test.\nCheck Package {self.single_package} \n')
-            elif pack_check is False:
-                print(f'Library path is wrong. Please check the path of {self.library} library path.')
-                exit(1)
-        else:
-            print(f'Library path is not set.')
-            exit(1)
-        if add_libraries_loc is not None:
-            for library in add_libraries_loc:
-                lib_path = Path(add_libraries_loc[library], library, "package.mo")
-                load_add_bib = self.dymola.openModel(lib_path)
-                if load_add_bib is True:
-                    print(f'{self.green}Load library {library}:{self.CEND} {lib_path}')
-                else:
-                    print(f'{self.CRED}Error:{self.CEND} Load of library {library} with path {lib_path} failed!')
-                    exit(1)
-
-
-def set_environment_variables(var, value):
-    """
-    Args:
-        var ():
-        value ():
-    """
-    if var in os.environ:
-        if platform.system() == "Windows":
-            os.environ[var] = value + ";" + os.environ[var]
-        else:
-            os.environ[var] = value + ":" + os.environ[var]
-    else:
-        os.environ[var] = value
-
-
-def set_environment_path(dymola_version):
-    """
-    Args:
-        dymola_version (): Version von dymola-docker image (e.g. 2022)
-    Set path of python dymola interface for windows or linux
-    """
-    if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
-        set_environment_variables("PATH", os.path.join(os.path.abspath('.'), "Resources", "Library", "win32"))
-        sys.path.insert(0, os.path.join('C:\\',
-                                        'Program Files',
-                                        'Dymola ' + dymola_version,
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    else:
-        set_environment_variables("LD_LIBRARY_PATH",
-                                  os.path.join(os.path.abspath('.'), "Resources", "Library", "linux32") + ":" +
-                                  os.path.join(os.path.abspath('.'), "Resources", "Library", "linux64"))
-        sys.path.insert(0, os.path.join('opt',
-                                        'dymola-' + dymola_version + '-x86_64',
-                                        'Modelica',
-                                        'Library',
-                                        'python_interface',
-                                        'dymola.egg'))
-    print(f'Operating system {platform.system()}')
-    sys.path.append(os.path.join(os.path.abspath('.'), "..", "..", "BuildingsPy"))
 
 
 class Parser:
@@ -533,7 +402,7 @@ class Parser:
         check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         check_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
                                       help="Library to test (e.g. Airflow.Multizone)")
-        check_test_group.add_argument("--root-library", default=Path(Path.cwd().parent, "AixLib", "package.mo"),
+        check_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"),
                                       help="root of library",
                                       type=Path)
         check_test_group.add_argument("--wh-library", default="IBPSA", help="library on a whitelist")
@@ -541,7 +410,7 @@ class Parser:
                                       help="library on a whitelist")
 
         # [Dymola - settings]
-        check_test_group.add_argument("-DS", "--dymola-version",
+        check_test_group.add_argument("--dymola-version",
                                       default="2022",
                                       help="Version of dymola (Give the number e.g. 2020")
         # [ bool - flag]
@@ -567,18 +436,9 @@ class Parser:
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    set_environment_path(dymola_version=args.dymola_version)
-    from dymola.dymola_interface import DymolaInterface
-    from dymola.dymola_exception import DymolaException
-
-    print(f'1: Starting Dymola instance')
-    if platform.system() == "Windows":
-        dymola = DymolaInterface()
-        dymola_exception = DymolaException()
-    else:
-        dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
-        dymola_exception = DymolaException()
-
+    dym = PythonDymolaInterface().load_dymola_python_interface(dymola_version=args.dymola_version)
+    dymola = dym[0]
+    dymola_exception = dym[1]
     if args.load_setting_flag is True:
         toml_file = f'Dymola_python_tests{os.sep}test_config.toml'
         data = toml.load(f'{toml_file}')
@@ -654,7 +514,8 @@ if __name__ == '__main__':
                              repo_dir=args.repo_dir,
                              git_url=args.git_url,
                              dymola_version=args.dymola_version,
-                             add_libraries_loc=additional_libraries_local)
+                             add_libraries_loc=additional_libraries_local,
+                             root_wh_library=args.root_wh_library)
         wh()
         version = wh.read_script_version()
         for options in args.dym_options:
@@ -664,12 +525,13 @@ if __name__ == '__main__':
                                                            wh_file=conf.wh_model_file)
                 wh.write_exit_log(vers_check=version_check)
                 if version_check is False:
+                    root_wh_library = Path(args.wh_library, "package.mo")
                     if args.git_url is not None and args.repo_dir is not None:
                         GitRepository(repo_dir=args.repo_dir,
                                       git_url=args.git_url).clone_repository()
-                        root_wh_library = Path(args.working_path, args.repo_dir, args.wh_library, "package.mo")
+                        root_wh_library = Path(Path.cwd(), args.repo_dir, args.wh_library, "package.mo")
                     elif args.root_wh_library is None:
-                        root_wh_library = Path(Path.cwd().parent, args.wh_library, "package.mo")
+                        root_wh_library = Path(Path.cwd(), args.wh_library, "package.mo")
                     elif args.root_wh_library is not None:
                         root_wh_library = args.root_wh_library
                     check.check_file_setting(root_wh_library)
@@ -693,12 +555,13 @@ if __name__ == '__main__':
                                                            wh_file=conf.wh_simulate_file)
                 wh.write_exit_log(vers_check=version_check)
                 if version_check is False:
+                    root_wh_library = Path(args.wh_library, "package.mo")
                     if args.git_url is not None and args.repo_dir is not None:
                         GitRepository(repo_dir=args.repo_dir,
                                       git_url=args.git_url).clone_repository()
-                        root_wh_library = Path(args.working_path, args.repo_dir, args.wh_library, "package.mo")
+                        root_wh_library = Path(Path.cwd(), args.repo_dir, args.wh_library, "package.mo")
                     elif args.root_wh_library is None:
-                        root_wh_library = Path(Path.cwd().parent, args.wh_library, "package.mo")
+                        root_wh_library = Path(Path.cwd(), args.wh_library, "package.mo")
                     elif args.root_wh_library is not None:
                         root_wh_library = args.root_wh_library
                     check.check_file_setting(root_wh_library)
