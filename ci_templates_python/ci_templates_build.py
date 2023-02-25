@@ -358,53 +358,50 @@ class ci_templates(ci_template_config):
         """
          Write HTML template
         """
-        if self.wh_library is not None:
-            merge_branch = f'- {self.wh_library}_Merge'
-            git = f'--git-url {self.git_url} --wh-library {self.wh_library}'
-        else:
-            git = ""
-            merge_branch = ""
-        my_template = Template(filename=self.temp_ci_html_file)
-        yml_text = my_template.render(image_name=self.image_name,
+
+        ci_temp = Path(self.temp_ci_dir, self.temp_ci_html_file)
+        print(f"Write {ci_temp}")
+        my_template = Template(filename=str(ci_temp))
+        yml_text = my_template.render(image_name=self.dym_image,
                                       ci_stage_html_check=self.ci_stage_html_check,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
+                                      html_praefix=self.html_praefix,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
-                                      config_ci_exit_file=self.config_ci_exit_file.replace(os.sep, "/"),
-                                      ci_correct_html_commit=self.ci_correct_html_commit,
-                                      library=self.library,
-                                      except_commit_list=self.except_commit_list,
-                                      except_branch_list=self.except_branch_list,
-                                      html_praefix=self.html_praefix,
-                                      merge_branch=merge_branch,
-                                      ci_html_commit=self.ci_html_commit,
-                                      git=git,
-                                      bot_update_wh_commit=self.bot_update_wh_commit,
-                                      wh_html_file=self.wh_html_file.replace(os.sep, "/"),
-                                      ci_create_html_wh_commit=self.ci_create_html_wh_commit,
-                                      dymola_python_html_tidy_file=self.dymola_python_html_tidy_file.replace(os.sep,
-                                                                                                             "/"),
-                                      dymola_python_api_github_file=self.dymola_python_api_github_file.replace(os.sep,
-                                                                                                               "/"),
-                                      bot_create_html_file_commit=self.bot_create_html_file_commit,
+                                      dymola_python_dir=self.dymola_python_dir,
+                                      dymola_python_html_tidy_file=self.dymola_python_html_tidy_file,
+                                      arg_correct_html="2",
+                                      result_dir=self.result_dir,
                                       expire_in_time=self.expire_in_time,
-                                      result_dir=self.result_dir.replace(os.sep, "/"),
-                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_html_file.split(os.sep)[-2]}'
-        self.check_path_setting(ci_folder)
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_html_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+                                      commit_string=self.commit_string,
+                                      library=self.library[0],
+                                      PR_main_branch_rule=self.pr_main_branch_rule,
+                                      ci_html_commit=self.ci_html_commit,
+                                      dymola_python_api_github_file=self.dymola_python_api_github_file,
+                                      arg_PR="2",
+                                      arg_wh="arg_wh",
+                                      arg_push="2",
+                                      bot_create_html_file_commit=self.bot_create_html_file_commit,
+                                      bot_update_wh_commit=self.bot_update_wh_commit,
+                                      wh_html_file=self.wh_html_file,
+                                      ci_create_html_wh_commit=self.ci_create_html_wh_commit)
+
+        ci_folder = Path(self.temp_dir, self.temp_ci_html_file).parent
+        data_structure().create_path(ci_folder)
+        yml_tmp = open(Path(ci_folder, Path(self.temp_ci_html_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
+
 
     def write_style_template(self):
         """
         Write Style Check template
         """
-        merge_branch = f'- {self.wh_library}_Merge'
-        mytemplate = Template(filename=self.temp_ci_style_check_file)
-        yml_text = mytemplate.render(image_name=self.image_name,
+        ci_temp = Path(self.temp_ci_dir, self.temp_ci_style_check_file)
+        print(f"Write {ci_temp}")
+        my_template = Template(filename=str(ci_temp))
+        yml_text = my_template.render(image_name=self.image_name,
                                      ci_stage_style_check=self.ci_stage_style_check,
                                      python_version=self.python_version,
                                      dymola_python_test_url=self.dymola_python_test_url,
@@ -424,12 +421,12 @@ class ci_templates(ci_template_config):
                                      html_praefix=self.html_praefix,
                                      result_dir=self.result_dir.replace(os.sep, "/"),
                                      dymola_python_dir=self.dymola_python_dir.replace(os.sep, "/"))
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-2]}'
-        self.check_path_setting(ci_folder)
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
+        ci_folder = Path(self.temp_dir, self.temp_ci_style_check_file).parent
+        data_structure().create_path(ci_folder)
+        yml_tmp = open(Path(ci_folder, Path(self.temp_ci_style_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
         yml_tmp.write(yml_text.replace('\n', ''))
         yml_tmp.close()
+
 
     def write_ci_whitelist_setting_template(self):
         """
@@ -518,10 +515,6 @@ class ci_templates(ci_template_config):
         yml_tmp.close()
 
     def write_regression_template(self):
-        if self.merge_branch is not None:
-            merge_branch = f'- {self.wh_library}_Merge'
-        else:
-            merge_branch = ""
 
         ci_temp = Path(self.temp_ci_dir, self.temp_ci_regression_file)
         print(f"Write {ci_temp}")
@@ -1483,11 +1476,12 @@ if __name__ == '__main__':
             if temp == "regression":
                 ci.write_regression_template()
                 pass
-            """
             if temp == "html":
                 ci.write_html_template()
+
             if temp == "style":
                 ci.write_style_template()
+                """
             if temp == "Merge" and data_dict["wh_libraries"] is not None:
                 ci.write_merge_template()"""
         #ci.write_ci_whitelist_setting_template()

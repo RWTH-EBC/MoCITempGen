@@ -1,3 +1,24 @@
+#  image_name : ${image_name}
+#  ci_stage_html_check : ${ci_stage_html_check}
+# ci_stage_html_whitelist : ${ci_stage_html_whitelist}
+#  ci_stage_open_PR : ${ci_stage_open_PR}
+#  html_praefix : ${html_praefix}
+# python_version : ${python_version}
+# dymola_python_test_url : ${dymola_python_test_url}
+# dymola_python_dir : ${dymola_python_dir}
+# ${dymola_python_html_tidy_file} : dymola_python_html_tidy_file
+# arg_correct_html: ${arg_correct_html}
+# result_dir : ${result_dir}
+# expire_in_time : ${expire_in_time}
+# commit_string : ${commit_string}
+# library : ${library}
+# PR_main_branch_rule : ${PR_main_branch_rule}
+# ci_html_commit : ${ci_html_commit}
+# ${dymola_python_api_github_file} : dymola_python_api_github_file
+# arg_PR : ${arg_PR}
+# arg_wh : ${arg_wh}
+# bot_create_html_file_commit : ${bot_create_html_file_commit}
+
 image: ${image_name}
 stages:
     - ${ci_stage_html_check}
@@ -8,26 +29,66 @@ variables:
     Praefix_Branch: ${html_praefix}
     Newbranch: $Praefix_Branch$CI_COMMIT_REF_NAME
 
-Correct_check_HTML:
+
+
+.html_rules:PR:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+          changes:
+            - ${library}/
+          when: on_success
+        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
+          when: on_success
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_html_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+.html_rules:push:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+          changes:
+            -  ${library}/
+          when: on_success
+        - if:  (${PR_main_branch_rule})
+          when: never
+
+
+Check_HTML:PR:
     stage: ${ci_stage_html_check}
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
+        - python ${dymola_python_html_tidy_file} ${arg_PR}
     artifacts:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     except:
         refs:
-            - external_pull_requests 
-    only:
+            - external_pull_requests
+    rules:
+        - !reference [.html_rules:PR , rules]
+
+Check_HTML:push:
+    stage: ${ci_stage_html_check}
+    before_script:
+        - source activate ${python_version}
+        - git clone ${dymola_python_test_url}
+        - pip install -r ${dymola_python_dir}/requirements.txt
+    script:
+        - python ${dymola_python_html_tidy_file} ${arg_push}
+    artifacts:
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    except:
         refs:
-            - /^${html_praefix}.*$/
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /${bot_create_html_file_commit}/
+            - external_pull_requests
+    rules:
+        - !reference [.html_rules:push , rules]
+
+
 
 Open_Pull_HTML_Request:
     stage: ${ci_stage_open_PR}
@@ -38,142 +99,16 @@ Open_Pull_HTML_Request:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python ${dymola_python_api_github_file} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME --github-token $GITHUB_API_TOKEN --create-pr --correct-html
+        - python ${dymola_python_api_github_file} ${arg_PR}
     except:
         refs:
             - external_pull_requests
-    only:
+    rules:
+        if $COmmit
         refs:
             - /^${html_praefix}.*$/
         variables:
             - $CI_COMMIT_MESSAGE =~ /${bot_create_html_file_commit}/
-
-HTML_PR_Checks:
-    stage: ${ci_stage_html_check}
-    before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    only:
-        refs:
-            - external_pull_requests
-    except:
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-  
-HTML_Check:
-    stage: ${ci_stage_html_check}
-    before_script:
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
-    after_script:
-        - source activate ${python_version}
-        - if cat ${config_ci_exit_file} | grep "exit 1"; then
-            mkdir CorrectedVersion &&  cd CorrectedVersion ;
-            git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
-            cd $CI_PROJECT_NAME;
-            git clone ${dymola_python_test_url} ;
-            pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
-            git checkout -B $Newbranch;
-            message="${bot_create_html_file_commit}";
-            git add ${library} ;
-            echo $message;
-            git commit -m "$message" ;
-            git push --force git@github.com:$Github_Repository.git;
-            wait ;
-            exit 1;
-          else 
-            exit 0; 
-          fi
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
-            - /^${html_praefix}.*$/
-            ${merge_branch}
-        variables:
-            %for commit in except_commit_list:
-            - $CI_COMMIT_MESSAGE  =~ /${commit}/
-            %endfor
-
-CI_HTML_Check:
-    stage: ${ci_stage_html_check}
-    before_script:
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
-    script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
-    after_script:
-        - source activate ${python_version}
-        - if cat ${config_ci_exit_file} | grep "exit 1"; then
-            mkdir CorrectedVersion &&  cd CorrectedVersion ;
-            git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
-            cd $CI_PROJECT_NAME;
-            git clone ${dymola_python_test_url} ;
-            pip install -r ${dymola_python_dir}/requirements.txt ;
-            python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
-            git checkout -B $Newbranch;
-            message="${bot_create_html_file_commit}";
-            git add ${library} ;
-            git commit -m "$message" ;
-            git push --force git@github.com:$Github_Repository.git;
-            wait ;
-            exit 1;
-          else 
-            exit 0; 
-          fi
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_html_commit}/
-
 
 
 html_whitelist_job:
@@ -196,7 +131,7 @@ html_whitelist_job:
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url} ;
         - pip install -r ${dymola_python_dir}/requirements.txt
-        - python ${dymola_python_html_tidy_file} --whitelist ${git}
+        - python ${dymola_python_html_tidy_file} ${arg_wh}
         - message="${bot_update_wh_commit}"
         - git add ${wh_html_file}
         - git commit -m "$message"
@@ -204,7 +139,7 @@ html_whitelist_job:
     artifacts:
         paths:
             - ${result_dir}/
-        expire_in: 7 day 
+        expire_in: 7 day
     only:
         variables:
             - $CI_COMMIT_MESSAGE =~ /${ci_create_html_wh_commit}/

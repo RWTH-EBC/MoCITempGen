@@ -3,7 +3,7 @@ import platform
 from ci_test_config import ci_config
 
 
-class Model_Management(ci_config):
+class ModelManagement(ci_config):
 
     def __init__(self,
                  dymola,
@@ -36,20 +36,18 @@ class Model_Management(ci_config):
                     if extended_model.find(f'{types}') > -1:
                         extended_list.append(extended_model)
                         continue
-                    else:
-                        continue
         extended_list = list(set(extended_list))
         for ext in extended_list:
             model_list.remove(ext)
         model_list = list(set(model_list))
         return model_list
 
-    def _get_extended_examples(self, model: str = ""):
+    def get_extended_examples(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.AST.Classes.ExtendsInClass("{model}");')
         extended_list = self._filter_modelica_types(model_list=model_list)
         return extended_list
 
-    def _get_used_models(self, model: str = ""):
+    def get_used_models(self, model: str = ""):
         model_list = self.dymola.ExecuteCommand(f'ModelManagement.Structure.Instantiated.UsedModels("{model}");')
         extended_list = self._filter_modelica_types(model_list=model_list)
         return extended_list
