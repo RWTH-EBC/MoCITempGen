@@ -12,7 +12,7 @@
 # ci_trigger_ibpsa_commit : ${ci_trigger_ibpsa_commit}
 # expire_in_time : ${expire_in_time}
 # dymola_python_html_tidy_file : ${dymola_python_html_tidy_file}
-# arg_wh : ${arg_wh}
+# arg_wh_html : ${arg_wh_html}
 # arg_wh_check : ${arg_wh_check}
 # arg_wh_sim : ${arg_wh_sim}
 # dymola_python_test_validate_file : ${dymola_python_test_validate_file}
@@ -81,7 +81,7 @@ WhiteList:
 
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
-        - python ${dymola_python_html_tidy_file} ${arg_wh}
+        - python ${dymola_python_html_tidy_file} ${arg_wh_html}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh_check}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh_sim}
         - python ${dymola_python_lock_model_file}   ${arg_lock}
@@ -114,5 +114,6 @@ IBPSA_Pull_Request:
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
        - python  ${dymola_python_api_github_file} ${arg_api_pr}
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == /${merge_branch}/ &&   $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
-          when: always
+    rules:
+       - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == /${merge_branch}/ &&   $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
+         when: always

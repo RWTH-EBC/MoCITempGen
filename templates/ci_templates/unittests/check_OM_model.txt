@@ -13,7 +13,7 @@
 # ${arg_push}
 # ${packages}
 # ${dymola_python_dir}
-
+# dymola_python_test_dir : ${dymola_python_test_dir}
 
 stages:
     - ${ci_stage_OM_model_check}
@@ -44,6 +44,8 @@ stages:
     before_script:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - PYTHONPATH=${dymola_python_test_dir}
+        - export PYTHONPATH
     script:
         - su -l openmodelicausers -s /bin/bash && python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:

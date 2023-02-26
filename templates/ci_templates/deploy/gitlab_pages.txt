@@ -21,7 +21,7 @@ pages:
          - public
         expire_in: ${expire_in_time}
     rules:
-        - if:   && (${PR_main_branch_rule})
+        - if:   (${PR_main_branch_rule})
           when: never
 
     allow_failure: true 

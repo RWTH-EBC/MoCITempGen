@@ -653,6 +653,8 @@ class Parser:
         parser.add_argument("--wh-library", default="IBPSA", help="Library that is written to a whitelist")
         parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                             help="url repository of library for whitelist")
+        parser.add_argument("--repo-dir", default="modelica-ibpsa",
+                            help="url repository of library for whitelist")
         parser.add_argument("--root-wh-library",
                             help="library on a whitelist")
         # [ bool - flag]
@@ -687,7 +689,7 @@ if __name__ == '__main__':
                                    path=args.root_wh_library,
                                    simulate_flag=False,
                                    extended_ex_flag=False)
-        htmlWhitelist().whitelist.write_whitelist(model_list=model_list)
+        htmlWhitelist().write_whitelist(model_list=model_list)
         data_structure.prepare_data(source_target_dict={conf.wh_html_file: conf.result_whitelist_dir})
         exit(0)
     html_tidy_check = HTML_Tidy(package=args.packages,

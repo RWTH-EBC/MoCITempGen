@@ -259,8 +259,9 @@ class ci_templates(ci_template_config):
                                                                 "changed_flag": True})
 
         yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
                                       commit_string=self.commit_string,
-                                      library=self.library[0],
+                                      library=self.library,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_OM_check_commit=self.ci_OM_check_commit,
                                       OM_Image=self.OM_Image,
@@ -270,7 +271,7 @@ class ci_templates(ci_template_config):
                                       expire_in_time=self.expire_in_time,
                                       arg_PR=arg_PR,
                                       arg_push=arg_push,
-                                      packages=self.package_list[self.library[0]],
+                                      packages=self.package_list[self.library],
                                       dymola_python_dir=self.dymola_python_dir)
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_check_file).parent
         data_structure().create_path(ci_folder)
@@ -338,10 +339,10 @@ class ci_templates(ci_template_config):
         ci_temp = Path(self.temp_ci_dir, self.temp_ci_html_file)
         print(f"Write {ci_temp}")
         arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
-                                             repl_parser_arg={"packages": self.library[0], "correct_view_flag": True,
+                                             repl_parser_arg={"packages": self.library, "correct_view_flag": True,
                                                               "log_flag": True, "filter_whitelist_flag": True }, out=["git_url"])
         arg_push = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
-                                               repl_parser_arg={"packages": self.library[0],
+                                               repl_parser_arg={"packages": self.library,
                                                                 "changed_flag": True}, out=["git_url"])
         arg_wh = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
                                              repl_parser_arg={"whitelist_flag": True,
@@ -367,7 +368,7 @@ class ci_templates(ci_template_config):
                                       result_dir=self.result_dir,
                                       expire_in_time=self.expire_in_time,
                                       commit_string=self.commit_string,
-                                      library=self.library[0],
+                                      library=self.library,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_html_commit=self.ci_html_commit,
                                       dymola_python_api_github_file=self.dymola_python_api_github_file,
@@ -406,7 +407,7 @@ class ci_templates(ci_template_config):
                                       dymola_python_dir=self.dymola_python_dir,
                                       dymola_python_syntax_test_file=self.dymola_python_syntax_test_file,
                                       xvfb_flag=self.xvfb_flag,
-                                      library=self.library[0],
+                                      library=self.library,
                                       commit_string=self.commit_string,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_style_commit=self.ci_style_commit,
@@ -454,32 +455,58 @@ class ci_templates(ci_template_config):
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         merge_branch = f'{self.wh_library}_Merge'
+        arg_wh_html = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
+            repl_parser_arg={"whitelist_flag": True}, out=["packages" ])
+        arg_lib = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_library_merge_file).name.replace(".py", ""),
+            repl_parser_arg={"changed_flag": True})
+        arg_wh_check = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
+            repl_parser_arg={"changed_flag": False, "dym_options": "DYM_CHECK",
+                             "create_wh_flag" : True, })
+        arg_wh_sim = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
+            repl_parser_arg={"changed_flag": False,
+                             "create_wh_flag": True,
+                             "dym_options": "DYM_SIM"})
+        arg_lock = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_lock_model_file).name.replace(".py", ""),
+            repl_parser_arg={"changed_flag": False,
+                             "create_wh_flag": True,
+                             "dym_options": "DYM_SIM"})
+
+        arg_api_pr  = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_lock_model_file).name.replace(".py", ""),
+            repl_parser_arg={"gitlab_page": self.gitlab_page,
+                             "dym_options": "DYM_SIM"})
+
         yml_text = my_template.render(image_name=self.dym_image,
                                       ci_stage_lib_merge=self.ci_stage_lib_merge,
                                       ci_stage_update_whitelist=self.ci_stage_update_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
-                                      git_url="2",
-                                      library=self.library[0],
-                                      merge_branch="2",
+                                      git_url=self.git_url,
+                                      library=self.library,
+                                      merge_branch=merge_branch,
                                       dymola_python_library_merge_file=self.dymola_python_library_merge_file,
-                                      arg_lib="2",
+                                      arg_lib=arg_lib,
                                       ci_trigger_ibpsa_commit=self.ci_trigger_ibpsa_commit,
                                       expire_in_time=self.expire_in_time,
                                       dymola_python_html_tidy_file=self.dymola_python_html_tidy_file,
-                                      arg_wh=2,
-                                      arg_wh_check=2,
-                                      arg_wh_sim=2,
+                                      arg_wh_html=arg_wh_html,
+                                      arg_wh_check=arg_wh_check,
+                                      arg_wh_sim=arg_wh_sim,
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file,
                                       xvfb_flag=self.xvfb_flag,
-                                      arg_lock=2,
+                                      arg_lock=arg_lock,
                                       dymola_python_lock_model_file=self.dymola_python_lock_model_file,
                                       wh_library=self.wh_library,
                                       bot_merge_commit=self.bot_merge_commit,
                                       result_dir=self.result_dir,
                                       dymola_python_api_github_file=self.dymola_python_api_github_file,
-                                      arg_api_pr=2,
+                                      arg_api_pr=arg_api_pr,
                                       dymola_python_dir=self.dymola_python_dir)
         ci_folder = Path(self.temp_dir, self.temp_ci_ibpsa_merge_file).parent
         data_structure().create_path(ci_folder)
@@ -502,8 +529,8 @@ class ci_templates(ci_template_config):
                              "changed_flag": True})
         arg_create_plots = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
-            repl_parser_arg={"packages": self.library[0], "create_layout_flag": True,
-                             "library": self.library[0]})
+            repl_parser_arg={"packages": self.library, "create_layout_flag": True,
+                             "library": self.library})
         arg_chart = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package", "funnel_comp_flag": True,
@@ -542,7 +569,7 @@ class ci_templates(ci_template_config):
                                       dymola_python_api_github_file=self.dymola_python_api_github_file,
                                       arg_create_plots=arg_create_plots,
                                       api_github_arg=api_github_arg,
-                                      library=self.library[0],
+                                      library=self.library,
                                       xvfb_flag=self.xvfb_flag,
                                       dymola_python_structure_file=self.dymola_python_structure_file,
                                       arg_ref=arg_ref,
@@ -569,7 +596,7 @@ class ci_templates(ci_template_config):
 
         yml_text = my_template.render(ci_stage_OM_simulate=self.ci_stage_OM_simulate,
                                       commit_string=self.commit_string,
-                                      library=self.library[0],
+                                      library=self.library,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_OM_sim_commit=self.ci_OM_simulate_commit,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -611,7 +638,7 @@ class ci_templates(ci_template_config):
                                       ci_stage_model_check=self.ci_stage_model_check,
                                       ci_stage_create_whitelist=self.ci_stage_create_whitelist,
                                       commit_string=self.commit_string,
-                                      library=self.library[0],
+                                      library=self.library,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_check_commit=self.ci_check_commit,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -623,7 +650,7 @@ class ci_templates(ci_template_config):
                                       arg_push=arg_push,
                                       arg_wh=arg_wh,
                                       arg_PR=arg_PR,
-                                      package_list=self.package_list[self.library[0]],
+                                      package_list=self.package_list[self.library],
                                       config_ci_exit_file=self.config_ci_exit_file,
                                       bot_update_model_wh_commit=self.bot_update_model_wh_commit,
                                       wh_model_file=self.wh_model_file,
@@ -660,7 +687,7 @@ class ci_templates(ci_template_config):
                                       arg_PR=arg_PR,
                                       commit_string=self.commit_string,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
-                                      library=self.library[0],
+                                      library=self.library,
                                       ci_check_commit=self.ci_stage_simulate,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -801,7 +828,6 @@ class ci_templates(ci_template_config):
         stage_list = list(set(stage_list))
         new_list = []
         for stage in self.stage_list:
-            print(stage)
             for st in stage_list:
                 if stage == st:
                     new_list.append(stage)
@@ -1435,12 +1461,11 @@ if __name__ == '__main__':
     to_parser.overwrite_arg_parser_toml()
     if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
-        print(data_dict["stages"].values())
-        ci = ci_templates(library=data_dict["library"],
+        ci = ci_templates(library=data_dict["library"][0],
                           package_list=data_dict["packages"],
                           dymola_version=data_dict["dymola_version"],
                           python_version=data_dict["conda_environment"],
-                          wh_library=data_dict["wh_library"].keys(),
+                          wh_library=list(data_dict["wh_library"].keys())[0],
                           git_url=data_dict["conda_environment"],
                           wh_path=data_dict["conda_environment"],
                           github_repo=data_dict["github_repository"],
