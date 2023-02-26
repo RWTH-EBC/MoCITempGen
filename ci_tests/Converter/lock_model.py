@@ -153,8 +153,8 @@ class Parser:
     def main(self):
         parser = argparse.ArgumentParser(description='Lock models.')
         unit_test_group = parser.add_argument_group("arguments to run class Lock_model")
-        unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-        unit_test_group.add_argument("-wh-l", "--lock-library", help="Library to lock")
+        unit_test_group.add_argument("--library", default="AixLib", help="Library to test")
+        unit_test_group.add_argument("--lock-library", default="IBPSA", help="Library to lock")
         args = parser.parse_args()
         return args
 

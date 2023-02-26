@@ -1,17 +1,16 @@
 [api_github.Parser]
-correct_branch = "${Newbranch}"
 github_repository = "RWTH-EBC/AixLib"
 working_branch = "${TARGET_BRANCH}"
 base_branch = "main"
 github_token = "${GITHUB_API_TOKEN}"
-prepare_plot = false
-show_plot = false
-post_pr_comment = false
-create_pr = false
-correct_html = false
-ibpsa_merge = false
-merge_request = false
 gitlab_page = " https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
+prepare_plot_flag = false
+show_plot_flag = false
+post_pr_comment_flag = false
+create_pr_flag = false
+correct_html_flag = false
+ibpsa_merge_flag = false
+merge_request = false
 
 [api_slack.Parser]
 github_token = "${GITHUB_API_TOKEN}"
@@ -24,22 +23,22 @@ config_dir = false
 create_path = false
 
 [google_charts.Parser]
-line_html = false
-create_layout = false
-line_matplot = false
-new_ref = false
-error = false
-show_ref = false
-update_ref = false
-show_package = false
-single_package = "None"
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
 library = [ "AixLib",]
-funnel_comp = false
-ref_txt = false
+line_html_flag = true
+error_flag = true
+funnel_comp_flag = true
+create_layout_flag = true
+line_matplot_flag = false
+new_ref_flag = false
+show_ref_flag = false
+update_ref_flag = false
+show_package_flag = false
+ref_txt_flag = false
 
 [lock_model.Parser]
 library = [ "AixLib",]
-lock_library = "None"
+lock_library = "IBPSA"
 
 [library_merge.Parser]
 library_dir = "AixLib\\Resources\\Scripts"
@@ -49,23 +48,23 @@ library = [ "AixLib",]
 merge_library = "IBPSA"
 
 [html_tidy_errors.Parser]
-correct_overwrite = false
-correct_backup = false
-log = false
-single_package = "None"
-path = "."
-whitelist = false
-correct_view = false
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
 library = [ "AixLib",]
 wh_library = [ "IBPSA",]
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
-filter_whitelist = false
+correct_overwrite_flag = false
+correct_backup_flag = false
+log_flag = false
+whitelist_flag = false
+correct_view_flag = false
+filter_whitelist_flag = false
 
 [StyleChecking.Parser]
-single_package = "None"
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
+root_library = [ "..\\AixLib\\package.mo",]
 library = [ "AixLib",]
 dymola_version = "2022"
-changed_models = false
+changed_flag = true
 
 [OM_Check.Parser]
 library = [ "AixLib",]
@@ -79,19 +78,20 @@ load_setting_flag = false
 om_options = [ "OM_CHECK",]
 
 [reference_check.Parser]
-batch = false
-show_gui = false
-single_package = "None"
-path = "."
 library = [ "AixLib",]
-number_of_processors = 16
+packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete",]
+root_library = [ "..\\AixLib\\package.mo",]
+path = "."
+show_gui = false
+number_of_processors = 4
 tool = "dymola"
 dymola_version = "2022"
+batch = true
 coverage_only = false
 create_ref = false
 ref_list = false
 update_ref = false
-modified_models = false
+changed_flag = true
 validate_html_only = false
 validate_experiment_setup = false
 report = false

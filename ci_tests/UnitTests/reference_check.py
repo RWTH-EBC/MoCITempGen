@@ -1,9 +1,7 @@
 import argparse
 import multiprocessing
 import os
-import platform
 import sys
-import time
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
 from ci_test_config import ci_config
@@ -15,18 +13,18 @@ from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterfac
 
 class Buildingspy_Regression_Check(ci_config):
 
-    def __init__(self, buildingspy_regression, package, n_pro, tool, batch, show_gui, path, library):
+    def __init__(self, buildingspy_regression, pack, n_pro, tool, batch, show_gui, path, library):
         """
         Args:
             buildingspy_regression (): library buildingspy: use for regression tests
-            package (): package to be checked
+            pack (): package to be checked
             n_pro (): number of processors
             tool (): dymola or Openmodelica
             batch (): boolean: - False: interactive with script (e.g. generate new regression-tests) - True: No interactive with script
             show_gui (): show_gui (): True - show dymola, false - dymola hidden.
             path (): Path where top-level package.mo of the library is located
         """
-        self.package = package
+        self.package = pack
         self.n_pro = n_pro
         self.tool = tool
         self.batch = batch
@@ -35,7 +33,7 @@ class Buildingspy_Regression_Check(ci_config):
         self.library = library
         super().__init__()
         self.wh_ref_file = Path("..", self.wh_ref_file)
-        self.config_ci_exit_file = Path("..",self.config_ci_exit_file)
+        self.config_ci_exit_file = Path("..", self.config_ci_exit_file)
         self.config_ci_ref_file = Path("..", self.config_ci_ref_file)
         self.ut = buildingspy_regression.Tester(tool=self.tool)
 
@@ -77,9 +75,11 @@ class Buildingspy_Regression_Check(ci_config):
                         print(f'{self.green}Regression test for package:{self.CEND} {package}')
                     self.ut.setSinglePackage(package)
                     response = self.ut.run()
-                    data_structure().prepare_data(source_target_dict={f'simulator-dymola.log': Path("..",self.result_regression_dir, package),
-                                        "unitTests-dymola.log": Path("..", self.result_regression_dir, package),
-                                        "funnel_comp": Path("..", self.result_regression_dir, package, "funnel_comp")})
+                    data_structure().prepare_data(
+                        source_target_dict={f'simulator-dymola.log': Path("..", self.result_regression_dir, package),
+                                            "unitTests-dymola.log": Path("..", self.result_regression_dir, package),
+                                            "funnel_comp": Path("..", self.result_regression_dir, package,
+                                                                "funnel_comp")})
                     if response != 0:
                         err_list.append(package)
                         if self.batch is False:
@@ -328,14 +328,6 @@ class Ref_model(ci_config):
             return mos_list
 
 
-
-
-
-
-
-
-
-
 class Buildingspy_Validate_test(ci_config):
 
     def __init__(self, validate, path):
@@ -396,52 +388,62 @@ class Buildingspy_Validate_test(ci_config):
 class Parser:
     def __init__(self, args):
         self.args = args
+
     def main(self):
         parser = argparse.ArgumentParser(description='Run the unit tests or the html validation only.')
         unit_test_group = parser.add_argument_group("arguments to run unit tests")
-        unit_test_group.add_argument("-b", "--batch",
-                                     action="store_true",
-                                     help="Run in batch mode without user interaction")
-        unit_test_group.add_argument("--show-gui",
-                                     help='Show the GUI of the simulator',
-                                     action="store_true")
+        # [Library - settings]
         unit_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         unit_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
-                                      help="Library to test (e.g. Airflow.Multizone)")
-        unit_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"),
-                                      help="root of library",
-                                      type=Path)
+                                     help="Library to test (e.g. Airflow.Multizone)")
+        unit_test_group.add_argument("--root-library", default=Path("AixLib", "package.mo"),
+                                     help="root of library",
+                                     type=Path)
         unit_test_group.add_argument("-p", "--path",
                                      default=".",
                                      help="Path where top-level package.mo of the library is located")
-        unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-        unit_test_group.add_argument("-n", "--number-of-processors", type=int, default=multiprocessing.cpu_count(),
+        # [Dymola - settings]
+        unit_test_group.add_argument("--show-gui",
+                                     help='Show the GUI of the simulator',
+                                     action="store_true",
+                                     default=False)
+        unit_test_group.add_argument("-n", "--number-of-processors", type=int, default=4,
                                      help='Maximum number of processors to be used')
         unit_test_group.add_argument('-t', "--tool", metavar="dymola", default="dymola",
                                      help="Tool for the regression tests. Set to dymola or jmodelica")
-        unit_test_group.add_argument("-DS", "--dymola-version", default="2022",
+        unit_test_group.add_argument("--dymola-version", default="2022",
                                      help="Version of Dymola(Give the number e.g. 2022")
+        # [ bool - flag]
+        unit_test_group.add_argument("-b", "--batch",
+                                     action="store_true",
+                                     default=True,
+                                     help="Run in batch mode without user interaction")
         unit_test_group.add_argument("--coverage-only",
                                      help='Only run the coverage test',
+                                     default=False,
                                      action="store_true")
         unit_test_group.add_argument("--create-ref",
                                      help='checks if all reference files exist',
+                                     default=False,
                                      action="store_true")
         unit_test_group.add_argument("--ref-list",
                                      help='checks if all reference files exist',
+                                     default=False,
                                      action="store_true")
         unit_test_group.add_argument("--update-ref",
+                                     default=False,
                                      help='update all reference files',
                                      action="store_true")
         unit_test_group.add_argument("--changed-flag",
                                      help='Regression test only for modified models',
                                      default=False,
                                      action="store_true")
-        unit_test_group.add_argument("--validate-html-only", action="store_true")
-        unit_test_group.add_argument("--validate-experiment-setup", action="store_true")
+        unit_test_group.add_argument("--validate-html-only", default=False, action="store_true")
+        unit_test_group.add_argument("--validate-experiment-setup", default=False, action="store_true")
         unit_test_group.add_argument("--report", default=False, action="store_true")
         args = parser.parse_args()
         return args
+
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
@@ -480,7 +482,7 @@ if __name__ == '__main__':
             exit(0)
         dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
-                                                 package=args.packages,
+                                                 pack=args.packages,
                                                  n_pro=args.number_of_processors,
                                                  tool=args.tool,
                                                  batch=args.batch,
@@ -527,11 +529,9 @@ if __name__ == '__main__':
             print(f'Start regression Test.\nTest following packages: {package_list}')
             val = ref_check.check_regression_test(package_list=package_list)
             if len(created_ref_list) > 0:
-                """ self.prepare_data(source_target_dict={
-                    API_log: Path(self.result_OM_check_result_dir, f'{self.library}.{pack}')},
-                    del_flag=True)"""
                 for ref in created_ref_list:
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
-                    check.prepare_data(source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
+                    check.prepare_data(
+                        source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
         ref_check.write_exit_file(var=val)
         exit(val)

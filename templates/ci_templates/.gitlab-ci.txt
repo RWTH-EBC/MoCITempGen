@@ -4,11 +4,7 @@ stages:
     - ${stage}
     %endfor
     
-variables:
-    %for variable in variable_list:
-    ${variable}
-    %endfor
-    
+
 include:
   %for file in file_list:
     - '${file}'  

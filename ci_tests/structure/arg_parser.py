@@ -74,7 +74,7 @@ class argpaser_toml(object):
         pass
 
     def load_python_modules(self):
-        py_f = glob.glob(f'{self.f_path }/**/*.py', recursive=True)
+        py_f = glob.glob(f'{self.f_path}/**/*.py', recursive=True)
         mo_py_files = []
         for file in py_f:
             if file.find("__init__.py") == -1:
@@ -158,9 +158,9 @@ class Pars:
                                       default=False,
                                       action="store_true")
         check_test_group.add_argument("--file-path",
-                                      default=os.path.join("ci_tests"))
+                                      default=os.path.join("Dymola_python_tests", "ci_tests"))
         check_test_group.add_argument("--parse-toml-file",
-                                      default=os.path.join("ci_templates_python", "ci_config", "toml_files", "parser.toml"))
+                                      default=os.path.join("Dymola_python_tests", "ci_templates_python", "ci_config", "toml_files", "parser.toml"))
         check_test_group.add_argument("--python-file",
                                       default="api_github")
         check_test_group.add_argument("--parser-arg",

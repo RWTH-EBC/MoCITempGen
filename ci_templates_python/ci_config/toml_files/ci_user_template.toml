@@ -76,6 +76,8 @@ ci_stage_html_check = "HTML_Check"
 ci_stage_style_check = "Style_check"
 ci_stage_model_check = "model_check"
 ci_stage_simulate = "simulate"
+ci_stage_OM_model_check = "OM_model_check"
+ci_stage_OM_simulate = "OM_simulate"
 ci_stage_regression_test = "RegressionTest"
 ci_stage_update_ref = "Update_Ref"
 ci_stage_plot_ref = "plot_ref"
@@ -85,8 +87,6 @@ ci_stage_update_whitelist = "update_whiteList"
 ci_stage_build_ci_structure = "build_ci_structure"
 ci_stage_deploy = "deploy"
 ci_stage_whitelist_setting = "build_ci_whitelist"
-ci_stage_OM_model_check = "OM_model_check"
-ci_stage_OM_simulate = "OM_simulate"
 
 [[CI_setting]]
 

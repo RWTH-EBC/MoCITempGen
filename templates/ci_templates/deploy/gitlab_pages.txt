@@ -1,7 +1,14 @@
-image: ${image_name}
+# ci_stage_deploy : ${ci_stage_deploy}
+# image_name : ${image_name}
+# result_dir : ${result_dir}
+# expire_in_time : ${expire_in_time}
+# PR_main_branch_rule : ${PR_main_branch_rule}
+
+
 stages:
     - ${ci_stage_deploy}
 pages:
+    image: ${image_name}
     stage: ${ci_stage_deploy}
     before_script:
         - apt-get update -y
@@ -13,10 +20,8 @@ pages:
         paths:
          - public
         expire_in: ${expire_in_time}
-    except:
-        refs:
-            %for branch in except_branch_list:
-            - ${branch}
-            %endfor
-    when: always
+    rules:
+        - if:   && (${PR_main_branch_rule})
+          when: never
+
     allow_failure: true 

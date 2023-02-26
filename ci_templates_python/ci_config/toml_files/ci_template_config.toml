@@ -33,6 +33,8 @@ ci_stage_html_check = 'HTML_Check'
 ci_stage_style_check = 'Style_check'
 ci_stage_model_check = 'model_check'
 ci_stage_simulate = 'simulate'
+ci_stage_OM_model_check = 'OM_model_check'
+ci_stage_OM_simulate = 'OM_simulate'
 ci_stage_regression_test = 'RegressionTest'
 ci_stage_update_ref = 'Update_Ref'
 ci_stage_plot_ref = 'plot_ref'
@@ -42,8 +44,6 @@ ci_stage_update_whitelist = 'update_whiteList'
 ci_stage_build_ci_structure = 'build_ci_structure'
 ci_stage_deploy = 'deploy'
 ci_stage_whitelist_setting = 'build_ci_whitelist'
-ci_stage_OM_model_check = 'OM_model_check'
-ci_stage_OM_simulate = 'OM_simulate'
 
 [Buildingspy_upgrade_url]
 buildingspy_upgrade = 'git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage'
@@ -74,7 +74,7 @@ temp_ci_OM_simulate_file = 'UnitTests/simulate_OM_model.txt'
 temp_dir = 'dymola-ci-tests/ci_templates'
 
 [dymola_python_scripts]
-dymola_python_dir = 'ci_tests'
+dymola_python_dir = 'Dymola_python_tests/ci_tests'
 dymola_python_test_validate_file = 'Dymola_python_tests/ci_tests/UnitTests/CheckPackages/validatetest.py'
 dymola_python_test_reference_file = 'Dymola_python_tests/ci_tests/UnitTests/reference_check.py'
 dymola_python_google_chart_file = 'Dymola_python_tests/ci_tests/Converter/google_charts.py'
@@ -85,6 +85,9 @@ dymola_python_syntax_test_file = 'Dymola_python_tests/ci_tests/SyntaxTests/Style
 dymola_python_configuration_file = 'Dymola_python_tests/CI_test_config.py'
 OM_python_check_model_file = 'Dymola_python_tests/ci_tests/UnitTests/OM_Check.py'
 dymola_python_structure_file = 'Dymola_python_tests/ci_tests/structure/config_structure.py'
+dymola_python_library_merge_file = 'Dymola_python_tests/ci_tests/deploy/IBPSA_Merge/library_merge.py'
+dymola_python_lock_model_file = 'Dymola_python_tests/CITests/Converter/lock_model.py'
+dymola_python_config_structure_file = 'Dymola_python_tests/ci_tests/structure/config_structure.py'
 
 [interactive_ci_commit]
 ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list

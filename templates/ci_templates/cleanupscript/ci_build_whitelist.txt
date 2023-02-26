@@ -1,9 +1,26 @@
-image: ${image_name}
+# image_name : ${image_name}
+# ci_stage_whitelist_setting : ${ci_stage_whitelist_setting}
+# python_version : ${python_version}
+# dymola_python_test_url: ${dymola_python_test_url}
+# dymola_python_config_structure_file:  ${dymola_python_config_structure_file}
+# arg_struc_wh : ${arg_struc_wh}
+# arg_wh_check : ${arg_wh_check}
+# dymola_python_html_tidy_file: ${dymola_python_html_tidy_file}
+# arg_wh_html : ${arg_wh_html}
+# arg_wh_sim : ${arg_wh_sim}
+# bot_build_whitelist_commit : ${bot_build_whitelist_commit}
+# dymola_ci_test_dir : ${dymola_ci_test_dir}
+# ci_build_whitelist_structure_commit : ${ci_build_whitelist_structure_commit}
+# expire_in_time : ${expire_in_time}
+# xvfb_flag : ${xvfb_flag}
+# dymola_python_test_validate_file : ${dymola_python_test_validate_file}
+
 stages:
     - ${ci_stage_whitelist_setting}
 
 
 CI_Whitelist_Setting:
+    image: ${image_name}
     stage: ${ci_stage_whitelist_setting}
     before_script:
         - source activate ${python_version}
@@ -23,21 +40,19 @@ CI_Whitelist_Setting:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        - python ${dymola_python_configuration_file} create-whitelist
-        - python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - python ${dymola_python_config_structure_file} ${arg_struc_wh}
+        - python ${dymola_python_html_tidy_file} ${arg_wh_html}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} ${arg_wh_check}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} ${arg_wh_sim}
         - message="${bot_build_whitelist_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${dymola_ci_test_dir})
         - git add  $push_model
         - git commit -m "$message"
         - git push --force git@github.com:$Github_Repository.git
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_build_whitelist_structure_commit}/
-    except:
-        refs:
-            - external_pull_requests
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  $CI_COMMIT_MESSAGE  =~ /${ci_build_whitelist_structure_commit}/
+          when: always
+
     artifacts:
         paths:
             - ${dymola_ci_test_dir}

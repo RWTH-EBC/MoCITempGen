@@ -4,14 +4,15 @@ import shutil
 import pandas as pd
 from mako.template import Template
 from ci_test_config import ci_config
+from ci_tests.structure.config_structure import data_structure
 import sys
+from pathlib import Path
 
 class Plot_Charts(ci_config):
 
-    def __init__(self, template, package, library):
+    def __init__(self,  package, library):
         """
         Args:
-            template (): mako template class
             package (): package to plot
             library (): library to plot
         init:
@@ -20,15 +21,14 @@ class Plot_Charts(ci_config):
         """
         self.package = package
         self.library = library
-        self.template = template
         super().__init__()
-        self.f_log = f'{self.library}{os.sep}unitTests-dymola.log'
-        self.csv_file = f'reference.csv'
-        self.test_csv = f'test.csv'
-        self.temp_chart_path = f'{self.chart_dir}{os.sep}{self.package}'
-        self.funnel_path = f'{self.library}{os.sep}funnel_comp'
-        self.ref_path = f'{self.library}{os.sep}{self.library_ref_results_dir}'
-        self.index_html_file = f'{self.temp_chart_path}{os.sep}index.html'
+        self.f_log = Path(self.library, "unitTests-dymola.log")
+        self.csv_file = Path("reference.csv")
+        self.test_csv = Path("test.csv")
+        self.temp_chart_path = Path(self.chart_dir, self.package)
+        self.funnel_path = Path(self.library, "funnel_comp")
+        self.ref_path = Path(self.library, self.library_ref_results_dir)
+        self.index_html_file = Path(self.temp_chart_path, "index.html")
 
     @staticmethod
     def _check_ref_file(reference_file_list):
@@ -74,9 +74,7 @@ class Plot_Charts(ci_config):
             file.close()
             reference_file_list = list()
             for line in lines:
-                if len(line) == 0:
-                    continue
-                else:
+                if len(line) != 0:
                     reference_file_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
                     continue
             if len(reference_file_list) == 0:
@@ -291,8 +289,8 @@ class Plot_Charts(ci_config):
         Returns:
 
         """
-        csv_file = f'{url.strip()}{os.sep}{self.csv_file}'
-        test_csv = f'{url.strip()}{os.sep}{self.test_csv}'
+        csv_file = Path(url.strip(), self.csv_file)
+        test_csv = Path(url.strip(), self.test_csv)
         try:
             var_model = pd.read_csv(csv_file)
             var_test = pd.read_csv(test_csv)
@@ -350,7 +348,7 @@ class Plot_Charts(ci_config):
                     else:
                         print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                         value = self._read_csv_funnel(url=path_name)
-                        my_template = self.template(filename=self.temp_chart_file)
+                        my_template = Template(filename=self.temp_chart_file)
                         html_chart = my_template.render(values=value,
                                                         var=[f'{var}_ref', var],
                                                         model=model,
@@ -365,7 +363,7 @@ class Plot_Charts(ci_config):
             else:
                 print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
                 value = self._read_csv_funnel(url=path_name)
-                my_template = self.template(filename=self.temp_chart_file)
+                my_template = Template(filename=self.temp_chart_file)
                 html_chart = my_template.render(values=value,
                                                 var=[f'{var}_ref', var],
                                                 model=model,
@@ -388,7 +386,7 @@ class Plot_Charts(ci_config):
         else:
             print(
                 f'Plot model: {self.green}{reference_file[reference_file.rfind(os.sep) + 1:]}{self.CEND} with variables:\n{self.green}{legend_list}{self.CEND}\n')
-            my_template = self.template(filename=self.temp_chart_file)
+            my_template = Template(filename=self.temp_chart_file)
             html_chart = my_template.render(values=value_list,
                                             var=legend_list,
                                             model=reference_file,
@@ -412,7 +410,7 @@ class Plot_Charts(ci_config):
         else:
             print(f'Plot model: {self.green}{model}{self.CEND} with variable:{self.green} {var}{self.CEND}')
             value = self._read_csv_funnel(url=path_name)
-            my_template = self.template(filename=self.temp_chart_file)
+            my_template = Template(filename=self.temp_chart_file)
             html_chart = my_template.render(values=value,
                                             var=[f'{var}_ref', var],
                                             model=model,
@@ -429,7 +427,7 @@ class Plot_Charts(ci_config):
         for file in os.listdir(self.temp_chart_path):
             if file.endswith(".html") and file != "index.html":
                 html_file_list.append(file)
-        my_template = self.template(filename=self.temp_index_file)
+        my_template = Template(filename=self.temp_index_file)
         if len(html_file_list) == 0:
             print(f'No html files')
             os.rmdir(self.temp_chart_path)
@@ -441,7 +439,7 @@ class Plot_Charts(ci_config):
             file_tmp.close()
             print(f'Create html file with reference results.')
 
-    def create_layout(self, temp_dir, layout_html_file):
+    def create_layout(self, temp_dir: Path, layout_html_file: Path):
         """
         Creates a layout index that has all links to the subordinate index files.
         """
@@ -455,8 +453,8 @@ class Plot_Charts(ci_config):
             print(f'No html files')
             exit(0)
         else:
-            my_template = self.template(filename=self.temp_layout_file)
-            html_chart = my_template.render(single_package=package_list)
+            my_template = Template(filename=self.temp_layout_file)
+            html_chart = my_template.render(packages=package_list)
             file_tmp = open(layout_html_file, "w")
             file_tmp.write(html_chart)
             file_tmp.close()
@@ -522,39 +520,51 @@ class Parser:
     def main(self):
         parser = argparse.ArgumentParser(description='Plot diagramms')
         unit_test_group = parser.add_argument_group("arguments to plot diagrams")
-        unit_test_group.add_argument("--line-html",
-                                     help='plot a google html chart in line form',
-                                     action="store_true")
-        unit_test_group.add_argument("--create-layout",
-                                     help='Create a layout with a plots',
-                                     action="store_true")
-        unit_test_group.add_argument("--line-matplot",
-                                     help='plot a matlab chart ',
-                                     action="store_true")
-        unit_test_group.add_argument("--new-ref",
-                                     help="Plot new models with new created reference files",
-                                     action="store_true")
-        unit_test_group.add_argument("-e", "--error",
-                                     help='Plot only model with errors',
-                                     action="store_true")
-        unit_test_group.add_argument("--show-ref",
-                                     help='Plot only model on the interact ci list',
-                                     action="store_true")
-        unit_test_group.add_argument("--update-ref",
-                                     help='Plot only updated models',
-                                     action="store_true")
-        unit_test_group.add_argument("--show-package",
-                                     help='Plot only updated models',
-                                     action="store_true")
-        unit_test_group.add_argument('-s', "--single-package",
+        # [Library - settings]
+        unit_test_group.add_argument("--packages",
                                      metavar="Modelica.Package",
                                      help="Test only the Modelica package Modelica.Package")
-        unit_test_group.add_argument("-L", "--library", default="AixLib", help="Library to test")
-        unit_test_group.add_argument('-fun', "--funnel-comp",
+        unit_test_group.add_argument("--library", default="AixLib", help="Library to test")
+        # [ bool - flag]
+        unit_test_group.add_argument("--line-html-flag",
+                                     help='plot a google html chart in line form',
+                                     default=True,
+                                     action="store_true")
+        unit_test_group.add_argument("--error-flag",
+                                     default=True,
+                                     help='Plot only model with errors',
+                                     action="store_true")
+        unit_test_group.add_argument("--funnel-comp-flag", default=True,
                                      help="Take the datas from funnel_comp",
                                      action="store_true")
-        unit_test_group.add_argument('-ref', "--ref-txt",
+        unit_test_group.add_argument("--create-layout-flag",
+                                     default=True,
+                                     help='Create a layout with a plots',
+                                     action="store_true")
+
+        unit_test_group.add_argument("--line-matplot-flag",
+                                     help='plot a matlab chart ',
+                                     default=False,
+                                     action="store_true")
+        unit_test_group.add_argument("--new-ref-flag",
+                                     help="Plot new models with new created reference files",
+                                     default=False,
+                                     action="store_true")
+        unit_test_group.add_argument("--show-ref-flag",
+                                     help='Plot only model on the interact ci list',
+                                     default=False,
+                                     action="store_true")
+        unit_test_group.add_argument("--update-ref-flag",
+                                     help='Plot only updated models',
+                                     default=False,
+                                     action="store_true")
+        unit_test_group.add_argument("--show-package-flag",
+                                     help='Plot only updated models',
+                                     default=False,
+                                     action="store_true")
+        unit_test_group.add_argument("--ref-txt-flag",
                                      help="Take the datas from reference datas",
+                                     default=False,
                                      action="store_true")
         args = parser.parse_args()
         return args
@@ -564,29 +574,26 @@ class Parser:
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    conf = CI_config()
-    conf.check_ci_folder_structure(folders_list=[conf.chart_dir,
-                                                 conf.temp_chart_dir])
-    conf.create_files(files_list=[conf.temp_chart_file,
-                                  conf.temp_index_file,
-                                  conf.temp_layout_file])
-    charts = Plot_Charts(template=Template,
-                         package=args.single_package,
+    conf = ci_config()
+    check = data_structure()
+    check.create_path(conf.chart_dir, conf.temp_chart_dir)
+    check.create_files(conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file)
+    charts = Plot_Charts(package=args.packages,
                          library=args.library)
-    if args.line_html is True:
+    if args.line_html_flag is True:
         charts.check_setting()
         charts.delete_folder()
         charts.check_folder_path()
-        if args.error is True:
+        if args.error_flag is True:
             model_var_list = charts.read_unitTest_log()
             print(f'Plot line chart with different reference results.\n')
             for model_variable in model_var_list:
                 model_variable = model_variable.split(":")
-                if args.funnel_comp is True:
+                if args.funnel_comp_flag is True:
                     charts.mako_line_html_chart(model=model_variable[0],
                                                 var=model_variable[1])
                     pass
-                if args.ref_txt is True:
+                if args.ref_txt_flag is True:
                     ref_file = charts.get_ref_file(model=model_variable[0])
                     if ref_file is None:
                         print(f'Reference file for model {model_variable[0]} does not exist.')
@@ -595,34 +602,32 @@ if __name__ == '__main__':
                         result = charts.get_values(reference_list=ref_file)
                         charts.mako_line_ref_chart(model=model_variable[0],
                                                    var=model_variable[1])
-        if args.new_ref is True:
+        if args.new_ref_flag is True:
             ref_list = charts.get_new_reference_files()
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
-        if args.update_ref is True:
+        if args.update_ref_flag is True:
             ref_list = charts.get_updated_reference_files()
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
-        if args.show_ref is True:
+        if args.show_ref_flag is True:
             ref_list = charts.read_show_reference()
             charts.write_html_plot_templates(reference_file_list=ref_list)
             pass
-        if args.show_package is True:
+        if args.show_package_flag is True:
             folder = charts.get_funnel_comp()
             for ref in folder:
-                if args.funnel_comp is True:
+                if args.funnel_comp_flag is True:
                     charts.mako_line_html_chart(model=ref[:ref.find(".mat")],
                                                 var=ref[ref.rfind(".mat") + 5:])
             pass
         charts.create_index_layout()
-        charts.create_layout(temp_dir=conf.chart_dir,
-                             layout_html_file=f'{conf.chart_dir}{os.sep}index.html')
-        conf.prepare_data(path_list=[conf.result_dir,
-                                     conf.result_plot_dir],
-                          file_path_dict={conf.chart_dir: f'{conf.result_plot_dir}{os.sep}{args.single_package}'})
+        charts.create_layout(temp_dir=Path(conf.chart_dir),
+                             layout_html_file=Path(conf.chart_dir,"index.html"))
+        check.prepare_data(source_target_dict={conf.chart_dir: Path(conf.result_plot_dir, args.packages)})
 
-    if args.create_layout is True:
-        conf.check_ci_folder_structure(folders_list=[f'{conf.result_plot_dir}'])
-        charts.create_layout(temp_dir=f'{conf.result_plot_dir}',
-                             layout_html_file=f'{conf.result_plot_dir}{os.sep}index.html')
+    if args.create_layout_flag is True:
+        check.create_path(Path(conf.result_plot_dir))
+        charts.create_layout(temp_dir=Path(conf.result_plot_dir),
+                             layout_html_file=Path(conf.result_plot_dir, "index.html"))
 

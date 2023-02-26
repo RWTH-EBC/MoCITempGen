@@ -64,9 +64,6 @@ Check_HTML:PR:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
     rules:
         - !reference [.html_rules:PR , rules]
 
@@ -82,9 +79,6 @@ Check_HTML:push:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
-    except:
-        refs:
-            - external_pull_requests
     rules:
         - !reference [.html_rules:push , rules]
 
@@ -99,16 +93,10 @@ Open_Pull_HTML_Request:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
     script:
-        - python ${dymola_python_api_github_file} ${arg_PR}
-    except:
-        refs:
-            - external_pull_requests
+        - python ${dymola_python_api_github_file} ${arg_github_PR}
     rules:
-        if $COmmit
-        refs:
-            - /^${html_praefix}.*$/
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /${bot_create_html_file_commit}/
+        - if: $CI_COMMIT_MESSAGE =~ /${bot_create_html_file_commit}/ && $CI_COMMIT_BRANCH =~ /^${html_praefix}.*$/ && $CI_PIPELINE_SOURCE == "push"
+          when: on_success
 
 
 html_whitelist_job:
@@ -140,9 +128,6 @@ html_whitelist_job:
         paths:
             - ${result_dir}/
         expire_in: 7 day
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /${ci_create_html_wh_commit}/
-    except:
-        refs:
-            - external_pull_requests
+    rules:
+        - if: $CI_COMMIT_MESSAGE =~ /${ci_create_html_wh_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always

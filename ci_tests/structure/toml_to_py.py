@@ -87,7 +87,7 @@ if __name__ == '__main__':
         to.write_python_ci_test_config(config_list=config,
                                        temp_file=os.path.join(Path.cwd(),"Dymola_python_tests", "templates", "config_templates",
                                                               "ci_test_config.txt"),
-                                       py_file=Path(Path.cwd(), "ci_test_config.py"))
+                                       py_file=Path(Path.cwd(), "Dymola_python_tests", "ci_test_config.py"))
     if arg.create_ci_temp_config is True:
         to = toml_to_py()
         config = to.load_toml(toml_file=Path(Path.cwd(), "Dymola_python_tests", "ci_templates_python", "ci_config", "toml_files",

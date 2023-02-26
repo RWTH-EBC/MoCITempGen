@@ -85,7 +85,7 @@ class Parser:
         check_test_group = parser.add_argument_group("Arguments to start style tests")
         check_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
                                       help="Library to test (e.g. Airflow.Multizone)")
-        check_test_group.add_argument("--root-library", default=Path(Path.cwd(), "AixLib", "package.mo"),
+        check_test_group.add_argument("--root-library", default=Path("AixLib", "package.mo"),
                                       help="root of library",
                                       type=Path)
         check_test_group.add_argument("--library", default="AixLib",

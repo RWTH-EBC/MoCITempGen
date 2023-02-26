@@ -5,6 +5,9 @@ from git import Repo
 from tidylib import tidy_document
 from ci_test_config import ci_config
 import sys
+from ci_tests.structure.config_structure import data_structure
+from ci_tests.api_script.api_github import GitRepository
+from ci_tests.structure.sort_mo_model import modelica_model
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -615,40 +618,16 @@ class HTML_Tidy(ci_config):
         return library_list
 
 
-class HTML_whitelist(ci_config):
+class htmlWhitelist(ci_config):
 
-    def __init__(self, wh_library, git_url):
+    def __init__(self):
         """
         Args:
-            wh_library (): Name of whitelist library
-            git_url (): clone git url
         """
-        self.wh_library = wh_library
-        self.git_url = git_url
         super().__init__()
 
-    def call_whitelist(self):
-        """
-        Create a whitelist of a library
-        """
-        self._clone_repository()
-        model_list = self._get_whitelist_model()
-        self._write_whitelist(model_list=model_list)
-        self.prepare_data(
-            path_list=[self.result_dir, self.result_whitelist_dir],
-                          file_path_dict={self.wh_html_file: self.result_whitelist_dir})
 
-    def _clone_repository(self):
-        """
-        Pull git repository.
-        """
-        if os.path.exists(self.wh_library):
-            print(f'{self.wh_library} folder already exists.')
-        else:
-            print(f'Clone {self.wh_library} Repo')
-            Repo.clone_from(self.git_url, self.wh_library)
-
-    def _write_whitelist(self, model_list):
+    def write_whitelist(self, model_list):
         """
         write a whitelist with models
         Args:
@@ -659,19 +638,7 @@ class HTML_whitelist(ci_config):
             file.write("\n" + model + ".mo" + "\n")
         file.close()
 
-    def _get_whitelist_model(self):
-        """
-        Create a new whiteList
-        """
-        model_list = []
-        for subdir, dirs, files in os.walk(self.wh_library):
-            for file in files:
-                filepath = subdir + os.sep + file
-                if filepath.endswith(".mo"):
-                    model = filepath.replace(os.sep, ".")
-                    model = model[model.rfind(self.wh_library):model.rfind(".mo")]
-                    model_list.append(model)
-        return model_list
+
 
 class Parser:
     def __init__(self, args):
@@ -680,53 +647,60 @@ class Parser:
     def main(self):
         parser = argparse.ArgumentParser(
             description='Run HTML correction on files')
-        parser.add_argument("--correct-overwrite", action="store_true", default=False,
-                            help="correct html code in modelica files and overwrite old files")
-        parser.add_argument("--correct-backup", action="store_true", default=False,
-                            help="backup old files")
-        parser.add_argument("--log", action="store_true",
-                            default=False, help="create logfile of model with errors")
-        parser.add_argument('-s', "--single-package", metavar="AixLib.Package",
+        # [Library - settings]
+        parser.add_argument("--packages", metavar="AixLib.Package",
                             help="Package to test for a html test")
-        parser.add_argument("-p", "--path", default=".",
-                            help="Path where top-level package.mo of the library is located")
-        parser.add_argument("--whitelist", action="store_true", default=False,
-                            help="Create a new whitelist for a Library")
-        parser.add_argument("--correct-view", action="store_true", default=False,
-                            help="Check and print the Correct HTML Code")
-        parser.add_argument("-L", "--library", default="AixLib", help="Library to test")
+        parser.add_argument("--library", default="AixLib", help="Library to test")
         parser.add_argument("--wh-library", default="IBPSA", help="Library that is written to a whitelist")
         parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                             help="url repository of library for whitelist")
-        parser.add_argument("--filter-whitelist", default=False, action="store_true", help="Argument for ")
+        parser.add_argument("--root-wh-library",
+                                      help="library on a whitelist")
+        # [ bool - flag]
+        parser.add_argument("--correct-overwrite-flag", action="store_true", default=False,
+                            help="correct html code in modelica files and overwrite old files")
+        parser.add_argument("--correct-backup-flag", action="store_true", default=False,
+                            help="backup old files")
+        parser.add_argument("--log-flag", action="store_true",
+                            default=False, help="create logfile of model with errors")
+
+        parser.add_argument("--whitelist-flag", action="store_true", default=False,
+                            help="Create a new whitelist for a Library")
+        parser.add_argument("--correct-view-flag", action="store_true", default=False,
+                            help="Check and print the Correct HTML Code")
+        parser.add_argument("--filter-whitelist-flag", default=False, action="store_true", help="Argument for ")
         args = parser.parse_args()
         return args
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-
     conf = ci_config()
-    conf.check_ci_folder_structure(folders_list=[conf.config_ci_dir])
-    conf.create_files(files_list=[conf.config_ci_exit_file])
-    if args.whitelist is True:
-        conf.check_ci_folder_structure(folders_list=[conf.wh_ci_dir])
-        conf.create_files(files_list=[conf.wh_html_file])
-        whitelist = HTML_whitelist(wh_library=args.wh_library, git_url=args.git_url)
-        print(f'Create a whitelist of {args.wh_library} Library')
-        whitelist.call_whitelist()
-
+    check = data_structure()
+    check.create_path(conf.config_ci_dir)
+    check.create_files(conf.config_ci_exit_file)
+    if args.whitelist_flag is True:
+        check.create_path(conf.wh_ci_dir)
+        check.create_files(conf.wh_html_file)
+        GitRepository(repo_dir=args.root_wh_library, git_url=args.git_url).clone_repository()
+        mo = modelica_model()
+        model_list = mo.get_models(library=args.wh_library,
+                                    path=args.root_wh_library,
+                                    simulate_flag=False,
+                                    extended_ex_flag=False)
+        htmlWhitelist().whitelist.write_whitelist(model_list=model_list)
+        data_structure.prepare_data(source_target_dict={conf.wh_html_file: conf.result_whitelist_dir})
         exit(0)
-    html_tidy_check = HTML_Tidy(package=args.single_package,
-                                correct_overwrite=args.correct_overwrite,
-                                correct_backup=args.correct_backup,
-                                log=args.log,
-                                correct_view=args.correct_view,
+    html_tidy_check = HTML_Tidy(package=args.packages,
+                                correct_overwrite=args.correct_overwrite_flag,
+                                correct_backup=args.correct_backup_flag,
+                                log=args.log_flag,
+                                correct_view=args.correct_view_flag,
                                 library=args.library,
                                 wh_library=args.wh_library,
-                                filter_whitelist=args.filter_whitelist)
+                                filter_whitelist=args.filter_whitelist_flag)
     html_tidy_check.run_files()
-    if args.log is True:
+    if args.log_flag is True:
         variable = html_tidy_check.call_read_log()
         exit(variable)
-    if args.correct_overwrite is False and args.correct_backup is False and args.log is False and args.correct_view is False:
+    if args.correct_overwrite_flag is False and args.correct_backup_flag is False and args.log_flag is False and args.correct_view_flag is False:
         print("please use -h or --help for help")
