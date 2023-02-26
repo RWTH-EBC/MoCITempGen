@@ -42,14 +42,10 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - id
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
-        - su -l openmodelicausers -s /bin/bash
-        - id
-        - cd /builds/EBC/EBC_all/github_ci/AixLib
     script:
-        - python3 ${OM_python_check_model_file}  ${arg_PR}
+        - su -l openmodelicausers -s /bin/bash && python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
         when: on_failure
         paths:

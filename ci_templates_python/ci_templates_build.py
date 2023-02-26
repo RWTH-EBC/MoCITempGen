@@ -394,10 +394,10 @@ class ci_templates(ci_template_config):
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_syntax_test_file).name.replace(".py", ""),
-                                             repl_parser_arg={"changed_flag": False})
+                                             repl_parser_arg={"changed_flag": False}, out=["packages"])
         arg_push = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_syntax_test_file).name.replace(".py", ""),
-            repl_parser_arg={"changed_flag": True})
+            repl_parser_arg={"changed_flag": True}, out=["packages"])
 
         yml_text = my_template.render(image_name=self.dym_image,
                                       ci_stage_style_check=self.ci_stage_style_check,
@@ -1126,7 +1126,7 @@ class settings_ci_interactive(ci_template_config):
             library = input(f'Which library should be tested? (e.g. {self.library}): ')
             path_library = input(
                 f'Path of library? (If the library is located in the directory, do not enter an entry.)  ')
-            lib_path = os.path.join("..", path_library, library, "package.mo")
+            lib_path = os.path.join(path_library, library, "package.mo").replace(os.sep, "/")
             self.data.check_file_setting(lib_path)
             libraries_root[library] = lib_path
             _list.append(library)
@@ -1239,7 +1239,7 @@ class settings_ci_interactive(ci_template_config):
                 if response == "y":
                     wh_path = input(
                         f'Specify the local path of the library (eg. ..\..\AixLib). (If the library is located in the directory, do not enter an entry.) ')
-                    lib_path = os.path.join("..", wh_path, wh_library, "package.mo")
+                    lib_path = os.path.join(wh_path, wh_library, "package.mo").replace(os.sep, "/")
                     self.data.check_file_setting(lib_path)
                     print(f'path of library: {lib_path}')
                     wh_library_dict[wh_library] = ("root_wh_library", lib_path)

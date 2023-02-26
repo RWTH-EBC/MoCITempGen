@@ -8,6 +8,7 @@ import sys
 from ci_tests.structure.config_structure import data_structure
 from ci_tests.api_script.api_github import GitRepository
 from ci_tests.structure.sort_mo_model import modelica_model
+
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 """View errors in the HTML code of a Modelica .mo file
@@ -103,7 +104,7 @@ class HTML_Tidy(ci_config):
         Make sure that the parameter rootDir points to a Modelica package.
         Write errors to error message.
         """
-        self._check_arguments(root_dir=self.root_dir)
+        data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
         if self.log:
             error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
@@ -158,10 +159,10 @@ class HTML_Tidy(ci_config):
         """
         err_list = self.read_log_file()
         var = self._write_exit(err_list=err_list)
-        self.prepare_data(del_flag = True,
-                          path_list=[self.result_dir, self.result_syntax_dir],
-                          file_path_dict={self.html_error_log: self.result_syntax_dir,
-                                          self.html_correct_log :self.result_syntax_dir})
+        data_structure().create_path(self.result_dir, self.result_syntax_dir)
+        data_structure().prepare_data(del_flag=True,
+                                      source_target_dict={self.html_error_log: self.result_syntax_dir,
+                                                          self.html_correct_log: self.result_syntax_dir})
         return var
 
     @staticmethod
@@ -177,7 +178,7 @@ class HTML_Tidy(ci_config):
             html_code (): html code of a modelica file
         """
         if len(error_list) > 0:
-            #html_correct_code = html_correct_code.replace(f'\n', "")
+            # html_correct_code = html_correct_code.replace(f'\n', "")
             error_log_file.write(f'\n---- {model_file} ----')
             correct_log_file.write(
                 f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
@@ -626,7 +627,6 @@ class htmlWhitelist(ci_config):
         """
         super().__init__()
 
-
     def write_whitelist(self, model_list):
         """
         write a whitelist with models
@@ -637,7 +637,6 @@ class htmlWhitelist(ci_config):
         for model in model_list:
             file.write("\n" + model + ".mo" + "\n")
         file.close()
-
 
 
 class Parser:
@@ -655,7 +654,7 @@ class Parser:
         parser.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                             help="url repository of library for whitelist")
         parser.add_argument("--root-wh-library",
-                                      help="library on a whitelist")
+                            help="library on a whitelist")
         # [ bool - flag]
         parser.add_argument("--correct-overwrite-flag", action="store_true", default=False,
                             help="correct html code in modelica files and overwrite old files")
@@ -672,6 +671,7 @@ class Parser:
         args = parser.parse_args()
         return args
 
+
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
     conf = ci_config()
@@ -684,9 +684,9 @@ if __name__ == '__main__':
         GitRepository(repo_dir=args.root_wh_library, git_url=args.git_url).clone_repository()
         mo = modelica_model()
         model_list = mo.get_models(library=args.wh_library,
-                                    path=args.root_wh_library,
-                                    simulate_flag=False,
-                                    extended_ex_flag=False)
+                                   path=args.root_wh_library,
+                                   simulate_flag=False,
+                                   extended_ex_flag=False)
         htmlWhitelist().whitelist.write_whitelist(model_list=model_list)
         data_structure.prepare_data(source_target_dict={conf.wh_html_file: conf.result_whitelist_dir})
         exit(0)

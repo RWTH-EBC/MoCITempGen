@@ -9,12 +9,12 @@ config_stages = [
 ]
 
 [[CI_setting]]
-dymola_version = "2022"
+dymola_version = "y"
 
 [[CI_setting]]
 
 [CI_setting.root_library]
-AixLib = "..\\AixLib\\package.mo"
+AixLib = "AixLib/package.mo"
 
 [[CI_setting]]
 library = [
@@ -33,6 +33,12 @@ AixLib = [
     "Fluid",
     "Media",
     "Obsolete",
+    "Resources",
+    "Systems",
+    "ThermalZones",
+    "Types",
+    "UsersGuide",
+    "Utilities",
 ]
 
 [[CI_setting]]
@@ -57,7 +63,7 @@ extended_ex_flag = true
 github_repository = "RWTH-EBC/AixLib"
 
 [[CI_setting]]
-gitlab_page = " https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
+gitlab_page = "https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
 
 [[CI_setting]]
 dymola_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
@@ -110,13 +116,13 @@ ci_merge_except_commit = "ci_merge_except"
 ci_correct_html_commit = "ci_correct_html"
 ci_build_structure_commit = "ci_build_structure"
 ci_build_whitelist_structure_commit = "ci_build_whitelist"
-bot_merge_commit = "CI message from ebc-aixlib-bot. Merge of IBPSA library. Update files ci_whitelist/ci_check_whitelist.txt and ci_whitelist/ci_html_whitelist.txt"
+bot_merge_commit = "CI message from ebc-aixlib-bot. Merge of IBPSA library. Update files dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt and dymola-ci-tests/ci_whitelist/ci_html_whitelist.txt"
 bot_push_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files. Please pull the new files before push again."
 bot_update_wh_commit = "CI message from ebc-aixlib-bot. Update or created new whitelist. Please pull the new whitelist before push again."
 bot_create_ref_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files.Please pull the new files before push again. Plottet Results $GITLAB_Page/$CI_COMMIT_REF_NAME/plots/"
 bot_create_CI_template_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new created CI templates. Please pull the new files before push again."
-bot_update_model_wh_commit = "CI message from ebc-aixlib-bot. Update file ci_whitelist/ci_check_whitelist.txt. Please pull the new files before push again."
-bot_update_example_wh_commit = "CI message from ebc-aixlib-bot. Update file ci_whitelist/ci_simulate_whitelist.txt. Please pull the new files before push again."
+bot_update_model_wh_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt. Please pull the new files before push again."
+bot_update_example_wh_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt. Please pull the new files before push again."
 bot_create_structure_commit = "CI message from ebc-aixlib-bot. Add files for ci structure"
 bot_create_html_file_commit = "CI message from ebc-aixlib-bot. Push new files with corrected html Syntax ."
 bot_build_whitelist_commit = "CI message from ebc-aixlib-bot. Push new created whitelists."
@@ -124,15 +130,19 @@ bot_build_whitelist_commit = "CI message from ebc-aixlib-bot. Push new created w
 [[CI_setting]]
 
 [CI_setting.dymola_python_script]
-dymola_python_test_validate_file = "UnitTests/CheckPackages/validatetest.py"
-dymola_python_test_reference_file = "UnitTests/reference_check.py"
-dymola_python_google_chart_file = "Converter/google_charts.py"
-dymola_python_api_github_file = "api_script/api_github.py"
-dymola_python_deploy_artifacts_file = "deploy/deploy_artifacts.py"
-dymola_python_html_tidy_file = "SyntaxTests/html_tidy_errors.py"
-dymola_python_syntax_test_file = "SyntaxTests/StyleChecking.py"
-dymola_python_configuration_file = "CI_test_config.py"
-OM_python_check_model_file = "CITests/UnitTests/OM_Check.py"
+dymola_python_test_validate_file = "Dymola_python_tests/ci_tests/UnitTests/CheckPackages/validatetest.py"
+dymola_python_test_reference_file = "Dymola_python_tests/ci_tests/UnitTests/reference_check.py"
+dymola_python_google_chart_file = "Dymola_python_tests/ci_tests/Converter/google_charts.py"
+dymola_python_api_github_file = "Dymola_python_tests/ci_tests/api_script/api_github.py"
+dymola_python_deploy_artifacts_file = "Dymola_python_tests/ci_tests/deploy/deploy_artifacts.py"
+dymola_python_html_tidy_file = "Dymola_python_tests/ci_tests/SyntaxTests/html_tidy_errors.py"
+dymola_python_syntax_test_file = "Dymola_python_tests/ci_tests/SyntaxTests/StyleChecking.py"
+dymola_python_configuration_file = "Dymola_python_tests/CI_test_config.py"
+OM_python_check_model_file = "Dymola_python_tests/ci_tests/UnitTests/OM_Check.py"
+dymola_python_structure_file = "Dymola_python_tests/ci_tests/structure/config_structure.py"
+dymola_python_library_merge_file = "Dymola_python_tests/ci_tests/deploy/IBPSA_Merge/library_merge.py"
+dymola_python_lock_model_file = "Dymola_python_tests/CITests/Converter/lock_model.py"
+dymola_python_config_structure_file = "Dymola_python_tests/ci_tests/structure/config_structure.py"
 
 [[CI_setting]]
 
