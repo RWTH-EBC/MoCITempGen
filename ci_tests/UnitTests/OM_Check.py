@@ -38,16 +38,17 @@ class Check_OpenModelica(ci_config):
 
         self.library = library
         # [start openModelica]
-        print(f'1: Starting Dymola instance')
+        print(f'1: Starting OpenModelica instance')
         if platform.system() == "Windows":
             self.omc = OMCSessionZMQ()
 
         else:
-            self.omc = OMCSessionZMQ(dockerOpenModelicaPath="/usr/bin/omc")
+            self.omc = OMCSessionZMQ(dockerOpenModelicaPath="/usr/bin/omc_orig",
+                                     )
             #dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
             #dymola_exception = DymolaException()
         print(f'{self.green}OpenModelica Version number:{self.CEND} {self.omc.sendExpression("getVersion()")}')
-        # [start dymola api]
+        # [start dymola api]1
         self.dym_api = None
 
     def __call__(self):
