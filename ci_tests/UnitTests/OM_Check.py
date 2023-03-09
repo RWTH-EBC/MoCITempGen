@@ -2,7 +2,6 @@ import sys
 from ebcpy import DymolaAPI, TimeSeriesData
 from ebcpy.utils.statistics_analyzer import StatisticsAnalyzer
 from OMPython import OMCSessionZMQ
-
 from ci_test_config import ci_config
 from ci_tests.structure.sort_mo_model import modelica_model
 from ci_tests.structure.toml_to_py import Convert_types
@@ -14,8 +13,7 @@ import matplotlib.pyplot as plt
 import argparse
 import toml
 import os
-
-
+import platform
 
 class Check_OpenModelica(ci_config):
 
@@ -40,7 +38,14 @@ class Check_OpenModelica(ci_config):
 
         self.library = library
         # [start openModelica]
-        self.omc = OMCSessionZMQ()
+        print(f'1: Starting Dymola instance')
+        if platform.system() == "Windows":
+            self.omc = OMCSessionZMQ()
+
+        else:
+            self.omc = OMCSessionZMQ(dockerOpenModelicaPath="/usr/bin/omc")
+            #dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
+            #dymola_exception = DymolaException()
         print(f'{self.green}OpenModelica Version number:{self.CEND} {self.omc.sendExpression("getVersion()")}')
         # [start dymola api]
         self.dym_api = None

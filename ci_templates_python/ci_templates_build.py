@@ -46,14 +46,10 @@ class CI_temp_struc(object):
             pass
 
     def _rekursive_types(self, args):
-
         if isinstance(args, dict):
-
             return self._rekursive_types(args.values())
         else:
             return args
-            # else:
-            # return args
 
     def write_parser_args(self, py_file: str = None, repl_parser_arg: dict = None, out: list = None):
         arg_to = argpaser_toml()
@@ -77,7 +73,6 @@ class CI_temp_struc(object):
                                 if isinstance(repl_parser_arg[rep], bool):
                                     if repl_parser_arg[rep] is True:
                                         arg = f'--{var.replace("_", "-")}  '
-
                                     else:
                                         arg = ""
                                 elif isinstance(repl_parser_arg[rep], dict):
@@ -119,9 +114,6 @@ class CI_temp_struc(object):
                             # print(arg)
                         else:
                             arg = ""
-
-                    # if isinstance(arg_parser[var], dict):
-                    #    var = self._rekursive_types(arg=arg_parser[var])
                     elif isinstance(arg_parser[var], list):
                         value_str = self._arg_list(arg_parser[var])
                         arg = f'--{var.replace("_", "-")} {value_str} '
@@ -137,7 +129,6 @@ class CI_temp_struc(object):
                              rule_option: str = "&&",
                              compare_str: str = "!~",
                              ci_variable: str = None):
-
         if rule_list is not None:
             if isinstance(rule_list, dict):
                 if except_string is not None:
@@ -145,19 +136,16 @@ class CI_temp_struc(object):
                     for var in rule_list:
                         if var != except_string:
                             _list.append(f'{ci_variable}  {compare_str} /{rule_list[var]}/')
-
                 else:
                     _list = []
                     for var in rule_list:
                         _list.append(f'{ci_variable}  {compare_str} /{rule_list[var]}/')
-
                 rule_string = ""
                 for rule in _list:
                     if rule == _list[0]:
                         rule_string = f'{rule}  '
                     else:
                         rule_string = f'{rule_string} {rule_option} {rule}'
-
                 return rule_string
             if isinstance(rule_list, list):
                 if except_string is not None:
@@ -265,6 +253,8 @@ class ci_templates(ci_template_config):
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       ci_OM_check_commit=self.ci_OM_check_commit,
                                       OM_Image=self.OM_Image,
+                                      HOME="${HOME}",
+                                      TIMESTAMP="${TIMESTAMP}",
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       OM_python_check_model_file=self.OM_python_check_model_file,
                                       result_dir=self.result_dir,
