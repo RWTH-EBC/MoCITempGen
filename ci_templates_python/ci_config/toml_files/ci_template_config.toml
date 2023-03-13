@@ -1,6 +1,6 @@
 [arguments]
 dym_image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda'
-OM_Image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:tes_fwu'
+OM_Image = 'registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:main'
 gitlab_page = 'https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib'
 github_repository = 'RWTH-EBC/AixLib'
 wh_library = 'IBPSA'
