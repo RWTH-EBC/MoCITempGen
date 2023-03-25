@@ -123,7 +123,7 @@ class PythonDymolaInterface(ci_config):
                                                         "linux32") + ":" +
                                            os.path.join(os.path.abspath('.'), "Resources", "Library",
                                                         "linux64"))
-            sys.path.insert(0, os.path.join('opt',
+            sys.path.insert(0, os.path.join('/opt',
                                             'dymola-' + dymola_version + '-x86_64',
                                             'Modelica',
                                             'Library',
