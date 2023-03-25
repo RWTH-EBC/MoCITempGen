@@ -100,15 +100,15 @@ class PythonDymolaInterface(ci_config):
         else:
             os.environ[var] = value
 
-    @staticmethod
-    def set_environment_path(dymola_version):
+
+    def set_environment_path(self, dymola_version):
         """
         Args:
             dymola_version (): Version von dymola-docker image (e.g. 2022)
         Set path of python dymola interface for windows or linux
         """
         if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
-            PythonDymolaInterface.set_environment_variables("PATH",
+            self.set_environment_variables("PATH",
                                                             os.path.join(os.path.abspath('.'), "Resources", "Library",
                                                                          "win32"))
             sys.path.insert(0, os.path.join('C:\\',
@@ -119,7 +119,7 @@ class PythonDymolaInterface(ci_config):
                                             'python_interface',
                                             'dymola.egg'))
         else:
-            PythonDymolaInterface.set_environment_variables("LD_LIBRARY_PATH",
+            self.set_environment_variables("LD_LIBRARY_PATH",
                                                             os.path.join(os.path.abspath('.'), "Resources", "Library",
                                                                          "linux32") + ":" +
                                                             os.path.join(os.path.abspath('.'), "Resources", "Library",
@@ -135,7 +135,7 @@ class PythonDymolaInterface(ci_config):
 
     @staticmethod
     def load_dymola_python_interface(dymola_version: int = 2022):
-        PythonDymolaInterface.set_environment_path(dymola_version=dymola_version)
+        PythonDymolaInterface().set_environment_path(dymola_version=dymola_version)
         from dymola.dymola_interface import DymolaInterface
         from dymola.dymola_exception import DymolaException
         print(f'1: Starting Dymola instance')
