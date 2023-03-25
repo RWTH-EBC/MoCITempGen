@@ -85,8 +85,8 @@ class PythonDymolaInterface(ci_config):
                     print(f'{self.CRED}Error:{self.CEND} Load of library {library} with path {lib_path} failed!')
                     exit(1)
 
-    @staticmethod
-    def set_environment_variables(var, value):
+
+    def set_environment_variables(self, var, value):
         """
         Args:
             var ():
@@ -100,7 +100,6 @@ class PythonDymolaInterface(ci_config):
         else:
             os.environ[var] = value
 
-
     def set_environment_path(self, dymola_version):
         """
         Args:
@@ -109,8 +108,8 @@ class PythonDymolaInterface(ci_config):
         """
         if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
             self.set_environment_variables("PATH",
-                                                            os.path.join(os.path.abspath('.'), "Resources", "Library",
-                                                                         "win32"))
+                                           os.path.join(os.path.abspath('.'), "Resources", "Library",
+                                                        "win32"))
             sys.path.insert(0, os.path.join('C:\\',
                                             'Program Files',
                                             'Dymola ' + dymola_version,
@@ -120,10 +119,10 @@ class PythonDymolaInterface(ci_config):
                                             'dymola.egg'))
         else:
             self.set_environment_variables("LD_LIBRARY_PATH",
-                                                            os.path.join(os.path.abspath('.'), "Resources", "Library",
-                                                                         "linux32") + ":" +
-                                                            os.path.join(os.path.abspath('.'), "Resources", "Library",
-                                                                         "linux64"))
+                                           os.path.join(os.path.abspath('.'), "Resources", "Library",
+                                                        "linux32") + ":" +
+                                           os.path.join(os.path.abspath('.'), "Resources", "Library",
+                                                        "linux64"))
             sys.path.insert(0, os.path.join('opt',
                                             'dymola-' + dymola_version + '-x86_64',
                                             'Modelica',
