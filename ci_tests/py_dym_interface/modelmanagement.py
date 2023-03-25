@@ -16,6 +16,8 @@ class ModelManagement(ci_config):
         self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
         self.dymola_version = dymola_version
 
+    #def __call__(self):
+
     def load_model_management(self):
         if platform.system() == "Windows":
             mm_path = f'cd("C:\Program Files\Dymola {str(self.dymola_version)}\Modelica\Library\ModelManagement 1.1.8\package.moe");'

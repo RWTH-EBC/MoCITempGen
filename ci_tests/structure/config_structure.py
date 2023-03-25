@@ -27,12 +27,12 @@ class data_structure(ci_config):
         for i, (var, val) in enumerate(zip(var_names, args)):
             if val is None:
                 print(
-                    f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
+                    f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var.strip()}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
                 print(f'***------****')
                 exit(1)
             else:
                 print(
-                    f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
+                    f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
         print(f'*** ------ ****')
 
     def check_path_setting(self, *args: Path):

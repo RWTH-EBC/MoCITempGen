@@ -46,7 +46,8 @@ class CheckPythonDymola(ci_config):
         # [Start Dymola]
         self.dymola = dym
         self.dymola_exception = dym_exp
-        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        if self.dymola is None:
+            self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
         self.dymola_log = Path(self.root_library, f'{self.library}-log.txt')
 
     def __call__(self):
@@ -98,10 +99,9 @@ class CheckPythonDymola(ci_config):
                         if sec_result is False:
                             print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
                             log = self.dymola.getLastError()
-                            for line in log.split("\n"):
+                            #for line in log.split("\n"):
+                            for line in log:
                                 exception_flag = False
-                                if len(line) == 0:
-                                    continue
                                 if exception_list is not None:
                                     for exception in exception_list:
                                         if exception in line:
@@ -118,9 +118,8 @@ class CheckPythonDymola(ci_config):
                                 print(f'{log}')
                             error_model_message_dic[model] = log
                             continue
-
-                except self.dymola_exception.DymolaFunctionException as err:
-                    print("Simulation failed: " + str(err))
+                except self.dymola_exception as ex:
+                    print("Simulation failed: " + str(ex))
                     continue
         self.dymola.savelog(f'{self.dymola_log}')
         self.dymola.close()
@@ -150,8 +149,6 @@ class CheckPythonDymola(ci_config):
                     warning_list = []
                     for line in error_dict[error_model].split("\n"):
                         exception_flag = False
-                        if len(line) == 0:
-                            continue
                         if exception_list is not None:
                             for exception in exception_list:
                                 if exception in line:
@@ -424,7 +421,7 @@ class Parser:
                                       action="store_true")
         # [dym - Options: DYM_CHECK, DYM_SIM]
         check_test_group.add_argument("--dym-options",
-                                      default=["DYM_CHECK"],
+                                      default=["DYM_CHECK"], nargs="+",
                                       help="Chose between openmodelica check, compare or simulate")
         # [repository - setting ]
         check_test_group.add_argument("--repo-dir", help="folder of a whitelist library ")
@@ -436,7 +433,7 @@ class Parser:
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    dym = PythonDymolaInterface().load_dymola_python_interface(dymola_version=args.dymola_version)
+    dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
     dymola = dym[0]
     dymola_exception = dym[1]
     if args.load_setting_flag is True:
@@ -469,7 +466,6 @@ if __name__ == '__main__':
                             inst_libraries=install_libraries)
     dym()
     model = modelica_model()
-
     for package in args.packages:
         for options in args.dym_options:
             if options == "DYM_CHECK":
@@ -480,6 +476,7 @@ if __name__ == '__main__':
                                                     simulate_flag=False,
                                                     filter_wh_flag=args.filter_wh_flag,
                                                     root_library=args.root_library)
+
                 error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                           exception_list=except_list,
                                                           simulate_examples=False)

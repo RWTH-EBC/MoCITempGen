@@ -21,8 +21,10 @@ class PythonDymolaInterface(ci_config):
         super().__init__()
         self.dymola = dymola
         self.dymola_exception = dymola_exception
-        self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        # todo exception mit einbauen
         self.dymola_version = dymola_version
+        if self.dymola is not None:
+            self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
 
     def dym_check_lic(self):
         """
@@ -141,7 +143,6 @@ class PythonDymolaInterface(ci_config):
             dymola = DymolaInterface()
             dymola_exception = DymolaException()
         else:
-
             dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
             dymola_exception = DymolaException()
         return dymola, dymola_exception

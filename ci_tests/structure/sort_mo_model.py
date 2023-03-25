@@ -28,9 +28,7 @@ class modelica_model(ci_config):
                          root_package: Path = None,
                          modelica_form_flag: bool = True):
         # todo: flag mit einbauen: In zukunft sollen die pfade gegeben werden, nach wunsch auch in modelica form
-
         """
-
         Args:
             library ():
             package ():
@@ -45,9 +43,7 @@ class modelica_model(ci_config):
             path_dir ():
             root_library ():
             root_package ():
-
         Returns:
-
         """
         check = data_structure()
         check.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)
@@ -138,8 +134,6 @@ class modelica_model(ci_config):
         changed_models = open(ch_file, "r", encoding='utf8')
         changed_lines = changed_models.readlines()
         changed_models.close()
-
-
         # List all type of files from changed file
         mos_script_list = self.get_ch_mos_script(ch_lines=changed_lines)
         modelica_model_list = self.get_ch_model(ch_lines=changed_lines)
