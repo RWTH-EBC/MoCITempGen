@@ -555,7 +555,7 @@ class ci_templates(ci_template_config):
                                       arg_push=arg_push,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       commit_string=self.commit_string,
-                                      package_list=self.package_list,
+                                      package_list=self.package_list[self.library],
                                       dymola_python_api_github_file=self.dymola_python_api_github_file,
                                       arg_create_plots=arg_create_plots,
                                       api_github_arg=api_github_arg,
@@ -597,7 +597,7 @@ class ci_templates(ci_template_config):
                                       result_dir=self.result_dir,
                                       OM_Image=self.OM_Image,
                                       expire_in_time=self.expire_in_time,
-                                      packages=self.package_list)
+                                      packages=self.package_list[self.library])
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_simulate_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_OM_simulate_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -683,7 +683,7 @@ class ci_templates(ci_template_config):
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_dir=self.dymola_python_dir,
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file,
-                                      package_list=self.package_list,
+                                      package_list=self.package_list[self.library],
                                       arg_wh=arg_wh,
                                       bot_update_model_wh_commit=self.bot_update_example_wh_commit,
                                       wh_model_file=self.wh_simulate_file,
@@ -716,7 +716,7 @@ class ci_templates(ci_template_config):
             library=self.library,
             wh_library=self.wh_library,
             dymola_version=self.dymola_version,
-            package_list=self.package_list,
+            package_list=self.package_list[self.library],
             stage_list=stage_list,
             merge_branch=self.merge_branch,
             image_name=self.image_name,

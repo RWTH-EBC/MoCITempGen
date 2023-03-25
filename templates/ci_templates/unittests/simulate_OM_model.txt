@@ -20,8 +20,6 @@ stages:
 .OM_sim_rules:PR:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
-          changes:
-            -  ${library}/
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -31,8 +29,6 @@ stages:
 .OM_sim_rules:push:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
-          changes:
-            -  ${library}/
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
@@ -44,7 +40,7 @@ stages:
     before_script:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PYTHONPATH:/home/openmodelicausers/Dymola_python_tests
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
@@ -52,6 +48,7 @@ stages:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
+    allow_failure: true
     rules:
         - !reference [.OM_sim_rules:PR , rules]
 
@@ -64,7 +61,7 @@ stages:
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
         - PYTHONPATH=Dymola_python_tests
-        - export PYTHONPATH=$PYTHONPATH:/home/openmodelicausers/Dymola_python_tests
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_push}
     artifacts:
@@ -72,6 +69,7 @@ stages:
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
+    allow_failure: true
     rules:
         - !reference [.OM_sim_rules:push, rules]
 

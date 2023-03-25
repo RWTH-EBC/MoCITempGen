@@ -33,6 +33,7 @@ CI_Whitelist_Setting:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
+        - export PYTHONPATH=Dymola_python_tests
 
     script:
         - mkdir build_whitelist

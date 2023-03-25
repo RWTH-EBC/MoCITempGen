@@ -21,6 +21,7 @@ scipy
 matplotlib
 lib-platform
 toml
+tomli_w
 git+https://github.com/lbl-srg/BuildingsPy@master
 
 

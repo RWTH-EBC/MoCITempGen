@@ -8,6 +8,7 @@ import sys
 from ci_tests.structure.config_structure import data_structure
 from ci_tests.api_script.api_github import GitRepository
 from ci_tests.structure.sort_mo_model import modelica_model
+from pathlib import Path
 
 # ! /usr/bin/env python3.6
 # -*- coding: utf-8 -*-
@@ -49,8 +50,14 @@ In case of trouble just put the dll in your working dir.
 class HTML_Tidy(ci_config):
     """Class to Check Packages and run CheckModel Tests"""
 
-    def __init__(self, package, correct_overwrite, correct_backup, log, correct_view,
-                 library, wh_library, filter_whitelist):
+    def __init__(self, package: str,
+                 correct_overwrite: bool,
+                 correct_backup: bool,
+                 log: bool,
+                 correct_view: bool,
+                 library: str,
+                 wh_library: str,
+                 filter_whitelist: bool):
         """
 
         Args:
@@ -151,6 +158,58 @@ class HTML_Tidy(ci_config):
         if self.log:
             error_log_file.close()
             correct_log_file.close()
+
+    def check_html_files(self, model_list: list = None):
+        data_structure().check_arguments_settings(self.root_dir)
+        file_counter = 0
+        if self.log:
+            error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
+            print(f'Error-log-file is saved in {self.html_error_log}')
+            correct_log_file = open(f'{self.html_correct_log}', "w", encoding="utf-8")
+            print(f'Correct-log-file is saved in {self.html_correct_log}')
+
+        if model_list is not None:
+            for model in model_list:
+                model_file = Path(model.replace(".", os.sep) + ".mo")  # todo: das kann weg, wenn ich sort angepasst haben
+                correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
+                    model_file=model_file)
+                if self.correct_backup:
+                    self._call_backup_old_files(model_file=model_file,
+                                                document_corr=correct_code,
+                                                file_counter=file_counter)
+                if len(error_list) > 0:
+                    if self.correct_overwrite:
+                        print(f'Error in file {model_file} with error:')
+                        for error in error_list:
+                            print(f'\n{error}\n')
+                        print(f'Overwrite model: {model_file}\n')
+                        self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
+                        if self.log:
+                            correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
+                                model_file=model_file)
+                            self._call_write_log(model_file=model_file,
+                                                 error_log_file=error_log_file,
+                                                 correct_log_file=correct_log_file,
+                                                 error_list=error_list,
+                                                 html_correct_code=html_correct_code,
+                                                 html_code=html_code)
+                    if self.correct_view:
+                        self._call_correct_view(model_file=model_file,
+                                                error_list=error_list,
+                                                html_correct_code=html_correct_code,
+                                                html_code=html_code)
+                        if self.log:
+                            self._call_write_log(model_file=model_file,
+                                                 error_log_file=error_log_file,
+                                                 correct_log_file=correct_log_file,
+                                                 error_list=error_list,
+                                                 html_correct_code=html_correct_code,
+                                                 html_code=html_code)
+            if self.log:
+                error_log_file.close()
+                correct_log_file.close()
+
+
 
     def call_read_log(self):
         """
@@ -663,8 +722,7 @@ class Parser:
         parser.add_argument("--correct-backup-flag", action="store_true", default=False,
                             help="backup old files")
         parser.add_argument("--log-flag", action="store_true",
-                            default=False, help="create logfile of model with errors")
-
+                            default=True, help="create logfile of model with errors")
         parser.add_argument("--whitelist-flag", action="store_true", default=False,
                             help="Create a new whitelist for a Library")
         parser.add_argument("--correct-view-flag", action="store_true", default=False,
@@ -680,11 +738,11 @@ if __name__ == '__main__':
     check = data_structure()
     check.create_path(conf.config_ci_dir)
     check.create_files(conf.config_ci_exit_file)
+    mo = modelica_model()
     if args.whitelist_flag is True:
         check.create_path(conf.wh_ci_dir)
         check.create_files(conf.wh_html_file)
         GitRepository(repo_dir=args.root_wh_library, git_url=args.git_url).clone_repository()
-        mo = modelica_model()
         model_list = mo.get_models(library=args.wh_library,
                                    path=args.root_wh_library,
                                    simulate_flag=False,
@@ -700,7 +758,14 @@ if __name__ == '__main__':
                                 library=args.library,
                                 wh_library=args.wh_library,
                                 filter_whitelist=args.filter_whitelist_flag)
-    html_tidy_check.run_files()
+
+    html_model = mo.get_option_model(library=args.library,
+                                     package=args.library,
+                                     filter_wh_flag=args.filter_whitelist_flag,
+                                     wh_library=args.wh_library,
+                                     root_package=Path(args.library))
+    #html_tidy_check.run_files()
+    html_tidy_check.check_html_files(model_list=html_model)
     if args.log_flag is True:
         variable = html_tidy_check.call_read_log()
         exit(variable)

@@ -8,7 +8,10 @@ import sys
 
 class PythonDymolaInterface(ci_config):
 
-    def __init__(self, dymola: classmethod = None, dymola_exception: classmethod = None, dymola_version: int = 2022):
+    def __init__(self,
+                 dymola: classmethod = None,
+                 dymola_exception: classmethod = None,
+                 dymola_version: int = 2022):
         """
         Args:
             dymola ():
@@ -47,6 +50,7 @@ class PythonDymolaInterface(ci_config):
             libraries ():
         """
         # Add function if necessary
+        # todo: add function to install dymola libraries
         pass
 
     def load_library(self, root_library: Path = None, add_libraries_loc: dict = None):

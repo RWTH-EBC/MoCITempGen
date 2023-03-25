@@ -10,6 +10,7 @@ Test_CI_Setting:
         - source activate ${python_version}
         - pip install toml
         - git clone ${dymola_python_test_url}
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - python Dymola_python_tests/CITests/CleanUp/setting_check.py --github-private-key $GITHUB_PRIVATE_KEY --github-token $GITHUB_API_TOKEN
     only:
@@ -34,6 +35,7 @@ Create_templates:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir build_template && cd build_template
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
@@ -43,6 +45,7 @@ Create_templates:
         - git add .
         - git commit -m "$message"
         - git push git@github.com:$Github_Repository.git
+
     only:
         variables:
             - $CI_COMMIT_MESSAGE  =~ /${ci_setting_commit}/

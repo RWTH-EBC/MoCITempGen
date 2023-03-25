@@ -47,6 +47,7 @@ IBPSA:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
@@ -78,6 +79,7 @@ WhiteList:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
 
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
@@ -112,6 +114,7 @@ IBPSA_Pull_Request:
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
        - python  ${dymola_python_api_github_file} ${arg_api_pr}
     rules:

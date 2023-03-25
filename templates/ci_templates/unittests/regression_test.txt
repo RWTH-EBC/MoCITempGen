@@ -41,8 +41,6 @@ stages:
 .regression_rules:PR:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
-          changes:
-            -  ${library}/
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -52,8 +50,6 @@ stages:
 .regression_rules:Push:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
-          changes:
-            -  ${library}/
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
@@ -67,6 +63,7 @@ stages:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} ${arg_PR}
     after_script:
@@ -95,6 +92,7 @@ stages:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} ${arg_push}
     after_script:
@@ -139,6 +137,7 @@ Regression_overall_coverage:PR:
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -157,6 +156,7 @@ Regression_overall_coverage:Push:
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -175,6 +175,7 @@ prepare_create_plots:Push:
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -196,6 +197,7 @@ prepare_create_plots:PR:
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -227,6 +229,7 @@ RegressionTest_Check_References:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
@@ -267,6 +270,7 @@ plot_reference_results:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot

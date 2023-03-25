@@ -24,13 +24,38 @@ class modelica_model(ci_config):
                          extended_ex_flag: bool = False,
                          dymola_version: int = 2022,
                          path_dir: Path = Path.cwd(),
-                         root_library: Path = None):
+                         root_library: Path = None,
+                         root_package: Path = None,
+                         modelica_form_flag: bool = True):
+        # todo: flag mit einbauen: In zukunft sollen die pfade gegeben werden, nach wunsch auch in modelica form
+
+        """
+
+        Args:
+            library ():
+            package ():
+            dymola ():
+            dymola_exception ():
+            changed_flag ():
+            simulate_flag ():
+            filter_wh_flag ():
+            wh_library ():
+            extended_ex_flag ():
+            dymola_version ():
+            path_dir ():
+            root_library ():
+            root_package ():
+
+        Returns:
+
+        """
         check = data_structure()
         check.check_arguments_settings(package, library, changed_flag, simulate_flag, filter_wh_flag, extended_ex_flag)
         if root_library is None:
             root_library = Path(path_dir, library, "package.mo")
         check.check_file_setting(root_library)
-        root_package = Path(root_library.parent, package.replace(".", os.sep))
+        if root_package is None:
+            root_package = Path(root_library.parent, package.replace(".", os.sep))
         check.check_path_setting(root_package)
         if dymola is None:
             extended_ex_flag = False

@@ -20,9 +20,10 @@ class data_structure(ci_config):
     def check_arguments_settings(self, *args):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
-        r = re.search(r"\((.*)\)", s).group(1)
-        var_names = r.split(", ")
-        print(f'***--- Argument setting---****')
+        #r = re.search(r"\((.*)\)", s).group(1)
+        r = re.search(r"check_arguments_settings\((.*)\)", s).group(1)
+        var_names = r.split(",")
+        print(f'*** --- Argument setting--- ****')
         for i, (var, val) in enumerate(zip(var_names, args)):
             if val is None:
                 print(
@@ -32,7 +33,7 @@ class data_structure(ci_config):
             else:
                 print(
                     f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
-        print(f'***------****')
+        print(f'*** ------ ****')
 
     def check_path_setting(self, *args: Path):
         frame = inspect.currentframe().f_back
@@ -70,28 +71,28 @@ class data_structure(ci_config):
 
     #  [Create Structure]
     def create_path(self, *args: Path):
-        print(f'\n**** Create folder ****\n')
+        print(f'\n**** Create folder ****')
         for arg in args:
             print(f'{self.green}Create Folder:{self.CEND} {arg}')
             os.makedirs(arg, exist_ok=True)
-        print(f'\n**** ----------- ****\n')
+        print(f'**** ----------- ****')
 
     def create_files(self, *args: Path):
         """
         Args:
             files_list ():
         """
-        print(f'\n**** Create file structure ****\n')
+        print(f'\n**** Create file structure ****')
         for file in args:
             if os.path.exists(file):
-                print(f'{file} does exist.')
+                print(f'{self.green}File:{self.CEND} {file} does exist.')
             else:
-                print(f'File {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
+                print(f'{self.CRED}File: {self.CEND}  {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
                 write_file = open(file, "w+")
                 if file is self.config_ci_eof_file:
                     write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
                 write_file.close()
-        print(f'\n**********************\n')
+        print(f'**** ----------- ****')
 
     # [Remove Structure]
     def delete_files_in_path(self, *args: Path):

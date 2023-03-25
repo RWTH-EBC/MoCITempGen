@@ -29,8 +29,6 @@ stages:
 .sim_rules:PR:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
-          changes:
-            - ${library}/
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -40,8 +38,6 @@ stages:
 .sim_rules:Push:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
-          changes:
-            -  ${library}/
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
@@ -53,6 +49,7 @@ stages:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
     artifacts:
@@ -70,6 +67,7 @@ stages:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -r ${dymola_python_dir}/requirements.txt
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:
@@ -111,6 +109,7 @@ check_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
+        - export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git

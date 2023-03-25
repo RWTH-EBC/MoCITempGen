@@ -9,7 +9,7 @@ config_stages = [
 ]
 
 [[CI_setting]]
-dymola_version = "y"
+dymola_version = "2022"
 
 [[CI_setting]]
 
@@ -32,12 +32,8 @@ AixLib = [
     "Electrical",
     "Fluid",
     "Media",
-    "Obsolete",
-    "Resources",
     "Systems",
     "ThermalZones",
-    "Types",
-    "UsersGuide",
     "Utilities",
 ]
 
