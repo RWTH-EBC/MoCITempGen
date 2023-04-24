@@ -396,7 +396,7 @@ class Parser:
         unit_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         unit_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
                                      help="Library to test (e.g. Airflow.Multizone)")
-        unit_test_group.add_argument("--root-library", default=Path("AixLib", "package.mo"),
+        unit_test_group.add_argument("--root-library", default=Path("..", "AixLib", "package.mo"),
                                      help="root of library",
                                      type=Path)
         unit_test_group.add_argument("-p", "--path",
