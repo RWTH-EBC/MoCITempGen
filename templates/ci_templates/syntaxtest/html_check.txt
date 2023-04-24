@@ -33,7 +33,7 @@ variables:
 
 .html_rules:PR:
     rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -53,7 +53,7 @@ Check_HTML:PR:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_html_tidy_file} ${arg_PR}
@@ -69,7 +69,7 @@ Check_HTML:push:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_html_tidy_file} ${arg_push}
@@ -89,7 +89,7 @@ Open_Pull_HTML_Request:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - python ${dymola_python_api_github_file} ${arg_github_PR}
@@ -111,14 +111,14 @@ html_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url} ;
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - python ${dymola_python_html_tidy_file} ${arg_wh}
         - message="${bot_update_wh_commit}"
         - git add ${wh_html_file}

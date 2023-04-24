@@ -742,7 +742,7 @@ if __name__ == '__main__':
     if args.whitelist_flag is True:
         check.create_path(conf.wh_ci_dir)
         check.create_files(conf.wh_html_file)
-        GitRepository(repo_dir=args.root_wh_library, git_url=args.git_url).clone_repository()
+        GitRepository.clone_repository(repo_dir=args.root_wh_library, git_url=args.git_url)
         model_list = mo.get_models(library=args.wh_library,
                                    path=args.root_wh_library,
                                    simulate_flag=False,

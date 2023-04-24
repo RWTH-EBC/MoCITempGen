@@ -524,8 +524,7 @@ if __name__ == '__main__':
                 if version_check is False:
                     root_wh_library = Path(args.wh_library, "package.mo")
                     if args.git_url is not None and args.repo_dir is not None:
-                        GitRepository(repo_dir=args.repo_dir,
-                                      git_url=args.git_url).clone_repository()
+                        GitRepository.clone_repository(repo_dir=args.root_wh_library, git_url=args.git_url)
                         root_wh_library = Path(Path.cwd(), args.repo_dir, args.wh_library, "package.mo")
                     elif args.root_wh_library is None:
                         root_wh_library = Path(Path.cwd(), args.wh_library, "package.mo")
@@ -554,8 +553,7 @@ if __name__ == '__main__':
                 if version_check is False:
                     root_wh_library = Path(args.wh_library, "package.mo")
                     if args.git_url is not None and args.repo_dir is not None:
-                        GitRepository(repo_dir=args.repo_dir,
-                                      git_url=args.git_url).clone_repository()
+                        GitRepository.clone_repository(repo_dir=args.root_wh_library, git_url=args.git_url)
                         root_wh_library = Path(Path.cwd(), args.repo_dir, args.wh_library, "package.mo")
                     elif args.root_wh_library is None:
                         root_wh_library = Path(Path.cwd(), args.wh_library, "package.mo")

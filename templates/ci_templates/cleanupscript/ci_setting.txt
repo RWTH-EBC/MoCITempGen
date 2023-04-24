@@ -18,7 +18,7 @@ Test_CI_Setting:
         - $CI_COMMIT_MESSAGE  =~ /${ci_setting_commit}/
     except:
         refs:
-            - external_pull_requests
+            - external_pull_request_event
 
 Create_templates:
     stage: ${ci_stage_build_templates}

@@ -56,6 +56,7 @@ class modelica_model(ci_config):
         if dymola is None:
             extended_ex_flag = False
         if changed_flag is True:
+            # todo: ci_changed_file selbst im skript erschaffen, nicht in der gitlab pipeline selbst
             check.check_path_setting(self.config_ci_dir)
             check.check_file_setting(self.config_ci_changed_file)
             result = self.get_changed_models(ch_file=self.config_ci_changed_file,

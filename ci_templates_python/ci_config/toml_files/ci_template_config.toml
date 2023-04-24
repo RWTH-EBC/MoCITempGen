@@ -20,7 +20,6 @@ except_branch_list = ['IBPSA']
 [main_branches]
 main_branch_list = ['main', 'development']
 
-
 [ci_stages]
 ci_stage_check_setting = 'check_setting'
 ci_stage_build_templates = 'build_templates'

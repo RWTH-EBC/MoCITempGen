@@ -8,9 +8,6 @@ from pathlib import Path
 import argparse
 
 
-
-
-
 class data_structure(ci_config):
 
     def __init__(self):
@@ -35,7 +32,7 @@ class data_structure(ci_config):
                     f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
         print(f'*** ------ ****')
 
-    def check_path_setting(self, *args: Path):
+    def check_path_setting(self,  *args: Path):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
@@ -49,7 +46,11 @@ class data_structure(ci_config):
                 print(
                     f'{self.CRED}Error:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
                 print(f'***------****')
-                exit(1)
+                if create_flag is True:
+                    self.create_path(path)
+                    print("test")
+                else:
+                    exit(1)
         print(f'***------****')
 
     def check_file_setting(self, *args):
@@ -66,6 +67,8 @@ class data_structure(ci_config):
                 print(
                     f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"{self.CEND} does not exist.')
                 print(f'***------****')
+                if create_flag is True:
+                    self.create_files(file)
                 exit(1)
         print(f'***------****')
 

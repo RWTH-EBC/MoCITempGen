@@ -7,7 +7,7 @@ import buildingspy.development.regressiontest as regression
 from ci_test_config import ci_config
 from ci_tests.structure.config_structure import data_structure
 from pathlib import Path
-from Dymola_python_tests.ci_tests.structure.sort_mo_model import modelica_model
+from ci_tests.structure.sort_mo_model import modelica_model
 from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterface
 
 

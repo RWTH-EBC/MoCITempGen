@@ -3,29 +3,49 @@ import argparse
 import sys
 from pathlib import Path
 import os
-from git import Repo
-
+#from git import Repo
+import git
 
 class GitRepository(object):
 
-    def __init__(self, repo_dir: Path, git_url: str):
+    #def __init__(self):
+    #    """
+    #    Args:
+    #        repo_dir ():  Folder of the cloned project.
+    #        git_url (): Git url of the cloned project.
+    #    """
+    #    pass
+
+    @staticmethod
+    def clone_repository(repo_dir: Path, git_url: str):
         """
+        Pull git repository.
+
         Args:
             repo_dir ():  Folder of the cloned project.
             git_url (): Git url of the cloned project.
         """
-        self.repo_dir = repo_dir
-        self.git_url = git_url
-
-    def clone_repository(self):
-        """
-        Pull git repository.
-        """
-        if os.path.exists(self.repo_dir):
-            print(f'{self.repo_dir} folder already exists.')
+        if os.path.exists(repo_dir):
+            print(f'{repo_dir} folder already exists.')
         else:
-            print(f'Clone {self.repo_dir} Repo')
-            Repo.clone_from(self.git_url, self.repo_dir)
+            print(f'Clone {repo_dir} Repo')
+            Repo.clone_from(git_url, repo_dir)
+
+    @staticmethod
+    def git_diff():
+        # git diff --raw --diff-filter=AMT HEAD^1 >  dymola-ci-tests/Configfiles/ci_changed_model_list.txt
+        repo = git.Repo("")
+        t = repo.git()
+
+        #print(t.diff("--raw --diff-filter=AMT HEAD^1"))
+        diff_list = repo.head.commit.diff("HEAD~1")
+        _list = []
+        library = "ci_tests"
+        for file in diff_list:
+
+            if library in str(file):
+                print(file)
+                _list.append(file)
 
 
 class PULL_REQUEST_GITHUB(object):
@@ -201,12 +221,13 @@ class Parser:
 
 if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
-    pull_request = PULL_REQUEST_GITHUB(github_repo=args.github_repository,
+    GitRepository.git_diff()
+    """pull_request = PULL_REQUEST_GITHUB(github_repo=args.github_repository,
                                        working_branch=args.working_branch,
                                        github_token=args.github_token)
-    message = ""
+    message = """""
 
-    if args.post_pr_comment_flag is True:
+    """if args.post_pr_comment_flag is True:
         page_url = f'{args.gitlab_page}/{args.working_branch}/charts'
         print(f'Setting gitlab page url: {page_url}')
         pr_number = pull_request.get_pr_number()
@@ -241,4 +262,5 @@ if __name__ == '__main__':
         pr_number = pull_request.get_pr_number()
         pull_request.update_pull_request_assignees(pull_request_number=pr_number, assignees_owner=assignees_owner,
                                                    label_name=label_name)
-        exit(0)
+        exit(0)"""
+

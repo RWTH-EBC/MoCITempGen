@@ -1,24 +1,26 @@
-# ${dym_image_name}
-# ${ci_stage_model_check}
-# ${ci_stage_create_whitelist}
-# ${commit_string}
-# ${library}
-# ${PR_main_branch_rule}
-# ${ci_check_commit}
-# ${dymola_python_test_url}
-# ${dymola_python_dir}
-# ${xvfb_flag}
-# ${dymola_python_test_validate_file}
-# ${result_dir}
-# ${expire_in_time}
-# ${ci_create_model_wh_commit}
-# ${arg_push}
-# ${config_ci_exit_file}
-# ${bot_update_model_wh_commit}
-# ${wh_model_file}
-# ${arg_wh}
-# ${arg_PR}
-
+# dym_image_name: ${dym_image_name}
+# ci_stage_model_check: ${ci_stage_model_check}
+# ci_stage_create_whitelist: ${ci_stage_create_whitelist}
+# commit_string: ${commit_string}
+# library: ${library}
+# PR_main_branch_rule: ${PR_main_branch_rule}
+# ci_check_commit: ${ci_check_commit}
+# dymola_python_test_url: ${dymola_python_test_url}
+# dymola_python_dir: ${dymola_python_dir}
+# xvfb_flag: ${xvfb_flag}
+# dymola_python_test_validate_file: ${dymola_python_test_validate_file}
+# result_dir: ${result_dir}
+# expire_in_time: ${expire_in_time}
+# ci_create_model_wh_commit: ${ci_create_model_wh_commit}
+# arg_push: ${arg_push}
+# config_ci_exit_file: ${config_ci_exit_file}
+# bot_update_model_wh_commit: ${bot_update_model_wh_commit}
+# wh_model_file: ${wh_model_file}
+# arg_wh: ${arg_wh}
+# arg_PR: ${arg_PR}
+# python_version ${python_version}
+# package_list: ${package_list}
+# config_ci_changed_file: ${config_ci_changed_file}
 
 stages:
     - ${ci_stage_model_check}
@@ -26,7 +28,7 @@ stages:
 
 .check_rules:PR:
     rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -48,7 +50,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
@@ -66,9 +68,11 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
+        - python Dymola_python_tests/CITests/CI_Configuration/configuration.py --changed-model
+        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:
         when: on_failure
@@ -114,7 +118,7 @@ check_whitelist_job:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

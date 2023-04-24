@@ -19,7 +19,7 @@ stages:
 
 .StyleCheckRule:PR:
     rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -39,7 +39,7 @@ StyleCheck:${library}:PR:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} ${arg_PR}
@@ -58,7 +58,7 @@ StyleCheck:${library}:Push:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} ${arg_Push}

@@ -1,9 +1,13 @@
-
 stages:
     %for stage in stage_list:
     - ${stage}
     %endfor
-    
+
+variables:
+    Github_Repository: ${github_repository}
+    GITLAB_Page:  ${gitlab_page}
+
+
 
 include:
   %for file in file_list:

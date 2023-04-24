@@ -19,7 +19,7 @@ stages:
 
 .OM_sim_rules:PR:
     rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_requests"  &&  ${commit_string}
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
@@ -39,7 +39,7 @@ stages:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_PR}
@@ -59,7 +59,7 @@ stages:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - git clone ${dymola_python_test_url}
-        - pip install -r ${dymola_python_dir}/requirements.txt
+        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - PYTHONPATH=Dymola_python_tests
         - export PYTHONPATH=Dymola_python_tests
     script:

@@ -645,7 +645,8 @@ class ci_templates(ci_template_config):
                                       bot_update_model_wh_commit=self.bot_update_model_wh_commit,
                                       wh_model_file=self.wh_model_file,
                                       python_version=self.python_version,
-                                      ci_create_model_wh_commit=self.ci_create_model_wh_commit)
+                                      ci_create_model_wh_commit=self.ci_create_model_wh_commit,
+                                      config_ci_changed_file=self.config_ci_changed_file)
         ci_folder = Path(self.temp_dir, self.temp_ci_check_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -748,6 +749,8 @@ class ci_templates(ci_template_config):
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.image_name,
                                       stage_list=stage_list,
+                                      github_repository=self.github_repository,
+                                      gitlab_page=self.gitlab_page,
                                       file_list=ci_template_list)
         ci_folder = Path(self.temp_dir, self.temp_ci_main_yml_file).parent
         data_structure().create_path(ci_folder)
