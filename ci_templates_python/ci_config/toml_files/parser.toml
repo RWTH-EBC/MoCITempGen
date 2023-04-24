@@ -82,7 +82,7 @@ om_options = [ "OM_CHECK",]
 [reference_check.Parser]
 library = [ "AixLib",]
 packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
-root_library = [ "AixLib/package.mo",]
+root_library = [ "../AixLib/package.mo",]
 path = "."
 show_gui = false
 number_of_processors = 4

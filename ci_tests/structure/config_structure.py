@@ -32,7 +32,7 @@ class data_structure(ci_config):
                     f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
         print(f'*** ------ ****')
 
-    def check_path_setting(self,  *args: Path):
+    def check_path_setting(self,  *args: Path, create_flag:bool=False):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
@@ -48,12 +48,11 @@ class data_structure(ci_config):
                 print(f'***------****')
                 if create_flag is True:
                     self.create_path(path)
-                    print("test")
                 else:
                     exit(1)
         print(f'***------****')
 
-    def check_file_setting(self, *args):
+    def check_file_setting(self, *args, create_flag:bool=False):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)

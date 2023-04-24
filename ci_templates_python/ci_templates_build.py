@@ -511,7 +511,8 @@ class ci_templates(ci_template_config):
         arg_PR = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package",
-                             "batch": True})
+                             "batch": True
+                             })
         arg_push = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package",
@@ -1403,6 +1404,9 @@ class Parser:
         check_test_group.add_argument("--write-templates",
                                       default=False,
                                       action="store_true")
+        check_test_group.add_argument("--update-toml",
+                                      default=False,
+                                      action="store_true")
 
         args = parser.parse_args()
         return args
@@ -1451,7 +1455,8 @@ if __name__ == '__main__':
                                                      extended_ex_dict, github_repo, gitlab_page, dymola_image,
                                                      stage_dict, commit_dict, file_dict, except_commit_list)
         to_parser.write_ci_template_toml(ci_temp_dict=ci_temp_dict)
-    to_parser.overwrite_arg_parser_toml()
+    if args.update_toml:
+        to_parser.overwrite_arg_parser_toml()
     if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
         ci = ci_templates(library=data_dict["library"][0],
@@ -1470,14 +1475,11 @@ if __name__ == '__main__':
             if temp == "check":
                 ci.write_check_template()
                 ci.write_OM_check_template()
-                pass
             if temp == "simulate":
                 ci.write_simulate_template()
                 ci.write_OM_simulate_template()
-                pass
             if temp == "regression":
                 ci.write_regression_template()
-                pass
             if temp == "html":
                 ci.write_html_template()
             if temp == "style":
