@@ -16,8 +16,6 @@ class CI_templates_structure(ci_config):
     def __init__(self):
         super().__init__()
         self.toml_file = Path(Path.cwd(), "python_arg_config.toml")
-        pass
-
 
 class StoreDictKeyPair(argparse.Action):
     def __init__(self, option_strings, dest, nargs=None, **kwargs):
