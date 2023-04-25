@@ -26,7 +26,7 @@ class data_structure(ci_config):
                 print(
                     f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var.strip()}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
                 print(f'***------****')
-                exit(1)
+                #exit(1)
             else:
                 print(
                     f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
