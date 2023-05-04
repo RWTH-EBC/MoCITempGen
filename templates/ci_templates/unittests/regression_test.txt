@@ -60,6 +60,7 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
@@ -89,6 +90,7 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
@@ -136,6 +138,7 @@ Regression_overall_coverage:PR:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
@@ -155,6 +158,7 @@ Regression_overall_coverage:Push:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
@@ -174,6 +178,7 @@ prepare_create_plots:Push:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
@@ -196,6 +201,7 @@ prepare_create_plots:PR:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
@@ -235,6 +241,7 @@ RegressionTest_Check_References:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - export PYTHONPATH=$PWD/Dymola_python_tests
         - echo $PYTHONPATH
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
@@ -271,6 +278,7 @@ plot_reference_results:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:

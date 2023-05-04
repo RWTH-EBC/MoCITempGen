@@ -22,9 +22,3 @@ matplotlib
 lib-platform
 toml
 tomli_w
-
-
-
-
-
-

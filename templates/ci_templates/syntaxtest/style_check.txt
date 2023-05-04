@@ -39,6 +39,7 @@ StyleCheck:${library}:PR:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -58,6 +59,7 @@ StyleCheck:${library}:Push:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:

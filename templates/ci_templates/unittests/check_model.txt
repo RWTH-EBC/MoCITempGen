@@ -50,6 +50,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -68,6 +69,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -112,6 +114,7 @@ check_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
+        - python Dymola_python_tests/setup.py install
         - export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir whitelist && cd whitelist

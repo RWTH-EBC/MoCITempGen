@@ -53,6 +53,7 @@ Check_HTML:PR:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -69,6 +70,7 @@ Check_HTML:push:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -89,6 +91,7 @@ Open_Pull_HTML_Request:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
@@ -117,7 +120,8 @@ html_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url} ;
+        - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - python ${dymola_python_html_tidy_file} ${arg_wh}
         - message="${bot_update_wh_commit}"

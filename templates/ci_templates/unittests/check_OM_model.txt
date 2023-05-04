@@ -39,6 +39,7 @@ stages:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - PYTHONPATH=${dymola_python_test_dir}
         - export PYTHONPATH=Dymola_python_tests
@@ -60,6 +61,7 @@ stages:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - git clone ${dymola_python_test_url}
+        - python Dymola_python_tests/setup.py install
         - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
