@@ -10,6 +10,7 @@ regex
 python-time
 DateTime
 pytest-shutil
+pytest
 glob2
 GitPython
 pytidylib
