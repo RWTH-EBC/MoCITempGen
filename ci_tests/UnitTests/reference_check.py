@@ -446,6 +446,7 @@ class Parser:
 
 
 if __name__ == '__main__':
+    # todo: Package list bearbeiten.
     args = Parser(sys.argv[1:]).main()
     dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
     dymola = dym[0]
@@ -464,7 +465,7 @@ if __name__ == '__main__':
                                         path=args.path).run_coverage_only(buildingspy_regression=regression,
                                                                           batch=args.batch,
                                                                           tool=args.tool,
-                                                                          package=args.packages)
+                                                                          package=args.packages[0])
         exit(var)
     else:
         dym_interface = PythonDymolaInterface(dymola=dymola,
