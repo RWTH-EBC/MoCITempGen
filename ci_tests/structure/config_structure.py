@@ -41,10 +41,10 @@ class data_structure(ci_config):
         for i, (var, path) in enumerate(zip(var_names, args)):
             if os.path.isdir(path) is True:
                 print(
-                    f'{self.green}Setting:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
+                    f'{self.green}Setting:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
             else:
                 print(
-                    f'{self.CRED}Error:{self.CEND} {self.blue}Path_variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
+                    f'{self.CRED}Error:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
                 print(f'***------****')
                 if create_flag is True:
                     self.create_path(path)

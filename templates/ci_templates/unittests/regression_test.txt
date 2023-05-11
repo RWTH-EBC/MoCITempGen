@@ -65,7 +65,7 @@ stages:
         # pip install --upgrade ${buildingspy_upgrade}
         # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - pip install -e  Dymola_python_tests
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_PR}
     after_script:
@@ -93,9 +93,10 @@ stages:
         - git clone ${dymola_python_test_url}
         # python Dymola_python_tests/setup.py install
         - source activate ${python_version}
+        - pip install -e  Dymola_python_tests
         # pip install --upgrade ${buildingspy_upgrade}
         # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        # export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_push}
     after_script:
@@ -181,9 +182,10 @@ prepare_create_plots:Push:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -204,9 +206,10 @@ prepare_create_plots:PR:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        - pip install -e  Dymola_python_tests
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -244,10 +247,10 @@ RegressionTest_Check_References:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - export PYTHONPATH=$PWD/Dymola_python_tests
-        - echo $PYTHONPATH
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # python Dymola_python_tests/setup.py install
+        # export PYTHONPATH=$PWD/Dymola_python_tests
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        - pip install -e  Dymola_python_tests
         - python ${dymola_python_structure_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --create-ref  < ../${config_ci_eof_file}
     after_script:
@@ -257,7 +260,6 @@ RegressionTest_Check_References:
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
-            pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
             git add $push_model ;
             git commit -m "$message";
@@ -281,9 +283,10 @@ plot_reference_results:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot

@@ -48,8 +48,9 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # python Dymola_python_tests/setup.py install
+        - pip install -e  Dymola_python_tests
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
@@ -67,9 +68,10 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        - pip install -e  Dymola_python_tests
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=Dymola_python_tests
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:
@@ -111,14 +113,15 @@ check_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - export PYTHONPATH=Dymola_python_tests
+        # export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # python Dymola_python_tests/setup.py install
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        - pip install -e  Dymola_python_tests
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

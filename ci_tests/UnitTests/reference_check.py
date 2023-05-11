@@ -499,7 +499,7 @@ if __name__ == '__main__':
             ref_model.delete_ref_file(ref_list=ref_list)
             package_list = ref_model.get_update_package(ref_list=ref_list)
         else:
-            check.check_path_setting(Path("..", conf.config_ci_dir))
+            check.check_path_setting(Path("..", conf.config_ci_dir), create_flag=True)
             if args.changed_flag is False:
                 check.create_files(Path("..", conf.config_ci_exit_file))
                 package_list = [args.packages]
