@@ -60,10 +60,11 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
+        # python Dymola_python_tests/setup.py install
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # pip install --upgrade ${buildingspy_upgrade}
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        - pip install -e  Dymola_python_tests
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_PR}
@@ -90,10 +91,10 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
+        # python Dymola_python_tests/setup.py install
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # pip install --upgrade ${buildingspy_upgrade}
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
         - export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_push}
@@ -136,11 +137,12 @@ Regression_overall_coverage:PR:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
+        # pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=$PWD/Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -156,11 +158,12 @@ Regression_overall_coverage:Push:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
+        # pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=$PWD/Dymola_python_tests
+        # python Dymola_python_tests/setup.py install
+        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
+        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  Dymola_python_tests
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only
     artifacts:

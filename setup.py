@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 import os
 from pathlib import Path
 
-with open("Dymola_python_tests/README.md", 'r') as f:
+with open("ci_tests/README.md", 'r') as f:
     long_description = f.read()
-with open("Dymola_python_tests/ci_tests/requirements.txt", 'r') as f:
+with open("ci_tests/requirements.txt", 'r') as f:
     required = f.read().splitlines()
-with open("Dymola_python_tests/ci_tests/dependency_requirements.txt", 'r') as f:
+with open("ci_tests/dependency_requirements.txt", 'r') as f:
     dep_required = f.read().splitlines()
 version = "0.1.0"
 
