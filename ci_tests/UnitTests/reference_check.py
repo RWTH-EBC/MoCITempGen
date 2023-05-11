@@ -505,7 +505,8 @@ if __name__ == '__main__':
                 package_list = [args.packages]
             if args.changed_flag is True:
                 check.create_files(Path("..", conf.config_ci_changed_file), Path("..", conf.config_ci_exit_file))
-                package = args.packages[args.packages.rfind(".") + 1:]
+                #package = args.packages[args.packages.rfind(".") + 1:]
+                package = args.packages[0]
                 mo = modelica_model()
                 package_list = mo.get_changed_regression_models(dymola=dymola,
                                                                 dymola_exception=dymola_exception,
