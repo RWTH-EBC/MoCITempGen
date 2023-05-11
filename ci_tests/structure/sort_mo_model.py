@@ -484,6 +484,6 @@ class modelica_model(ci_config):
                         model_list.append(model)
         if model_list is None or len(model_list) == 0:
             print(f'No models in package {path}')
-            exit(0)
+
         else:
             return model_list, no_example_list
