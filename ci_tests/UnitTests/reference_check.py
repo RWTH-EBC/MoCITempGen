@@ -447,6 +447,8 @@ class Parser:
 
 if __name__ == '__main__':
     # todo: Package list bearbeiten.
+    # todo: /bin/sh: 1: xdg-settings: not found
+    # todo: AttributeError: 'Tester' object has no attribute 'get_test_example_coverage'
     args = Parser(sys.argv[1:]).main()
     dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
     dymola = dym[0]
@@ -512,7 +514,7 @@ if __name__ == '__main__':
                 package_list = mo.get_changed_regression_models(dymola=dymola,
                                                                 dymola_exception=dymola_exception,
                                                                 dymola_version=args.dymola_version,
-                                                                root_package=Path(args.package.replace(".", os.sep)),
+                                                                root_package=Path(package.replace(".", os.sep)),
                                                                 library=args.library,
                                                                 ch_file=Path("..", conf.config_ci_changed_file))
         # Start regression test
