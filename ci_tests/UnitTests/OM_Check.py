@@ -25,6 +25,7 @@ class Check_OpenModelica(ci_config):
                  working_path: Path = Path(Path.cwd())):
         """
         Args:
+            working_path:
             add_libraries_loc ():
             inst_libraries ():
             library ():
@@ -44,13 +45,14 @@ class Check_OpenModelica(ci_config):
 
         else:
             self.omc = OMCSessionZMQ(dockerOpenModelicaPath="/usr/bin/omc_orig")
-            #dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
-            #dymola_exception = DymolaException()
         print(f'{self.green}OpenModelica Version number:{self.CEND} {self.omc.sendExpression("getVersion()")}')
-        # [start dymola api]1
+        # [start dymola api]
         self.dym_api = None
 
     def __call__(self):
+        """
+
+        """
         self.load_library(root_library=self.root_library,
                           library=self.library,
                           add_libraries_loc=self.add_libraries_loc)
@@ -155,6 +157,9 @@ class Check_OpenModelica(ci_config):
             exit(0)
 
     def close_OM(self):
+        """
+
+        """
         self.omc.sendExpression("quit()")
 
     def write_errorlog(self,
@@ -165,6 +170,7 @@ class Check_OpenModelica(ci_config):
         """
         Write an error log with all models, that don´t pass the check
         Args:
+            options:
             pack ():
             exception_list ():
             error_dict ():
@@ -227,6 +233,17 @@ class Check_OpenModelica(ci_config):
             exit(0)
 
     def _read_error_log(self, pack: str, err_log, check_log, options: str = None):
+        """
+
+        Args:
+            pack:
+            err_log:
+            check_log:
+            options:
+
+        Returns:
+
+        """
         error_log = open(err_log, "r")
         lines = error_log.readlines()
         error_log_list = []
@@ -249,6 +266,11 @@ class Check_OpenModelica(ci_config):
         return var
 
     def install_library(self, libraries: list = None):
+        """
+
+        Args:
+            libraries:
+        """
         load_modelica = self.omc.sendExpression(f'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true)')
         if load_modelica is True:
             print(f'{self.green}Load library modelica in Openmodelica.{self.CEND}')
@@ -292,6 +314,11 @@ class Check_OpenModelica(ci_config):
         print(self.omc.sendExpression("getErrorString()"))
 
     def sim_with_dymola(self, pack: str = None, example_list: list = None):
+        """
+
+        Returns:
+            object:
+        """
         all_sims_dir = Path(self.root_library, self.result_OM_check_result_dir, f'{self.library}.{pack}')
         if example_list is not None:
             if self.dym_api is None:
@@ -329,6 +356,11 @@ class Check_OpenModelica(ci_config):
                           stats: dict = None,
                           with_plot: bool = True,
                           pack: str = None):
+        """
+
+        Returns:
+            object:
+        """
         if example_list is not None:
             if stats is None:
                 stats = {
@@ -439,6 +471,11 @@ class Check_OpenModelica(ci_config):
 
 class Parser:
     def __init__(self, args):
+        """
+
+        Args:
+            args:
+        """
         self.args = args
 
     def main(self):

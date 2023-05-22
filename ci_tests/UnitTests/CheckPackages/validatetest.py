@@ -1,8 +1,6 @@
-# /bin/bash
 import argparse
 import glob
 import os
-import platform
 import sys
 import toml
 from natsort import natsorted
@@ -18,8 +16,8 @@ from ci_tests.api_script.api_github import GitRepository
 class CheckPythonDymola(ci_config):
 
     def __init__(self,
-                 dym,
-                 dym_exp,
+                 dym: DymolaInterface(),
+                 dym_exp: DymolaException(),
                  library: str,
                  root_library: Path,
                  dymola_version: int = 2022,
@@ -29,6 +27,11 @@ class CheckPythonDymola(ci_config):
         """
         The class check or simulate models. Return an error-log. Can filter models from a whitelist
         Args:
+            root_library: root path of library (e.g. ../AixLib/package.mo)
+            dymola_version: Version of used dymola (2023)
+            working_path:
+            add_libraries_loc:
+            inst_libraries: installed libraries
             dym (): python_dymola_interface class.
             dym_exp (): python_dymola_exception class.
             library (): library to test.
@@ -51,6 +54,12 @@ class CheckPythonDymola(ci_config):
         self.dymola_log = Path(self.root_library, f'{self.library}-log.txt')
 
     def __call__(self):
+        """
+        1. Start dymola interface
+        2. Check dymola license
+        3. load library to check
+        4. Install library to check
+        """
         dym_int = PythonDymolaInterface(dymola=self.dymola,
                                         dymola_exception=self.dymola_exception,
                                         dymola_version=self.dymola_version)
@@ -65,8 +74,8 @@ class CheckPythonDymola(ci_config):
         """
         Check models and return an error log, if the check failed
         Args:
-            simulate_examples ():
-            exception_list ():
+            simulate_examples (): list of examples
+            exception_list ():  models not to check
             check_model_list (): list of models to be checked
         Returns:
             error_model_message_dic (): dictionary with models and its error message
@@ -99,7 +108,6 @@ class CheckPythonDymola(ci_config):
                         if sec_result is False:
                             print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
                             log = self.dymola.getLastError()
-                            #for line in log.split("\n"):
                             for line in log:
                                 exception_flag = False
                                 if exception_list is not None:
@@ -189,7 +197,14 @@ class CheckPythonDymola(ci_config):
             print(f"{self.green}Check was successful.{self.CEND}")
             exit(0)
 
-    def _read_error_log(self, pack: str, err_log, check_log):
+    def _read_error_log(self, pack: str, err_log: file , check_log):
+        """
+        Args:
+            pack:
+            err_log:
+            check_log:
+        Returns:
+        """
         error_log = open(err_log, "r")
         lines = error_log.readlines()
         error_log_list = []
@@ -229,6 +244,11 @@ class CreateWhitelist(ci_config):
         """
         The class creates a whitelist of faulty models based on wh_library.
         Args:
+            working_path:
+            dymola_version:
+            add_libraries_loc:
+            inst_libraries:
+            root_wh_library:
             dym (): python_dymola_interface class.
             dymola_ex (): python_dymola_exception class.
             library (): library to be tested.
@@ -238,7 +258,6 @@ class CreateWhitelist(ci_config):
 
         """
         super().__init__()
-
         self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
@@ -248,7 +267,7 @@ class CreateWhitelist(ci_config):
             self.root_library = Path(working_path, repo_dir, wh_library, "package.mo")
         else:
             self.root_library = root_wh_library
-        # [Libraries]
+        # [libraries]
         self.add_libraries_loc = add_libraries_loc
         self.install_libraries = inst_libraries
         self.library = library
@@ -456,7 +475,6 @@ if __name__ == '__main__':
         for lib in additional_libraries_local:
             add_lib_path = Path(additional_libraries_local[lib], lib, "package.mo")
             check.check_file_setting(add_lib_path)
-
     dym = CheckPythonDymola(dym=dymola,
                             dym_exp=dymola_exception,
                             dymola_version=args.dymola_version,
