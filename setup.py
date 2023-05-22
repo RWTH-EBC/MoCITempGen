@@ -51,5 +51,4 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
-    dependency_links=dep_required
-)
+    dependency_links=dep_required)

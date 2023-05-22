@@ -1,12 +1,12 @@
 import argparse
 import multiprocessing
+from pathlib import Path
 import os
 import sys
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
 from ci_test_config import ci_config
 from ci_tests.structure.config_structure import data_structure
-from pathlib import Path
 from ci_tests.structure.sort_mo_model import modelica_model
 from ci_tests.py_dym_interface.PythonDymolaInterface import PythonDymolaInterface
 
@@ -449,6 +449,7 @@ if __name__ == '__main__':
     # todo: Package list bearbeiten.
     # todo: /bin/sh: 1: xdg-settings: not found
     # todo: AttributeError: 'Tester' object has no attribute 'get_test_example_coverage'
+    # todo: Template für push hat changed:flag drin, ist falsch
     args = Parser(sys.argv[1:]).main()
     dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
     dymola = dym[0]
