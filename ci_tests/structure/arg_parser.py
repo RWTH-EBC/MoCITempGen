@@ -66,7 +66,7 @@ class argpaser_toml(object):
 
     def __init__(self,
                  f_path: str = os.path.join("Dymola_python_tests", "ci_tests"),
-                 toml_file: str = os.path.join("Dymola_python_tests", "ci_templates_python", "ci_config", "toml_files", "parser.toml")):
+                 toml_file: str = os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")):
         self.f_path = f_path
         self.toml_file = toml_file
         pass
@@ -158,7 +158,7 @@ class Pars:
         check_test_group.add_argument("--file-path",
                                       default=os.path.join("Dymola_python_tests", "ci_tests"))
         check_test_group.add_argument("--parse-toml-file",
-                                      default=os.path.join("Dymola_python_tests", "ci_templates_python", "ci_config", "toml_files", "parser.toml"))
+                                      default=os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml"))
         check_test_group.add_argument("--python-file",
                                       default="api_github")
         check_test_group.add_argument("--parser-arg",

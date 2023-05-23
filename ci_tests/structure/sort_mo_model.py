@@ -81,8 +81,8 @@ class modelica_model(ci_config):
             else:
                 ci_wh_file = self.wh_model_file
                 file_list = self.wh_model_file
-            check.check_path_setting(self.wh_ci_dir)
-            check.check_file_setting(file_list)
+            check.check_path_setting(self.wh_ci_dir, create_flag=True)
+            check.check_file_setting(file_list, create_flag=True)
             wh_list_models = self.get_wh_models(wh_file=ci_wh_file,
                                                 wh_library=wh_library,
                                                 library=library,

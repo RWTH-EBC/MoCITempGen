@@ -13,91 +13,97 @@ class data_structure(ci_config):
     def __init__(self):
         super().__init__()
 
-    # *********** Checking structure *******************
     def check_arguments_settings(self, *args):
+        """
+        Checking structure
+        Args:
+            *args ():
+        """
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
-        #r = re.search(r"\((.*)\)", s).group(1)
         r = re.search(r"check_arguments_settings\((.*)\)", s).group(1)
         var_names = r.split(",")
-        print(f'*** --- Argument setting--- ****')
+        print(f'*** --- Argument setting --- ****')
         for i, (var, val) in enumerate(zip(var_names, args)):
             if val is None:
-                print(
-                    f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var.strip()}"{self.CEND} has value {self.CRED}"{val}". "{var}"{self.CEND} is not set!')
-                print(f'***------****')
-                #exit(1)
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}Variable "{var.strip()}"{self.CEND} has value '
+                      f'{self.CRED}"{val}". "{var}"{self.CEND} is not set!')
+                exit(1)
             else:
-                print(
-                    f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: {self.blue}"{val}"{self.CEND}')
-        print(f'*** ------ ****')
+                print(f'{self.green}Setting:{self.CEND} {self.blue}Variable "{var.strip()}" {self.CEND} is set as: '
+                      f'{self.blue}"{val}"{self.CEND}')
 
-    def check_path_setting(self,  *args: Path, create_flag:bool=False):
+    def check_path_setting(self,  *args: Path, create_flag: bool = False):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
         var_names = r.split(", ")
-        print(f'***--- Check path setting---****')
+        print(f'*** --- Check path setting --- ****')
         for i, (var, path) in enumerate(zip(var_names, args)):
             if os.path.isdir(path) is True:
-                print(
-                    f'{self.green}Setting:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} is set as: {self.blue}"{path}"{self.CEND} and exists.')
+                print(f'{self.green}Setting:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} is set as: '
+                      f'{self.blue}"{path}"{self.CEND} and exists.')
             else:
-                print(
-                    f'{self.CRED}Error:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} in {self.blue}"{path}"{self.CEND} does not exist.')
-                print(f'***------****')
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}Path variable "{var}"{self.CEND} in {self.blue}"{path}"'
+                      f'{self.CEND} does not exist.')
+                """if var == "self.wh_ci_dir":
+                    print(f"If filter_wh_flag is True, a file must be stored under {path}.")
+                    exit(1)"""
                 if create_flag is True:
                     self.create_path(path)
                 else:
                     exit(1)
-        print(f'***------****')
 
-    def check_file_setting(self, *args, create_flag:bool=False):
+    def check_file_setting(self, *args, create_flag: bool = False):
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
         var_names = r.split(", ")
-        print(f'***--- Check file setting ---****')
+        print(f'*** --- Check file setting --- ****')
         for i, (var, file) in enumerate(zip(var_names, args)):
             if os.path.isfile(file) is True:
-                print(
-                    f'{self.green}Setting:{self.CEND} {self.blue}File "{var}"{self.CEND} is set as: {self.blue}"{file}"{self.CEND} and exists.')
+                print(f'{self.green}Setting:{self.CEND} {self.blue}File "{var}"{self.CEND} is set as: '
+                      f'{self.blue}"{file}"{self.CEND} and exists.')
             else:
-                print(
-                    f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"{self.CEND} does not exist.')
-                print(f'***------****')
+                print(f'{self.CRED}Error:{self.CEND} {self.blue}File_variable "{var}"{self.CEND} in {self.blue}"{file}"'
+                      f'{self.CEND} does not exist.')
                 if create_flag is True:
                     self.create_files(file)
-                exit(1)
-        print(f'***------****')
+                else:
+                    exit(1)
 
-    #  [Create Structure]
     def create_path(self, *args: Path):
+        """
+        Create Structure
+        Args:
+            *args ():
+        """
         print(f'\n**** Create folder ****')
         for arg in args:
             print(f'{self.green}Create Folder:{self.CEND} {arg}')
             os.makedirs(arg, exist_ok=True)
-        print(f'**** ----------- ****')
 
     def create_files(self, *args: Path):
         """
         Args:
             files_list ():
         """
-        print(f'\n**** Create file structure ****')
+        print(f'**** --- Create file structure --- ****')
         for file in args:
             if os.path.exists(file):
                 print(f'{self.green}File:{self.CEND} {file} does exist.')
             else:
                 print(f'{self.CRED}File: {self.CEND}  {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
-                write_file = open(file, "w+")
-                if file is self.config_ci_eof_file:
-                    write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
-                write_file.close()
-        print(f'**** ----------- ****')
+                with open(file, 'w') as write_file:
+                    if file is self.config_ci_eof_file:
+                        write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
 
-    # [Remove Structure]
     def delete_files_in_path(self, *args: Path):
+            """
+            Remove Structure
+            Args:
+                *args ():
+            """
             print(f'\n**** Delete folder ****\n')
             for arg in args:
                 print(f'{self.green}Delete files:{self.CEND} {arg}')
@@ -110,7 +116,6 @@ class data_structure(ci_config):
                             shutil.rmtree(file_path)
                     except Exception as e:
                         print('Failed to delete %s. Reason: %s' % (file_path, e))
-            print(f'\n**** ----------- ****\n')
 
     @staticmethod
     def delete_spec_file(root: str = None, pattern: str = None):
@@ -143,6 +148,11 @@ class data_structure(ci_config):
 
     @staticmethod
     def remove_path(path_list: list = None):
+        """
+
+        Args:
+            path_list ():
+        """
         if path_list is not None:
             for path in path_list:
                 if os.path.isdir(path) is True:
@@ -180,9 +190,7 @@ class data_structure(ci_config):
                     shutil.copytree(source, target_path)
                     if del_flag is True:
                         self.remove_path([source])
-        print(f'{self.blue}**********************{self.CEND}\n')
 
-    # *******************************
     @staticmethod
     def return_file_list():
         """

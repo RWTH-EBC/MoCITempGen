@@ -2,8 +2,8 @@ import os
 from mako.template import Template
 import argparse
 import toml
-from ci_templates_python.ci_templates_config import ci_template_config
-from ci_templates_python.ci_templates_structure import templates_structure
+from gitlab_ci_templates.ci_templates_config import ci_template_config
+from gitlab_ci_templates.ci_templates_structure import templates_structure
 import glob
 from ci_tests.structure.arg_parser import argpaser_toml
 from ci_tests.structure.config_structure import data_structure
@@ -1321,7 +1321,7 @@ class settings_ci_interactive(ci_template_config):
 class CI_toml_parser(object):
 
     def __init__(self):
-        self.ci_template_toml_file = os.path.join("Dymola_python_tests", "ci_templates_python", "ci_config",
+        self.ci_template_toml_file = os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config",
                                                   "toml_files",
                                                   "ci_user_template.toml")
 

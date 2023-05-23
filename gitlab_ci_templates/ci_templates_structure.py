@@ -1,4 +1,4 @@
-from ci_templates_python.ci_templates_config import ci_template_config
+from gitlab_ci_templates.ci_templates_config import ci_template_config
 
 class templates_structure(ci_template_config):
 
