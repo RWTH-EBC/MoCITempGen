@@ -16,8 +16,8 @@ from ci_tests.api_script.api_github import GitRepository
 class CheckPythonDymola(ci_config):
 
     def __init__(self,
-                 dym: DymolaInterface(),
-                 dym_exp: DymolaException(),
+                 dym,
+                 dym_exp,
                  library: str,
                  root_library: Path,
                  dymola_version: int = 2022,
@@ -35,7 +35,6 @@ class CheckPythonDymola(ci_config):
             dym (): python_dymola_interface class.
             dym_exp (): python_dymola_exception class.
             library (): library to test.
-
         """
         super().__init__()
         # [Libraries]
@@ -63,18 +62,19 @@ class CheckPythonDymola(ci_config):
         dym_int = PythonDymolaInterface(dymola=self.dymola,
                                         dymola_exception=self.dymola_exception,
                                         dymola_version=self.dymola_version)
-        dym_int.dym_check_lic()
+        #dym_int.dym_check_lic()
         dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
+
 
     def check_dymola_model(self,
                            check_model_list: list = None,
                            exception_list: list = None,
-                           simulate_examples: bool = False):
+                           sim_ex_flag: bool = False):
         """
         Check models and return an error log, if the check failed
         Args:
-            simulate_examples (): list of examples
+            sim_ex_flag (): list of examples
             exception_list ():  models not to check
             check_model_list (): list of models to be checked
         Returns:
@@ -85,47 +85,27 @@ class CheckPythonDymola(ci_config):
             print(f'{self.CRED}Error:{self.CEND} Found no models.')
             exit(0)
         else:
-            for model in check_model_list:
+            for dym_model in check_model_list:
                 try:
-                    err_list = []
-                    if simulate_examples is True:
-                        res = self.dymola.checkModel(model, simulate=True)
-                    else:
-                        res = self.dymola.checkModel(model)
+                    res = self.dymola.checkModel(dym_model, simulate=sim_ex_flag)
                     if res is True:
-                        print(f'\n {self.green} Successful: {self.CEND} {model} \n')
-                        continue
+                        print(f'{self.green}Successful: {self.CEND} {dym_model}')
                     if res is False:
-                        print(
-                            f'Check for Model {model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} {model}\nSecond Check Test for model {model}')
-                        if simulate_examples is True:
-                            sec_result = self.dymola.checkModel(model, simulate=True)
-                        else:
-                            sec_result = self.dymola.checkModel(model)
+                        """print(
+                            f'Check for Model {dym_model}{self.CRED} failed!{self.CEND}\n\n{self.CRED}Error:{self.CEND} '
+                            f'{dym_model}\nSecond Check Test for model {dym_model}')"""
+                        # Second test for model
+                        sec_result = self.dymola.checkModel(dym_model, simulate=sim_ex_flag)
                         if sec_result is True:
-                            print(f'\n {self.green} Successful: {self.CEND} {model} \n')
-                            continue
+                            print(f'\n{self.green}Successful: {self.CEND} {dym_model}')
                         if sec_result is False:
-                            print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
                             log = self.dymola.getLastError()
-                            for line in log:
-                                exception_flag = False
-                                if exception_list is not None:
-                                    for exception in exception_list:
-                                        if exception in line:
-                                            exception_flag = True
-                                    if exception_flag is False:
-                                        err_list.append(line)
-                                else:
-                                    err_list.append(line)
+                            err_list, warning_list = self.sort_warnings_from_log(log=log, exception_list=exception_list)
                             if len(err_list) > 0:
-                                print(f'\n   {self.CRED}  Error:   {self.CEND}  {model}  \n')
-                                print(f'{log}')
-                            else:
-                                print(f'\n   {self.yellow}  Warning:   {self.CEND}  {model}  \n')
-                                print(f'{log}')
-                            error_model_message_dic[model] = log
-                            continue
+                                print(f'\n{self.CRED}Error: {self.CEND} {dym_model} \n{log}')
+                            if len(warning_list) > 0:
+                                print(f'\n{self.yellow} Warning: {self.CEND} {dym_model} \n{log}')
+                            error_model_message_dic[dym_model] = log
                 except self.dymola_exception as ex:
                     print("Simulation failed: " + str(ex))
                     continue
@@ -133,98 +113,88 @@ class CheckPythonDymola(ci_config):
         self.dymola.close()
         return error_model_message_dic
 
+    def sort_warnings_from_log(self, log: str = None, exception_list: list = None):
+        err_list, warning_list = [], []
+        if log is not None:
+            for line in log:
+                exception_flag = False
+                if exception_list is not None:
+                    for exception in exception_list:
+                        if exception in line:
+                            exception_flag = True
+                            warning_list.append(line)
+                    if exception_flag is False:
+                        err_list.append(line)
+                else:
+                    err_list.append(line)
+        return err_list, warning_list
+
     def write_error_log(self,
                         pack: str = None,
                         error_dict: dict = None,
                         exception_list: list = None):
         """
-        Write an error log with all models, that don´t pass the check
+        Write an error log with all models, that don´t pass the check.
         Args:
-            pack ():
-            exception_list ():
-            error_dict ():
+            pack (): Package to check.
+            exception_list (): Exceptions like certain warnings that are not recognized as errors.
+            error_dict (): Dicitonary of models with log message, that does not pass the check.
         """
         if error_dict is not None:
             if pack is not None:
                 ch_log = Path(self.working_path, self.result_check_result_dir, f'{self.library}.{pack}-check_log.txt')
-                error_log = Path(self.working_path, self.result_check_result_dir,
-                                 f'{self.library}.{pack}-error_log.txt')
+                error_log = Path(self.working_path, self.result_check_result_dir, f'{self.library}.{pack}-error_log.txt')
                 os.makedirs(Path(ch_log).parent, exist_ok=True)
-                check_log = open(ch_log, "w")
-                err_log = open(error_log, "w")
-                for error_model in error_dict:
-                    err_list = []
-                    warning_list = []
-                    for line in error_dict[error_model].split("\n"):
-                        exception_flag = False
-                        if exception_list is not None:
-                            for exception in exception_list:
-                                if exception in line:
-                                    exception_flag = True
-                                    warning_list.append(line)
-                            if exception_flag is False:
-                                err_list.append(line)
-                        else:
-                            err_list.append(line)
-                    if len(err_list) > 0:
-                        check_log.write(f'\n\nError in model:  {error_model} \n')
-                        err_log.write(f'\n\nError in model:  {error_model} \n')
-                        for err in err_list:
-                            check_log.write(err + "\n")
-                            err_log.write(err + "\n")
-                        if len(warning_list) > 0:
-                            for warning in warning_list:
-                                check_log.write(warning + "\n")
-                        else:
+                with open(ch_log, 'w') as check_log, open(error_log, "w") as err_log:
+                    for error_model in error_dict:
+                        err_list, warning_list = self.sort_warnings_from_log(log=error_dict[error_model],
+                                                                             exception_list=exception_list)
+                        if len(err_list) > 0:
+                            check_log.write(f'\nError in model:  {error_model} \n')
+                            err_log.write(f'\nError in model:  {error_model} \n')
                             for err in err_list:
-                                check_log.write(err + "\n")
-                                err_log.write(err + "\n")
-                    else:
-                        check_log.write(f'\n\nWarning in model:  {error_model} \n')
-                        if len(warning_list) > 0:
-                            for warning in warning_list:
-                                check_log.write(warning + "\n")
-                check_log.close()
-                err_log.close()
-                var = self._read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
-                if var != 0:
-                    exit(var)
-                return var
-            else:
-                print(f'Package is not set.')
-                exit(1)
+                                check_log.write(str(err) + "\n")
+                                err_log.write(str(err) + "\n")
+                            if len(warning_list) > 0:
+                                for warning in warning_list:
+                                    check_log.write(str(warning) + "\n")
+                        else:
+                            if len(warning_list) > 0:
+                                check_log.write(f'\n\nWarning in model:  {error_model} \n')
+                                for warning in warning_list:
+                                    check_log.write(str(warning) + "\n")
+                return pack, error_log, ch_log
         else:
             print(f"{self.green}Check was successful.{self.CEND}")
             exit(0)
 
-    def _read_error_log(self, pack: str, err_log: file , check_log):
+    def read_error_log(self, pack: str, err_log: Path, check_log):
         """
         Args:
-            pack:
+            pack:Package to test
             err_log:
             check_log:
         Returns:
         """
-        error_log = open(err_log, "r")
-        lines = error_log.readlines()
-        error_log_list = []
-        for line in lines:
-            if "Error in model" in line:
-                error_log_list.append(line)
-                line = line.strip("\n")
-                print(f'{self.CRED}{line}{self.CEND}')
-        if len(error_log_list) > 0:
-            print(f'{self.CRED}Dymola check failed{self.CEND}')
-            e_var = 1
-        else:
-            print(f'{self.green}Dymola check was successful{self.CEND}')
-            e_var = 0
-        error_log.close()
+        with open(err_log, "r") as error_log:
+            lines = error_log.readlines()
+            error_log_list = []
+            for line in lines:
+                if "Error in model" in line:
+                    error_log_list.append(line)
+                    line = line.strip("\n")
+                    print(f'{self.CRED}{line}{self.CEND}')
+
         data_structure().prepare_data(source_target_dict={
             check_log: Path(self.result_check_result_dir, f'{self.library}.{pack}'),
             err_log: Path(self.result_check_result_dir, f'{self.library}.{pack}')},
             del_flag=True)
-        return e_var
+        if len(error_log_list) > 0:
+            print(f'{self.CRED}Dymola check failed{self.CEND}')
+            return 1
+        else:
+            print(f'{self.green}Dymola check was successful{self.CEND}')
+            return 0
 
 
 class CreateWhitelist(ci_config):
@@ -376,7 +346,6 @@ class CreateWhitelist(ci_config):
                     result = self.dymola.checkModel(model)
                 if result is True:
                     print(f'\n{self.green}Successful:{self.CEND} {model}\n')
-                    continue
                 if result is False:
                     print(f'\n{self.CRED}Error:{self.CEND} {model}\n')
                     log = self.dymola.getLastError()
@@ -384,7 +353,6 @@ class CreateWhitelist(ci_config):
                     error_model_message_dic[model] = log
                     wh_files.write(f'\n{model} \n \n')
                     error_log.write(f'\n \n Error in model:  {model} \n{log}')
-                    continue
             wh_files.close()
             error_log.close()
             self.dymola.savelog(f'{dymola_log}')
@@ -401,8 +369,6 @@ class CreateWhitelist(ci_config):
             exit(1)
 
 
-
-
 class Parser:
     def __init__(self, args):
         self.args = args
@@ -411,10 +377,6 @@ class Parser:
         parser = argparse.ArgumentParser(description="Check and validate single packages")
         check_test_group = parser.add_argument_group("Arguments to run check tests")
         # [Library - settings]
-        """check_test_group.add_argument("--library", dest="library_dict", action=StoreDictKeyPair, nargs="*",
-                                      metavar="Library1=Path_Lib1 Library2=Path_Lib2")
-        check_test_group.add_argument("--package", dest="package_dict", action=StoreDictKeyPair_list, nargs="*",
-                                      metavar="Library1=Package1,Package2 Library2=Package3,Package4")"""
         check_test_group.add_argument("--library", default="AixLib", help="Library to test (e.g. AixLib")
         check_test_group.add_argument("--packages", default=["Airflow"], nargs="+",
                                       help="Library to test (e.g. Airflow.Multizone)")
@@ -451,13 +413,12 @@ class Parser:
 
 
 if __name__ == '__main__':
+    # Load Parser arguments
     args = Parser(sys.argv[1:]).main()
-    dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
-    dymola = dym[0]
-    dymola_exception = dym[1]
+    # Load dymola python interface and dymola exception
+
     if args.load_setting_flag is True:
-        toml_file = f'Dymola_python_tests{os.sep}test_config.toml'
-        data = toml.load(f'{toml_file}')
+        data = toml.load(Path("config", "toml_files", "script_settings.toml"))
         install_libraries = data["Dymola_Check"]["install_libraries"]
         except_list = data["Dymola_Check"]["except_list"]
         additional_libraries_local = data["Dymola_Check"]["additional_libraries_local"]
@@ -475,6 +436,7 @@ if __name__ == '__main__':
         for lib in additional_libraries_local:
             add_lib_path = Path(additional_libraries_local[lib], lib, "package.mo")
             check.check_file_setting(add_lib_path)
+    dymola, dymola_exception = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
     dym = CheckPythonDymola(dym=dymola,
                             dym_exp=dymola_exception,
                             dymola_version=args.dymola_version,
@@ -483,39 +445,46 @@ if __name__ == '__main__':
                             add_libraries_loc=additional_libraries_local,
                             inst_libraries=install_libraries)
     dym()
-    model = modelica_model()
+    mm = modelica_model()
+    option_check_dictionary = {}
     for package in args.packages:
         for options in args.dym_options:
             if options == "DYM_CHECK":
-                model_list = model.get_option_model(library=args.library,
-                                                    package=package,
-                                                    wh_library=args.wh_library,
-                                                    changed_flag=args.changed_flag,
-                                                    simulate_flag=False,
-                                                    filter_wh_flag=args.filter_wh_flag,
-                                                    root_library=args.root_library)
+                # todo: Funktionen Zusammenfassen
+                model_list = mm.get_option_model(library=args.library,
+                                                 package=package,
+                                                 wh_library=args.wh_library,
+                                                 changed_flag=args.changed_flag,
+                                                 simulate_flag=False,
+                                                 filter_wh_flag=args.filter_wh_flag,
+                                                 root_library=args.root_library)
 
                 error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                           exception_list=except_list,
-                                                          simulate_examples=False)
-                exit_var = dym.write_error_log(pack=package,
+                                                          sim_ex_flag=False)
+                pack, error_log, ch_log = dym.write_error_log(pack=package,
                                                error_dict=error_model_dict,
                                                exception_list=except_list)
+                var = dym.read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
+                option_check_dictionary[options] = var
 
-            if args.dym_options == "DYM_SIM":
-                model_list = model.get_option_model(library=args.library,
-                                                    package=package,
-                                                    wh_library=args.wh_library,
-                                                    changed_flag=args.changed_flag,
-                                                    simulate_flag=True,
-                                                    filter_wh_flag=args.filter_wh_flag,
-                                                    root_library=args.root_library)
+
+            if options == "DYM_SIM":
+                model_list = mm.get_option_model(library=args.library,
+                                                 package=package,
+                                                 wh_library=args.wh_library,
+                                                 changed_flag=args.changed_flag,
+                                                 simulate_flag=True,
+                                                 filter_wh_flag=args.filter_wh_flag,
+                                                 root_library=args.root_library)
                 error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                           exception_list=except_list,
-                                                          simulate_examples=True)
-                exit_var = dym.write_error_log(pack=package,
+                                                          sim_ex_flag=True)
+                pack, error_log, ch_log = dym.write_error_log(pack=package,
                                                error_dict=error_model_dict,
                                                exception_list=except_list)
+                var = dym.read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
+                option_check_dictionary[options] = var
 
     if args.create_wh_flag is True:
         check.check_arguments_settings(args.wh_library)

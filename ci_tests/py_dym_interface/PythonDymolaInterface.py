@@ -6,7 +6,7 @@ import os
 import sys
 
 
-class PythonDymolaInterface(ci_config):
+class PythonDymolaInterface:
 
     def __init__(self,
                  dymola: classmethod = None,
@@ -25,6 +25,12 @@ class PythonDymolaInterface(ci_config):
         self.dymola_version = dymola_version
         if self.dymola is not None:
             self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
+        # Color
+        self.CRED = f"\033[91m"
+        self.CEND = f"\033[0m"
+        self.green = f"\033[0;32m"
+        self.yellow = f"\033[33m"
+        self.blue = f"\033[44m"
 
     def dym_check_lic(self):
         """
@@ -102,11 +108,12 @@ class PythonDymolaInterface(ci_config):
 
     def set_environment_path(self, dymola_version):
         """
+        Checks the Operating System, Important for the Python-Dymola Interface
         Args:
             dymola_version (): Version von dymola-docker image (e.g. 2022)
         Set path of python dymola interface for windows or linux
         """
-        if platform.system() == "Windows":  # Checks the Operating System, Important for the Python-Dymola Interface
+        if platform.system() == "Windows":
             self.set_environment_variables("PATH",
                                            os.path.join(os.path.abspath('.'), "Resources", "Library",
                                                         "win32"))
@@ -134,6 +141,12 @@ class PythonDymolaInterface(ci_config):
 
     @staticmethod
     def load_dymola_python_interface(dymola_version: int = 2022):
+        """
+        Load dymola python interface and dymola exception
+        Args:
+            dymola_version ():
+        Returns:
+        """
         PythonDymolaInterface().set_environment_path(dymola_version=dymola_version)
         from dymola.dymola_interface import DymolaInterface
         from dymola.dymola_exception import DymolaException

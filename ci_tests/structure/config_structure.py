@@ -151,14 +151,14 @@ class data_structure(ci_config):
                 else:
                     print(f'Path {path} does not exist.')
 
-    # [Prepare Result]
     def prepare_data(self,
                      source_target_dict: dict = None,
                      del_flag: bool = False):
         """
+        Prepare Result:
             Args:
-            file_path_dict (): {dst:src,}
-            del_flag (): True: delete file, False dont delete file
+            file_path_dict (): {dst:src}
+            del_flag (): True: delete files if True, dont delete files if False
         """
         print(f'\n{self.blue}**** Prepare Data ****{self.CEND}')
         if source_target_dict is not None:
