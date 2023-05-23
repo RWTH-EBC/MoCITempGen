@@ -21,6 +21,7 @@
 # python_version ${python_version}
 # package_list: ${package_list}
 # config_ci_changed_file: ${config_ci_changed_file}
+# dymola_python_config_structure_file: ${dymola_python_config_structure_file}
 
 stages:
     - ${ci_stage_model_check}
@@ -67,10 +68,9 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
         - pip install -e  Dymola_python_tests
     script:
-        - python Dymola_python_tests/CITests/CI_Configuration/configuration.py --changed-model
+        - python ${dymola_python_config_structure_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:

@@ -65,8 +65,8 @@ class StoreDictKey(argparse.Action):
 class argpaser_toml(object):
 
     def __init__(self,
-                 f_path: str = os.path.join("Dymola_python_tests", "ci_tests"),
-                 toml_file: str = os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")):
+                 f_path: str = os.path.join("Modelica-GitLab-CI", "ci_tests"),
+                 toml_file: str = os.path.join("Modelica-GitLab-CI", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")):
         self.f_path = f_path
         self.toml_file = toml_file
         pass

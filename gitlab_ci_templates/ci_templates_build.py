@@ -611,17 +611,20 @@ class ci_templates(ci_template_config):
         arg_PR = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
-                             "changed_flag": False})
+                             "changed_flag": False, "extended_ex_flag": False},
+            out=["repo_dir", "git_url"])
         arg_push = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
-                             "changed_flag": True})
+                             "changed_flag": True, "extended_ex_flag": False },
+                             out= ["repo_dir", "git_url"])
 
         arg_wh = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
-                             "create_wh_flag": True,
-                             "changed_flag": False})
+                             "create_wh_flag": True,"extended_ex_flag": False, "filter_wh_flag" : False,
+                             "changed_flag": False,},
+                             out= ["root_library", "packages"])
 
         yml_text = my_template.render(dym_image_name=self.dym_image,
                                       ci_stage_model_check=self.ci_stage_model_check,
@@ -645,7 +648,8 @@ class ci_templates(ci_template_config):
                                       wh_model_file=self.wh_model_file,
                                       python_version=self.python_version,
                                       ci_create_model_wh_commit=self.ci_create_model_wh_commit,
-                                      config_ci_changed_file=self.config_ci_changed_file)
+                                      config_ci_changed_file=self.config_ci_changed_file,
+                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file)
         ci_folder = Path(self.temp_dir, self.temp_ci_check_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -1319,7 +1323,7 @@ class settings_ci_interactive(ci_template_config):
 class CI_toml_parser(object):
 
     def __init__(self):
-        self.ci_template_toml_file = os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config",
+        self.ci_template_toml_file = os.path.join("Modelica-GitLab-CI", "gitlab_ci_templates", "ci_config",
                                                   "toml_files",
                                                   "ci_user_template.toml")
 

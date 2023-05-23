@@ -20,7 +20,6 @@ class CheckPythonDymola(ci_config):
                  dym_exp,
                  library: str,
                  root_library: Path,
-                 dymola_version: int = 2022,
                  working_path: Path = Path(Path.cwd()),
                  add_libraries_loc: dict = None,
                  inst_libraries: list = None):
@@ -43,8 +42,6 @@ class CheckPythonDymola(ci_config):
         self.install_libraries = inst_libraries
         self.library = library
         self.working_path = working_path
-        # [dymola version]
-        self.dymola_version = dymola_version
         # [Start Dymola]
         self.dymola = dym
         self.dymola_exception = dym_exp
@@ -60,8 +57,7 @@ class CheckPythonDymola(ci_config):
         4. Install library to check
         """
         dym_int = PythonDymolaInterface(dymola=self.dymola,
-                                        dymola_exception=self.dymola_exception,
-                                        dymola_version=self.dymola_version)
+                                        dymola_exception=self.dymola_exception)
         dym_int.dym_check_lic()
         dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
@@ -176,7 +172,7 @@ class CheckPythonDymola(ci_config):
                                 check_log.write(f'\n\nWarning in model:  {error_model} \n')
                                 for warning in warning_list:
                                     check_log.write(str(warning) + "\n")
-                return pack, error_log, ch_log
+                return error_log, ch_log
         else:
             print(f"{self.green}Check was successful.{self.CEND}")
             exit(0)
@@ -226,7 +222,6 @@ class CreateWhitelist(ci_config):
     def __init__(self,
                  dym,
                  dymola_ex,
-                 library: str,
                  wh_library: str,
                  working_path: Path = Path(Path.cwd()),
                  dymola_version: int = 2022,
@@ -249,10 +244,8 @@ class CreateWhitelist(ci_config):
             wh_library ():  Library and its models that can be on the whitelist.
             repo_dir ():  Folder of the cloned project.
             git_url (): Git url of the cloned project.
-
         """
         super().__init__()
-        self.library = library
         self.wh_library = wh_library
         self.repo_dir = repo_dir
         self.git_url = git_url
@@ -261,7 +254,6 @@ class CreateWhitelist(ci_config):
         # [libraries]
         self.add_libraries_loc = add_libraries_loc
         self.install_libraries = inst_libraries
-        self.library = library
         # [dymola version]
         self.dymola_version = dymola_version
         # [Start Dymola]
@@ -273,8 +265,7 @@ class CreateWhitelist(ci_config):
         """
 
         """
-        dym_int = PythonDymolaInterface(dymola=self.dymola, dymola_exception=self.dymola_exception,
-                                        dymola_version=self.dymola_version)
+        dym_int = PythonDymolaInterface(dymola=self.dymola, dymola_exception=self.dymola_exception)
         # dym_int.dym_check_lic()
         dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
@@ -301,20 +292,21 @@ class CreateWhitelist(ci_config):
             root_wh_library = arg_root_wh_library
         return root_wh_library
 
-    def write_exit_log(self, vers_check: bool):
+    @staticmethod
+    def write_exit_log(vers_check: bool):
         """
         Write entry in exit file. Necessary for CI templates.
         Args:
             vers_check (): Boolean that check if the version number is up-to-date.
         """
         try:
-            with open(self.config_ci_exit_file, "w") as exit_file:
+            with open(ci_config().config_ci_exit_file, "w") as exit_file:
                 if vers_check is False:
                     exit_file.write(f'FAIL')
                 else:
                     exit_file.write(f'successful')
         except IOError:
-            print(f'Error: File {self.config_ci_exit_file} does not exist.')
+            print(f'Error: File {ci_config().config_ci_exit_file} does not exist.')
             exit(1)
 
     @staticmethod
@@ -488,7 +480,6 @@ if __name__ == '__main__':
     if args.create_wh_flag is False:
         dym = CheckPythonDymola(dym=dymola,
                                 dym_exp=dymola_exception,
-                                dymola_version=args.dymola_version,
                                 library=args.library,
                                 root_library=args.root_library,
                                 add_libraries_loc=additional_libraries_local,
@@ -511,10 +502,10 @@ if __name__ == '__main__':
                     error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                               exception_list=except_list,
                                                               sim_ex_flag=False)
-                    pack, error_log, ch_log = dym.write_error_log(pack=package,
+                    error_log, ch_log = dym.write_error_log(pack=package,
                                                                   error_dict=error_model_dict,
                                                                   exception_list=except_list)
-                    var = dym.read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
+                    var = dym.read_error_log(pack=package, err_log=error_log, check_log=ch_log)
                     option_check_dictionary[options] = var
 
                 if options == "DYM_SIM":
@@ -528,10 +519,10 @@ if __name__ == '__main__':
                     error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                               exception_list=except_list,
                                                               sim_ex_flag=True)
-                    pack, error_log, ch_log = dym.write_error_log(pack=package,
+                    error_log, ch_log = dym.write_error_log(pack=package,
                                                                   error_dict=error_model_dict,
                                                                   exception_list=except_list)
-                    var = dym.read_error_log(pack=pack, err_log=error_log, check_log=ch_log)
+                    var = dym.read_error_log(pack=package, err_log=error_log, check_log=ch_log)
                     option_check_dictionary[options] = var
             dym.return_exit_var(opt_check_dict=option_check_dictionary, pack=package)
     if args.create_wh_flag is True:
@@ -555,7 +546,6 @@ if __name__ == '__main__':
                     check.check_file_setting(root_wh_library)
                     wh = CreateWhitelist(dym=dymola,
                                          dymola_ex=dymola_exception,
-                                         library=args.library,
                                          wh_library=args.wh_library,
                                          repo_dir=args.repo_dir,
                                          git_url=args.git_url,
@@ -563,8 +553,6 @@ if __name__ == '__main__':
                                          add_libraries_loc=additional_libraries_local,
                                          root_wh_library=root_wh_library)
                     wh()
-                    wh.write_exit_log(vers_check=version_check)
-
                     model_list = mo.get_option_model(library=args.wh_library,
                                                      package=".",
                                                      wh_library=args.wh_library,
@@ -577,6 +565,7 @@ if __name__ == '__main__':
                                              wh_files=conf.wh_model_file,
                                              version=version,
                                              simulate_examples=False)
+                CreateWhitelist.write_exit_log(vers_check=version_check)
             if options == "DYM_SIM":
                 check.create_files(conf.wh_simulate_file, conf.config_ci_exit_file)
                 version_check = CreateWhitelist.check_whitelist_version(version=version,
@@ -589,7 +578,6 @@ if __name__ == '__main__':
                     check.check_file_setting(root_wh_library)
                     wh = CreateWhitelist(dym=dymola,
                                          dymola_ex=dymola_exception,
-                                         library=args.library,
                                          wh_library=args.wh_library,
                                          repo_dir=args.repo_dir,
                                          git_url=args.git_url,
@@ -597,7 +585,6 @@ if __name__ == '__main__':
                                          add_libraries_loc=additional_libraries_local,
                                          root_wh_library=root_wh_library)
                     wh()
-                    wh.write_exit_log(vers_check=version_check)  # todo: Brauch ich die Datei noch?
                     model_list = mo.get_option_model(library=args.wh_library,
                                                      package=".",
                                                      wh_library=args.wh_library,
@@ -610,3 +597,4 @@ if __name__ == '__main__':
                                              wh_files=conf.wh_simulate_file,
                                              version=version,
                                              simulate_examples=True)
+                CreateWhitelist.write_exit_log(vers_check=version_check)  # todo: Brauch ich die Datei noch?

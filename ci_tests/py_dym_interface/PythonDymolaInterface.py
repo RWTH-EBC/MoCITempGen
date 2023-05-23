@@ -10,8 +10,7 @@ class PythonDymolaInterface:
 
     def __init__(self,
                  dymola: classmethod = None,
-                 dymola_exception: classmethod = None,
-                 dymola_version: int = 2022):
+                 dymola_exception: classmethod = None):
         """
         Args:
             dymola ():
@@ -22,7 +21,6 @@ class PythonDymolaInterface:
         self.dymola = dymola
         self.dymola_exception = dymola_exception
         # todo exception mit einbauen
-        self.dymola_version = dymola_version
         if self.dymola is not None:
             self.dymola.ExecuteCommand("Advanced.TranslationInCommandLog:=true;")
         # Color

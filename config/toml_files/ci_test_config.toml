@@ -36,7 +36,7 @@ library_ref_results_dir = 'Resources/ReferenceResults/Dymola'
 library_resource_dir = 'Resources/Scripts/Dymola'
 
 [Dymola_Python_Tests]
-dymola_python_test_url = '--single-branch --branch 03_openModelica https://$CI_PYTHON_DYMOLA_NAME:$CI_PYTHON_DYMOLA_TOKEN@git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests.git'
+dymola_python_test_url = '--single-branch --branch 03_openModelica https://github.com/RWTH-EBC/Modelica-CI.git'
 
 [result]
 result_dir = 'dymola-ci-tests/result'
