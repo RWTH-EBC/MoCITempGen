@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 import os
-#from git import Repo
+from git import Repo
 import git
 
 class GitRepository(object):

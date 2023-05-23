@@ -111,7 +111,6 @@ class CI_temp_struc(object):
                     elif isinstance(arg_parser[var], bool):
                         if arg_parser[var] is True:
                             arg = f'--{var.replace("_", "-")}  '
-                            # print(arg)
                         else:
                             arg = ""
                     elif isinstance(arg_parser[var], list):
@@ -160,7 +159,6 @@ class CI_temp_struc(object):
                     else:
                         rule_string = f'{rule_string} {rule_option} {rule}'
                 return rule_string
-
         else:
             print("Rule is None")
             exit(1)

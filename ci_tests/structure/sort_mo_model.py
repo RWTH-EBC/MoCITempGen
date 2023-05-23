@@ -51,7 +51,10 @@ class modelica_model(ci_config):
             root_library = Path(path_dir, library, "package.mo")
         check.check_file_setting(root_library)
         if root_package is None:
-            root_package = Path(root_library.parent, package.replace(".", os.sep))
+            if package is ".":
+                root_package = Path(Path(root_library).parent)
+            else:
+                root_package = Path(Path(root_library).parent, package.replace(".", os.sep))
         check.check_path_setting(root_package)
         if dymola is None:
             extended_ex_flag = False

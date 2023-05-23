@@ -111,12 +111,11 @@ check_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - pip install -e  Dymola_python_tests
+
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
+        - cd $CI_PROJECT_NAME && git clone ${dymola_python_test_url}
         - pip install -e  Dymola_python_tests
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
     after_script:
@@ -125,7 +124,7 @@ check_whitelist_job:
             message="${bot_update_model_wh_commit}" ;
             git add ${wh_model_file} ;
             git commit -m "$message" ;
-            git push git@github.com:$Github_Repository.git ;
+            git push git@github.com:$Github_Repository.git;
             exit 0;
           else
             exit 0 ;
