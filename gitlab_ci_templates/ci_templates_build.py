@@ -239,10 +239,10 @@ class ci_templates(ci_template_config):
         # out = ["root_library", "library"]
         arg_PR = self.rule.write_parser_args(py_file=Path(self.OM_python_check_model_file).name.replace(".py", ""),
                                              repl_parser_arg={"packages": "$lib_package", "om_options": "OM_CHECK",
-                                                              "changed_flag": False})
+                                                              "changed_flag": False, "extended_ex_flag": False})
         arg_push = self.rule.write_parser_args(py_file=Path(self.OM_python_check_model_file).name.replace(".py", ""),
                                                repl_parser_arg={"packages": "$lib_package", "om_options": "OM_CHECK",
-                                                                "changed_flag": True})
+                                                                "changed_flag": True, "extended_ex_flag": False})
 
         yml_text = my_template.render(ci_stage_OM_model_check=self.ci_stage_OM_model_check,
                                       dymola_python_test_dir=self.dymola_python_test_dir,
@@ -566,7 +566,8 @@ class ci_templates(ci_template_config):
                                       config_ci_eof_file=self.config_ci_eof_file,
                                       config_ci_new_create_ref_file=self.config_ci_new_create_ref_file,
                                       bot_create_ref_commit=self.bot_create_ref_commit,
-                                      ci_show_ref_commit=self.ci_show_ref_commit)
+                                      ci_show_ref_commit=self.ci_show_ref_commit,
+                                      dymola_python_test_dir=self.dymola_python_test_dir)
         ci_folder = Path(self.temp_dir, self.temp_ci_regression_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_regression_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -597,7 +598,8 @@ class ci_templates(ci_template_config):
                                       result_dir=self.result_dir,
                                       OM_Image=self.OM_Image,
                                       expire_in_time=self.expire_in_time,
-                                      packages=self.package_list[self.library])
+                                      packages=self.package_list[self.library],
+                                      dymola_python_test_dir=self.dymola_python_test_dir)
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_simulate_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_OM_simulate_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -672,19 +674,20 @@ class ci_templates(ci_template_config):
                              "changed_flag": True})
         arg_wh = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_validate_file).name.replace(".py", ""),
-            repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_SIM",
+            repl_parser_arg={"packages": ".", "dym_options": "DYM_SIM",
                              "create_wh_flag": True,
                              "changed_flag": False})
 
         yml_text = my_template.render(dym_image_name=self.dym_image,
                                       ci_stage_simulate=self.ci_stage_simulate,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
                                       ci_stage_create_exampeL_whitelist=self.ci_stage_create_example_whitelist,
                                       arg_push=arg_push,
                                       arg_PR=arg_PR,
                                       commit_string=self.commit_string,
                                       PR_main_branch_rule=self.pr_main_branch_rule,
                                       library=self.library,
-                                      ci_check_commit=self.ci_stage_simulate,
+                                      ci_check_commit=self.ci_simulate_commit,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_dir=self.dymola_python_dir,

@@ -266,7 +266,7 @@ class CreateWhitelist(ci_config):
 
         """
         dym_int = PythonDymolaInterface(dymola=self.dymola, dymola_exception=self.dymola_exception)
-        # dym_int.dym_check_lic()
+        dym_int.dym_check_lic()
         dym_int.load_library(root_library=self.root_library, add_libraries_loc=self.add_libraries_loc)
         dym_int.install_library(libraries=self.install_libraries)
 

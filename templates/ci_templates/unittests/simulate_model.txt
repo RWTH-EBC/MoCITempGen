@@ -48,10 +48,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        - pip install -e  Dymola_python_tests
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
     artifacts:
@@ -68,10 +65,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        - pip install -e  Dymola_python_tests
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:
@@ -99,7 +93,7 @@ Simulate_${library}_${package}:Push:
 
 %endfor
 
-check_whitelist_job:
+simulate_whitelist_job:
     image: ${dym_image_name}
     stage:  ${ci_stage_create_exampeL_whitelist}
     before_script:
@@ -113,15 +107,12 @@ check_whitelist_job:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        # export PYTHONPATH=Dymola_python_tests
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

@@ -39,9 +39,7 @@ stages:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_PR}
     artifacts:
@@ -60,10 +58,7 @@ stages:
     stage: ${ci_stage_OM_simulate}
     before_script:
         - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/setup.py install
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - PYTHONPATH=Dymola_python_tests
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_push}
     artifacts:

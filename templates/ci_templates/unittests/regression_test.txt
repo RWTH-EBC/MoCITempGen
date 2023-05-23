@@ -60,18 +60,15 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
         - source activate ${python_version}
-        # pip install --upgrade ${buildingspy_upgrade}
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
+        - pip install --upgrade ${buildingspy_upgrade}
 
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_PR}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} ${arg_chart} ;
             exit 1 ;
           else
@@ -91,18 +88,14 @@ stages:
     stage: ${ci_stage_regression_test}
     before_script:
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
         - source activate ${python_version}
-        - pip install -e  Dymola_python_tests
-        # pip install --upgrade ${buildingspy_upgrade}
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
+        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_push}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt ;
             python ${dymola_python_google_chart_file} ${arg_chart} ;
             exit 1 ;
           else
@@ -138,12 +131,9 @@ Regression_overall_coverage:PR:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
-        # pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
-        # python Dymola_python_tests/setup.py install
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
+        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -159,12 +149,8 @@ Regression_overall_coverage:Push:
     stage: ${ci_stage_regression_test}
     before_script:
         - source activate ${python_version}
-        # pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -182,10 +168,8 @@ prepare_create_plots:Push:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
-        # python Dymola_python_tests/setup.py install
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
+
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -204,12 +188,9 @@ prepare_create_plots:PR:
     stage: ${ci_stage_prepare}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        - pip install -e  Dymola_python_tests
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e ${dymola_python_test_dir}
+
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -247,10 +228,7 @@ RegressionTest_Check_References:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${dymola_python_test_url}
-        # python Dymola_python_tests/setup.py install
-        # export PYTHONPATH=$PWD/Dymola_python_tests
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
         - python ${dymola_python_structure_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --create-ref  < ../${config_ci_eof_file}
     after_script:
@@ -283,10 +261,8 @@ plot_reference_results:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
-        # python Dymola_python_tests/setup.py install
-        # pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        # export PYTHONPATH=$PWD/Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
+
     script:
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
         - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
