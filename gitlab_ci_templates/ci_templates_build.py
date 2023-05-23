@@ -261,6 +261,8 @@ class ci_templates(ci_template_config):
                                       arg_push=arg_push,
                                       packages=self.package_list[self.library],
                                       dymola_python_dir=self.dymola_python_dir,
+                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file,
+                                      config_ci_changed_file=self.config_ci_changed_file
                                      )
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_check_file).parent
         data_structure().create_path(ci_folder)
@@ -345,6 +347,8 @@ class ci_templates(ci_template_config):
                                                                 "correct_html_flag": True}, out=["gitlab_page", "base_branch"])
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.dym_image,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
+
                                       ci_stage_html_check=self.ci_stage_html_check,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
@@ -390,6 +394,7 @@ class ci_templates(ci_template_config):
             repl_parser_arg={"changed_flag": True}, out=["packages"])
 
         yml_text = my_template.render(image_name=self.dym_image,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
                                       ci_stage_style_check=self.ci_stage_style_check,
                                       python_version=self.python_version,
                                       dymola_python_test_url=self.dymola_python_test_url,
@@ -419,6 +424,8 @@ class ci_templates(ci_template_config):
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       dymola_python_config_structure_file=self.dymola_python_config_structure_file,
                                       arg_struc_wh=2,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
+
                                       arg_wh_check=2,
                                       dymola_python_html_tidy_file=self.dymola_python_html_tidy_file,
                                       arg_wh_html=2,
@@ -471,6 +478,7 @@ class ci_templates(ci_template_config):
                              "dym_options": "DYM_SIM"})
 
         yml_text = my_template.render(image_name=self.dym_image,
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
                                       ci_stage_lib_merge=self.ci_stage_lib_merge,
                                       ci_stage_update_whitelist=self.ci_stage_update_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
@@ -599,7 +607,9 @@ class ci_templates(ci_template_config):
                                       OM_Image=self.OM_Image,
                                       expire_in_time=self.expire_in_time,
                                       packages=self.package_list[self.library],
-                                      dymola_python_test_dir=self.dymola_python_test_dir)
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
+                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file,
+                                      config_ci_changed_file=self.config_ci_changed_file)
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_simulate_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_OM_simulate_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -682,7 +692,9 @@ class ci_templates(ci_template_config):
                                       ci_stage_simulate=self.ci_stage_simulate,
                                       dymola_python_test_dir=self.dymola_python_test_dir,
                                       ci_stage_create_exampeL_whitelist=self.ci_stage_create_example_whitelist,
+                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file,
                                       arg_push=arg_push,
+                                      config_ci_changed_file=self.config_ci_changed_file,
                                       arg_PR=arg_PR,
                                       commit_string=self.commit_string,
                                       PR_main_branch_rule=self.pr_main_branch_rule,

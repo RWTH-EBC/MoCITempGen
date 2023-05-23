@@ -46,8 +46,7 @@ IBPSA:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
@@ -78,8 +77,7 @@ WhiteList:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
 
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
@@ -113,8 +111,7 @@ IBPSA_Pull_Request:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - pip install --use-deprecated=legacy-resolver -r ${dymola_python_dir}/requirements.txt
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
        - python  ${dymola_python_api_github_file} ${arg_api_pr}
     rules:

@@ -67,6 +67,8 @@ stages:
         - git clone ${dymola_python_test_url}
         - pip install -e  ${dymola_python_test_dir}
     script:
+        - python ${dymola_python_config_structure_file} --changed-model
+        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
     artifacts:
         when: on_failure

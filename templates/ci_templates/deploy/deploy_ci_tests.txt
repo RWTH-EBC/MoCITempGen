@@ -16,5 +16,5 @@ CI_tests:
         - git config --global user.name "${GITLAB_USER_NAME}"
         - git config --global user.email "${GITLAB_USER_EMAIL}"
         - git clone ${dymola_python_test_url}
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     when: always

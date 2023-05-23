@@ -8,9 +8,8 @@ Test_CI_Setting:
     before_script:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - source activate ${python_version}
-        - pip install toml
         - git clone ${dymola_python_test_url}
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - python Dymola_python_tests/CITests/CleanUp/setting_check.py --github-private-key $GITHUB_PRIVATE_KEY --github-token $GITHUB_API_TOKEN
     only:
@@ -35,7 +34,7 @@ Create_templates:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - export PYTHONPATH=Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - mkdir build_template && cd build_template
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git

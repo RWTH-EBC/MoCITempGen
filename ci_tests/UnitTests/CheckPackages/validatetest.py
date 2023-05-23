@@ -557,7 +557,7 @@ if __name__ == '__main__':
                                                      package=".",
                                                      wh_library=args.wh_library,
                                                      changed_flag=False,
-                                                     simulate_flag=True,
+                                                     simulate_flag=False,
                                                      filter_wh_flag=False,
                                                      extended_ex_flag=False,
                                                      root_library=root_wh_library)
