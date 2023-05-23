@@ -6,11 +6,14 @@ import shutil
 import glob
 from pathlib import Path
 import argparse
-
+import distutils.dir_util
 
 class data_structure(ci_config):
 
     def __init__(self):
+        """
+
+        """
         super().__init__()
 
     def check_arguments_settings(self, *args):
@@ -34,6 +37,12 @@ class data_structure(ci_config):
                       f'{self.blue}"{val}"{self.CEND}')
 
     def check_path_setting(self,  *args: Path, create_flag: bool = False):
+        """
+
+        Args:
+            *args ():
+            create_flag ():
+        """
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
@@ -55,6 +64,12 @@ class data_structure(ci_config):
                     exit(1)
 
     def check_file_setting(self, *args, create_flag: bool = False):
+        """
+
+        Args:
+            *args ():
+            create_flag ():
+        """
         frame = inspect.currentframe().f_back
         s = inspect.getframeinfo(frame).code_context[0]
         r = re.search(r"\((.*)\)", s).group(1)
@@ -119,6 +134,12 @@ class data_structure(ci_config):
 
     @staticmethod
     def delete_spec_file(root: str = None, pattern: str = None):
+        """
+
+        Args:
+            root ():
+            pattern ():
+        """
         if root is not None and pattern is not None:
             for filename in os.listdir(root):
                 file = os.path.join(root, filename)
@@ -127,6 +148,13 @@ class data_structure(ci_config):
 
     @staticmethod
     def delete_files_path(root: str = None, pattern: str = None, subfolder: bool = False):
+        """
+
+        Args:
+            root ():
+            pattern ():
+            subfolder ():
+        """
         if subfolder is True:
             files = glob.glob(f'{root}/**/*{pattern}', recursive=True)
         else:
@@ -137,6 +165,11 @@ class data_structure(ci_config):
 
     @staticmethod
     def remove_files(file_list: list = None):
+        """
+
+        Args:
+            file_list ():
+        """
         if file_list is not None:
             for file in file_list:
                 if os.path.exists(file):
@@ -187,7 +220,7 @@ class data_structure(ci_config):
                 if os.path.isdir(source) is True:
                     print(
                         f'Result Folder {self.blue}{source}{self.CEND} was moved to {self.blue}{target_path}{self.CEND}')
-                    shutil.copytree(source, target_path)
+                    distutils.dir_util.copy_tree(source, str(target_path))
                     if del_flag is True:
                         self.remove_path([source])
 
@@ -205,6 +238,11 @@ class data_structure(ci_config):
 
     @staticmethod
     def return_file_dir():
+        """
+
+        Returns:
+
+        """
         dir_list = []
         dir_dic = (vars(ci_config()))
         for dirs in dir_dic:

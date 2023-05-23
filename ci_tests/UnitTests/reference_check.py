@@ -42,12 +42,11 @@ class Buildingspy_Regression_Check(ci_config):
         write an exit file, important for gitlab ci
         """
         try:
-            ex_file = open(self.config_ci_exit_file, "w")
-            if var == 0:
-                ex_file.write(f'successful')
-            else:
-                ex_file.write(f'FAIL')
-            ex_file.close()
+            with open(self.config_ci_exit_file, "w") as ex_file:
+                if var == 0:
+                    ex_file.write(f'successful')
+                else:
+                    ex_file.write(f'FAIL')
         except IOError:
             print(f'Error: File {self.config_ci_exit_file} does not exist.')
 
@@ -201,14 +200,13 @@ class Ref_model(ci_config):
         """
         wh_list = []
         try:
-            ref_wh = open(self.wh_ref_file, "r")
-            lines = ref_wh.readlines()
-            for line in lines:
-                if len(line.strip()) == 0:
-                    continue
-                else:
-                    wh_list.append(line.strip())
-            ref_wh.close()
+            with open(self.wh_ref_file, "r") as ref_wh:
+                lines = ref_wh.readlines()
+                for line in lines:
+                    if len(line.strip()) == 0:
+                        continue
+                    else:
+                        wh_list.append(line.strip())
             for wh_package in wh_list:
                 print(
                     f'{self.CRED} Don´t create reference results for package{self.CEND} {wh_package}: This Package is '
@@ -266,15 +264,14 @@ class Ref_model(ci_config):
         Returns:
         """
         try:
-            file = open(f'..{os.sep}{self.ci_interact_update_ref_file}', "r")
-            lines = file.readlines()
-            update_ref_list = []
-            for line in lines:
-                if len(line) == 0:
-                    continue
-                elif line.find(".txt") > -1:
-                    update_ref_list.append(line.strip())
-            file.close()
+            with open(f'..{os.sep}{self.ci_interact_update_ref_file}', "r") as file:
+                lines = file.readlines()
+                update_ref_list = []
+                for line in lines:
+                    if len(line) == 0:
+                        continue
+                    elif line.find(".txt") > -1:
+                        update_ref_list.append(line.strip())
             if len(update_ref_list) == 0:
                 print(
                     f'No reference files in file {self.ci_interact_update_ref_file}. Please add here your reference files you '
@@ -291,10 +288,9 @@ class Ref_model(ci_config):
         """
         mos_list = self._get_mos_scripts()
         try:
-            wh_file = open(self.config_ci_ref_file, "w")
-            for mos in mos_list:
-                wh_file.write(f'\n{mos}\n')
-            wh_file.close()
+            with open(self.config_ci_ref_file, "w") as wh_file:
+                for mos in mos_list:
+                    wh_file.write(f'\n{mos}\n')
         except IOError:
             print(f'Error: File {self.config_ci_ref_file} does not exist.')
 
@@ -309,18 +305,16 @@ class Ref_model(ci_config):
             for file in files:
                 filepath = subdir + os.sep + file
                 if filepath.endswith(".mos"):
-                    infile = open(filepath, "r")
-                    lines = infile.read()
-                    if lines.find("simulateModel") > -1:
-                        mos_script = filepath[filepath.find("Dymola"):filepath.find(".mos")].replace("Dymola",
-                                                                                                     self.library)
-                        mos_script = mos_script.replace(os.sep, ".")
-                        mos_list.append(mos_script)
-                    if lines.find("simulateModel") == -1:
-                        print(
-                            f'{self.CRED}This mos script is not suitable for regression testing:{self.CEND} {filepath}')
-                    infile.close()
-                    continue
+                    with open(filepath, "r") as infile:
+                        lines = infile.read()
+                        if lines.find("simulateModel") > -1:
+                            mos_script = filepath[filepath.find("Dymola"):filepath.find(".mos")].replace("Dymola",
+                                                                                                         self.library)
+                            mos_script = mos_script.replace(os.sep, ".")
+                            mos_list.append(mos_script)
+                        if lines.find("simulateModel") == -1:
+                            print(
+                                f'{self.CRED}This mos script is not suitable for regression testing:{self.CEND} {filepath}')
         if len(mos_list) == 0:
             print(f'No feasible mos script for regression test in {self.library_resource_dir}.')
             return mos_list
@@ -451,9 +445,7 @@ if __name__ == '__main__':
     # todo: AttributeError: 'Tester' object has no attribute 'get_test_example_coverage'
     # todo: Template für push hat changed:flag drin, ist falsch
     args = Parser(sys.argv[1:]).main()
-    dym = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
-    dymola = dym[0]
-    dymola_exception = dym[1]
+    dymola, dymola_exception = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
 
     if args.validate_html_only:
         var = Buildingspy_Validate_test(validate=validate,
@@ -473,7 +465,6 @@ if __name__ == '__main__':
     else:
         dym_interface = PythonDymolaInterface(dymola=dymola,
                                               dymola_exception=dymola_exception)
-        dym_interface.dym_check_lic()
         dym_interface.load_library(root_library=args.root_library,
                                    add_libraries_loc=None)
         conf = ci_config()
@@ -483,7 +474,7 @@ if __name__ == '__main__':
         if args.ref_list:
             ref_model.write_regression_list()
             exit(0)
-        dym_interface.dym_check_lic()
+        #dym_interface.dym_check_lic()
         ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
                                                  pack=args.packages,
                                                  n_pro=args.number_of_processors,
@@ -494,9 +485,7 @@ if __name__ == '__main__':
                                                  library=args.library)
         created_ref_list = list()
         if args.create_ref:
-            result = ref_model.get_update_model()
-            package_list = result[0]
-            created_ref_list = result[1]
+            package_list, created_ref_list = ref_model.get_update_model()
         elif args.update_ref:
             ref_list = ref_model.get_update_ref()
             ref_model.delete_ref_file(ref_list=ref_list)
@@ -505,7 +494,7 @@ if __name__ == '__main__':
             check.check_path_setting(Path("..", conf.config_ci_dir), create_flag=True)
             if args.changed_flag is False:
                 check.create_files(Path("..", conf.config_ci_exit_file))
-                package_list = [args.packages]
+                package_list = args.packages
             if args.changed_flag is True:
                 check.create_files(Path("..", conf.config_ci_changed_file), Path("..", conf.config_ci_exit_file))
                 #package = args.packages[args.packages.rfind(".") + 1:]
@@ -536,6 +525,7 @@ if __name__ == '__main__':
             if len(created_ref_list) > 0:
                 for ref in created_ref_list:
                     ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
+                    print(ref_file)
                     check.prepare_data(
                         source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
         ref_check.write_exit_file(var=val)
