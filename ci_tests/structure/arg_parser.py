@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 import sys
 from ci_test_config import ci_config
+from gitlab_ci_templates.ci_templates_config import ci_template_config
 import os
 from mako.template import Template
 import glob
@@ -62,13 +63,14 @@ class StoreDictKey(argparse.Action):
         else:
             return None
 
-class argpaser_toml(object):
+class argpaser_toml(ci_template_config):
 
     def __init__(self,
                  f_path: str = os.path.join("Modelica-GitLab-CI", "ci_tests"),
                  toml_file: str = os.path.join("Modelica-GitLab-CI", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")):
+        super().__init__()
         self.f_path = f_path
-        self.toml_file = toml_file
+        self.toml_file = Path(self.dymola_python_test_dir, "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")
         pass
 
     def load_python_modules(self):

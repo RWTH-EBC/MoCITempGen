@@ -22,6 +22,7 @@
 # package_list: ${package_list}
 # config_ci_changed_file: ${config_ci_changed_file}
 # dymola_python_config_structure_file: ${dymola_python_config_structure_file}
+# dymola_python_test_dir : ${dymola_python_test_dir}
 
 stages:
     - ${ci_stage_model_check}
@@ -51,7 +52,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
     artifacts:
@@ -68,7 +69,7 @@ stages:
     before_script:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
     script:
         - python ${dymola_python_config_structure_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
@@ -116,7 +117,7 @@ check_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME && git clone ${dymola_python_test_url}
-        - pip install -e  Dymola_python_tests
+        - pip install -e  ${dymola_python_test_dir}
         - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

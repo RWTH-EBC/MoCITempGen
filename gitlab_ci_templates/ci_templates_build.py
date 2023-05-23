@@ -260,7 +260,8 @@ class ci_templates(ci_template_config):
                                       arg_PR=arg_PR,
                                       arg_push=arg_push,
                                       packages=self.package_list[self.library],
-                                      dymola_python_dir=self.dymola_python_dir)
+                                      dymola_python_dir=self.dymola_python_dir,
+                                     )
         ci_folder = Path(self.temp_dir, self.temp_ci_OM_check_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_OM_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -649,7 +650,8 @@ class ci_templates(ci_template_config):
                                       python_version=self.python_version,
                                       ci_create_model_wh_commit=self.ci_create_model_wh_commit,
                                       config_ci_changed_file=self.config_ci_changed_file,
-                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file)
+                                      dymola_python_config_structure_file=self.dymola_python_config_structure_file,
+                                      dymola_python_test_dir=self.dymola_python_test_dir)
         ci_folder = Path(self.temp_dir, self.temp_ci_check_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_check_file).name.replace(".txt", ".gitlab-ci.yml")), "w")
@@ -1320,10 +1322,11 @@ class settings_ci_interactive(ci_template_config):
         return dymola_image_dict
 
 
-class CI_toml_parser(object):
+class CI_toml_parser(ci_template_config):
 
     def __init__(self):
-        self.ci_template_toml_file = os.path.join("Modelica-GitLab-CI", "gitlab_ci_templates", "ci_config",
+        super().__init__()
+        self.ci_template_toml_file = os.path.join(self.dymola_python_test_dir, "gitlab_ci_templates", "ci_config",
                                                   "toml_files",
                                                   "ci_user_template.toml")
 
