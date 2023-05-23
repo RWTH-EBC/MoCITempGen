@@ -764,7 +764,7 @@ if __name__ == '__main__':
                                      filter_wh_flag=args.filter_whitelist_flag,
                                      wh_library=args.wh_library,
                                      root_package=Path(args.library))
-    #html_tidy_check.run_files()
+    html_tidy_check.run_files()
     html_tidy_check.check_html_files(model_list=html_model)
     if args.log_flag is True:
         variable = html_tidy_check.call_read_log()

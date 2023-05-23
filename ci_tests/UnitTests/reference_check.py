@@ -472,8 +472,7 @@ if __name__ == '__main__':
         exit(var)
     else:
         dym_interface = PythonDymolaInterface(dymola=dymola,
-                                              dymola_exception=dymola_exception,
-                                              dymola_version=args.dymola_version)
+                                              dymola_exception=dymola_exception)
         dym_interface.dym_check_lic()
         dym_interface.load_library(root_library=args.root_library,
                                    add_libraries_loc=None)
