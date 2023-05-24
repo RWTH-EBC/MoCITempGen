@@ -32,9 +32,8 @@ class toml_to_py():
     def write_python_ci_test_config(self, config_list, temp_file: str, py_file: Path):
         my_template = Template(filename=temp_file)
         config_text = my_template.render(config_list=config_list)
-        yml_tmp = open(py_file, "w")
-        yml_tmp.write(config_text.replace('\n', ''))
-        yml_tmp.close()
+        with  open(py_file, "w") as yml_tmp:
+            yml_tmp.write(config_text.replace('\n', ''))
         print(f"Created file {py_file}.")
 
 
@@ -87,7 +86,7 @@ if __name__ == '__main__':
         to.write_python_ci_test_config(config_list=config,
                                        temp_file=os.path.join(Path.cwd(), "Modelica-CI", "templates", "config_templates",
                                                               "ci_test_config.txt"),
-                                       py_file=Path(Path.cwd(), "Dymola_python_tests", "ci_test_config.py"))
+                                       py_file=Path(Path.cwd(), "Modelica-CI", "ci_test_config.py"))
     if arg.create_ci_temp_config is True:
         to = toml_to_py()
         config = to.load_toml(toml_file=Path(Path.cwd(), "Modelica-CI", "gitlab_ci_templates", "ci_config", "toml_files",

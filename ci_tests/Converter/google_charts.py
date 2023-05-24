@@ -445,6 +445,7 @@ class Plot_Charts(ci_config):
             print(f'No html files')
             exit(0)
         else:
+            print(package_list)
             my_template = Template(filename=self.temp_layout_file)
             html_chart = my_template.render(packages=package_list)
             with open(layout_html_file, "w") as file_tmp:
@@ -566,8 +567,9 @@ if __name__ == '__main__':
     args = Parser(sys.argv[1:]).main()
     conf = ci_config()
     check = data_structure()
-    check.create_path(conf.chart_dir, conf.temp_chart_dir)
-    check.create_files(conf.temp_chart_file, conf.temp_index_file, conf.temp_layout_file)
+    check.create_path(conf.chart_dir)
+    check.check_path_setting(conf.chart_dir, conf.temp_chart_dir)
+    check.check_file_setting(conf.temp_chart_file, conf.temp_index_file,  conf.temp_layout_file)
     charts = Plot_Charts(package=args.packages,
                          library=args.library)
     if args.line_html_flag is True:
