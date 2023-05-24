@@ -53,7 +53,7 @@ temp_toml_ci_setting_file = 'Setting/CI_setting_template.txt'
 toml_ci_setting_file = 'Setting/CI_setting.toml'
 
 [ci_templates_file]
-temp_ci_dir = 'Modelica-GitLab-CI/templates/ci_templates'
+temp_ci_dir = 'Modelica-CI/templates/ci_templates'
 temp_ci_regression_file = 'UnitTests/regression_test.txt'
 temp_ci_check_file = 'UnitTests/check_model.txt'
 temp_ci_simulate_file = 'UnitTests/simulate_model.txt'
@@ -96,9 +96,9 @@ ci_create_model_wh_commit = "ci_create_model_wh"       # create a whitelist with
 ci_create_html_wh_commit = "ci_create_html_wh"         # create a whitelist with models that should not go through the html check
 ci_create_simulate_wh_commit = "ci_create_example_wh"  # create a whitelist with models that failed the simulate job
 ci_simulate_commit = "ci_simulate"                     # trigger only to simulate job
-ci_OM_simulate_commit = "ci_OM_simulate"
+ci_OM_simulate_commit = "ci_om_simulate"
 ci_check_commit = "ci_check"                           # trigger only the check job
-ci_OM_check_commit = "ci_OM_check"
+ci_OM_check_commit = "ci_om_check"
 ci_regression_test_commit = "ci_regression_test"       # trigger only the regression job
 ci_html_commit = "ci_html"                             # trigger only the html job
 ci_setting_commit = "ci_setting"                       # trigger only the setting job
@@ -108,6 +108,7 @@ ci_merge_except_commit = "ci_merge_except"
 ci_correct_html_commit = "ci_correct_html"
 ci_build_structure_commit = "ci_build_structure"
 ci_build_whitelist_structure_commit = "ci_build_whitelist"
+ci_reference_check = "ci_reference_check"
 
 
 [ci_commit_bot]

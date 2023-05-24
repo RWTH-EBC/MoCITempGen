@@ -543,6 +543,14 @@ class ci_templates(ci_template_config):
         arg_ref = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"create_ref_flag": True})
+        arg_check_ref_plot = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
+            repl_parser_arg={"line_html_flag":True, "package": self.library,
+                             "funnel_comp_flag:": False, "create_layout_flag": False,
+                             "error_flag":False,"new_ref":True },
+            out=["packages"])
+        #python ${dymola_python_google_chart_file} - -line - html - -new - ref - -packages ${library};
+
         yml_text = my_template.render(dym_image=self.dym_image,
                                       ci_stage_regression_test=self.ci_stage_regression_test,
                                       ci_stage_ref_check=self.ci_stage_ref_check,
@@ -575,7 +583,9 @@ class ci_templates(ci_template_config):
                                       config_ci_new_create_ref_file=self.config_ci_new_create_ref_file,
                                       bot_create_ref_commit=self.bot_create_ref_commit,
                                       ci_show_ref_commit=self.ci_show_ref_commit,
-                                      dymola_python_test_dir=self.dymola_python_test_dir)
+                                      dymola_python_test_dir=self.dymola_python_test_dir,
+                                      arg_check_ref_plot=arg_check_ref_plot,
+                                      ci_reference_check=self.ci_reference_check)
         ci_folder = Path(self.temp_dir, self.temp_ci_regression_file).parent
         data_structure().create_path(ci_folder)
         yml_tmp = open(Path(ci_folder, Path(self.temp_ci_regression_file).name.replace(".txt", ".gitlab-ci.yml")), "w")

@@ -44,8 +44,7 @@ stages:
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
-          when: always
+
 
 .regression_rules:Push:
     rules:
@@ -81,6 +80,8 @@ stages:
         expire_in: ${expire_in_time}
     rules:
         - !reference [.regression_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
 
 
 .Regressiontest:Push:
@@ -143,6 +144,8 @@ Regression_overall_coverage:PR:
         expire_in: ${expire_in_time}
     rules:
         - !reference [.regression_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
 
 
 Regression_overall_coverage:Push:
@@ -199,6 +202,8 @@ prepare_create_plots:PR:
             - ${result_dir}/
     rules:
         - !reference [.regression_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
     needs:
     %for package in package_list:
     - job: Regressiontest_${library}_${package}:PR
@@ -238,7 +243,7 @@ RegressionTest_Check_References:
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
-            python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
+            python ${dymola_python_google_chart_file} ${arg_check_ref_plot} ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
@@ -255,6 +260,8 @@ RegressionTest_Check_References:
         expire_in: ${expire_in_time}
     rules:
         - !reference [.regression_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_reference_check}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
 
 plot_reference_results:
     stage: plot_ref

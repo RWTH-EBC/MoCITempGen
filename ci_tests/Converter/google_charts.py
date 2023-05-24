@@ -532,7 +532,6 @@ class Parser:
                                      default=True,
                                      help='Create a layout with a plots',
                                      action="store_true")
-
         unit_test_group.add_argument("--line-matplot-flag",
                                      help='plot a matlab chart ',
                                      default=False,
