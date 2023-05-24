@@ -498,7 +498,7 @@ if __name__ == '__main__':
             if args.changed_flag is True:
                 check.create_files(Path("..", conf.config_ci_changed_file), Path("..", conf.config_ci_exit_file))
                 #package = args.packages[args.packages.rfind(".") + 1:]
-                package = args.packages[0]
+                package = args.packages[0] # todo: Schleife ergänzen
                 print(package)
                 mo = modelica_model()
                 package_list = mo.get_changed_regression_models(dymola=dymola,

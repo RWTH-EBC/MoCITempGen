@@ -143,16 +143,15 @@ class modelica_model(ci_config):
         modelica_model_list = self.get_ch_model(ch_lines=changed_lines)
         reference_list = self.ch_ref_files(ch_lines=changed_lines)
         # get all models from page package
-        result = self.get_models(path=root_package,
-                               library=library,
-                               simulate_flag=True,
-                               extended_ex_flag=False)
-        model_list = result[0]
+        model_list, no_example_list = self.get_models(path=root_package,
+                                       library=library,
+                                       simulate_flag=True,
+                                       extended_ex_flag=False)
         extended_list = self.get_extended_model(dymola=dymola,
-                                              dymola_exception=dymola_exception,
-                                              model_list=model_list,
-                                              dymola_version=dymola_version,
-                                              library=library)
+                                                  dymola_exception=dymola_exception,
+                                                  model_list=model_list,
+                                                  dymola_version=dymola_version,
+                                                  library=library)
 
         ch_model_list = self.get_changed_used_model(ch_lines=changed_lines, extended_list=extended_list)
 
@@ -487,6 +486,7 @@ class modelica_model(ci_config):
                         model_list.append(model)
         if model_list is None or len(model_list) == 0:
             print(f'No models in package {path}')
+            return model_list, no_example_list
 
         else:
             return model_list, no_example_list
