@@ -25,8 +25,7 @@ class modelica_model(ci_config):
                          dymola_version: int = 2022,
                          path_dir: Path = Path.cwd(),
                          root_library: Path = None,
-                         root_package: Path = None,
-                         modelica_form_flag: bool = True):
+                         root_package: Path = None):
         # todo: flag mit einbauen: In zukunft sollen die pfade gegeben werden, nach wunsch auch in modelica form
         """
         Args:
@@ -75,8 +74,6 @@ class modelica_model(ci_config):
                                                         dymola_version=dymola_version)
                 model_list.extend(simulate_list)
                 model_list = list(set(model_list))
-
-
         elif filter_wh_flag is True:
             if simulate_flag is True:
                 ci_wh_file = self.wh_simulate_file
@@ -144,21 +141,21 @@ class modelica_model(ci_config):
         reference_list = self.ch_ref_files(ch_lines=changed_lines)
         # get all models from page package
         model_list, no_example_list = self.get_models(path=root_package,
-                                       library=library,
-                                       simulate_flag=True,
-                                       extended_ex_flag=False)
+                                                      library=library,
+                                                      simulate_flag=True,
+                                                      extended_ex_flag=False)
         extended_list = self.get_extended_model(dymola=dymola,
-                                                  dymola_exception=dymola_exception,
-                                                  model_list=model_list,
-                                                  dymola_version=dymola_version,
-                                                  library=library)
+                                                dymola_exception=dymola_exception,
+                                                model_list=model_list,
+                                                dymola_version=dymola_version,
+                                                library=library)
 
         ch_model_list = self.get_changed_used_model(ch_lines=changed_lines, extended_list=extended_list)
 
         changed_list = self.return_type_list(ref_list=reference_list,
-                                           mos_list=mos_script_list,
-                                           modelica_list=modelica_model_list,
-                                           ch_model_list=ch_model_list)
+                                             mos_list=mos_script_list,
+                                             modelica_list=modelica_model_list,
+                                             ch_model_list=ch_model_list)
         if len(changed_list) == 0:
             print(f'No models to check and cannot start a regression test')
             exit(0)
@@ -210,16 +207,16 @@ class modelica_model(ci_config):
         _list = []
         for line in ch_lines:
             if line.rfind(".mo") > -1 and line.find("package.") == -1 and line.rfind(
-                        self.package) > -1 and line.rfind("Scripts") == -1:
-                    _list.append(line[line.rfind(self.library):line.rfind(".mo")])
+                    self.package) > -1 and line.rfind("Scripts") == -1:
+                _list.append(line[line.rfind(self.library):line.rfind(".mo")])
         return _list
 
     def ch_ref_files(self, ch_lines: list):
         _list = []
         for line in ch_lines:
             if line.rfind(".txt") > -1 and line.find("package.") == -1 and line.rfind(
-                        self.package) > -1 and line.rfind("Scripts") == -1:
-                    _list.append(line[line.rfind(self.library):line.rfind(".txt")])
+                    self.package) > -1 and line.rfind("Scripts") == -1:
+                _list.append(line[line.rfind(self.library):line.rfind(".txt")])
         return _list
 
     @staticmethod
@@ -326,7 +323,6 @@ class modelica_model(ci_config):
                     if filepath.find(model_file) > -1:
                         return mos_script
 
-
     def return_type_list(self,
                          ref_list,
                          mos_list,
@@ -375,14 +371,12 @@ class modelica_model(ci_config):
         changed_list = list(set(changed_list))
         return changed_list
 
-    def get_changed_used_model(self, ch_lines: list , extended_list: list):
+    def get_changed_used_model(self, ch_lines: list, extended_list: list):
         """
         return all used models, that changed
         Args:
-            lines (): lines from changed models
-            used_model_list (): models to check
-            extended_model_list (): models to check
-
+            ch_lines (): lines from changed models
+            extended_list (): models to check
         Returns:
             ch_model_list () : return a list of changed models
         """
@@ -393,9 +387,6 @@ class modelica_model(ci_config):
                 if line[line.find(self.library):line.rfind(".mo")].strip() == model:
                     ch_model_list.append(model)
         return ch_model_list
-
-
-
 
     def get_changed_models(self,
                            ch_file: Path,

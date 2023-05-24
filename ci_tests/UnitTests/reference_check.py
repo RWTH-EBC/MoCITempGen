@@ -22,7 +22,7 @@ class Buildingspy_Regression_Check(ci_config):
             tool (): dymola or Openmodelica
             batch (): boolean: - False: interactive with script (e.g. generate new regression-tests) - True: No interactive with script
             show_gui (): show_gui (): True - show dymola, false - dymola hidden.
-            path (): Path where top-level package.mo of the library is located
+            path (): Path where top-level package.mo of the library is located.
         """
         self.package = pack
         self.n_pro = n_pro
@@ -39,7 +39,7 @@ class Buildingspy_Regression_Check(ci_config):
 
     def write_exit_file(self, var):
         """
-        write an exit file, important for gitlab ci
+        write an exit file, use for gitlab ci.
         """
         try:
             with open(self.config_ci_exit_file, "w") as ex_file:
@@ -98,7 +98,7 @@ class Buildingspy_Regression_Check(ci_config):
             if len(err_list) > 0:
                 print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
                 for error in err_list:
-                    print(f'{self.CRED}     Error:{self.CEND} {error}')
+                    print(f'{self.CRED}Error:{self.CEND} {error}')
                 return 1
             else:
                 print(f'{self.green}Regression test was successful {self.CEND}')
@@ -445,89 +445,89 @@ if __name__ == '__main__':
     # todo: Template für push hat changed:flag drin, ist falsch
     args = Parser(sys.argv[1:]).main()
     dymola, dymola_exception = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
-
-    if args.validate_html_only:
-        var = Buildingspy_Validate_test(validate=validate,
-                                        path=args.path).validate_html()
-        exit(var)
-    elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
-        var = Buildingspy_Validate_test(validate=validate,
-                                        path=args.path).validate_experiment_setup()
-        exit(var)
-    elif args.coverage_only:
-        var = Buildingspy_Validate_test(validate=validate,
-                                        path=args.path).run_coverage_only(buildingspy_regression=regression,
-                                                                          batch=args.batch,
-                                                                          tool=args.tool,
-                                                                          package=args.packages[0])
-        exit(var)
-    else:
-        dym_interface = PythonDymolaInterface(dymola=dymola,
-                                              dymola_exception=dymola_exception)
-        dym_interface.load_library(root_library=args.root_library,
-                                   add_libraries_loc=None)
-        conf = ci_config()
-        check = data_structure()
-        ref_model = Ref_model(library=args.library)
-        package_list = []
-        if args.ref_list:
-            ref_model.write_regression_list()
-            exit(0)
-        #dym_interface.dym_check_lic()
-        ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
-                                                 pack=args.packages,
-                                                 n_pro=args.number_of_processors,
-                                                 tool=args.tool,
-                                                 batch=args.batch,
-                                                 show_gui=args.show_gui,
-                                                 path=args.path,
-                                                 library=args.library)
-        #todo: Liste?
-
-        created_ref_list = list()
-        if args.create_ref:
-            package_list, created_ref_list = ref_model.get_update_model()
-        elif args.update_ref:
-            ref_list = ref_model.get_update_ref()
-            ref_model.delete_ref_file(ref_list=ref_list)
-            package_list = ref_model.get_update_package(ref_list=ref_list)
+    for package in args.packages:
+        if args.validate_html_only:
+            var = Buildingspy_Validate_test(validate=validate,
+                                            path=args.path).validate_html()
+            exit(var)
+        elif args.validate_experiment_setup:  # Match the mos file parameters with the mo files only, and then exit
+            var = Buildingspy_Validate_test(validate=validate,
+                                            path=args.path).validate_experiment_setup()
+            exit(var)
+        elif args.coverage_only:
+            var = Buildingspy_Validate_test(validate=validate,
+                                            path=args.path).run_coverage_only(buildingspy_regression=regression,
+                                                                              batch=args.batch,
+                                                                              tool=args.tool,
+                                                                              package=package)
+            exit(var)
         else:
-            check.check_path_setting(Path("..", conf.config_ci_dir), create_flag=True)
-            if args.changed_flag is False:
-                check.create_files(Path("..", conf.config_ci_exit_file))
-                package_list = args.packages
-            if args.changed_flag is True:
-                check.create_files(Path("..", conf.config_ci_changed_file), Path("..", conf.config_ci_exit_file))
-                #package = args.packages[args.packages.rfind(".") + 1:]
-                package = args.packages[0] # todo: Schleife ergänzen
-                print(package)
-                mo = modelica_model()
-                package_list = mo.get_changed_regression_models(dymola=dymola,
-                                                                dymola_exception=dymola_exception,
-                                                                dymola_version=args.dymola_version,
-                                                                root_package=Path(package.replace(".", os.sep)),
-                                                                library=args.library,
-                                                                ch_file=Path("..", conf.config_ci_changed_file))
-        # Start regression test
-        val = 0
-        if package_list is None or len(package_list) == 0:
-            if args.batch is False:
-                print(f'All Reference files exist')
-                val = 0
-            elif args.changed_flag is False:
-                print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
-                val = 1
-            elif args.changed_flag is True:
-                print(f'No changed models in Package {args.packages}')
-                val = 0
-        else:
-            print(f'Start regression Test.\nTest following packages: {package_list}')
-            val = ref_check.check_regression_test(package_list=package_list)
-            if len(created_ref_list) > 0:
-                for ref in created_ref_list:
-                    ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
-                    print(ref_file)
-                    check.prepare_data(
-                        source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
-        ref_check.write_exit_file(var=val)
-        exit(val)
+            dym_interface = PythonDymolaInterface(dymola=dymola,
+                                                  dymola_exception=dymola_exception)
+            dym_interface.load_library(root_library=args.root_library,
+                                       add_libraries_loc=None)
+            conf = ci_config()
+            check = data_structure()
+            ref_model = Ref_model(library=args.library)
+            package_list = []
+            if args.ref_list:
+                ref_model.write_regression_list()
+                exit(0)
+            #dym_interface.dym_check_lic()
+            ref_check = Buildingspy_Regression_Check(buildingspy_regression=regression,
+                                                     pack=args.packages,
+                                                     n_pro=args.number_of_processors,
+                                                     tool=args.tool,
+                                                     batch=args.batch,
+                                                     show_gui=args.show_gui,
+                                                     path=args.path,
+                                                     library=args.library)
+            #todo: Liste?
+
+            created_ref_list = list()
+            if args.create_ref:
+                package_list, created_ref_list = ref_model.get_update_model()
+            elif args.update_ref:
+                ref_list = ref_model.get_update_ref()
+                ref_model.delete_ref_file(ref_list=ref_list)
+                package_list = ref_model.get_update_package(ref_list=ref_list)
+            else:
+                check.check_path_setting(Path("..", conf.config_ci_dir), create_flag=True)
+                if args.changed_flag is False:
+                    check.create_files(Path("..", conf.config_ci_exit_file))
+                    package_list = args.packages
+                if args.changed_flag is True:
+                    check.create_files(Path("..", conf.config_ci_changed_file), Path("..", conf.config_ci_exit_file))
+                    #package = args.packages[args.packages.rfind(".") + 1:]
+                    package = args.packages[0] # todo: Schleife ergänzen
+                    print(package)
+                    mo = modelica_model()
+                    package_list = mo.get_changed_regression_models(dymola=dymola,
+                                                                    dymola_exception=dymola_exception,
+                                                                    dymola_version=args.dymola_version,
+                                                                    root_package=Path(package.replace(".", os.sep)),
+                                                                    library=args.library,
+                                                                    ch_file=Path("..", conf.config_ci_changed_file))
+            # Start regression test
+            val = 0
+            if package_list is None or len(package_list) == 0:
+                if args.batch is False:
+                    print(f'All Reference files exist')
+                    val = 0
+                elif args.changed_flag is False:
+                    print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
+                    val = 1
+                elif args.changed_flag is True:
+                    print(f'No changed models in Package {args.packages}')
+                    val = 0
+            else:
+                print(f'Start regression Test.\nTest following packages: {package_list}')
+                val = ref_check.check_regression_test(package_list=package_list)
+                if len(created_ref_list) > 0:
+                    for ref in created_ref_list:
+                        ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
+                        print(ref_file)
+                        check.prepare_data(
+                            source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
+            ref_check.write_exit_file(var=val)
+            exit(val)

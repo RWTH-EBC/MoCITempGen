@@ -169,10 +169,8 @@ prepare_create_plots:Push:
     stage: ${ci_stage_prepare}
     before_script:
         - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
         - git clone ${dymola_python_test_url}
         - pip install -e  ${dymola_python_test_dir}
-
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}
@@ -193,7 +191,6 @@ prepare_create_plots:PR:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -e ${dymola_python_test_dir}
-
     script:
         - python ${dymola_python_google_chart_file} ${arg_create_plots}
         - python ${dymola_python_api_github_file}   ${api_github_arg}

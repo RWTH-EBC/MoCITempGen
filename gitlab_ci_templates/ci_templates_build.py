@@ -537,7 +537,8 @@ class ci_templates(ci_template_config):
         arg_create_plots = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
             repl_parser_arg={"packages": self.library, "create_layout_flag": True,
-                             "library": self.library})
+                             "library": self.library, "funnel_comp_flag": False,
+                             "error_flag":False, "line_html_flag": False})
         arg_chart = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package", "funnel_comp_flag": True,

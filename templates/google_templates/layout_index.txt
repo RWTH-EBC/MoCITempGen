@@ -68,7 +68,7 @@
 
     <!-- Menu Navigation Bar -->
     <div class="menu">
-        <a href="#Plotresults">Plot results</a>
+        <a href="Plotresults">Plot results</a>
 
 
     </div>

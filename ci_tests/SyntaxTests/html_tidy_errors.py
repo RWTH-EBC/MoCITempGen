@@ -1,7 +1,6 @@
 import argparse
 import os
 import shutil
-from git import Repo
 from tidylib import tidy_document
 from ci_test_config import ci_config
 import sys
@@ -113,11 +112,6 @@ class HTML_Tidy(ci_config):
         """
         data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
-        if self.log:
-            error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
-            print(f'Error-log-file is saved in {self.html_error_log}')
-            correct_log_file = open(f'{self.html_correct_log}', "w", encoding="utf-8")
-            print(f'Correct-log-file is saved in {self.html_correct_log}')
         html_model_list = self._get_html_model()
         for model in html_model_list:
             error_list = list()
@@ -135,14 +129,18 @@ class HTML_Tidy(ci_config):
                     print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
                     if self.log:
-                        correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
-                            model_file=model_file)
-                        self._call_write_log(model_file=model_file,
-                                             error_log_file=error_log_file,
-                                             correct_log_file=correct_log_file,
-                                             error_list=error_list,
-                                             html_correct_code=html_correct_code,
-                                             html_code=html_code)
+                        with open(f'{self.html_error_log}', "a", encoding="utf-8") as error_log_file:
+                            print(f'Error-log-file is saved in {self.html_error_log}')
+                        with open(f'{self.html_correct_log}', "a", encoding="utf-8") as correct_log_file:
+                            print(f'Correct-log-file is saved in {self.html_correct_log}')
+                            correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
+                                model_file=model_file)
+                            self._call_write_log(model_file=model_file,
+                                                 error_log_file=error_log_file,
+                                                 correct_log_file=correct_log_file,
+                                                 error_list=error_list,
+                                                 html_correct_code=html_correct_code,
+                                                 html_code=html_code)
                 if self.correct_view:
                     self._call_correct_view(model_file=model_file,
                                             error_list=error_list,
@@ -163,10 +161,10 @@ class HTML_Tidy(ci_config):
         data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
         if self.log:
-            error_log_file = open(f'{self.html_error_log}', "w", encoding="utf-8")
-            print(f'Error-log-file is saved in {self.html_error_log}')
-            correct_log_file = open(f'{self.html_correct_log}', "w", encoding="utf-8")
-            print(f'Correct-log-file is saved in {self.html_correct_log}')
+            with open(f'{self.html_error_log}', "w", encoding="utf-8") as error_log_file:
+                print(f'Error-log-file is saved in {self.html_error_log}')
+            with open(f'{self.html_correct_log}', "w", encoding="utf-8") as correct_log_file:
+                print(f'Correct-log-file is saved in {self.html_correct_log}')
 
         if model_list is not None:
             for model in model_list:
@@ -205,9 +203,6 @@ class HTML_Tidy(ci_config):
                                                  error_list=error_list,
                                                  html_correct_code=html_correct_code,
                                                  html_code=html_code)
-            if self.log:
-                error_log_file.close()
-                correct_log_file.close()
 
 
 

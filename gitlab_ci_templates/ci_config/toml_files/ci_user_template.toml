@@ -28,7 +28,6 @@ AixLib = [
     "Airflow",
     "BoundaryConditions",
     "Controls",
-    "DataBase",
     "Electrical",
     "Fluid",
     "Media",

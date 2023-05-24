@@ -1,6 +1,6 @@
 [CI_dir]
 dymola_ci_test_dir = 'dymola-ci-tests'
-dymola_python_test_dir = 'Dymola_python_tests'
+dymola_python_test_dir = 'Modelica-CI'
 
 [whitelist]
 wh_ci_dir = "dymola-ci-tests/ci_whitelist"
