@@ -232,7 +232,8 @@ RegressionTest_Check_References:
         - git clone ${dymola_python_test_url}
         - pip install -e  ${dymola_python_test_dir}
         - python ${dymola_python_structure_file} --create-ref
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --create-ref  < ../${config_ci_eof_file}
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file}  ${arg_ref_check}  < ../${config_ci_eof_file}
+
     after_script:
         - source activate ${python_version}
         - cd CorrectedVersion/$CI_PROJECT_NAME

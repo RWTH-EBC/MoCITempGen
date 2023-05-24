@@ -531,8 +531,16 @@ class ci_templates(ci_template_config):
             repl_parser_arg={"coverage_only": True,
                              "packages": ".",
                              "batch": False,
-
                              "changed_flag": False})
+
+        arg_ref_check = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
+            repl_parser_arg={"create_ref": True,
+                             "dymola_version": self.dymola_version,
+                             "batch": False,
+                             "changed_flag": False},
+            out = ["packages", "path", "root_library"])
+
 
         arg_create_plots = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
@@ -550,6 +558,7 @@ class ci_templates(ci_template_config):
                              "github_token": "${GITHUB_API_TOKEN}",
                              "post_pr_comment_flag": True,
                              "prepare_plot_flag": True})
+
 
         arg_ref = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
@@ -570,6 +579,7 @@ class ci_templates(ci_template_config):
                                       ci_stage_prepare=self.ci_stage_prepare,
                                       dymola_python_test_url=self.dymola_python_test_url,
                                       python_version=self.python_version,
+                                      arg_ref_check=arg_ref_check,
                                       buildingspy_upgrade=self.buildingspy_upgrade,
                                       dymola_python_dir=self.dymola_python_dir,
                                       dymola_python_test_reference_file=self.dymola_python_test_reference_file,

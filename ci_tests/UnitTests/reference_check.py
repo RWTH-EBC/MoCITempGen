@@ -162,6 +162,7 @@ class Ref_model(ci_config):
         Returns: return a package_list to check for regression test
 
         """
+        #todo: Kennzeichnen, wenn reference vorhanden aber kein mos
         mos_script_list = self._get_mos_scripts()  # Mos Scripts
         reference_list = self._get_check_ref()  # Reference files
         mos_list = self._compare_ref_mos(mos_script_list=mos_script_list,
@@ -234,7 +235,7 @@ class Ref_model(ci_config):
         for err in err_list:
             mos_script_list.remove(err)
         for package in mos_script_list:
-            print(f'{self.CRED}No Reference result for Model:{self.CRED} {package}')
+            print(f'{self.CRED}No Reference result for Model:{self.CEND} {package}')
         return mos_script_list
 
     def _get_check_ref(self):
@@ -296,6 +297,9 @@ class Ref_model(ci_config):
 
     def _get_mos_scripts(self):
         """
+        self.artifacts_dir = f"dymola-ci-tests/templates/artifacts"
+        self.library_ref_results_dir = f"Resources/ReferenceResults/Dymola"
+        self.library_resource_dir = f"Resources/Scripts/Dymola"
         Obtain mos scripts that are feasible for regression testing
         Returns:
             mos_list (): return a list with .mos script that are feasible for regression testing
@@ -410,7 +414,7 @@ class Parser:
         # [ bool - flag]
         unit_test_group.add_argument("-b", "--batch",
                                      action="store_true",
-                                     default=True,
+                                     default=False,
                                      help="Run in batch mode without user interaction")
         unit_test_group.add_argument("--coverage-only",
                                      help='Only run the coverage test',
@@ -501,6 +505,7 @@ if __name__ == '__main__':
                     #package = args.packages[args.packages.rfind(".") + 1:]
                     package = args.packages[0] # todo: Schleife ergänzen
                     mo = modelica_model()
+
                     package_list = mo.get_changed_regression_models(dymola=dymola,
                                                                     dymola_exception=dymola_exception,
                                                                     dymola_version=args.dymola_version,
@@ -511,7 +516,7 @@ if __name__ == '__main__':
             val = 0
             if package_list is None or len(package_list) == 0:
                 if args.batch is False:
-                    print(f'All Reference files exist')
+                    print(f'{conf.green}All Reference files exist.{conf.CEND}')
                     val = 0
                 elif args.changed_flag is False:
                     print(f'{conf.CRED}Error:{conf.CEND} Package is missing! (e.g. Airflow)')
@@ -519,14 +524,18 @@ if __name__ == '__main__':
                 elif args.changed_flag is True:
                     print(f'No changed models in Package {args.packages}')
                     val = 0
-            else:
+            elif args.create_ref is True:
                 print(f'Start regression Test.\nTest following packages: {package_list}')
                 val = ref_check.check_regression_test(package_list=package_list)
                 if len(created_ref_list) > 0:
                     for ref in created_ref_list:
-                        ref_file = f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt'
-                        print(ref_file)
                         check.prepare_data(
-                            source_target_dict={ref_file: Path("..", conf.result_regression_dir, "referencefiles")})
-            ref_check.write_exit_file(var=val)
+                            source_target_dict={f'{conf.library_ref_results_dir}{os.sep}{ref.replace(".", "_")}.txt':
+                                                    Path("..", conf.result_regression_dir, "referencefiles")})
+                ref_check.write_exit_file(var=1)
+
+            else:
+                print(f'Start regression Test.\nTest following packages: {package_list}')
+                val = ref_check.check_regression_test(package_list=package_list)
+                ref_check.write_exit_file(var=val)
             exit(val)
