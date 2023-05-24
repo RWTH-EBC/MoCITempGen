@@ -41,7 +41,6 @@ class Plot_Charts(ci_config):
         for reference_file in reference_file_list:
             if os.path.isfile(reference_file) is False:
                 print(f'File {reference_file} does not exist.')
-                continue
             else:
                 update_ref_list.append(reference_file)
                 print(f'\nCreate plots for reference result {reference_file}')
@@ -69,9 +68,8 @@ class Plot_Charts(ci_config):
             exit(0)
         else:
             print(f'Plot results from file {self.ci_interact_show_ref_file}')
-            file = open(self.ci_interact_show_ref_file, "r")
-            lines = file.readlines()
-            file.close()
+            with open(self.ci_interact_show_ref_file, "r") as file:
+                lines = file.readlines()
             reference_file_list = list()
             for line in lines:
                 if len(line) != 0:
@@ -99,7 +97,9 @@ class Plot_Charts(ci_config):
         distriction_values = {}
         time_interval_list = list()
         time_interval_steps = int
-        for line in open(reference_file, 'r'):
+        with open(reference_file, 'r') as ref_file:
+            lines = ref_file.readlines()
+        for line in lines:
             current_value = list()
             if line.find("last-generated=") > -1 or line.find("statistics-simulation=") > -1 or line.find(
                     "statistics-initialization=") > -1:
@@ -152,15 +152,14 @@ class Plot_Charts(ci_config):
             exit(0)
         else:
             print(f'Plot results from file {self.ci_interact_update_ref_file}')
-        file = open(self.ci_interact_update_ref_file, "r")
-        lines = file.readlines()
+        with open(self.ci_interact_update_ref_file, "r") as file:
+            lines = file.readlines()
         reference_list = list()
         for line in lines:
             line = line.strip()
             if line.find(".txt") > -1 and line.find("_"):
                 reference_list.append(f'{self.ref_path}{os.sep}{line.strip()}')
                 continue
-        file.close()
         return reference_list
 
     def get_new_reference_files(self):
@@ -172,8 +171,8 @@ class Plot_Charts(ci_config):
             exit(0)
         else:
             print(f'Plot results from file {self.config_ci_new_create_ref_file}')
-        file = open(self.config_ci_new_create_ref_file, "r")
-        lines = file.readlines()
+        with open(self.config_ci_new_create_ref_file, "r") as file:
+            lines = file.readlines()
         reference_list = list()
         for line in lines:
             line = line.strip()
@@ -189,9 +188,8 @@ class Plot_Charts(ci_config):
             reference_list ():
         Returns:
         """
-        reference_file = open(f'{reference_list}', "r")
-        lines = reference_file.readlines()
-        reference_file.close()
+        with open(f'{reference_list}', "r") as reference_file:
+            lines = reference_file.readlines()
         measure_list = list()
         measure_len = int
         time_str = str
@@ -244,8 +242,8 @@ class Plot_Charts(ci_config):
         """
         try:
             self.check_file(file=self.f_log)
-            log_file = open(self.f_log, "r")
-            lines = log_file.readlines()
+            with open(self.f_log, "r") as log_file:
+                lines = log_file.readlines()
             model_variable_list = list()
             for line in lines:
                 if line.find("*** Warning:") > -1:
@@ -353,9 +351,8 @@ class Plot_Charts(ci_config):
                                                         var=[f'{var}_ref', var],
                                                         model=model,
                                                         title=f'{model}.mat_{var}')
-                        file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
-                        file_tmp.write(html_chart)
-                        file_tmp.close()
+                        with open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w") as file_tmp:
+                            file_tmp.write(html_chart)
         else:
             path_name = (f'{self.library}{os.sep}funnel_comp{os.sep}{model}.mat_{var}'.strip())
             if os.path.isdir(path_name) is False:
@@ -368,9 +365,8 @@ class Plot_Charts(ci_config):
                                                 var=[f'{var}_ref', var],
                                                 model=model,
                                                 title=f'{model}.mat_{var}')
-                file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
-                file_tmp.write(html_chart)
-                file_tmp.close()
+                with open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w") as file_tmp:
+                    file_tmp.write(html_chart)
 
     def _mako_line_html_new_chart(self, reference_file, value_list, legend_list):
         """
@@ -391,10 +387,8 @@ class Plot_Charts(ci_config):
                                             var=legend_list,
                                             model=reference_file,
                                             title=reference_file)
-            file_tmp = open(
-                f'{self.temp_chart_path}{os.sep}{reference_file[reference_file.rfind(os.sep):].replace(".txt", ".html")}', "w")
-            file_tmp.write(html_chart)
-            file_tmp.close()
+            with open(f'{self.temp_chart_path}{os.sep}{reference_file[reference_file.rfind(os.sep):].replace(".txt", ".html")}', "w") as file_tmp:
+                file_tmp.write(html_chart)
 
     def mako_line_ref_chart(self, model, var):
         """
@@ -415,9 +409,8 @@ class Plot_Charts(ci_config):
                                             var=[f'{var}_ref', var],
                                             model=model,
                                             title=f'{model}.mat_{var}')
-            file_tmp = open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w")
-            file_tmp.write(html_chart)
-            file_tmp.close()
+            with open(f'{self.temp_chart_path}{os.sep}{model}_{var.strip()}.html', "w") as file_tmp:
+                file_tmp.write(html_chart)
 
     def create_index_layout(self):
         """
@@ -434,9 +427,8 @@ class Plot_Charts(ci_config):
             exit(0)
         else:
             html_chart = my_template.render(html_model=html_file_list)
-            file_tmp = open(self.index_html_file, "w")
-            file_tmp.write(html_chart)
-            file_tmp.close()
+            with open(self.index_html_file, "w") as file_tmp:
+                file_tmp.write(html_chart)
             print(f'Create html file with reference results.')
 
     def create_layout(self, temp_dir: Path, layout_html_file: Path):
@@ -455,9 +447,8 @@ class Plot_Charts(ci_config):
         else:
             my_template = Template(filename=self.temp_layout_file)
             html_chart = my_template.render(packages=package_list)
-            file_tmp = open(layout_html_file, "w")
-            file_tmp.write(html_chart)
-            file_tmp.close()
+            with open(layout_html_file, "w") as file_tmp:
+                file_tmp.write(html_chart)
 
     @staticmethod
     def check_file(file):
