@@ -331,7 +331,8 @@ class ci_templates(ci_template_config):
         print(f"Write {ci_temp}")
         arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
                                              repl_parser_arg={"packages": self.library, "correct_view_flag": True,
-                                                              "log_flag": True, "filter_whitelist_flag": True }, out=["git_url"])
+                                                              "log_flag": True, "filter_whitelist_flag": True,
+                                                              "changed_flag": False}, out=["git_url"])
         arg_push = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
                                                repl_parser_arg={"packages": self.library,
                                                                 "changed_flag": True}, out=["git_url"])
@@ -518,13 +519,21 @@ class ci_templates(ci_template_config):
         arg_PR = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package",
-                             "batch": True
+                             "batch": True, "changed_flag": False
                              })
         arg_push = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"packages": "$lib_package",
                              "batch": True,
                              "changed_flag": True})
+        coverage_arg = self.rule.write_parser_args(
+            py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
+            repl_parser_arg={"coverage_only": True,
+                             "packages": ".",
+                             "batch": False,
+
+                             "changed_flag": False})
+
         arg_create_plots = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
             repl_parser_arg={"packages": self.library, "create_layout_flag": True,
@@ -540,6 +549,7 @@ class ci_templates(ci_template_config):
                              "github_token": "${GITHUB_API_TOKEN}",
                              "post_pr_comment_flag": True,
                              "prepare_plot_flag": True})
+
         arg_ref = self.rule.write_parser_args(
             py_file=Path(self.dymola_python_test_reference_file).name.replace(".py", ""),
             repl_parser_arg={"create_ref_flag": True})
@@ -552,6 +562,7 @@ class ci_templates(ci_template_config):
         #python ${dymola_python_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
         yml_text = my_template.render(dym_image=self.dym_image,
+                                      coverage_arg=coverage_arg,
                                       ci_stage_regression_test=self.ci_stage_regression_test,
                                       ci_stage_ref_check=self.ci_stage_ref_check,
                                       ci_stage_plot_ref=self.ci_stage_plot_ref,

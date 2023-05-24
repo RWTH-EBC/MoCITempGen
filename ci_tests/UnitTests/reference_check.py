@@ -442,7 +442,6 @@ class Parser:
 if __name__ == '__main__':
     # todo: Package list bearbeiten.
     # todo: /bin/sh: 1: xdg-settings: not found
-    # todo: AttributeError: 'Tester' object has no attribute 'get_test_example_coverage'
     # todo: Template für push hat changed:flag drin, ist falsch
     args = Parser(sys.argv[1:]).main()
     dymola, dymola_exception = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)

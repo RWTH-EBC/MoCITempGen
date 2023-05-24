@@ -48,7 +48,7 @@ ci_stage_whitelist_setting = 'build_ci_whitelist'
 buildingspy_upgrade = 'git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage'
 
 [ci_setting]
-temp_ci_template_dir = 'Modelica-GitLab-CI/ci_templates_python'
+temp_ci_template_dir = 'Modelica-CI/ci_templates_python'
 temp_toml_ci_setting_file = 'Setting/CI_setting_template.txt'
 toml_ci_setting_file = 'Setting/CI_setting.toml'
 
@@ -74,19 +74,19 @@ temp_dir = 'dymola-ci-tests/ci_templates'
 
 [dymola_python_scripts]
 dymola_python_dir = 'Modelica-GitLab-CI/ci_tests'
-dymola_python_test_validate_file = 'Modelica-GitLab-CI/ci_tests/UnitTests/CheckPackages/validatetest.py'
-dymola_python_test_reference_file = 'Modelica-GitLab-CI/ci_tests/UnitTests/reference_check.py'
-dymola_python_google_chart_file = 'Modelica-GitLab-CI/ci_tests/Converter/google_charts.py'
-dymola_python_api_github_file = 'Modelica-GitLab-CI/ci_tests/api_script/api_github.py'
-dymola_python_deploy_artifacts_file = 'Modelica-GitLab-CI/ci_tests/deploy/deploy_artifacts.py'
-dymola_python_html_tidy_file = 'Modelica-GitLab-CI/ci_tests/SyntaxTests/html_tidy_errors.py'
-dymola_python_syntax_test_file = 'Modelica-GitLab-CI/ci_tests/SyntaxTests/StyleChecking.py'
-dymola_python_configuration_file = 'Modelica-GitLab-CI/CI_test_config.py'
-OM_python_check_model_file = 'Modelica-GitLab-CI/ci_tests/UnitTests/OM_Check.py'
-dymola_python_structure_file = 'Modelica-GitLab-CI/ci_tests/structure/config_structure.py'
-dymola_python_library_merge_file = 'Modelica-GitLab-CI/ci_tests/deploy/IBPSA_Merge/library_merge.py'
-dymola_python_lock_model_file = 'Modelica-GitLab-CI/CITests/Converter/lock_model.py'
-dymola_python_config_structure_file = 'Modelica-GitLab-CI/ci_tests/structure/config_structure.py'
+dymola_python_test_validate_file = 'Modelica-CI/ci_tests/UnitTests/CheckPackages/validatetest.py'
+dymola_python_test_reference_file = 'Modelica-CI/ci_tests/UnitTests/reference_check.py'
+dymola_python_google_chart_file = 'Modelica-CI/ci_tests/Converter/google_charts.py'
+dymola_python_api_github_file = 'Modelica-CI/ci_tests/api_script/api_github.py'
+dymola_python_deploy_artifacts_file = 'Modelica-CI/ci_tests/deploy/deploy_artifacts.py'
+dymola_python_html_tidy_file = 'Modelica-CI/ci_tests/SyntaxTests/html_tidy_errors.py'
+dymola_python_syntax_test_file = 'Modelica-CI/ci_tests/SyntaxTests/StyleChecking.py'
+dymola_python_configuration_file = 'Modelica-CI/CI_test_config.py'
+OM_python_check_model_file = 'Modelica-CI/ci_tests/UnitTests/OM_Check.py'
+dymola_python_structure_file = 'Modelica-CI/ci_tests/structure/config_structure.py'
+dymola_python_library_merge_file = 'Modelica-CI/ci_tests/deploy/IBPSA_Merge/library_merge.py'
+dymola_python_lock_model_file = 'Modelica-CI/CITests/Converter/lock_model.py'
+dymola_python_config_structure_file = 'Modelica-CI/ci_tests/structure/config_structure.py'
 
 [interactive_ci_commit]
 ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list
