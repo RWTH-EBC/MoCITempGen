@@ -30,7 +30,7 @@ def copy_non_code_file(non_code_dir:list, not_include:list):
 
 
 setup(
-    name='Dymola_Python_test',
+    name='Modelica-CI',
     version=version,
     description='Check dymola files with python-dymola-interface',
     license="LICENSE",
@@ -45,7 +45,7 @@ setup(
     include_package_data=True,
     package_data=copy_non_code_file(non_code_dir=f'ci_tests',
                                     not_include=[".py", ".Dockerfile", ".pyc"]),
-    python_requires='>=3.9.0',
+    python_requires='>=3.8.0',
     install_requires=[required],
     classifiers=[
         'Programming Language :: Python :: 3.8',
