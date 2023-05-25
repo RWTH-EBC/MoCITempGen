@@ -514,6 +514,7 @@ class Parser:
         unit_test_group = parser.add_argument_group("arguments to plot diagrams")
         # [Library - settings]
         unit_test_group.add_argument("--packages",
+                                     default="Airflow",
                                      metavar="Modelica.Package",
                                      help="Test only the Modelica package Modelica.Package")
         unit_test_group.add_argument("--library", default="AixLib", help="Library to test")
