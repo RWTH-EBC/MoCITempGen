@@ -585,7 +585,6 @@ if __name__ == '__main__':
                 if args.funnel_comp_flag is True:
                     charts.mako_line_html_chart(model=model_variable[0],
                                                 var=model_variable[1])
-                    pass
                 if args.ref_txt_flag is True:
                     ref_file = charts.get_ref_file(model=model_variable[0])
                     if ref_file is None:
@@ -598,22 +597,18 @@ if __name__ == '__main__':
         if args.new_ref_flag is True:
             ref_list = charts.get_new_reference_files()
             charts.write_html_plot_templates(reference_file_list=ref_list)
-            pass
         if args.update_ref_flag is True:
             ref_list = charts.get_updated_reference_files()
             charts.write_html_plot_templates(reference_file_list=ref_list)
-            pass
         if args.show_ref_flag is True:
             ref_list = charts.read_show_reference()
             charts.write_html_plot_templates(reference_file_list=ref_list)
-            pass
         if args.show_package_flag is True:
             folder = charts.get_funnel_comp()
             for ref in folder:
                 if args.funnel_comp_flag is True:
                     charts.mako_line_html_chart(model=ref[:ref.find(".mat")],
                                                 var=ref[ref.rfind(".mat") + 5:])
-            pass
         charts.create_index_layout()
         charts.create_layout(temp_dir=Path(conf.chart_dir),
                              layout_html_file=Path(conf.chart_dir,"index.html"))

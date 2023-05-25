@@ -567,7 +567,8 @@ class ci_templates(ci_template_config):
             py_file=Path(self.dymola_python_google_chart_file).name.replace(".py", ""),
             repl_parser_arg={"line_html_flag":True, "package": self.library,
                              "funnel_comp_flag:": False, "create_layout_flag": False,
-                             "error_flag":False,"new_ref":True },
+                             "error_flag": False, "new_ref": True,
+                             "funnel_comp_flag" : False, "new_ref_flag": True},
             out=["packages"])
         #python ${dymola_python_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
