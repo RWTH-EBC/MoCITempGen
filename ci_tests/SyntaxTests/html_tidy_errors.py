@@ -58,7 +58,6 @@ class HTML_Tidy(ci_config):
                  wh_library: str,
                  filter_whitelist: bool):
         """
-
         Args:
             package (): package to test
             correct_overwrite (): argument (default:false) overwrite models that failed html test
@@ -151,13 +150,7 @@ class HTML_Tidy(ci_config):
     def check_html_files(self, model_list: list = None):
         data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
-        if self.log:
-            with open(f'{self.html_error_log}', "w", encoding="utf-8") as error_log_file:
-                print(f'Error-log-file is saved in {self.html_error_log}')
-            with open(f'{self.html_correct_log}', "w", encoding="utf-8") as correct_log_file:
-                print(f'Correct-log-file is saved in {self.html_correct_log}')
-
-        if model_list is not None:
+        if model_list is not None and len(model_list) > 0:
             for model in model_list:
                 model_file = Path(model.replace(".", os.sep) + ".mo")  # todo: das kann weg, wenn ich sort angepasst haben
                 correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
@@ -177,8 +170,6 @@ class HTML_Tidy(ci_config):
                             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
                                 model_file=model_file)
                             self._call_write_log(model_file=model_file,
-                                                 error_log_file=error_log_file,
-                                                 correct_log_file=correct_log_file,
                                                  error_list=error_list,
                                                  html_correct_code=html_correct_code,
                                                  html_code=html_code)
@@ -189,8 +180,6 @@ class HTML_Tidy(ci_config):
                                                 html_code=html_code)
                         if self.log:
                             self._call_write_log(model_file=model_file,
-                                                 error_log_file=error_log_file,
-                                                 correct_log_file=correct_log_file,
                                                  error_list=error_list,
                                                  html_correct_code=html_correct_code,
                                                  html_code=html_code)
@@ -221,10 +210,9 @@ class HTML_Tidy(ci_config):
         """
 
         if len(error_list) > 0 and error_list is not None:
-            with open(f'{self.html_error_log}', "w", encoding="utf-8") as error_log_file,  open(f'{self.html_correct_log}', "w", encoding="utf-8") as correct_log_file:
+            with open(f'{self.html_error_log}', "a", encoding="utf-8") as error_log_file,  open(f'{self.html_correct_log}', "a", encoding="utf-8") as correct_log_file:
                 print(f'Error-log-file is saved in {self.html_error_log}')
                 print(f'Correct-log-file is saved in {self.html_correct_log}')
-                # html_correct_code = html_correct_code.replace(f'\n', "")
                 error_log_file.write(f'\n---- {model_file} ----')
                 correct_log_file.write(
                     f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
@@ -737,24 +725,25 @@ if __name__ == '__main__':
         htmlWhitelist().write_whitelist(model_list=model_list)
         data_structure.prepare_data(source_target_dict={conf.wh_html_file: conf.result_whitelist_dir})
         exit(0)
-    html_tidy_check = HTML_Tidy(package=args.packages,
-                                correct_overwrite=args.correct_overwrite_flag,
-                                correct_backup=args.correct_backup_flag,
-                                log=args.log_flag,
-                                correct_view=args.correct_view_flag,
-                                library=args.library,
-                                wh_library=args.wh_library,
-                                filter_whitelist=args.filter_whitelist_flag)
+    else:
+        html_tidy_check = HTML_Tidy(package=args.packages,
+                                    correct_overwrite=args.correct_overwrite_flag,
+                                    correct_backup=args.correct_backup_flag,
+                                    log=args.log_flag,
+                                    correct_view=args.correct_view_flag,
+                                    library=args.library,
+                                    wh_library=args.wh_library,
+                                    filter_whitelist=args.filter_whitelist_flag)
 
-    html_model = mo.get_option_model(library=args.library,
-                                     package=args.library,
-                                     filter_wh_flag=args.filter_whitelist_flag,
-                                     wh_library=args.wh_library,
-                                     root_package=Path(args.library))
-    html_tidy_check.run_files()
-    html_tidy_check.check_html_files(model_list=html_model)
-    if args.log_flag is True:
-        variable = html_tidy_check.call_read_log()
-        exit(variable)
-    if args.correct_overwrite_flag is False and args.correct_backup_flag is False and args.log_flag is False and args.correct_view_flag is False:
-        print("please use -h or --help for help")
+        html_model = mo.get_option_model(library=args.library,
+                                         package=args.library,
+                                         filter_wh_flag=args.filter_whitelist_flag,
+                                         wh_library=args.wh_library,
+                                         root_package=Path(args.library))
+        html_tidy_check.run_files()
+        html_tidy_check.check_html_files(model_list=html_model)
+        if args.log_flag is True:
+            variable = html_tidy_check.call_read_log()
+            exit(variable)
+        if args.correct_overwrite_flag is False and args.correct_backup_flag is False and args.log_flag is False and args.correct_view_flag is False:
+            print("please use -h or --help for help")
