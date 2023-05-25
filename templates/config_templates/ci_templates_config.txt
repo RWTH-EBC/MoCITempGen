@@ -27,18 +27,6 @@ class ci_template_config(ci_config):
         %for config in config_list:
         ${config}
         %endfor
-         # [Commits from CI bot: Does not matter for the user, only ci_bot messages]
-        self.bot_merge_commit = f'CI message from {self.bot_name}. Merge of {self.wh_library} library. Update files {self.wh_model_file} and {self.wh_html_file}'
-        self.bot_push_commit = f'CI message from {self.bot_name}. Automatic push of CI with new regression reference files. Please pull the new files before push again.'
-        self.bot_create_ref_message = f'CI message from {self.bot_name}. New reference files were pushed to this branch. The job was successfully and the newly added files are tested in another commit.'
-        self.bot_update_wh_commit = f'CI message from {self.bot_name}. Update or created new whitelist. Please pull the new whitelist before push again.'
-        self.bot_create_ref_commit = f'CI message from {self.bot_name}. Automatic push of CI with new regression reference files.Please pull the new files before push again. Plottet Results $GITLAB_Page/$CI_COMMIT_REF_NAME/plots/'
-        self.bot_create_CI_template_commit = f'CI message from {self.bot_name}. Automatic push of CI with new created CI templates. Please pull the new files before push again.'
-        self.bot_update_model_wh_commit = f'CI message from {self.bot_name}. Update file {self.wh_model_file}. Please pull the new files before push again.'
-        self.bot_update_example_wh_commit = f'CI message from {self.bot_name}. Update file {self.wh_simulate_file}. Please pull the new files before push again.'
-        self.bot_create_structure_commit = f'CI message from {self.bot_name}. Add files for ci structure'
-        self.bot_create_html_file_commit = f'CI message from {self.bot_name}. Push new files with corrected html Syntax .'
-        self.bot_build_whitelist_commit = f'CI message from {self.bot_name}. Push new created whitelists.'
 
 
 
