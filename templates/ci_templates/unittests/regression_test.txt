@@ -154,6 +154,7 @@ Regression_overall_coverage:Push:
         - source activate ${python_version}
         - git clone ${dymola_python_test_url}
         - pip install -e  ${dymola_python_test_dir}
+        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${coverage_arg}
     artifacts:
