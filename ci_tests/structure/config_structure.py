@@ -110,7 +110,8 @@ class data_structure(ci_config):
             else:
                 print(f'{self.CRED}File: {self.CEND}  {file} does not exist. Create a new one under {self.green}{file}{self.CEND}')
                 with open(file, 'w') as write_file:
-                    if file is self.config_ci_eof_file:
+                    if os.path.basename(file) == os.path.basename(self.config_ci_eof_file):
+                        print("hallo")
                         write_file.write(f'y\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\ny\n')
 
     def delete_files_in_path(self, *args: Path):

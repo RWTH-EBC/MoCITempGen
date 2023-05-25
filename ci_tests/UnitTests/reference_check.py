@@ -1,5 +1,4 @@
 import argparse
-import multiprocessing
 from pathlib import Path
 import os
 import sys
@@ -64,36 +63,36 @@ class Buildingspy_Regression_Check(ci_config):
         self.ut.showGUI(self.show_gui)
         err_list = list()
         new_ref_list = list()
-        if package_list is not None:
-            if len(package_list) > 0:
-                for package in package_list:
+        #if "-y" in sys.argv:
+        if package_list is not None and  len(package_list) > 0:
+            for package in package_list:
+                if self.batch is False:
+                    new_ref_list.append(package)
+                    print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
+                else:
+                    print(f'{self.green}Regression test for package:{self.CEND} {package}')
+                self.ut.setSinglePackage(package)
+                response = self.ut.run()
+                data_structure().prepare_data(
+                    source_target_dict={f'simulator-dymola.log': Path("..", self.result_regression_dir, package),
+                                        "unitTests-dymola.log": Path("..", self.result_regression_dir, package),
+                                        "funnel_comp": Path("..", self.result_regression_dir, package,
+                                                            "funnel_comp")})
+                if response != 0:
+                    err_list.append(package)
                     if self.batch is False:
-                        new_ref_list.append(package)
-                        print(f'{self.green}Generate new reference results for package: {self.CEND} {package}')
+                        print(f'{self.CRED}Error in package: {self.CEND} {package}')
+                        continue
                     else:
-                        print(f'{self.green}Regression test for package:{self.CEND} {package}')
-                    self.ut.setSinglePackage(package)
-                    response = self.ut.run()
-                    data_structure().prepare_data(
-                        source_target_dict={f'simulator-dymola.log': Path("..", self.result_regression_dir, package),
-                                            "unitTests-dymola.log": Path("..", self.result_regression_dir, package),
-                                            "funnel_comp": Path("..", self.result_regression_dir, package,
-                                                                "funnel_comp")})
-                    if response != 0:
-                        err_list.append(package)
-                        if self.batch is False:
-                            print(f'{self.CRED}Error in package: {self.CEND} {package}')
-                            continue
-                        else:
-                            print(f'{self.CRED}Regression test for model {package} was not successfully{self.CEND}')
-                            continue
+                        print(f'{self.CRED}Regression test for model {package} was not successfully{self.CEND}')
+                        continue
+                else:
+                    if self.batch is False:
+                        print(f'{self.green}New reference results in package: {self.CEND} {package}\n')
+                        continue
                     else:
-                        if self.batch is False:
-                            print(f'{self.green}New reference results in package: {self.CEND} {package}\n')
-                            continue
-                        else:
-                            print(f'{self.green}Regression test for model {package} was successful {self.CEND}')
-                            continue
+                        print(f'{self.green}Regression test for model {package} was successful {self.CEND}')
+                        continue
         if self.batch is True:
             if len(err_list) > 0:
                 print(f'{self.CRED}The following packages in regression test failed:{self.CEND}')
