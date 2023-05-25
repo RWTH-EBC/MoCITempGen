@@ -77,8 +77,11 @@ class HTML_Tidy(ci_config):
         self.wh_library = wh_library
         self.filter_whitelist = filter_whitelist
         self.root_dir = self.package.replace(".", os.sep)
+        data_structure().check_arguments_settings(self.root_dir)
         self.html_error_log = f'{self.root_dir}{os.sep}HTML_error_log.txt'
         self.html_correct_log = f'{self.root_dir}{os.sep}HTML_correct_log.txt'
+        data_structure().check_file_setting(self.html_error_log, self.html_correct_log, create_flag=True)
+
         super().__init__()
 
     def _get_html_model(self):
@@ -93,34 +96,21 @@ class HTML_Tidy(ci_config):
         html_model_list = self._remove_whitelist_model(library_list=library_list, wh_library_list=wh_library_list)
         return html_model_list
 
-    @staticmethod
-    def _check_arguments(root_dir):
-        """
-        Args:
-            root_dir (): check if the package exist
-        """
-        top_package = os.path.join(root_dir, "package.mo")
-        if not os.path.isfile(top_package):
-            raise ValueError(
-                "Argument rootDir=%s is not a Modelica package. Expected file '%s'." % (root_dir, top_package))
-
     def run_files(self):
         """
         Make sure that the parameter rootDir points to a Modelica package.
         Write errors to error message.
         """
-        data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
         html_model_list = self._get_html_model()
         for model in html_model_list:
-            error_list = list()
             model_file = f'{model[:model.rfind(".mo")].replace(".", os.sep)}.mo'
             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(model_file=model_file)
             if self.correct_backup:
                 self._call_backup_old_files(model_file=model_file,
                                             document_corr=correct_code,
                                             file_counter=file_counter)
-            if len(error_list) > 0:
+            if len(error_list) > 0 and error_list is not None:
                 if self.correct_overwrite:
                     print(f'Error in file {model_file} with error:')
                     for error in error_list:
@@ -128,7 +118,6 @@ class HTML_Tidy(ci_config):
                     print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
                     if self.log:
-
                             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
                                 model_file=model_file)
                             self._call_write_log(model_file=model_file,
@@ -148,7 +137,6 @@ class HTML_Tidy(ci_config):
 
 
     def check_html_files(self, model_list: list = None):
-        data_structure().check_arguments_settings(self.root_dir)
         file_counter = 0
         if model_list is not None and len(model_list) > 0:
             for model in model_list:
@@ -530,9 +518,9 @@ class HTML_Tidy(ci_config):
         read logfile for possible errors
         Returns: return a list of error
         """
-        log_file = open(self.html_error_log, "r", encoding="utf-8")
-        lines = log_file.readlines()
-        log_file.close()
+        with open(self.html_error_log, "r", encoding="utf-8") as log_file:
+            lines = log_file.readlines()
+
         err_list = []
         warning_table = f'Warning: The summary attribute on the <table> element is obsolete in HTML5'
         warning_font = f'Warning: <font> element removed from HTML5'
@@ -541,6 +529,7 @@ class HTML_Tidy(ci_config):
         warning_th_align = f' Warning: <th> attribute "align" not allowed for HTML5'
         except_warning_list = [warning_img, warning_align, warning_table, warning_th_align]
         warning_list = [warning_font]
+
         for line in lines:
             line = line.replace("\n", "")
             for warning in warning_list:
