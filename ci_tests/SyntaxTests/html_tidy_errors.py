@@ -129,15 +129,10 @@ class HTML_Tidy(ci_config):
                     print(f'Overwrite model: {model_file}\n')
                     self._call_correct_overwrite(model_name=model_file, document_corr=correct_code)
                     if self.log:
-                        with open(f'{self.html_error_log}', "a", encoding="utf-8") as error_log_file:
-                            print(f'Error-log-file is saved in {self.html_error_log}')
-                        with open(f'{self.html_correct_log}', "a", encoding="utf-8") as correct_log_file:
-                            print(f'Correct-log-file is saved in {self.html_correct_log}')
+
                             correct_code, error_list, html_correct_code, html_code = self._getInfoRevisionsHTML(
                                 model_file=model_file)
                             self._call_write_log(model_file=model_file,
-                                                 error_log_file=error_log_file,
-                                                 correct_log_file=correct_log_file,
                                                  error_list=error_list,
                                                  html_correct_code=html_correct_code,
                                                  html_code=html_code)
@@ -148,14 +143,10 @@ class HTML_Tidy(ci_config):
                                             html_code=html_code)
                     if self.log:
                         self._call_write_log(model_file=model_file,
-                                             error_log_file=error_log_file,
-                                             correct_log_file=correct_log_file,
                                              error_list=error_list,
                                              html_correct_code=html_correct_code,
                                              html_code=html_code)
-        if self.log:
-            error_log_file.close()
-            correct_log_file.close()
+
 
     def check_html_files(self, model_list: list = None):
         data_structure().check_arguments_settings(self.root_dir)
@@ -219,26 +210,27 @@ class HTML_Tidy(ci_config):
                                                           self.html_correct_log: self.result_syntax_dir})
         return var
 
-    @staticmethod
-    def _call_write_log(model_file, error_log_file, correct_log_file, error_list, html_correct_code, html_code):
+    def _call_write_log(self, model_file, error_list, html_correct_code, html_code):
         """
         Write a log file of the html test.
         Args:
             model_file (): model to check
-            error_log_file (): file of the error log
-            correct_log_file (): file with corrected models
             error_list (): list of errors for each model
             html_correct_code (): corrected html code
             html_code (): html code of a modelica file
         """
-        if len(error_list) > 0:
-            # html_correct_code = html_correct_code.replace(f'\n', "")
-            error_log_file.write(f'\n---- {model_file} ----')
-            correct_log_file.write(
-                f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
-            for error in error_list:
-                error_log_file.write(f'\n{error}\n')
-                correct_log_file.write(f'\n{error}\n')
+
+        if len(error_list) > 0 and error_list is not None:
+            with open(f'{self.html_error_log}', "w", encoding="utf-8") as error_log_file,  open(f'{self.html_correct_log}', "w", encoding="utf-8") as correct_log_file:
+                print(f'Error-log-file is saved in {self.html_error_log}')
+                print(f'Correct-log-file is saved in {self.html_correct_log}')
+                # html_correct_code = html_correct_code.replace(f'\n', "")
+                error_log_file.write(f'\n---- {model_file} ----')
+                correct_log_file.write(
+                    f'\n---- {model_file} ----\n-------- HTML Code --------\n{html_code}\n-------- Corrected Code --------\n{html_correct_code}\n-------- Errors --------')
+                for error in error_list:
+                    error_log_file.write(f'\n{error}\n')
+                    correct_log_file.write(f'\n{error}\n')
 
     @staticmethod
     def _call_correct_view(model_file, error_list, html_correct_code, html_code):
