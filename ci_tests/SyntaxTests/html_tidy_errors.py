@@ -78,8 +78,8 @@ class HTML_Tidy(ci_config):
         self.filter_whitelist = filter_whitelist
         self.root_dir = self.package.replace(".", os.sep)
         data_structure().check_arguments_settings(self.root_dir)
-        self.html_error_log = f'{self.root_dir}{os.sep}HTML_error_log.txt'
-        self.html_correct_log = f'{self.root_dir}{os.sep}HTML_correct_log.txt'
+        self.html_error_log = Path(self.root_dir, "HTML_error_log.txt")
+        self.html_correct_log = Path(self.root_dir, "HTML_correct_log.txt")
         data_structure().check_file_setting(self.html_error_log, self.html_correct_log, create_flag=True)
 
         super().__init__()
