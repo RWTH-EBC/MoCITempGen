@@ -23,7 +23,7 @@ config_dir = false
 create_path = false
 
 [google_charts.Parser]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
 library = [ "AixLib",]
 line_html_flag = true
 error_flag = true
@@ -48,7 +48,7 @@ library = [ "AixLib",]
 merge_library = "IBPSA"
 
 [html_tidy_errors.Parser]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
 library = [ "AixLib",]
 wh_library = [ "IBPSA",]
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
@@ -62,7 +62,7 @@ correct_view_flag = false
 filter_whitelist_flag = false
 
 [StyleChecking.Parser]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
 root_library = [ "AixLib/package.mo",]
 library = [ "AixLib",]
 dymola_version = "2022"
@@ -70,7 +70,7 @@ changed_flag = true
 
 [OM_Check.Parser]
 library = [ "AixLib",]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
 root_library = [ "AixLib/package.mo",]
 wh_library = [ "IBPSA",]
 changed_flag = true
@@ -81,8 +81,8 @@ om_options = [ "OM_CHECK",]
 
 [reference_check.Parser]
 library = [ "AixLib",]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
-root_library = [ "../AixLib/package.mo",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+root_library = [ "AixLib/package.mo",]
 path = "."
 show_gui = false
 number_of_processors = 4
@@ -100,7 +100,7 @@ report = false
 
 [validatetest.Parser]
 library = [ "AixLib",]
-packages = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
+packages = [ "Airflow", "BoundaryConditions", "Controls", "Electrical", "Fluid", "Media", "Systems", "ThermalZones", "Utilities",]
 root_library = [ "AixLib/package.mo",]
 wh_library = [ "IBPSA",]
 root_wh_library = "None"

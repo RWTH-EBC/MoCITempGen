@@ -91,6 +91,7 @@ if __name__ == '__main__':
         to = toml_to_py()
         config = to.load_toml(toml_file=Path(Path.cwd(), "Modelica-CI", "gitlab_ci_templates", "ci_config", "toml_files",
                                              "ci_template_config.toml"))
+
         to.write_python_ci_test_config(config_list=config,
                                        temp_file=os.path.join(Path.cwd(),"Modelica-CI", "templates", "config_templates",
                                                               "ci_templates_config.txt"),

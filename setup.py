@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 import os
 from pathlib import Path
 
-with open("ci_tests/README.md", 'r') as f:
+with open("README.md", 'r') as f:
     long_description = f.read()
-with open("ci_tests/requirements.txt", 'r') as f:
+with open("requirements.txt", 'r') as f:
     required = f.read().splitlines()
-with open("ci_tests/dependency_requirements.txt", 'r') as f:
+with open("dependency_requirements.txt", 'r') as f:
     dep_required = f.read().splitlines()
 version = "0.1.0"
 
@@ -30,7 +30,7 @@ def copy_non_code_file(non_code_dir:list, not_include:list):
 
 
 setup(
-    name='Modelica-CI',
+    name='MoCITempGen',
     version=version,
     description='Check dymola files with python-dymola-interface',
     license="LICENSE",
@@ -39,11 +39,11 @@ setup(
     author='Sven Hinrichs',
     author_email='sven.hinrichs@eonerc.rwth-aachen.de',
     url="https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests",
-    packages=find_packages(include=['ci_tests*',
+    packages=find_packages(include=['MoCITempGen*',
                                     'config*',
                                     'templates*']),
     include_package_data=True,
-    package_data=copy_non_code_file(non_code_dir=f'ci_tests',
+    package_data=copy_non_code_file(non_code_dir=f'MoCITempGen',
                                     not_include=[".py", ".Dockerfile", ".pyc"]),
     python_requires='>=3.8.0',
     install_requires=[required],

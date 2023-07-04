@@ -7,6 +7,11 @@ class templates_structure(ci_template_config):
 
     @staticmethod
     def create_except_commit_list():
+        """
+
+        Returns:
+
+        """
         except_commit_list = []
         except_commit_dic = (vars(ci_template_config()))
         for commit in except_commit_dic:
@@ -16,6 +21,16 @@ class templates_structure(ci_template_config):
 
 
     def get_toml_var(self, pattern_1: str, pattern_2: str, to_group: str):
+        """
+
+        Args:
+            pattern_1 ():
+            pattern_2 ():
+            to_group ():
+
+        Returns:
+
+        """
         _list = {}
         var_dict = vars(ci_template_config())
         _dict = {}
@@ -25,7 +40,16 @@ class templates_structure(ci_template_config):
         _dict[to_group] = _list
         return _dict
 
-    def get_variables(self, pattern: str , to_group: str):
+    def get_variables(self, pattern: str, to_group: str):
+        """
+
+        Args:
+            pattern ():
+            to_group ():
+
+        Returns:
+
+        """
         _list = {}
         var_dict = vars(ci_template_config())
         _dict = {}

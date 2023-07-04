@@ -77,7 +77,7 @@ stages:
 
 
 %for package in packages:
-OM_Check_${library}_${package}:PR:
+OM_Simulate_${library}_${package}:PR:
     variables:
         lib_package: ${package}
     extends: .OM_simulate_model_job:PR
@@ -86,7 +86,7 @@ OM_Check_${library}_${package}:PR:
 
 
 %for package in packages:
-OM_Check_${library}_${package}:push:
+OM_Simulate_${library}_${package}:push:
     variables:
         lib_package: ${package}
     extends: .OM_simulate_model_job:push

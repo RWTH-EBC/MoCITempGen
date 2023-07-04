@@ -222,6 +222,7 @@ class ci_templates(ci_template_config):
 
         # self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
         self.rule = CI_temp_struc()
+
         self.commit_string = self.rule.write_multiple_rules(rule_list=self.except_commit_list,
                                                             rule_option="&&",
                                                             compare_str="!~",
@@ -1500,6 +1501,7 @@ if __name__ == '__main__':
         to_parser.overwrite_arg_parser_toml()
     if args.write_templates is True:
         data_dict = CI_toml_parser().read_ci_template_toml()
+
         ci = ci_templates(library=data_dict["library"][0],
                           package_list=data_dict["packages"],
                           dymola_version=data_dict["dymola_version"],
