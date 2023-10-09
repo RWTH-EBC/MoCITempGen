@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 import argparse
-
+# TODO Get rid of all references to "Dymola_python_tests"
 sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
