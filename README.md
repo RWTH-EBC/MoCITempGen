@@ -11,7 +11,7 @@ The created templates hold functionality for:
 - Merge IBPSA library (specific for IBPSA context)
 
 The basic setup is shown in this picture:
-![process](/docs/mocitempgen_process.png)
+![process](/docs/images/mocitempgen_process.png)
 * MoCITempGen uses the base CI-Templates in .txt form stored in `templates` 
 folder to create a library related CI-structure.
 * This can then be placed inside the target Modelica library
