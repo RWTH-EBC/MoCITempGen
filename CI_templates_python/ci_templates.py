@@ -3,9 +3,11 @@ from mako.template import Template
 import argparse
 import toml
 import sys
+from pathlib import Path
 from ci_templates_configuration import CI_template_config
 
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+MoCITempGenPATH = Path(__file__).parents[1]
+sys.path.append(str(MoCITempGenPATH.joinpath("CITests", "CI_Configuration")))
 from configuration import CI_conf_class
 
 
@@ -579,14 +581,14 @@ class Read_config_data(CI_template_config):
 
         """
         super().__init__()
-
-    def delte_yml_files(self):
+    # TODO: Fix typos
+    def delete_yml_files(self):
         """
 
         """
         for subdir, dirs, files in os.walk(self.temp_dir):
             for file in files:
-                filepath = f'{subdir}{os.sep}{file}'
+                filepath = os.path.join(subdir, file)  # TODO: Use os.path.join or joinpath from pathlib instead of os.sep
                 if filepath.endswith(".yml") and file != ".gitlab-ci.yml":
                     os.remove(filepath)
 
@@ -596,6 +598,7 @@ class Read_config_data(CI_template_config):
         @return:
         @rtype:
         """
+        # TODO: Use proper data-classes and loaders for it. I would suggest pydantic
         data = toml.load(self.toml_ci_setting_file)
         library = self._read_library(data=data)
         package_list = self._read_package_list(data=data)
@@ -634,7 +637,7 @@ class Read_config_data(CI_template_config):
         @type data:
         @return:
         @rtype:
-        """
+        """  # TODO: Remove ALL essentially empty docstrings.
         github_repo = data["github_repo"]
         github_repo = github_repo["github_repo"]
         print(f'Setting library: {github_repo}')
@@ -1028,7 +1031,7 @@ if __name__ == '__main__':
                                   action="store_true")
     args = parser.parse_args()
     Conf = Read_config_data()
-    Conf.delte_yml_files()
+    Conf.delete_yml_files()
 
     if args.setting is False:
         set_setting = Set_CI_Settings_interactive()
