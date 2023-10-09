@@ -23,6 +23,25 @@ to a public ModelicaPyCI package on PyPi soon
 not only GitLab repos can use MoCITempGen generated templates buy any GitHub,
 BitBucket or AWS CodeCommit repository
 
+## How to use
+### Interactive mode
+For this a prompt menu will guide you through the needed inputs. This is still
+work in progress and not as robust as it should be.
+```python
+python CI_templates_python/ci_templates.py 
+```
+If the process in finished you will have your results stored under
+`CI_templates_python/dymola-ci-tests`. Additionally you will be provided with a 
+fresh `CI_setting.toml` file that holds the configuration you created. You can 
+change this config and rerun the process in config mode:
+### Config mode
+This takes the configurations from the previous process which can be modified 
+and creates a new `dymola-ci-tests` setup. This is useful if you only want to 
+change a few settings. For this run 
+```python
+python CI_templates_python/ci_templates.py --setting
+```
+
 ## Folder Structure
 
 ### CI_templates_python
@@ -42,6 +61,7 @@ your library dependant ci-templates.
 
 ## TODOS:
 * [ ] complete documentation
+* [ ] merge open modelica branch
 * [ ] complete extraction of python functions from CITests folder to 
 [ModelicaPyCI](https://github.com/RWTH-EBC/ModelicaPyCI) package
 * [ ] remove dymola functionality as far as possible 
