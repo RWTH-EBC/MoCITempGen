@@ -859,12 +859,12 @@ class Set_CI_Settings_interactive(CI_template_config):
         template_list = self._set_ci_templates()
         library = self._ci_set_library()
         package_list = self._set_ci_packages(library=library)
-        dymola_version = self._set_ci_dymola_version()
-        python_version = self._set_ci_python_version()
         wh_result = self._set_ci_whitelist()  # wh_library, git_url, wh_path
         github_repo = self._set_ci_github_repo()
         gitlab_page = self._set_ci_gitlab_page()
         image_name = self._set_ci_image()
+        dymola_version = self._set_ci_dymola_version()
+        python_version = self._set_ci_python_version()
         return template_list, library, package_list, dymola_version, python_version, wh_result, github_repo, gitlab_page, image_name
 
     @staticmethod
@@ -943,7 +943,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         @return:
         @rtype:
         """
-        dymola_version = input(f'Give the dymolaversion (e.g. {self.dymola_version}): ')
+        dymola_version = input(f'Give the dymolaversion installed on your image (e.g. {self.dymola_version}): ')
         print(f'Setting dymola version: {dymola_version}')
         return dymola_version
 
@@ -953,7 +953,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         @return:
         @rtype:
         """
-        python_version = input(f'Give the python version in your image (e.g. {self.python_version}): ')
+        python_version = input(f'Give the name of the conda environment on your image (e.g. {self.python_version}): ')
         print(f'Setting python version: {python_version}')
         return python_version
 
@@ -1012,7 +1012,8 @@ class Set_CI_Settings_interactive(CI_template_config):
     def _set_ci_image(self):
         """
         """
-        image_name = input(f'Which docker image should be used? (e.g {self.image_name}): ')
+        print("Which docker image should be used? The image needs a valid anaconda installation, ")
+        image_name = input(f'and your CI needs reading access to the image. (e.g {self.image_name}): ')
         print(f'Setting dymola version: {image_name}')
         return image_name
 
