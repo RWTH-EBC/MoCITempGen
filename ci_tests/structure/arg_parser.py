@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 import sys
 from ci_test_config import ci_config
-from gitlab_ci_templates.ci_templates_config import ci_template_config
+from MoCITempGen.ci_templates_config import ci_template_config
 import os
 from mako.template import Template
 import glob
@@ -66,11 +66,11 @@ class StoreDictKey(argparse.Action):
 class argpaser_toml(ci_template_config):
 
     def __init__(self,
-                 f_path: str = os.path.join("Modelica-GitLab-CI", "ci_tests"),
-                 toml_file: str = os.path.join("Modelica-GitLab-CI", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")):
+                 f_path: str = os.path.join("MoCITempGen", "ci_tests"),
+                 toml_file: str = os.path.join("MoCITempGen", "MoCITempGen", "ci_config", "toml_files", "parser.toml")):
         super().__init__()
         self.f_path = f_path
-        self.toml_file = Path(self.dymola_python_test_dir, "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml")
+        self.toml_file = Path(self.dymola_python_test_dir, "MoCITempGen", "ci_config", "toml_files", "parser.toml")
         pass
 
     def load_python_modules(self):
@@ -160,7 +160,7 @@ class Pars:
         check_test_group.add_argument("--file-path",
                                       default=os.path.join("Dymola_python_tests", "ci_tests"))
         check_test_group.add_argument("--parse-toml-file",
-                                      default=os.path.join("Dymola_python_tests", "gitlab_ci_templates", "ci_config", "toml_files", "parser.toml"))
+                                      default=os.path.join("Dymola_python_tests", "MoCITempGen", "ci_config", "toml_files", "parser.toml"))
         check_test_group.add_argument("--python-file",
                                       default="api_github")
         check_test_group.add_argument("--parser-arg",

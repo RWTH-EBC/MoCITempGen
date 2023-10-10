@@ -2,15 +2,15 @@ import os
 from mako.template import Template
 import argparse
 import toml
-from gitlab_ci_templates.ci_templates_config import ci_template_config
-from gitlab_ci_templates.ci_templates_structure import templates_structure
+from MoCITempGen.ci_templates_config import ci_template_config
+from MoCITempGen.ci_templates_structure import templates_structure
 import glob
 from ci_tests.structure.arg_parser import argpaser_toml
 from ci_tests.structure.config_structure import data_structure
 from pathlib import Path
 import sys
 import tomli_w as tomlwriter
-
+import MoCITempGen
 
 class CI_temp_struc(object):
 
@@ -219,6 +219,8 @@ class ci_templates(ci_template_config):
         self.github_repository = github_repo
         self.image_name = image_name
         self.gitlab_page = gitlab_page
+        self.ci_templ_base_dir = Path(MoCITempGen.__file__).parent.parent \
+                                 / "templates" / "ci_templates"
 
         # self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
         self.rule = CI_temp_struc()
@@ -234,7 +236,7 @@ class ci_templates(ci_template_config):
                                                                   ci_variable="$CI_COMMIT_BRANCH")
 
     def write_OM_check_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_OM_check_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_OM_check_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         # out = ["root_library", "library"]
@@ -284,7 +286,7 @@ class ci_templates(ci_template_config):
         """
         Write page template, deploy artifacts, plots, reference results
         """
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_page_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_page_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.image_name,
@@ -325,7 +327,7 @@ class ci_templates(ci_template_config):
          Write HTML template
         """
 
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_html_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_html_file
         print(f"Write {ci_temp}")
         arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_html_tidy_file).name.replace(".py", ""),
                                              repl_parser_arg={"packages": self.library, "correct_view_flag": True,
@@ -383,7 +385,7 @@ class ci_templates(ci_template_config):
         """
         Write Style Check template
         """
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_style_check_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_style_check_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = self.rule.write_parser_args(py_file=Path(self.dymola_python_syntax_test_file).name.replace(".py", ""),
@@ -413,7 +415,7 @@ class ci_templates(ci_template_config):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_ci_whitelist_setting_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_build_whitelist_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_build_whitelist_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.dym_image,
@@ -444,7 +446,7 @@ class ci_templates(ci_template_config):
         """
         Write (IBPSA) Merge template
         """
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_ibpsa_merge_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_ibpsa_merge_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         merge_branch = f'{self.wh_library}_Merge'
@@ -508,7 +510,7 @@ class ci_templates(ci_template_config):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_regression_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_regression_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_regression_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = self.rule.write_parser_args(
@@ -610,7 +612,7 @@ class ci_templates(ci_template_config):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_OM_simulate_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_OM_simulate_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_OM_simulate_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = self.rule.write_parser_args(py_file=Path(self.OM_python_check_model_file).name.replace(".py", ""),
@@ -643,7 +645,7 @@ class ci_templates(ci_template_config):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_check_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_check_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_check_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
 
@@ -696,7 +698,7 @@ class ci_templates(ci_template_config):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_simulate_template(self):
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_simulate_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_simulate_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = self.rule.write_parser_args(
@@ -787,7 +789,7 @@ class ci_templates(ci_template_config):
         @param ci_template_list:
         @type ci_template_list:
         """
-        ci_temp = Path(self.temp_ci_dir, self.temp_ci_main_yml_file)
+        ci_temp = self.ci_templ_base_dir / self.temp_ci_main_yml_file
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.image_name,
@@ -1363,7 +1365,7 @@ class CI_toml_parser(ci_template_config):
 
     def __init__(self):
         super().__init__()
-        self.ci_template_toml_file = os.path.join(self.dymola_python_test_dir, "gitlab_ci_templates", "ci_config",
+        self.ci_template_toml_file = os.path.join(self.dymola_python_test_dir, "MoCITempGen", "ci_config",
                                                   "toml_files",
                                                   "ci_user_template.toml")
 

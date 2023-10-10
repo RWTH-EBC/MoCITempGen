@@ -1,4 +1,4 @@
-from gitlab_ci_templates.ci_templates_config import ci_template_config
+from MoCITempGen.ci_templates_config import ci_template_config
 
 class templates_structure(ci_template_config):
 

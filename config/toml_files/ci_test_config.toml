@@ -1,6 +1,6 @@
 [CI_dir]
 dymola_ci_test_dir = 'dymola-ci-tests'
-dymola_python_test_dir = 'Modelica-CI'
+dymola_python_test_dir = 'MoCITempGen'
 
 [whitelist]
 wh_ci_dir = "dymola-ci-tests/ci_whitelist"
@@ -20,10 +20,10 @@ config_ci_eof_file = 'dymola-ci-tests/Configfiles/EOF.sh'
 
 [plot]
 chart_dir = 'dymola-ci-tests/charts'
-temp_chart_dir = 'Modelica-CI/templates/google_templates'
-temp_chart_file = 'Modelica-CI/templates/google_templates/google_chart.txt'
-temp_index_file = 'Modelica-CI/templates/google_templates/index.txt'
-temp_layout_file = 'Modelica-CI/templates/google_templates/layout_index.txt'
+temp_chart_dir = 'MoCITempGen/templates/google_templates'
+temp_chart_file = 'MoCITempGen/templates/google_templates/google_chart.txt'
+temp_index_file = 'MoCITempGen/templates/google_templates/index.txt'
+temp_layout_file = 'MoCITempGen/templates/google_templates/layout_index.txt'
 
 [interact_ci_list]
 ci_interact_dir = 'dymola-ci-tests/interact_CI'
@@ -36,7 +36,7 @@ library_ref_results_dir = 'Resources/ReferenceResults/Dymola'
 library_resource_dir = 'Resources/Scripts/Dymola'
 
 [Dymola_Python_Tests]
-dymola_python_test_url = '--single-branch --branch 03_openModelica https://github.com/RWTH-EBC/Modelica-CI.git'
+dymola_python_test_url = '--single-branch --branch 03_openModelica https://github.com/RWTH-EBC/MoCITempGen.git'
 
 [result]
 result_dir = 'dymola-ci-tests/result'
