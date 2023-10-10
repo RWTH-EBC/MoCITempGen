@@ -31,6 +31,15 @@ class CI_yml_templates(CI_template_config):
         self.gitlab_page = gitlab_page
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
 
+    def write_yml(self, ci_template_file, yml_text, ci_folder=None):
+        if not ci_folder:
+            ci_folder = Path(self.temp_dir) / ci_template_file.parent.name
+        CI_conf_class().check_ci_folder_structure([ci_folder])
+        yml_file = (ci_folder / ci_template_file.stem).with_suffix('.yml')
+        yml_tmp = open(yml_file, "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
     def _write_ci_structure_template(self):
         """
 
@@ -47,13 +56,7 @@ class CI_yml_templates(CI_template_config):
                                       ci_interact_show_ref_file=self.ci_interact_show_ref_file,
                                       ci_interact_update_ref_file=self.ci_interact_update_ref_file,
                                       expire_in_time=self.expire_in_time)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_structure_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_structure_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_structure_file, yml_text)
 
     '''
     def _write_dymola_ci_temp(self):
@@ -73,12 +76,7 @@ class CI_yml_templates(CI_template_config):
         yml_text = my_template.render(ci_stage_deploy=self.ci_stage_deploy,
                                       expire_in_time=self.expire_in_time,
                                       except_branch_list=self.except_branch_list, )
-        ci_folder = Path(self.temp_dir) / self.temp_ci_page_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_page_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_page_file, yml_text)
 
     def _write_setting_template(self):
         """
@@ -93,12 +91,7 @@ class CI_yml_templates(CI_template_config):
                                       bot_create_CI_template_commit=self.bot_create_CI_template_commit,
                                       temp_dir=self.temp_dir,
                                       modelica_ci_test_url=self.modelica_ci_test_url)
-        ci_folder = str(Path(self.temp_dir) / self.temp_ci_setting_file.parent.name)
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{str(self.temp_ci_setting_file).split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_setting_file, yml_text)
 
     def _write_html_template(self):
         """
@@ -132,12 +125,7 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_api_github_file=self.dymola_python_api_github_file,
                                       bot_create_html_file_commit=self.bot_create_html_file_commit,
                                       expire_in_time=self.expire_in_time)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_html_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_html_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_html_file, yml_text)
 
     def _write_style_template(self):
         """
@@ -160,12 +148,7 @@ class CI_yml_templates(CI_template_config):
                                      dymola_python_syntax_test_file=self.dymola_python_syntax_test_file,
                                      dymola_python_configuration_file=self.dymola_python_configuration_file,
                                      html_praefix=self.html_praefix)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_style_check_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_style_check_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_style_check_file, yml_text)
 
     def _write_CI_Whitelist_Setting_template(self):
         """
@@ -209,13 +192,7 @@ class CI_yml_templates(CI_template_config):
                                       xvfb_flag=self.xvfb_flag,
                                       wh_library=wh_library,
                                       wh_path=wh_path)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_build_whitelist_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_build_whitelist_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_build_whitelist_file, yml_text)
 
     def _write_merge_template(self):
         """
@@ -240,13 +217,7 @@ class CI_yml_templates(CI_template_config):
                                       xvfb_flag=self.xvfb_flag,
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file)
 
-        ci_folder = Path(self.temp_dir) / self.temp_ci_ibpsa_merge_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_ibpsa_merge_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_ibpsa_merge_file, yml_text)
 
     def _write_regression_template(self):
         if self.merge_branch is not None:
@@ -285,13 +256,7 @@ class CI_yml_templates(CI_template_config):
                                      dymola_python_configuration_file=self.dymola_python_configuration_file,
                                      html_praefix=self.html_praefix
                                      )
-        ci_folder = Path(self.temp_dir) / self.temp_ci_regression_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_regression_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_regression_file, yml_text)
 
     def _write_check_template(self):
         if self.wh_library is not None:
@@ -342,13 +307,7 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file,
                                       dymola_python_configuration_file=self.dymola_python_configuration_file,
                                       html_praefix=self.html_praefix)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_check_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_check_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_check_file, yml_text)
 
     def _write_simulate_template(self):
         if self.wh_library is not None:
@@ -397,13 +356,7 @@ class CI_yml_templates(CI_template_config):
                                       dymola_python_test_validate_file=self.dymola_python_test_validate_file,
                                       dymola_python_configuration_file=self.dymola_python_configuration_file,
                                       html_praefix=self.html_praefix)
-        ci_folder = Path(self.temp_dir) / self.temp_ci_simulate_file.parent.name
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_simulate_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_simulate_file, yml_text)
 
     def write_toml_settings(self, stage_list, file_list, config_list):
         """
@@ -452,14 +405,8 @@ class CI_yml_templates(CI_template_config):
                                       stage_list=stage_list,
                                       variable_list=self.variable_main_list,
                                       file_list=ci_template_list)
-
         ci_folder = Path(self.temp_dir)
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = (ci_folder / self.temp_ci_main_yml_file.stem).with_suffix('.yml')
-        yml_tmp = open(yml_file, "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
-
+        self.write_yml(self.temp_ci_main_yml_file, yml_text, ci_folder)
 
     def _get_variables(self):
         """
