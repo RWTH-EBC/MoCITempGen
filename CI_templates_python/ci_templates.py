@@ -921,7 +921,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         package_list = []
         package_list_final = []
         for package in os.listdir(library):
-            if package.find(".") == -1:
+            if package.find(".") == -1 and Path(library).joinpath(package, "package.mo").exists():
                 package_list.append(package)
 
         if package_list is None:
