@@ -18,9 +18,9 @@ Check and simulate dymola models with dymola-python-interface.
 | --git-url | url repository of whitelist library"        |
 
 #### Example: Execution on gitlab runner (linux)
-    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py  --single-package Airflow --library AixLib -DS 2022 --wh-library IBPSA --filter-whitelist
-    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py --single-package Airflow --library AixLib -DS 2022 -CM
-    xvfb-run -n 77 python Dymola_python_tests/CITests/UnitTests/CheckPackages/validatetest.py -DS 2022 --repo-dir IBPSA --git-url https://github.com/ibpsa/modelica-ibpsa.git  --library AixLib --wh-library IBPSA --whitelist
+    xvfb-run -n 77 python MoCITempGen/CITests/UnitTests/CheckPackages/validatetest.py  --single-package Airflow --library AixLib -DS 2022 --wh-library IBPSA --filter-whitelist
+    xvfb-run -n 77 python MoCITempGen/CITests/UnitTests/CheckPackages/validatetest.py --single-package Airflow --library AixLib -DS 2022 -CM
+    xvfb-run -n 77 python MoCITempGen/CITests/UnitTests/CheckPackages/validatetest.py -DS 2022 --repo-dir IBPSA --git-url https://github.com/ibpsa/modelica-ibpsa.git  --library AixLib --wh-library IBPSA --whitelist
 For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
 
 
@@ -44,10 +44,10 @@ For further information on how to use the UnitTest, please refer to the followin
 | --validate-experiment-setup       | Check the setup                                                     |
 
 #### Example: Execution on gitlab runner (linux)
-    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package AixLib.Airflow --library AixLib --batch -DS 2022
-    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py --coverage-only
-    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package  AixLib.Airflow  --library AixLib --batch -DS 2022 -n 2 --modified-model
-    cd AixLib && xvfb-run -n 77 python ../Dymola_python_tests/CITests/UnitTests/reference_check.py --create-ref -n 4 < ../dymola-ci-tests/Configfiles/EOF.sh
+    cd AixLib && xvfb-run -n 77 python ../MoCITempGen/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package AixLib.Airflow --library AixLib --batch -DS 2022
+    cd AixLib && xvfb-run -n 77 python ../MoCITempGen/CITests/UnitTests/reference_check.py --coverage-only
+    cd AixLib && xvfb-run -n 77 python ../MoCITempGen/CITests/UnitTests/reference_check.py -n 4 --tool dymola --single-package  AixLib.Airflow  --library AixLib --batch -DS 2022 -n 2 --modified-model
+    cd AixLib && xvfb-run -n 77 python ../MoCITempGen/CITests/UnitTests/reference_check.py --create-ref -n 4 < ../dymola-ci-tests/Configfiles/EOF.sh
 
 For the implementation in gitlab-yaml go to the following [link](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/tree/AixLib/dymola-ci-tests/ci_templates)
 

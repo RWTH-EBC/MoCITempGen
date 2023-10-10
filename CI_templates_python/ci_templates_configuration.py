@@ -75,7 +75,7 @@ class CI_template_config(CI_conf_class):
         self.temp_ci_build_whitelist_file = self.templates_ci_directory.joinpath("cleanupscript", "ci_build_whitelist.txt")
         # [Created CI_template_folder]
         # TODO: Remove redundant lines
-        #self.temp_dir = f'Dymola_python_tests{os.sep}gitlab_ci_templates'
+        #self.temp_dir = f'MoCITempGen{os.sep}gitlab_ci_templates'
         self.temp_dir = f'dymola-ci-tests{os.sep}ci_templates'
         # [Dymola test scripts]
         self.xvfb_flag = f'xvfb-run -n 77'

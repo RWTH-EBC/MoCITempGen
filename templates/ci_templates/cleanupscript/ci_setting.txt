@@ -9,9 +9,9 @@ Test_CI_Setting:
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
         - pip install toml
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
-        - python Dymola_python_tests/CITests/CleanUp/setting_check.py --github-private-key $GITHUB_PRIVATE_KEY --github-token $GITHUB_API_TOKEN
+        - python MoCITempGen/CITests/CleanUp/setting_check.py --github-private-key $GITHUB_PRIVATE_KEY --github-token $GITHUB_API_TOKEN
     only:
         variables:
         - $CI_COMMIT_MESSAGE  =~ /${ci_setting_commit}/
@@ -34,12 +34,12 @@ Create_templates:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - mkdir build_template && cd build_template
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python Dymola_python_tests/CITests/ci_templates/ci_templates.py --setting
+        - python MoCITempGen/CITests/ci_templates/ci_templates.py --setting
         - message="${bot_create_CI_template_commit}"
         - git add .
         - git commit -m "$message"
