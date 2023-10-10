@@ -79,7 +79,7 @@ class CI_template_config(CI_conf_class):
         self.temp_dir = f'dymola-ci-tests{os.sep}ci_templates'
         # [Dymola test scripts]
         self.xvfb_flag = f'xvfb-run -n 77'
-        self.dymola_python_dir = MoCITempGenPATH.joinpath("CITests")
+        self.dymola_python_dir = Path("MoCITempGen").joinpath("CITests")
         self.dymola_python_test_validate_file = self.dymola_python_dir.joinpath("UnitTests", "CheckPackages", "validatetest.py")
         self.dymola_python_test_reference_file = self.dymola_python_dir.joinpath("UnitTests", "reference_check.py")
         self.dymola_python_google_chart_file = self.dymola_python_dir.joinpath("Converter", "google_charts.py")
