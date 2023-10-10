@@ -20,25 +20,38 @@ provided through the python functions in `CITests` folder. This will be moved
 to a public ModelicaPyCI package on PyPi soon
 * Through the
 [GitLab mirroring feature](https://docs.gitlab.com/ee/user/project/repository/mirror/) 
-not only GitLab repos can use MoCITempGen generated templates buy any GitHub,
+not only GitLab repos can use MoCITempGen generated templates but any GitHub,
 BitBucket or AWS CodeCommit repository
 
 ## How to use
+
+### Installation
+
+You don't need to install the package, but the requirements 
+must be installed:
+
+```bash
+pip install -r requirements.txt
+```
+
 ### Interactive mode
 For this a prompt menu will guide you through the needed inputs. This is still
 work in progress and not as robust as it should be.
-```python
-python CI_templates_python/ci_templates.py 
+Be sure to be in the folder of the library you want to create tests for.
+Then, get the path to the folder `CI_templates_python`, e.g. `/path_to/CI_templates_python`
+and run:
+```bash
+python /path_to/CI_templates_python/ci_templates.py 
 ```
 If the process in finished you will have your results stored under
-`CI_templates_python/dymola-ci-tests`. Additionally you will be provided with a 
+`CI_templates_python/dymola-ci-tests`. Additionally, you will be provided with a 
 fresh `CI_setting.toml` file that holds the configuration you created. You can 
 change this config and rerun the process in config mode:
 ### Config mode
 This takes the configurations from the previous process which can be modified 
 and creates a new `dymola-ci-tests` setup. This is useful if you only want to 
 change a few settings. For this run 
-```python
+```bash
 python CI_templates_python/ci_templates.py --setting
 ```
 
