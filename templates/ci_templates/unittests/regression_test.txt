@@ -7,7 +7,7 @@ stages:
 .CI_Regressiontest:
     stage: ${ci_stage_regression_test}
     before_script:
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
@@ -63,7 +63,7 @@ CI_Regressiontest_${library}_${package}:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
 
@@ -112,7 +112,7 @@ CI_create_plots:
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -141,7 +141,7 @@ CI_create_plots:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
     after_script:
@@ -195,7 +195,7 @@ Regression_overall_coverage:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
     artifacts:
@@ -228,7 +228,7 @@ prepare_create_plots:
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -263,7 +263,7 @@ prepare_create_plots:
         - source activate ${python_version}
         - pip install --upgrade ${buildingspy_upgrade}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
@@ -323,7 +323,7 @@ Changed_create_plots:
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot requests toml
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -378,7 +378,7 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
         - python ${dymola_python_configuration_file} --create-ref
         - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
     after_script:
@@ -434,7 +434,7 @@ plot_reference_results:
         - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}

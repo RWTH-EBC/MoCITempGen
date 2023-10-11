@@ -3,9 +3,11 @@ from mako.template import Template
 import argparse
 import toml
 import sys
+from pathlib import Path
 from ci_templates_configuration import CI_template_config
 
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+MoCITempGenPATH = Path(__file__).parents[1]
+sys.path.append(str(MoCITempGenPATH.joinpath("CITests", "CI_Configuration")))
 from configuration import CI_conf_class
 
 
@@ -29,14 +31,23 @@ class CI_yml_templates(CI_template_config):
         self.gitlab_page = gitlab_page
         self.variable_main_list = [f'Github_Repository: {self.github_repo}', f'GITLAB_Page: {self.gitlab_page}']
 
+    def write_yml(self, ci_template_file, yml_text, ci_folder=None):
+        if not ci_folder:
+            ci_folder = Path(self.temp_dir) / ci_template_file.parent.name
+        CI_conf_class().check_ci_folder_structure([ci_folder])
+        yml_file = (ci_folder / ci_template_file.stem).with_suffix('.yml')
+        yml_tmp = open(yml_file, "w")
+        yml_tmp.write(yml_text.replace('\n', ''))
+        yml_tmp.close()
+
     def _write_ci_structure_template(self):
         """
 
         """
-        my_template = Template(filename=self.temp_ci_structure_file)
+        my_template = Template(filename=str(self.temp_ci_structure_file))
         yml_text = my_template.render(ci_stage_build_ci_structure=self.ci_stage_build_ci_structure,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                       bot_create_structure_commit=self.bot_create_structure_commit,
                                       ci_build_structure_commit=self.ci_build_structure_commit,
                                       wh_model_file=self.wh_model_file,
@@ -45,12 +56,7 @@ class CI_yml_templates(CI_template_config):
                                       ci_interact_show_ref_file=self.ci_interact_show_ref_file,
                                       ci_interact_update_ref_file=self.ci_interact_update_ref_file,
                                       expire_in_time=self.expire_in_time)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_structure_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_structure_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_structure_file, yml_text)
 
     '''
     def _write_dymola_ci_temp(self):
@@ -66,22 +72,17 @@ class CI_yml_templates(CI_template_config):
         """
         Write page template, deploy artifacts, plots, reference results
         """
-        my_template = Template(filename=self.temp_ci_page_file)
+        my_template = Template(filename=str(self.temp_ci_page_file))
         yml_text = my_template.render(ci_stage_deploy=self.ci_stage_deploy,
                                       expire_in_time=self.expire_in_time,
                                       except_branch_list=self.except_branch_list, )
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_page_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_page_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_page_file, yml_text)
 
     def _write_setting_template(self):
         """
         Write setting template, create template with own Syntax
         """
-        my_template = Template(filename=self.temp_ci_setting_file)
+        my_template = Template(filename=str(self.temp_ci_setting_file))
         yml_text = my_template.render(github_repo=self.github_repo,
                                       ci_setting_commit=self.ci_setting_commit,
                                       python_version=self.python_version,
@@ -89,13 +90,8 @@ class CI_yml_templates(CI_template_config):
                                       ci_stage_build_templates=self.ci_stage_build_templates,
                                       bot_create_CI_template_commit=self.bot_create_CI_template_commit,
                                       temp_dir=self.temp_dir,
-                                      dymola_python_test_url=self.dymola_python_test_url)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_setting_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_setting_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+                                      modelica_ci_test_url=self.modelica_ci_test_url)
+        self.write_yml(self.temp_ci_setting_file, yml_text)
 
     def _write_html_template(self):
         """
@@ -107,12 +103,12 @@ class CI_yml_templates(CI_template_config):
         else:
             git = ""
             merge_branch = ""
-        my_template = Template(filename=self.temp_ci_html_file)
+        my_template = Template(filename=str(self.temp_ci_html_file))
         yml_text = my_template.render(ci_stage_html_check=self.ci_stage_html_check,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                       config_ci_exit_file=self.config_ci_exit_file.replace(os.sep, "/"),
                                       ci_correct_html_commit=self.ci_correct_html_commit,
                                       library=self.library,
@@ -125,28 +121,21 @@ class CI_yml_templates(CI_template_config):
                                       bot_update_wh_commit=self.bot_update_wh_commit,
                                       wh_html_file=self.wh_html_file.replace(os.sep, "/"),
                                       ci_create_html_wh_commit=self.ci_create_html_wh_commit,
-                                      dymola_python_html_tidy_file=self.dymola_python_html_tidy_file.replace(os.sep,
-                                                                                                             "/"),
-                                      dymola_python_api_github_file=self.dymola_python_api_github_file.replace(os.sep,
-                                                                                                               "/"),
+                                      dymola_python_html_tidy_file=self.dymola_python_html_tidy_file,
+                                      dymola_python_api_github_file=self.dymola_python_api_github_file,
                                       bot_create_html_file_commit=self.bot_create_html_file_commit,
                                       expire_in_time=self.expire_in_time)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_html_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_html_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_html_file, yml_text)
 
     def _write_style_template(self):
         """
         Write Style Check template
         """
         merge_branch = f'- {self.wh_library}_Merge'
-        mytemplate = Template(filename=self.temp_ci_style_check_file)
+        mytemplate = Template(filename=str(self.temp_ci_style_check_file))
         yml_text = mytemplate.render(ci_stage_style_check=self.ci_stage_style_check,
                                      python_version=self.python_version,
-                                     dymola_python_test_url=self.dymola_python_test_url,
+                                     modelica_ci_test_url=self.modelica_ci_test_url,
                                      dymola_version=self.dymola_version,
                                      library=self.library,
                                      except_commit_list=self.except_commit_list,
@@ -156,17 +145,10 @@ class CI_yml_templates(CI_template_config):
                                      expire_in_time=self.expire_in_time,
                                      xvfb_flag=self.xvfb_flag,
                                      ci_style_commit=self.ci_style_commit,
-                                     dymola_python_syntax_test_file=self.dymola_python_syntax_test_file.replace(os.sep,
-                                                                                                                "/"),
-                                     dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
-                                         os.sep, "/"),
+                                     dymola_python_syntax_test_file=self.dymola_python_syntax_test_file,
+                                     dymola_python_configuration_file=self.dymola_python_configuration_file,
                                      html_praefix=self.html_praefix)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_style_check_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_style_check_file, yml_text)
 
     def _write_CI_Whitelist_Setting_template(self):
         """
@@ -194,12 +176,12 @@ class CI_yml_templates(CI_template_config):
             wh_path = ""
             merge_branch = ""
 
-        my_template = Template(filename=self.temp_ci_build_whitelist_file)
+        my_template = Template(filename=str(self.temp_ci_build_whitelist_file))
         yml_text = my_template.render(ci_stage_whitelist_setting=self.ci_stage_whitelist_setting,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(os.sep, "/"),
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(os.sep, "/"),
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file,
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file,
                                       dymola_version=self.dymola_version,
                                       git_url=git_url,
                                       library=self.library,
@@ -210,25 +192,19 @@ class CI_yml_templates(CI_template_config):
                                       xvfb_flag=self.xvfb_flag,
                                       wh_library=wh_library,
                                       wh_path=wh_path)
-
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_build_whitelist_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_build_whitelist_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_build_whitelist_file, yml_text)
 
     def _write_merge_template(self):
         """
         Write (IBPSA) Merge template
         """
         merge_branch = f'{self.wh_library}_Merge'
-        my_template = Template(filename=self.temp_ci_ibpsa_merge_file)
+        my_template = Template(filename=str(self.temp_ci_ibpsa_merge_file))
         yml_text = my_template.render(ci_stage_lib_merge=self.ci_stage_lib_merge,
                                       ci_stage_update_whitelist=self.ci_stage_update_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                       merge_branch=merge_branch,
                                       git_url=self.git_url,
                                       library=self.library,
@@ -239,21 +215,16 @@ class CI_yml_templates(CI_template_config):
                                       bot_merge_commit=self.bot_merge_commit,
                                       wh_model_file=self.wh_model_file,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(
-                                          os.sep, "/"))
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_ibpsa_merge_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file)
+
+        self.write_yml(self.temp_ci_ibpsa_merge_file, yml_text)
 
     def _write_regression_template(self):
         if self.merge_branch is not None:
             merge_branch = f'- {self.wh_library}_Merge'
         else:
             merge_branch = ""
-        mytemplate = Template(filename=self.temp_ci_regression_file)
+        mytemplate = Template(filename=str(self.temp_ci_regression_file))
         yml_text = mytemplate.render(ci_stage_regression_test=self.ci_stage_regression_test,
                                      ci_stage_ref_check=self.ci_stage_ref_check,
                                      ci_stage_plot_ref=self.ci_stage_plot_ref,
@@ -261,7 +232,7 @@ class CI_yml_templates(CI_template_config):
                                      python_version=self.python_version,
                                      buildingspy_upgrade=self.buildingspy_upgrade,
                                      config_ci_exit_file=self.config_ci_exit_file.replace(os.sep, "/"),
-                                     dymola_python_test_url=self.dymola_python_test_url,
+                                     modelica_ci_test_url=self.modelica_ci_test_url,
                                      library=self.library,
                                      dymola_version=self.dymola_version,
                                      chart_dir=self.chart_dir.replace(os.sep, "/"),
@@ -278,24 +249,14 @@ class CI_yml_templates(CI_template_config):
                                                                                                               "/"),
                                      xvfb_flag=self.xvfb_flag,
                                      ci_show_ref_commit=self.ci_show_ref_commit,
-                                     dymola_python_test_reference_file=self.dymola_python_test_reference_file.replace(
-                                         os.sep, "/"),
-                                     dymola_python_google_chart_file=self.dymola_python_google_chart_file.replace(
-                                         os.sep, "/"),
-                                     dymola_python_deploy_artifacts_file=self.dymola_python_deploy_artifacts_file.replace(
-                                         os.sep, "/"),
-                                     dymola_python_api_github_file=self.dymola_python_api_github_file.replace(os.sep,
-                                                                                                              "/"),
-                                     dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
-                                         os.sep, "/"),
+                                     dymola_python_test_reference_file=self.dymola_python_test_reference_file,
+                                     dymola_python_google_chart_file=self.dymola_python_google_chart_file,
+                                     dymola_python_deploy_artifacts_file=self.dymola_python_deploy_artifacts_file,
+                                     dymola_python_api_github_file=self.dymola_python_api_github_file,
+                                     dymola_python_configuration_file=self.dymola_python_configuration_file,
                                      html_praefix=self.html_praefix
                                      )
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_regression_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_regression_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_regression_file, yml_text)
 
     def _write_check_template(self):
         if self.wh_library is not None:
@@ -319,11 +280,11 @@ class CI_yml_templates(CI_template_config):
             filter_flag = ""
             wh_path = ""
             merge_branch = ""
-        my_template = Template(filename=self.temp_ci_check_file)
+        my_template = Template(filename=str(self.temp_ci_check_file))
         yml_text = my_template.render(ci_stage_model_check=self.ci_stage_model_check,
                                       ci_stage_create_whitelist=self.ci_stage_create_whitelist,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                       except_commit_list=self.except_commit_list,
                                       except_branch_list=self.except_branch_list,
                                       library=self.library,
@@ -343,17 +304,10 @@ class CI_yml_templates(CI_template_config):
                                       wh_model_file=self.wh_model_file.replace(os.sep, "/"),
                                       ci_create_model_wh_commit=self.ci_create_model_wh_commit,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(
-                                          os.sep, "/"),
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
-                                          os.sep, "/"),
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file,
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file,
                                       html_praefix=self.html_praefix)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_check_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_check_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_check_file, yml_text)
 
     def _write_simulate_template(self):
         if self.wh_library is not None:
@@ -375,10 +329,10 @@ class CI_yml_templates(CI_template_config):
             wh_flag = ""
             wh_path = ""
             git_url = ""
-        my_template = Template(filename=self.temp_ci_simulate_file)
+        my_template = Template(filename=str(self.temp_ci_simulate_file))
         yml_text = my_template.render(ci_stage_simulate=self.ci_stage_simulate,
                                       python_version=self.python_version,
-                                      dymola_python_test_url=self.dymola_python_test_url,
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                       library=self.library,
                                       wh_library=self.wh_library,
                                       git_url=git_url,
@@ -399,17 +353,10 @@ class CI_yml_templates(CI_template_config):
                                       wh_simulate_file=self.wh_simulate_file.replace(os.sep, "/"),
                                       ci_create_simulate_wh_commit=self.ci_create_simulate_wh_commit,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.replace(
-                                          os.sep, "/"),
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.replace(
-                                          os.sep, "/"),
+                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file,
+                                      dymola_python_configuration_file=self.dymola_python_configuration_file,
                                       html_praefix=self.html_praefix)
-        ci_folder = f'{self.temp_dir}{os.sep}{self.temp_ci_simulate_file.split(os.sep)[-2]}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_simulate_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        self.write_yml(self.temp_ci_simulate_file, yml_text)
 
     def write_toml_settings(self, stage_list, file_list, config_list):
         """
@@ -423,7 +370,7 @@ class CI_yml_templates(CI_template_config):
         @param git_url:
         @type git_url:
         """
-        my_template = Template(filename=self.temp_toml_ci_setting_file)
+        my_template = Template(filename=str(self.temp_toml_ci_setting_file))
         yml_text = my_template.render(library=self.library,
                                       wh_library=self.wh_library,
                                       dymola_version=self.dymola_version,
@@ -453,17 +400,13 @@ class CI_yml_templates(CI_template_config):
         @param ci_template_list:
         @type ci_template_list:
         """
-        my_template = Template(filename=self.temp_ci_main_yml_file)
+        my_template = Template(filename=str(self.temp_ci_main_yml_file))
         yml_text = my_template.render(image_name=self.image_name,
                                       stage_list=stage_list,
                                       variable_list=self.variable_main_list,
                                       file_list=ci_template_list)
-        ci_folder = f'{self.temp_dir}'
-        CI_conf_class().check_ci_folder_structure([ci_folder])
-        yml_file = f'{ci_folder}{os.sep}{self.temp_ci_main_yml_file.split(os.sep)[-1]}'
-        yml_tmp = open(yml_file.replace(".gitlab-ci.txt", ".gitlab-ci.yml"), "w")
-        yml_tmp.write(yml_text.replace('\n', ''))
-        yml_tmp.close()
+        ci_folder = Path(self.temp_dir)
+        self.write_yml(self.temp_ci_main_yml_file, yml_text, ci_folder)
 
     def _get_variables(self):
         """
@@ -579,14 +522,14 @@ class Read_config_data(CI_template_config):
 
         """
         super().__init__()
-
-    def delte_yml_files(self):
+    # TODO: Fix typos
+    def delete_yml_files(self):
         """
 
         """
         for subdir, dirs, files in os.walk(self.temp_dir):
             for file in files:
-                filepath = f'{subdir}{os.sep}{file}'
+                filepath = os.path.join(subdir, file)  # TODO: Use os.path.join or joinpath from pathlib instead of os.sep
                 if filepath.endswith(".yml") and file != ".gitlab-ci.yml":
                     os.remove(filepath)
 
@@ -596,6 +539,7 @@ class Read_config_data(CI_template_config):
         @return:
         @rtype:
         """
+        # TODO: Use proper data-classes and loaders for it. I would suggest pydantic
         data = toml.load(self.toml_ci_setting_file)
         library = self._read_library(data=data)
         package_list = self._read_package_list(data=data)
@@ -634,7 +578,7 @@ class Read_config_data(CI_template_config):
         @type data:
         @return:
         @rtype:
-        """
+        """  # TODO: Remove ALL essentially empty docstrings.
         github_repo = data["github_repo"]
         github_repo = github_repo["github_repo"]
         print(f'Setting library: {github_repo}')
@@ -862,12 +806,12 @@ class Set_CI_Settings_interactive(CI_template_config):
         template_list = self._set_ci_templates()
         library = self._ci_set_library()
         package_list = self._set_ci_packages(library=library)
-        dymola_version = self._set_ci_dymola_version()
-        python_version = self._set_ci_python_version()
         wh_result = self._set_ci_whitelist()  # wh_library, git_url, wh_path
         github_repo = self._set_ci_github_repo()
         gitlab_page = self._set_ci_gitlab_page()
         image_name = self._set_ci_image()
+        dymola_version = self._set_ci_dymola_version()
+        python_version = self._set_ci_python_version()
         return template_list, library, package_list, dymola_version, python_version, wh_result, github_repo, gitlab_page, image_name
 
     @staticmethod
@@ -924,7 +868,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         package_list = []
         package_list_final = []
         for package in os.listdir(library):
-            if package.find(".") == -1:
+            if package.find(".") == -1 and Path(library).joinpath(package, "package.mo").exists():
                 package_list.append(package)
 
         if package_list is None:
@@ -946,7 +890,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         @return:
         @rtype:
         """
-        dymola_version = input(f'Give the dymolaversion (e.g. {self.dymola_version}): ')
+        dymola_version = input(f'Give the dymolaversion installed on your image (e.g. {self.dymola_version}): ')
         print(f'Setting dymola version: {dymola_version}')
         return dymola_version
 
@@ -956,7 +900,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         @return:
         @rtype:
         """
-        python_version = input(f'Give the python version in your image (e.g. {self.python_version}): ')
+        python_version = input(f'Give the name of the conda environment on your image (e.g. {self.python_version}): ')
         print(f'Setting python version: {python_version}')
         return python_version
 
@@ -999,7 +943,7 @@ class Set_CI_Settings_interactive(CI_template_config):
         @rtype:
         """
         github_repo = input(f'Which github repo should be used? (e.g {self.github_repo}): ')
-        print(f'Setting dymola version: {github_repo}')
+        print(f'Setting GitHub Repository: {github_repo}')
         return github_repo
 
     def _set_ci_gitlab_page(self):
@@ -1015,7 +959,8 @@ class Set_CI_Settings_interactive(CI_template_config):
     def _set_ci_image(self):
         """
         """
-        image_name = input(f'Which docker image should be used? (e.g {self.image_name}): ')
+        print("Which docker image should be used? The image needs a valid anaconda installation, ")
+        image_name = input(f'and your CI needs reading access to the image. (e.g {self.image_name}): ')
         print(f'Setting dymola version: {image_name}')
         return image_name
 
@@ -1028,7 +973,7 @@ if __name__ == '__main__':
                                   action="store_true")
     args = parser.parse_args()
     Conf = Read_config_data()
-    Conf.delte_yml_files()
+    Conf.delete_yml_files()
 
     if args.setting is False:
         set_setting = Set_CI_Settings_interactive()

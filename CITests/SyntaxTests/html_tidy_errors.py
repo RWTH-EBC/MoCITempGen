@@ -5,7 +5,7 @@ import sys
 from git import Repo
 from tidylib import tidy_document
 
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+sys.path.append('MoCITempGen/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 # ! /usr/bin/env python3.6

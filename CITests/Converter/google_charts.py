@@ -4,7 +4,7 @@ import shutil
 import sys
 import pandas as pd
 from mako.template import Template
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+sys.path.append('MoCITempGen/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 

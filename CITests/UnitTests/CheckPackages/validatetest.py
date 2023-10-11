@@ -6,7 +6,7 @@ import sys
 import time
 from git import Repo
 from natsort import natsorted
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+sys.path.append('MoCITempGen/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 

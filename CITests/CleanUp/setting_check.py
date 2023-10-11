@@ -1,5 +1,5 @@
 import sys, configparser, os, argparse
-sys.path.append('Dymola_python_tests/CITests/CI_Configuration')
+sys.path.append('MoCITempGen/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 class Check_Settings(CI_conf_class):

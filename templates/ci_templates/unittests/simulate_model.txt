@@ -9,7 +9,7 @@ stages:
         - source activate ${python_version}
         - pip install natsort toml
         - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -43,7 +43,7 @@ CI_simulate_${library}_${package}:
         - source activate ${python_version}
         - pip install natsort toml
         - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -83,7 +83,7 @@ Development_simulate_${library}_${package}:
         - source activate ${python_version}
         - pip install natsort toml
         - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -124,7 +124,7 @@ simulate_${library}_${package}:
         - source activate ${python_version}
         - pip install natsort toml
         - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
 
     script:
         - python ${dymola_python_configuration_file} --changed-model
@@ -184,7 +184,7 @@ whitelist_example_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
         - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME

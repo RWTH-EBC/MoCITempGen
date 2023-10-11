@@ -7,9 +7,9 @@ Style_Check_AixLib:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
-        - ${xvfb_flag} python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+        - ${xvfb_flag} python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
         when: on_failure
         paths:
@@ -35,7 +35,7 @@ Development_Style_Check:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
@@ -56,7 +56,7 @@ CI_Style_Check:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
     artifacts:
@@ -78,7 +78,7 @@ Style_Check_ChangedModel:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
         - export PYTHONIOENCODING=utf-8
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - (git diff --raw --diff-filter=AMT HEAD^1) > ${config_ci_changed_file}

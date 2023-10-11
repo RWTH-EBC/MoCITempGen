@@ -19,7 +19,7 @@ IBPSA:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
@@ -29,7 +29,7 @@ IBPSA:
         - cd ..
         - cd ..
         - cd ..
-        - python Dymola_python_tests/CITests/deploy/IBPSA_Merge/library_merge.py
+        - python MoCITempGen/CITests/deploy/IBPSA_Merge/library_merge.py
         - rm -r modelica-ibpsa
     only:
         refs:
@@ -57,13 +57,13 @@ WhiteList:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
-        - python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --whitelist
+        - python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist
         - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
         - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
-        - python Dymola_python_tests/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
+        - python MoCITempGen/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
         - rm  -r ${wh_library}
         - message="${bot_merge_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
@@ -95,9 +95,9 @@ IBPSA_Pull_Request:
         - export PYTHONIOENCODING=utf-8 # just in case
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
+        - git clone ${modelica_ci_test_url}
     script:
-       - python Dymola_python_tests/CITests/api_script/api_github.py --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME  --github-token $GITHUB_API_TOKEN --create-pr --ibpsa-merge
+       - python MoCITempGen/CITests/api_script/api_github.py --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME  --github-token $GITHUB_API_TOKEN --create-pr --ibpsa-merge
     only:
         refs:
             - ${merge_branch}

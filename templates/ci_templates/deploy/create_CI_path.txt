@@ -20,8 +20,8 @@ create_ci_structure_job:
     script:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
-        - python Dymola_python_tests/CITests/CleanUp/structure_check.py
+        - git clone ${modelica_ci_test_url}
+        - python MoCITempGen/CITests/CleanUp/structure_check.py
     after_script:
         - cd $CI_PROJECT_NAME
         - message="${bot_create_structure_commit}" ;

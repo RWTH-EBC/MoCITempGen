@@ -7,7 +7,7 @@ import time
 import buildingspy.development.validator as validate
 import buildingspy.development.regressiontest as regression
 
-sys.path.append('../Dymola_python_tests/CITests/CI_Configuration')
+sys.path.append('../MoCITempGen/CITests/CI_Configuration')
 from configuration import CI_conf_class
 
 
