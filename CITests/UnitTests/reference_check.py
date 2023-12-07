@@ -733,6 +733,9 @@ if __name__ == '__main__':
     unit_test_group.add_argument("--validate-html-only", action="store_true")
     unit_test_group.add_argument("--validate-experiment-setup", action="store_true")
     unit_test_group.add_argument("--report", default=False, action="store_true")
+    unit_test_group.add_argument("--startup-mos",
+                                 help="Define a path to a .mos script which is used after starting dymola",
+                                 default=None, action="store_true")
 
     args = parser.parse_args()
 
@@ -746,6 +749,14 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+
+    if args.startup_mos is not None:
+        pack_check = dymola.RunScript(args.startup_mos)
+        if pack_check:
+            print(f'Successfully ran startup .mos-script: Found {args.startup_mos}\n')
+        else:
+            print(f'Failed to run .mos-script {args.startup_mos}')
+            exit(1)
 
     if args.validate_html_only:
         Buildingspy_Validate_test(validate=validate,

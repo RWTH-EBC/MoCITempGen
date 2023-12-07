@@ -1,15 +1,16 @@
+include: 'utilities.yml'
+
+
 stages:
     - ${ci_stage_style_check}
-    
+
+
 Style_Check_AixLib:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+        - ${xvfb_flag} python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -32,12 +33,9 @@ Style_Check_AixLib:
 Development_Style_Check:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -53,12 +51,9 @@ Development_Style_Check:
 CI_Style_Check:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -75,14 +70,11 @@ CI_Style_Check:
 Style_Check_ChangedModel:
     stage: ${ci_stage_style_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - (git diff --raw --diff-filter=AMT HEAD^1) > ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -CM -DS ${dymola_version}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -CM -DS ${dymola_version} ${startup_mos}
     only:
         changes:
             - ${library}/**/*

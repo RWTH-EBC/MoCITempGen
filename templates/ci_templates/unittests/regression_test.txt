@@ -1,3 +1,5 @@
+include: 'utilities.yml'
+
 stages:
     - ${ci_stage_regression_test}
     - ${ci_stage_ref_check}
@@ -7,13 +9,11 @@ stages:
 .CI_Regressiontest:
     stage: ${ci_stage_regression_test}
     before_script:
-        - git clone ${modelica_ci_test_url}
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip" ;
@@ -59,13 +59,11 @@ CI_Regressiontest_${library}_${package}:
 .dev_Regressiontest:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
 
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
@@ -108,11 +106,9 @@ Development_Regressiontest_${library}_${package}:
 CI_create_plots:
     stage: ${ci_stage_prepare}
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
+        - !reference [.clone_ci_templates, script]
+        - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -137,13 +133,11 @@ CI_create_plots:
 .Regressiontest_job:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version}
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip" ;
@@ -191,13 +185,11 @@ Regressiontest_${library}_${package}:
 Regression_overall_coverage:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --coverage-only
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -223,12 +215,11 @@ Regression_overall_coverage:
 prepare_create_plots:
     stage: ${ci_stage_prepare}
     before_script:
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
+        - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -259,15 +250,13 @@ prepare_create_plots:
 .Regressiontest_changed_Job:
     stage: ${ci_stage_regression_test}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip";
@@ -319,11 +308,9 @@ Changed_Regressiontest_${library}_${package}:
 Changed_create_plots:
     stage: ${ci_stage_prepare}
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
+        - !reference [.clone_ci_templates, script]
+        - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot requests toml
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
@@ -360,27 +347,17 @@ Changed_create_plots:
 RegressionTest_Check_References:
     stage: ${ci_stage_ref_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - export PYTHONIOENCODING=utf-8
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${modelica_ci_test_url}
-        - python ${dymola_python_configuration_file} --create-ref
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file}
+        - python ../${dymola_python_configuration_file} --create-ref
+        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file} ${startup_mos}
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
@@ -430,11 +407,9 @@ RegressionTest_Check_References:
 plot_reference_results:
     stage: plot_ref
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
+        - !reference [.clone_ci_templates, script]
+        - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
         - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}

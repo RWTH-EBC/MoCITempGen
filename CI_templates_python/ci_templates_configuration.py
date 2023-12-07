@@ -27,6 +27,7 @@ class CI_template_config(CI_conf_class):
         self.dymola_version = f'2022'
         self.python_version = f'myenv'
         self.git_url = f'https://github.com/ibpsa/modelica-ibpsa.git'
+        self.dymola_startup_mos_path = ""
         # [CI fixed arguments]
         self.bot_name = f'ebc-aixlib-bot'
         # [Except branches]
@@ -70,6 +71,7 @@ class CI_template_config(CI_conf_class):
         self.temp_ci_style_check_file = self.templates_ci_directory.joinpath("syntaxtest", "style_check.txt")
         self.temp_ci_structure_file = self.templates_ci_directory.joinpath("deploy", "create_CI_path.txt")
         self.temp_ci_main_yml_file = self.templates_ci_directory.joinpath(".gitlab-ci.txt")
+        self.temp_ci_utils_yml_file = self.templates_ci_directory.joinpath("utilities.txt")
         self.temp_ci_setting_file = self.templates_ci_directory.joinpath("cleanupscript", "ci_setting.txt")
         self.temp_ci_deploy_test_file = self.templates_ci_directory.joinpath("deploy", "deploy_ci_tests.txt")
         self.temp_ci_build_whitelist_file = self.templates_ci_directory.joinpath("cleanupscript", "ci_build_whitelist.txt")

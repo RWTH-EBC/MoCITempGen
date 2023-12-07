@@ -1,17 +1,16 @@
+include: 'utilities.yml'
+
 stages:
     - ${ci_stage_model_check}
     - ${ci_stage_create_whitelist}
-    
+
 .check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -44,13 +43,10 @@ Check_${library}_${package}:
 .dev_check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -77,15 +73,12 @@ Development_Check_${library}_${package}:
 .check_changed_models_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -122,13 +115,10 @@ Check_${library}_${package}_changed_models:
 .CI_check_model_job:
     stage: ${ci_stage_model_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag}
+        - ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -157,25 +147,14 @@ CI_Check_${library}_${package}:
 whitelist_job:
     stage: ${ci_stage_create_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8 
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${modelica_ci_test_url}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
+        - ${xvfb_flag} python ../${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist ${startup_mos}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then

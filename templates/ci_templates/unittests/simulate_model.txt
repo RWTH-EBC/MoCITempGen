@@ -1,3 +1,5 @@
+include: 'utilities.yml'
+
 stages:
     - ${ci_stage_simulate}
     - ${ci_stage_create_exampeL_whitelist}
@@ -5,11 +7,8 @@ stages:
 .CI_simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -39,11 +38,8 @@ CI_simulate_${library}_${package}:
 .dev_simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -79,11 +75,8 @@ Development_simulate_${library}_${package}:
 .simulate_model_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
@@ -120,12 +113,8 @@ simulate_${library}_${package}:
 .simulate_changed_models_job:
     stage: ${ci_stage_simulate}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${modelica_ci_test_url}
-
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         - python ${dymola_python_configuration_file} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
@@ -167,25 +156,15 @@ simulate_${library}_${package}_changed_models:
 whitelist_example_job:
     stage: ${ci_stage_create_exampeL_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort
-        - export PYTHONIOENCODING=utf-8
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
+
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${modelica_ci_test_url}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - ${xvfb_flag} python ../${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then

@@ -636,6 +636,10 @@ if __name__ == '__main__':
     check_test_group.add_argument("--repo-dir", help="folder of a whitelist library ")
     check_test_group.add_argument("--git-url", default="https://github.com/ibpsa/modelica-ibpsa.git",
                                   help="url repository of whitelist library")
+    check_test_group.add_argument("--startup-mos",
+                                  help="Define a path to a .mos script which is used after starting dymola",
+                                  default=None, action="store_true")
+
     args = parser.parse_args()
     _setEnvironmentPath(dymola_version=args.dymola_version)
 
@@ -648,6 +652,14 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+
+    if args.startup_mos is not None:
+        pack_check = dymola.RunScript(args.startup_mos)
+        if pack_check:
+            print(f'Successfully ran startup .mos-script: Found {args.startup_mos}\n')
+        else:
+            print(f'Failed to run .mos-script {args.startup_mos}')
+            exit(1)
 
     if args.whitelist is True:
         wh = Create_whitelist(dymola=dymola,

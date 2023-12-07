@@ -208,6 +208,10 @@ if __name__ == '__main__':
     check_test_group.add_argument("-DS", "--dymola-version", default="2022",
                                   help="Version of Dymola(Give the number e.g. 2022")
     check_test_group.add_argument("-CM", "--changed-models", default=False, action="store_true")
+    check_test_group.add_argument("--startup-mos",
+                                  help="Define a path to a .mos script which is used after starting dymola",
+                                  default=None, action="store_true")
+
     args = parser.parse_args()
     _setEnvironmentPath(dymola_version=args.dymola_version)
     from dymola.dymola_interface import DymolaInterface
@@ -219,6 +223,15 @@ if __name__ == '__main__':
     else:
         dymola = DymolaInterface(dymolapath="/usr/local/bin/dymola")
         dymola_exception = DymolaException()
+
+    if args.startup_mos is not None:
+        pack_check = dymola.RunScript(args.startup_mos)
+        if pack_check:
+            print(f'Successfully ran startup .mos-script: Found {args.startup_mos}\n')
+        else:
+            print(f'Failed to run .mos-script {args.startup_mos}')
+            exit(1)
+
     CheckStyle = StyleCheck(dymola=dymola,
                             dymola_exception=dymola_exception,
                             package=args.single_package,

@@ -1,3 +1,5 @@
+include: 'utilities.yml'
+
 stages:
     - ${ci_stage_html_check}
     - ${ci_stage_html_whitelist}
@@ -10,10 +12,7 @@ variables:
 Correct_check_HTML:
     stage: ${ci_stage_html_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
@@ -33,13 +32,10 @@ Correct_check_HTML:
 Open_Pull_HTML_Request:
     stage: ${ci_stage_open_PR}
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install requests toml
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - apt-get update -y && apt-get install zip unzip -y
+        - !reference [.clone_ci_templates, script]
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${modelica_ci_test_url}
     script:
         - python ${dymola_python_api_github_file} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME --github-token $GITHUB_API_TOKEN --create-pr --correct-html
     except:
@@ -54,10 +50,7 @@ Open_Pull_HTML_Request:
 HTML_PR_Checks:
     stage: ${ci_stage_html_check}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - git clone ${modelica_ci_test_url}
+        - !reference [.clone_ci_templates, script]
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
@@ -82,19 +75,8 @@ HTML_PR_Checks:
 HTML_Check:
     stage: ${ci_stage_html_check}
     before_script:
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.github_ssh_auth, script]
+        - !reference [.clone_ci_templates, script]
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
@@ -137,19 +119,8 @@ HTML_Check:
 CI_HTML_Check:
     stage: ${ci_stage_html_check}
     before_script:
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - git clone ${modelica_ci_test_url}
+        - !reference [.github_ssh_auth, script]
+        - !reference [.clone_ci_templates, script]
     script:
         - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
@@ -190,24 +161,13 @@ CI_HTML_Check:
 html_whitelist_job:
     stage: ${ci_stage_html_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - !reference [.clone_ci_templates, script]
+        - !reference [.github_ssh_auth, script]
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${modelica_ci_test_url} ;
-        - python ${dymola_python_html_tidy_file} --whitelist ${git}
+        - python ../${dymola_python_html_tidy_file} --whitelist ${git}
         - message="${bot_update_wh_commit}"
         - git add ${wh_html_file}
         - git commit -m "$message"

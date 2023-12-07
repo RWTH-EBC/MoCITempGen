@@ -1,3 +1,5 @@
+include: 'utilities.yml'
+
 stages:
     - ${ci_stage_whitelist_setting}
 
@@ -5,28 +7,18 @@ stages:
 CI_Whitelist_Setting:
     stage: ${ci_stage_whitelist_setting}
     before_script:
-        - source activate ${python_version}
-        - export PYTHONIOENCODING=utf-8
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - !reference [.github_ssh_auth, script]
+        - !reference [.clone_ci_templates, script]
 
     script:
         - mkdir build_whitelist
         - cd build_whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${modelica_ci_test_url}
-        - python ${dymola_python_configuration_file} create-whitelist
-        - python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - python ../${dymola_python_configuration_file} create-whitelist
+        - python ../MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist
+        - ${xvfb_flag} python ../${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist
+        - ${xvfb_flag} python ../${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
         - message="${bot_build_whitelist_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${dymola_ci_test_dir})
         - git add  $push_model
