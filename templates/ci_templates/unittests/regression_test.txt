@@ -349,7 +349,7 @@ RegressionTest_Check_References:
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - !reference [.github_ssh_auth, script]
+        #- !reference [.github_ssh_auth, script]  # TODO-Revert
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
         - pip install --upgrade ${buildingspy_upgrade}
     script:

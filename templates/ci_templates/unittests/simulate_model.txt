@@ -158,7 +158,7 @@ whitelist_example_job:
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - !reference [.github_ssh_auth, script]
+        #- !reference [.github_ssh_auth, script]  # TODO: Revert
 
     script:
         - mkdir whitelist && cd whitelist
