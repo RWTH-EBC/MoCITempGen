@@ -50,6 +50,7 @@ class CI_yml_templates(CI_template_config):
         """
         my_template = Template(filename=str(self.temp_ci_structure_file))
         yml_text = my_template.render(ci_stage_build_ci_structure=self.ci_stage_build_ci_structure,
+                                      utilities_directory=self.utilities_directory,
                                       python_version=self.python_version,
                                       modelica_ci_test_url=self.modelica_ci_test_url,
                                       bot_create_structure_commit=self.bot_create_structure_commit,
@@ -88,6 +89,7 @@ class CI_yml_templates(CI_template_config):
         """
         my_template = Template(filename=str(self.temp_ci_setting_file))
         yml_text = my_template.render(github_repo=self.github_repo,
+                                      utilities_directory=self.utilities_directory,
                                       ci_setting_commit=self.ci_setting_commit,
                                       python_version=self.python_version,
                                       ci_stage_check_setting=self.ci_stage_check_setting,
@@ -109,6 +111,7 @@ class CI_yml_templates(CI_template_config):
             merge_branch = ""
         my_template = Template(filename=str(self.temp_ci_html_file))
         yml_text = my_template.render(ci_stage_html_check=self.ci_stage_html_check,
+                                      utilities_directory=self.utilities_directory,
                                       ci_stage_html_whitelist=self.ci_stage_html_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
@@ -125,8 +128,8 @@ class CI_yml_templates(CI_template_config):
                                       bot_update_wh_commit=self.bot_update_wh_commit,
                                       wh_html_file=self.wh_html_file.replace(os.sep, "/"),
                                       ci_create_html_wh_commit=self.ci_create_html_wh_commit,
-                                      dymola_python_html_tidy_file=self.dymola_python_html_tidy_file.as_posix(),
-                                      dymola_python_api_github_file=self.dymola_python_api_github_file.as_posix(),
+                                      dymola_python_html_tidy_module=self.dymola_python_html_tidy_module,
+                                      dymola_python_api_github_module=self.dymola_python_api_github_module,
                                       bot_create_html_file_commit=self.bot_create_html_file_commit,
                                       expire_in_time=self.expire_in_time)
         self.write_yml(self.temp_ci_html_file, yml_text)
@@ -138,6 +141,7 @@ class CI_yml_templates(CI_template_config):
         merge_branch = f'- {self.wh_library}_Merge'
         mytemplate = Template(filename=str(self.temp_ci_style_check_file))
         yml_text = mytemplate.render(ci_stage_style_check=self.ci_stage_style_check,
+                                     utilities_directory=self.utilities_directory,
                                      python_version=self.python_version,
                                      modelica_ci_test_url=self.modelica_ci_test_url,
                                      dymola_version=self.dymola_version,
@@ -149,8 +153,8 @@ class CI_yml_templates(CI_template_config):
                                      expire_in_time=self.expire_in_time,
                                      xvfb_flag=self.xvfb_flag,
                                      ci_style_commit=self.ci_style_commit,
-                                     dymola_python_syntax_test_file=self.dymola_python_syntax_test_file.as_posix(),
-                                     dymola_python_configuration_file=self.dymola_python_configuration_file.as_posix(),
+                                     dymola_python_syntax_test_module=self.dymola_python_syntax_test_module,
+                                     dymola_python_configuration_module=self.dymola_python_configuration_module,
                                      html_praefix=self.html_praefix,
                                      startup_mos=self.dymola_startup_mos_path)
         self.write_yml(self.temp_ci_style_check_file, yml_text)
@@ -183,10 +187,12 @@ class CI_yml_templates(CI_template_config):
 
         my_template = Template(filename=str(self.temp_ci_build_whitelist_file))
         yml_text = my_template.render(ci_stage_whitelist_setting=self.ci_stage_whitelist_setting,
+                                      utilities_directory=self.utilities_directory,
                                       python_version=self.python_version,
                                       modelica_ci_test_url=self.modelica_ci_test_url,
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.as_posix(),
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.as_posix(),
+                                      dymola_python_html_tidy_module=self.dymola_python_html_tidy_module,
+                                      dymola_python_configuration_module=self.dymola_python_configuration_module,
+                                      dymola_python_test_validate_module=self.dymola_python_test_validate_module,
                                       dymola_version=self.dymola_version,
                                       git_url=git_url,
                                       library=self.library,
@@ -206,6 +212,7 @@ class CI_yml_templates(CI_template_config):
         merge_branch = f'{self.wh_library}_Merge'
         my_template = Template(filename=str(self.temp_ci_ibpsa_merge_file))
         yml_text = my_template.render(ci_stage_lib_merge=self.ci_stage_lib_merge,
+                                      utilities_directory=self.utilities_directory,
                                       ci_stage_update_whitelist=self.ci_stage_update_whitelist,
                                       ci_stage_open_PR=self.ci_stage_open_PR,
                                       python_version=self.python_version,
@@ -220,7 +227,7 @@ class CI_yml_templates(CI_template_config):
                                       bot_merge_commit=self.bot_merge_commit,
                                       wh_model_file=self.wh_model_file,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.as_posix())
+                                      dymola_python_test_validate_module=self.dymola_python_test_validate_module)
 
         self.write_yml(self.temp_ci_ibpsa_merge_file, yml_text)
 
@@ -231,6 +238,7 @@ class CI_yml_templates(CI_template_config):
             merge_branch = ""
         mytemplate = Template(filename=str(self.temp_ci_regression_file))
         yml_text = mytemplate.render(ci_stage_regression_test=self.ci_stage_regression_test,
+                                     utilities_directory=self.utilities_directory,
                                      ci_stage_ref_check=self.ci_stage_ref_check,
                                      ci_stage_plot_ref=self.ci_stage_plot_ref,
                                      ci_stage_prepare=self.ci_stage_prepare,
@@ -254,11 +262,11 @@ class CI_yml_templates(CI_template_config):
                                                                                                               "/"),
                                      xvfb_flag=self.xvfb_flag,
                                      ci_show_ref_commit=self.ci_show_ref_commit,
-                                     dymola_python_test_reference_file=self.dymola_python_test_reference_file.as_posix(),
-                                     dymola_python_google_chart_file=self.dymola_python_google_chart_file.as_posix(),
-                                     dymola_python_deploy_artifacts_file=self.dymola_python_deploy_artifacts_file.as_posix(),
-                                     dymola_python_api_github_file=self.dymola_python_api_github_file.as_posix(),
-                                     dymola_python_configuration_file=self.dymola_python_configuration_file.as_posix(),
+                                     dymola_python_test_reference_module=self.dymola_python_test_reference_module,
+                                     dymola_python_google_chart_module=self.dymola_python_google_chart_module,
+                                     dymola_python_deploy_artifacts_module=self.dymola_python_deploy_artifacts_module,
+                                     dymola_python_api_github_module=self.dymola_python_api_github_module,
+                                     dymola_python_configuration_module=self.dymola_python_configuration_module,
                                      html_praefix=self.html_praefix,
                                      startup_mos=self.dymola_startup_mos_path
                                      )
@@ -288,6 +296,7 @@ class CI_yml_templates(CI_template_config):
             merge_branch = ""
         my_template = Template(filename=str(self.temp_ci_check_file))
         yml_text = my_template.render(ci_stage_model_check=self.ci_stage_model_check,
+                                      utilities_directory=self.utilities_directory,
                                       ci_stage_create_whitelist=self.ci_stage_create_whitelist,
                                       python_version=self.python_version,
                                       modelica_ci_test_url=self.modelica_ci_test_url,
@@ -310,8 +319,8 @@ class CI_yml_templates(CI_template_config):
                                       wh_model_file=self.wh_model_file.replace(os.sep, "/"),
                                       ci_create_model_wh_commit=self.ci_create_model_wh_commit,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.as_posix(),
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.as_posix(),
+                                      dymola_python_test_validate_module=self.dymola_python_test_validate_module,
+                                      dymola_python_configuration_module=self.dymola_python_configuration_module,
                                       html_praefix=self.html_praefix,
                                       startup_mos=self.dymola_startup_mos_path)
         self.write_yml(self.temp_ci_check_file, yml_text)
@@ -338,6 +347,7 @@ class CI_yml_templates(CI_template_config):
             git_url = ""
         my_template = Template(filename=str(self.temp_ci_simulate_file))
         yml_text = my_template.render(ci_stage_simulate=self.ci_stage_simulate,
+                                      utilities_directory=self.utilities_directory,
                                       python_version=self.python_version,
                                       modelica_ci_test_url=self.modelica_ci_test_url,
                                       library=self.library,
@@ -354,14 +364,14 @@ class CI_yml_templates(CI_template_config):
                                       except_branch_list=self.except_branch_list,
                                       config_ci_changed_file=self.config_ci_changed_file.replace(os.sep, "/"),
                                       merge_branch=merge_branch,
-                                      ci_stage_create_exampeL_whitelist=self.ci_stage_create_example_whitelist,
+                                      ci_stage_create_example_whitelist=self.ci_stage_create_example_whitelist,
                                       bot_update_example_wh_commit=self.bot_update_example_wh_commit,
                                       config_ci_exit_file=self.config_ci_exit_file.replace(os.sep, "/"),
                                       wh_simulate_file=self.wh_simulate_file.replace(os.sep, "/"),
                                       ci_create_simulate_wh_commit=self.ci_create_simulate_wh_commit,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_test_validate_file=self.dymola_python_test_validate_file.as_posix(),
-                                      dymola_python_configuration_file=self.dymola_python_configuration_file.as_posix(),
+                                      dymola_python_test_validate_module=self.dymola_python_test_validate_module,
+                                      dymola_python_configuration_module=self.dymola_python_configuration_module,
                                       html_praefix=self.html_praefix)
         self.write_yml(self.temp_ci_simulate_file, yml_text)
 
@@ -379,6 +389,7 @@ class CI_yml_templates(CI_template_config):
         """
         my_template = Template(filename=str(self.temp_toml_ci_setting_file))
         yml_text = my_template.render(library=self.library,
+                                      utilities_directory=self.utilities_directory,
                                       wh_library=self.wh_library,
                                       dymola_version=self.dymola_version,
                                       package_list=self.package_list,
@@ -410,7 +421,8 @@ class CI_yml_templates(CI_template_config):
         """
         my_template = Template(filename=str(self.temp_ci_utils_yml_file))
         yml_text = my_template.render(python_version=self.python_version,
-                                      modelica_ci_test_url=self.modelica_ci_test_url)
+                                      modelica_ci_test_url=self.modelica_ci_test_url,
+                                      dymola_python_test_dir=self.dymola_python_test_dir)
         ci_folder = Path(self.temp_dir)
         self.write_yml(self.temp_ci_utils_yml_file, yml_text, ci_folder)
 

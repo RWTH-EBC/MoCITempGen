@@ -1,4 +1,4 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 stages:
     - ${ci_stage_build_ci_structure}

@@ -1,8 +1,8 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 stages:
     - ${ci_stage_simulate}
-    - ${ci_stage_create_exampeL_whitelist}
+    - ${ci_stage_create_example_whitelist}
 
 .CI_simulate_model_job:
     stage: ${ci_stage_simulate}
@@ -10,7 +10,7 @@ stages:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
+        -  ${xvfb_flag} python ${dymola_python_test_validate_module}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
         paths:
@@ -41,7 +41,7 @@ CI_simulate_${library}_${package}:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
+        -  ${xvfb_flag} python ${dymola_python_test_validate_module} --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
         paths:
@@ -78,7 +78,7 @@ Development_simulate_${library}_${package}:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
+        -  ${xvfb_flag} python ${dymola_python_test_validate_module}  --single-package $lib_package --library ${library} -DS ${dymola_version} ${wh_flag} ${filter_flag} --simulate-examples
     artifacts:
         when: on_failure
         paths:
@@ -116,9 +116,9 @@ simulate_${library}_${package}:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - python ${dymola_python_configuration_file} --changed-model
+        - python ${dymola_python_configuration_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        -  ${xvfb_flag} python ${dymola_python_test_validate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples
+        -  ${xvfb_flag} python ${dymola_python_test_validate_module} --single-package $lib_package --library ${library} -DS ${dymola_version} -CM --simulate-examples
     artifacts:
         when: on_failure
         paths:
@@ -154,7 +154,7 @@ simulate_${library}_${package}_changed_models:
 
 
 whitelist_example_job:
-    stage: ${ci_stage_create_exampeL_whitelist}
+    stage: ${ci_stage_create_example_whitelist}
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
@@ -164,7 +164,7 @@ whitelist_example_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - ${xvfb_flag} python ../${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} -DS ${dymola_version} --repo-dir ${wh_library} ${git_url} ${wh_path} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then

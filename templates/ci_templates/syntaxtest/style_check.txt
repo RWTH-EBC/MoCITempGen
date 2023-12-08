@@ -1,4 +1,4 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 
 stages:
@@ -10,7 +10,7 @@ Style_Check_AixLib:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
+        - ${xvfb_flag} python -m ModelicaPyCI.syntax.style_checking -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -35,7 +35,7 @@ Development_Style_Check:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_module} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -53,7 +53,7 @@ CI_Style_Check:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_module} -s ${library} -p ${library}/package.mo -DS ${dymola_version} ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -72,9 +72,9 @@ Style_Check_ChangedModel:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_configuration_file} --changed-model
+        - python ${dymola_python_configuration_module} --changed-model
         - (git diff --raw --diff-filter=AMT HEAD^1) > ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} -s ${library} -p ${library}/package.mo -CM -DS ${dymola_version} ${startup_mos}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_module} -s ${library} -p ${library}/package.mo -CM -DS ${dymola_version} ${startup_mos}
     only:
         changes:
             - ${library}/**/*

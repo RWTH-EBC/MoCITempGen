@@ -1,4 +1,4 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 stages:
     - ${ci_stage_html_check}
@@ -14,7 +14,7 @@ Correct_check_HTML:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
+        - python ${dymola_python_html_tidy_module} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
         paths:
             - ${library}/HTML_correct_log.txt
@@ -37,7 +37,7 @@ Open_Pull_HTML_Request:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
     script:
-        - python ${dymola_python_api_github_file} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME --github-token $GITHUB_API_TOKEN --create-pr --correct-html
+        - python ${dymola_python_api_github_module} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME --github-token $GITHUB_API_TOKEN --create-pr --correct-html
     except:
         refs:
             - external_pull_requests
@@ -52,7 +52,7 @@ HTML_PR_Checks:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log  --filter-whitelist
+        - python ${dymola_python_html_tidy_module} --s ${library} --correct-view --log  --filter-whitelist
     artifacts:
         when: on_failure
         paths:
@@ -78,7 +78,7 @@ HTML_Check:
         - !reference [.github_ssh_auth, script]
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
+        - python ${dymola_python_html_tidy_module} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
@@ -88,7 +88,7 @@ HTML_Check:
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
             cd $CI_PROJECT_NAME;
             git clone ${modelica_ci_test_url} ;
-            python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
+            python ${dymola_python_html_tidy_module} --s ${library} --correct-overwrite --filter-whitelist --log;
             git checkout -B $Newbranch;
             message="${bot_create_html_file_commit}";
             git add ${library} ;
@@ -122,7 +122,7 @@ CI_HTML_Check:
         - !reference [.github_ssh_auth, script]
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_html_tidy_file} --s ${library} --correct-view --log   --filter-whitelist
+        - python ${dymola_python_html_tidy_module} --s ${library} --correct-view --log   --filter-whitelist
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
@@ -132,7 +132,7 @@ CI_HTML_Check:
             git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git;
             cd $CI_PROJECT_NAME;
             git clone ${modelica_ci_test_url} ;
-            python ${dymola_python_html_tidy_file} --s ${library} --correct-overwrite --filter-whitelist --log;
+            python ${dymola_python_html_tidy_module} --s ${library} --correct-overwrite --filter-whitelist --log;
             git checkout -B $Newbranch;
             message="${bot_create_html_file_commit}";
             git add ${library} ;
@@ -167,7 +167,7 @@ html_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python ../${dymola_python_html_tidy_file} --whitelist ${git}
+        - python ${dymola_python_html_tidy_module} --whitelist ${git}
         - message="${bot_update_wh_commit}"
         - git add ${wh_html_file}
         - git commit -m "$message"

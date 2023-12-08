@@ -1,4 +1,4 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 stages:
     - ${ci_stage_regression_test}
@@ -13,7 +13,7 @@ stages:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip" ;
@@ -24,7 +24,7 @@ stages:
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
+            python ${dymola_python_google_chart_module} --line-html --error --funnel-comp --single-package $lib_package ;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
@@ -63,7 +63,7 @@ CI_Regressiontest_${library}_${package}:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
 
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
@@ -75,7 +75,7 @@ CI_Regressiontest_${library}_${package}:
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
+            python ${dymola_python_google_chart_module} --line-html --error --funnel-comp --single-package $lib_package ;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
@@ -111,9 +111,9 @@ CI_create_plots:
         - pip install pandas mako matplot toml requests
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
+        - python ${dymola_python_google_chart_module}  --create-layout --library ${library} --single-package ${library}
         - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
+        - python ${dymola_python_api_github_module}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
         paths:
          - $CI_COMMIT_REF_NAME/plots
@@ -137,7 +137,7 @@ CI_create_plots:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} -n 4 --tool dymola --single-package "$lib_package" --library ${library} --batch -DS ${dymola_version} ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip" ;
@@ -148,7 +148,7 @@ CI_create_plots:
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package ;
+            python ${dymola_python_google_chart_module} --line-html --error --funnel-comp --single-package $lib_package ;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!" ;
@@ -189,7 +189,7 @@ Regression_overall_coverage:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --coverage-only ${startup_mos}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} --coverage-only ${startup_mos}
     artifacts:
         when: on_failure
         paths:
@@ -222,9 +222,9 @@ prepare_create_plots:
         - pip install pandas mako matplot toml requests
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
+        - python ${dymola_python_google_chart_module}  --create-layout --library ${library} --single-package ${library}
         - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_api_github_file}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
+        - python ${dymola_python_api_github_module}  --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --prepare-plot
     artifacts:
         paths:
          - $CI_COMMIT_REF_NAME/plots
@@ -254,9 +254,9 @@ prepare_create_plots:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - python ${dymola_python_configuration_file} --changed-model
+        - python ${dymola_python_configuration_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 > ${config_ci_changed_file}
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models ${startup_mos}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} -n 4 --tool dymola --single-package $lib_package --library ${library} --batch -DS ${dymola_version} -n 2 --modified-models ${startup_mos}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             export PIP_CACHE_DIR="/opt/cache/pip";
@@ -267,7 +267,7 @@ prepare_create_plots:
             cp -r ${library}/simulator-dymola.log data ;
             cp -r ${library}/unitTests-dymola.log data ;
             cp -r ${library}/funnel_comp data ;
-            python ${dymola_python_google_chart_file} --line-html --error --funnel-comp --single-package $lib_package;
+            python ${dymola_python_google_chart_module} --line-html --error --funnel-comp --single-package $lib_package;
             cp -r ${chart_dir}/$lib_package data/plots/$lib_package ;
           else
             echo "Test was successful!";
@@ -313,7 +313,7 @@ Changed_create_plots:
         - pip install pandas mako matplot requests toml
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_google_chart_file}  --create-layout --library ${library} --single-package ${library}
+        - python ${dymola_python_google_chart_module}  --create-layout --library ${library} --single-package ${library}
         - cp -r data/plots/*  $CI_COMMIT_REF_NAME/plots
     artifacts:
         paths:
@@ -356,8 +356,8 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python ../${dymola_python_configuration_file} --create-ref
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file} ${startup_mos}
+        - python ${dymola_python_configuration_module} --create-ref
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} --create-ref -DS ${dymola_version}  -n 4 < ../${config_ci_eof_file} ${startup_mos}
     after_script:
         - export PIP_CACHE_DIR="/opt/cache/pip"
         - source activate ${python_version}
@@ -369,7 +369,7 @@ RegressionTest_Check_References:
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
             pip install pandas mako matplot;
-            python ${dymola_python_google_chart_file} --line-html --new-ref --single-package ${library} ;
+            python ${dymola_python_google_chart_module} --line-html --new-ref --single-package ${library} ;
             mkdir -p ../../$CI_COMMIT_REF_NAME/plots ;
             mkdir -p ../../data ;
             mkdir -p ../../data/reference_result ;
@@ -412,9 +412,9 @@ plot_reference_results:
         - pip install pandas mako matplot toml requests
     script:
         - mkdir -p $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
+        - python ${dymola_python_google_chart_module} --line-html --show-ref --single-package ${library} --library ${library}
         - cp -r ${chart_dir}/* $CI_COMMIT_REF_NAME/plots
-        - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
+        - python ${dymola_python_api_github_module} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
     artifacts:
         when: always
         paths:

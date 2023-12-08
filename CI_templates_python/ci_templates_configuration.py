@@ -81,15 +81,15 @@ class CI_template_config(CI_conf_class):
         self.temp_dir = f'dymola-ci-tests{os.sep}ci_templates'
         # [Dymola test scripts]
         self.xvfb_flag = f'xvfb-run -n 77'
-        self.dymola_python_dir = Path("MoCITempGen").joinpath("CITests")
-        self.dymola_python_test_validate_file = self.dymola_python_dir.joinpath("UnitTests", "CheckPackages", "validatetest.py")
-        self.dymola_python_test_reference_file = self.dymola_python_dir.joinpath("UnitTests", "reference_check.py")
-        self.dymola_python_google_chart_file = self.dymola_python_dir.joinpath("Converter", "google_charts.py")
-        self.dymola_python_api_github_file = self.dymola_python_dir.joinpath("api_script", "api_github.py")
-        self.dymola_python_deploy_artifacts_file = self.dymola_python_dir.joinpath("deploy", "deploy_artifacts.py")
-        self.dymola_python_html_tidy_file = self.dymola_python_dir.joinpath("SyntaxTests", "html_tidy_errors.py")
-        self.dymola_python_syntax_test_file = self.dymola_python_dir.joinpath("SyntaxTests", "StyleChecking.py")
-        self.dymola_python_configuration_file = self.dymola_python_dir.joinpath("CI_Configuration", "configuration.py")
+        self.dymola_python_dir = "-m ModelicaPyCI"
+        self.dymola_python_test_validate_module = self.dymola_python_dir + ".unittest.checkpackages.validatetest"
+        self.dymola_python_test_reference_module = self.dymola_python_dir + ".unittest.reference_check"
+        self.dymola_python_google_chart_module = self.dymola_python_dir + ".converter.google_charts"
+        self.dymola_python_api_github_module = self.dymola_python_dir + ".api_script.api_github"
+        self.dymola_python_deploy_artifacts_module = self.dymola_python_dir + ".deploy.deploy_artifacts"
+        self.dymola_python_html_tidy_module = self.dymola_python_dir + ".syntax.html_tidy"
+        self.dymola_python_syntax_test_module = self.dymola_python_dir + ".syntax.style_checking"
+        self.dymola_python_configuration_module = self.dymola_python_dir + ".structure.config_structure"
         # TODO: Make these into separate structures with a TOML like: "interact-ci".
         # [Triggers different jobs specifically: Interact CI: User]
         #self.ci_update_ref_commit = "ci_update_ref"                 # Update reference results from list

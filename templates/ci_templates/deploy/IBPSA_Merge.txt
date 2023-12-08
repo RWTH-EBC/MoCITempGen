@@ -1,4 +1,4 @@
-include: 'utilities.yml'
+include: '${utilities_directory}'
 
 stages:
     - ${ci_stage_lib_merge}
@@ -38,9 +38,9 @@ WhiteList:
         - !reference [.github_ssh_auth, script]
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
-        - python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
+        - python ${dymola_python_html_tidy_module} --whitelist
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
         - python MoCITempGen/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
         - rm  -r ${wh_library}
         - message="${bot_merge_commit}"
@@ -72,7 +72,7 @@ IBPSA_Pull_Request:
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
     script:
-       - python MoCITempGen/CITests/api_script/api_github.py --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME  --github-token $GITHUB_API_TOKEN --create-pr --ibpsa-merge
+       - python ${dymola_python_api_github_module} --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME  --github-token $GITHUB_API_TOKEN --create-pr --ibpsa-merge
     only:
         refs:
             - ${merge_branch}

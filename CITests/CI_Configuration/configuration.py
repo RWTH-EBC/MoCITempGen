@@ -38,7 +38,9 @@ class CI_conf_class(object):
         self.library_ref_results_dir = f'Resources{os.sep}ReferenceResults{os.sep}Dymola'
         self.library_resource_dir = f'Resources{os.sep}Scripts{os.sep}Dymola'
         # [Dymola_Python_Tests] + Parser Commands
-        self.modelica_ci_test_url = f'https://github.com/RWTH-EBC/MoCITempGen'
+        self.modelica_ci_test_url = f'https://github.com/RWTH-EBC/ModelicaPyCI'
+        # [utilities]
+        self.utilities_directory = f'{self.dymola_ci_test_dir}/ci_templates/utilities.yml'
         # [Color]
         self.CRED = '\033[91m'  # Colors
         self.CEND = '\033[0m'

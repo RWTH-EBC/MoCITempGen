@@ -20,7 +20,9 @@
     - source activate ${python_version}
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
+    - !reference[.github_ssh_auth, script]
     - git clone ${modelica_ci_test_url}
+    - pip install -e ${dymola_python_test_dir}
 
 .custom_install_additional_modelica_libraries:
   script:
