@@ -32,6 +32,9 @@
 # config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
 # bot_create_ref_commit: ${bot_create_ref_commit}
 # ci_show_ref_commit: ${ci_show_ref_commit}
+
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_regression_test}
     - ${ci_stage_ref_check}
@@ -58,13 +61,11 @@ stages:
     image: ${dym_image}
     stage: ${ci_stage_regression_test}
     before_script:
-        - git clone ${dymola_python_test_url}
-        - source activate ${python_version}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
-
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_PR}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${arg_PR}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
@@ -88,12 +89,13 @@ stages:
     image: ${dym_image}
     stage: ${ci_stage_regression_test}
     before_script:
-        - git clone ${dymola_python_test_url}
-        - source activate ${python_version}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${arg_push}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${arg_push}
+
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
@@ -131,12 +133,11 @@ Regressiontest_${library}_${package}:Push:
 Regression_overall_coverage:PR:
     stage: ${ci_stage_regression_test}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${coverage_arg}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${coverage_arg}
     artifacts:
         when: on_failure
         paths:
@@ -151,12 +152,11 @@ Regression_overall_coverage:PR:
 Regression_overall_coverage:Push:
     stage: ${ci_stage_regression_test}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file} ${coverage_arg}
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module}  ${coverage_arg}
     artifacts:
         when: on_failure
         paths:
@@ -169,12 +169,15 @@ Regression_overall_coverage:Push:
 prepare_create_plots:Push:
     stage: ${ci_stage_prepare}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - pip install --upgrade ${buildingspy_upgrade}
+        - apt-get update -y && apt-get install zip unzip -y
+        - pip install pandas mako matplot toml requests
+
     script:
-        - python ${dymola_python_google_chart_file} ${arg_create_plots}
-        - python ${dymola_python_api_github_file}   ${api_github_arg}
+        - python ${dymola_python_google_chart_module} ${arg_create_plots}
+        - python ${dymola_python_api_github_modulehon_api}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
@@ -189,12 +192,13 @@ prepare_create_plots:Push:
 prepare_create_plots:PR:
     stage: ${ci_stage_prepare}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
+        - !reference [.clone_ci_templates, script]
+
+
         - pip install -e ${dymola_python_test_dir}
     script:
-        - python ${dymola_python_google_chart_file} ${arg_create_plots}
-        - python ${dymola_python_api_github_file}   ${api_github_arg}
+        - python ${dymola_python_google_chart_module} ${arg_create_plots}
+        - python ${dymola_python_api_github_module}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
@@ -213,28 +217,18 @@ prepare_create_plots:PR:
 RegressionTest_Check_References:
     stage: ${ci_stage_ref_check}
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade ${buildingspy_upgrade}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - pip install --upgrade ${buildingspy_upgrade}
 
     script:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
-        - python ${dymola_python_structure_file} --create-ref
-        - cd ${library} && ${xvfb_flag} python ../${dymola_python_test_reference_file}  ${arg_ref_check}  < ../${config_ci_eof_file}
-
+        - python ${dymola_python_configuration_module} --create-ref
+        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module}  ${arg_ref_check}  < ../${config_ci_eof_file}
     after_script:
         - source activate ${python_version}
         - cd CorrectedVersion/$CI_PROJECT_NAME
@@ -242,7 +236,8 @@ RegressionTest_Check_References:
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
-            python ${dymola_python_google_chart_file} ${arg_check_ref_plot} ;
+            pip install pandas mako matplot;
+            python ${dymola_python_google_chart_module} ${arg_check_ref_plot} ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
@@ -265,13 +260,13 @@ RegressionTest_Check_References:
 plot_reference_results:
     stage: plot_ref
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - apt-get update -y && apt-get install zip unzip -y
+        - pip install pandas mako matplot toml requests
 
     script:
-        - python ${dymola_python_google_chart_file} --line-html --show-ref --single-package ${library} --library ${library}
-        - python ${dymola_python_api_github_file} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
+        - python ${dymola_python_google_chart_module} --line-html --show-ref --single-package ${library} --library ${library}
+        - python ${dymola_python_api_github_module} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
     artifacts:
         when: always
         paths:

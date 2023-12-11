@@ -21,9 +21,9 @@ Return a log file.
 
 
 #### Example: Execution on gitlab runner (linux)
-    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-view --log  --filter-whitelist
-    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-overwrite --filter-whitelist --log
-    python Dymola_python_tests/CITests/SyntaxTests/html_tidy_errors.py --whitelist --git-url https://github.com/ibpsa/modelica-ibpsa.git --wh-library IBPSA
+    python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-view --log  --filter-whitelist
+    python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --s AixLib --correct-overwrite --filter-whitelist --log
+    python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist --git-url https://github.com/ibpsa/modelica-ibpsa.git --wh-library IBPSA
 
 ![ModelManagement_StyleChecking.PNG](../../Documentation/Images/HTMLProcess.png)
 For more information look at following [Repository](https://github.com/RWTH-EBC/HTML-Tidy-Modelica).
@@ -41,8 +41,8 @@ Return a log file.
 | --changed-models  | Check only changed models with last commit push (in CI: ci_changed_model_list.txt)|
 
 #### Example: Execution on gitlab runner (linux)
-    xvfb-run -n 77 python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -DS 2022
-    xvfb-run -n 77 python Dymola_python_tests/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -CM -DS 2022
+    xvfb-run -n 77 python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -DS 2022
+    xvfb-run -n 77 python MoCITempGen/CITests/SyntaxTests/StyleChecking.py -s AixLib -p AixLib/package.mo -CM -DS 2022
 
 ![ModelManagement_StyleChecking.PNG](../../Documentation/Images/ModelManagement_StyleChecking.PNG)
 

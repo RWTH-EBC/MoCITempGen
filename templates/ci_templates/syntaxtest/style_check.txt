@@ -13,6 +13,7 @@
 # arg_PR : ${arg_PR}
 # arg_Push : ${arg_Push}
 
+include: '${utilities_directory}'
 stages:
     - ${ci_stage_style_check}
 
@@ -37,9 +38,7 @@ StyleCheck:${library}:PR:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
 
     script:
         - ${xvfb_flag} python ${dymola_python_syntax_test_file} ${arg_PR}
@@ -56,11 +55,10 @@ StyleCheck:${library}:Push:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
+        - !reference [.clone_ci_templates, script]
         - pip install -e  ${dymola_python_test_dir}
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} ${arg_Push}
+        - ${xvfb_flag} python ${dymola_python_syntax_test_module} ${arg_Push}
     artifacts:
         when: on_failure
         paths:

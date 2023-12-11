@@ -24,6 +24,8 @@
 # dymola_python_config_structure_file: ${dymola_python_config_structure_file}
 # dymola_python_test_dir : ${dymola_python_test_dir}
 
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_model_check}
     - ${ci_stage_create_whitelist}
@@ -50,11 +52,11 @@ stages:
     image: ${dym_image_name}
     stage: ${ci_stage_model_check}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install -e  ${dymola_python_test_dir}
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_PR}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -67,13 +69,13 @@ stages:
     image: ${dym_image_name}
     stage: ${ci_stage_model_check}
     before_script:
-        - source activate ${python_version}
-        - git clone ${dymola_python_test_url}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install -e  ${dymola_python_test_dir}
     script:
-        - python ${dymola_python_config_structure_file} --changed-model
+        - python ${dymola_python_configuration_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_push}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_push}
     artifacts:
         when: on_failure
         paths:
@@ -102,23 +104,15 @@ check_whitelist_job:
     image: ${dym_image_name}
     stage: ${ci_stage_create_whitelist}
     before_script:
-        - source activate ${python_version}
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y)'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
+        - !reference [.clone_ci_templates, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
 
     script:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME && git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh}
+        - cd $CI_PROJECT_NAME
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then

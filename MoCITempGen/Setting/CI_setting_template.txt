@@ -70,3 +70,6 @@ github_repo = "${github_repo_name}"
 
 [gitlab_page]
 gitlab_page = "${gitlab_page_name}"
+
+[dymola_startup_mos_path]
+dymola_startup_mos_path = "${dymola_startup_mos_path}"

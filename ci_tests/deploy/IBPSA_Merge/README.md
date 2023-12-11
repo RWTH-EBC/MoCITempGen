@@ -12,4 +12,4 @@ latest conversion script of IBPSA.
 |--merge-library|Library to be merged | 
 
 #### Example: Execution on gitlab runner (linux)
-    python Dymola_python_tests/CITests/deploy/IBPSA_Merge/library_merge.py 
+    python MoCITempGen/CITests/deploy/IBPSA_Merge/library_merge.py 

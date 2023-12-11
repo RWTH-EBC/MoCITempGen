@@ -26,6 +26,8 @@
 # arg_api_pr : ${arg_api_pr}
 # dymola_python_dir: ${dymola_python_dir}
 
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_lib_merge}
     - ${ci_stage_update_whitelist}
@@ -35,25 +37,16 @@ IBPSA:
     image: ${image_name}
     stage: ${ci_stage_lib_merge}
     before_script:
-        - source activate ${python_version}
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.github_ssh_auth, script]
+
     script:
         - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
         - git clone ${git_url}
         - cd ${library}/Resources/Scripts
         - python mergeModelicaIBPSA.py
-        - cd ../../..  && python ${dymola_python_library_merge_file}  ${arg_lib}
+        - cd ../../..  && python ${dymola_python_library_merge_module} ${arg_lib}
         - rm -r modelica-ibpsa
     rules:
         - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == /${merge_branch}/ &&   $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
@@ -66,25 +59,15 @@ IBPSA:
 WhiteList:
     stage: ${ci_stage_update_whitelist}
     before_script:
-        - source activate ${python_version}
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - !reference [.clone_ci_templates, script]
+        - !reference [.github_ssh_auth, script]
 
     script:
         - cd Merge_Package/$CI_PROJECT_NAME
-        - python ${dymola_python_html_tidy_file} ${arg_wh_html}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh_check}
-        - ${xvfb_flag} python ${dymola_python_test_validate_file}  ${arg_wh_sim}
-        - python ${dymola_python_lock_model_file}   ${arg_lock}
+        - python ${dymola_python_html_tidy_module} ${arg_wh_html}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module}  ${arg_wh_check}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module}  ${arg_wh_sim}
+        - python ${dymola_python_lock_model_module}   ${arg_lock}
         - rm  -r ${wh_library}
         - message="${bot_merge_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${library})
@@ -107,11 +90,11 @@ WhiteList:
 IBPSA_Pull_Request:
     stage: ${ci_stage_open_PR}
     before_script:
-        - source activate ${python_version}
+        - export PYTHONIOENCODING=utf-8 # just in case
+        - !reference [.clone_ci_templates, script]
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
         - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
     script:
        - python  ${dymola_python_api_github_file} ${arg_api_pr}
     rules:
