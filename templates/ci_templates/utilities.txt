@@ -20,16 +20,6 @@
     - source activate ${python_version}
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
-    # TODO Remove once https://github.com/RWTH-EBC/ModelicaPyCI is public
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - mkdir -p ~/.ssh
-    - ssh-keyscan github.com >> ~/.ssh/known_hosts
-    - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-    - echo "$MODELICA_PY_PRIVATE_KEY" > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - git config --global user.name "$GITLAB_USER_NAME"
-    - git config --global user.email "$GITLAB_USER_EMAIL"
     - git clone ${modelica_ci_test_url}
     - pip install -e ${dymola_python_test_dir}
 
