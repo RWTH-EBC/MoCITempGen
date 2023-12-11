@@ -1,3 +1,4 @@
 .idea*
 *.pyc
 CI_templates_python/dymola-ci-tests/*
+__pycache__
