@@ -8,9 +8,9 @@ class ci_template_config(ci_config):
         ci_update_ref_commit                # Update reference results from list
         ci_show_ref_commit                   # show reference results from list
         ci_dif_ref_commit                    # Show difference in reference results
-        ci_create_model_wh_commit            # create a whitelist with models that failed the check job
-        ci_create_html_wh_commit             # create a whitelist with models that should not go through the html check
-        ci_create_simulate_wh_commit         # create a whitelist with models that failed the simulate job
+        ci_create_model_whitelist_commit            # create a whitelist with models that failed the check job
+        ci_create_html_whitelist_commit             # create a whitelist with models that should not go through the html check
+        ci_create_simulate_whitelist_commit         # create a whitelist with models that failed the simulate job
         ci_simulate_commit                   # trigger only to simulate job
         ci_check_commit                      # trigger only the check job
         ci_regression_test_commit            # trigger only the regression job

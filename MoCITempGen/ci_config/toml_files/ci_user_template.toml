@@ -1,163 +1,146 @@
-[[CI_setting]]
-config_stages = [
-    "html",
-    "style",
-    "check",
-    "simulate",
-    "regression",
-    "Merge",
-]
-
-[[CI_setting]]
-dymola_version = "2022"
-
-[[CI_setting]]
-
-[CI_setting.root_library]
-AixLib = "AixLib/package.mo"
-
-[[CI_setting]]
-library = [
-    "AixLib",
-]
-
-[[CI_setting]]
-
-[CI_setting.packages]
-AixLib = [
-    "Airflow",
-    "BoundaryConditions",
-    "Controls",
-    "Electrical",
-    "Fluid",
-    "Media",
-    "Systems",
-    "ThermalZones",
-    "Utilities",
-]
-
-[[CI_setting]]
-conda_environment = "myenv"
-
-[[CI_setting]]
-
-[CI_setting.wh_library.IBPSA]
-git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
-repo_dir = "modelica-ibpsa"
-
-[[CI_setting]]
-filter_wh_flag = true
-
-[[CI_setting]]
-changed_flag = true
-
-[[CI_setting]]
-extended_ex_flag = true
-
-[[CI_setting]]
-github_repository = "RWTH-EBC/AixLib"
-
-[[CI_setting]]
-gitlab_page = "https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
-
-[[CI_setting]]
 dymola_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
+open_modelica_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:main"
+gitlab_page = "https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
+github_repository = "RWTH-EBC/AixLib"
+whitelist_library = "None"
+stage_list = [ "html", "style", "check", "simulate", "regression", "Merge",]
+whitelist_path = "None"
+changed_flag = false
+extended_examples_flag = false
+html_praefix = "correct_HTML_"
+expire_in_time = "7h"
+library = "AixLib"
+dymola_version = "2022"
+conda_environment = "myenv"
+git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
+xvfb_flag = "xvfb-run -n 77"
+bot_name = "ebc-aixlib-bot"
+except_branch_list = [ "IBPSA",]
+main_branch_list = [ "main", "development",]
+buildingspy_upgrade = "git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage"
+toml_setting_file_template = "Setting/CI_setting_template.txt"
+toml_setting_file = "Setting/CI_setting.toml"
+templates_dir = "dymola-ci-tests/ci_templates"
 
-[[CI_setting]]
+[package_list]
+AixLib = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete", "Resources", "Systems", "ThermalZones", "Types", "UsersGuide", "Utilities",]
 
-[CI_setting.stages]
-ci_stage_check_setting = "check_setting"
-ci_stage_build_templates = "build_templates"
-ci_stage_ref_check = "Ref_Check"
-ci_stage_lib_merge = "merge"
-ci_stage_html_whitelist = "create_html_whitelist"
-ci_stage_create_whitelist = "create_model_whitelist"
-ci_stage_create_example_whitelist = "create_example_whitelist"
-ci_stage_html_check = "HTML_Check"
-ci_stage_style_check = "Style_check"
-ci_stage_model_check = "model_check"
-ci_stage_simulate = "simulate"
-ci_stage_OM_model_check = "OM_model_check"
-ci_stage_OM_simulate = "OM_simulate"
-ci_stage_regression_test = "RegressionTest"
-ci_stage_update_ref = "Update_Ref"
-ci_stage_plot_ref = "plot_ref"
-ci_stage_prepare = "prepare"
-ci_stage_open_PR = "open_PR"
-ci_stage_update_whitelist = "update_whiteList"
-ci_stage_build_ci_structure = "build_ci_structure"
-ci_stage_deploy = "deploy"
-ci_stage_whitelist_setting = "build_ci_whitelist"
+[stage_names]
+check_setting = "check_setting"
+build_templates = "build_templates"
+ref_check = "Ref_Check"
+lib_merge = "merge"
+html_whitelist = "create_html_whitelist"
+create_whitelist = "create_model_whitelist"
+create_example_whitelist = "create_example_whitelist"
+html_check = "HTML_Check"
+style_check = "Style_check"
+dymola_model_check = "model_check"
+simulate = "simulate"
+OM_model_check = "OM_model_check"
+OM_simulate = "OM_simulate"
+regression_test = "RegressionTest"
+update_ref = "Update_Ref"
+plot_ref = "plot_ref"
+prepare = "prepare"
+open_PR = "open_PR"
+update_whitelist = "update_whiteList"
+build_ci_structure = "build_ci_structure"
+deploy = "deploy"
+whitelist_setting = "build_ci_whitelist"
 
-[[CI_setting]]
+[modelica_py_ci]
+dir = "Modelica-GitLab-CI/ci_tests"
+OM_python_check_model_file = "Modelica-CI/ci_tests/UnitTests/OM_Check.py"
+test_validate_file = "Modelica-CI/ci_tests/UnitTests/CheckPackages/validatetest.py"
+test_reference_file = "Modelica-CI/ci_tests/UnitTests/reference_check.py"
+google_chart_file = "Modelica-CI/ci_tests/Converter/google_charts.py"
+api_github_file = "Modelica-CI/ci_tests/api_script/api_github.py"
+deploy_artifacts_file = "Modelica-CI/ci_tests/deploy/deploy_artifacts.py"
+html_tidy_file = "Modelica-CI/ci_tests/SyntaxTests/html_tidy_errors.py"
+syntax_test_file = "Modelica-CI/ci_tests/SyntaxTests/StyleChecking.py"
+configuration_file = "Modelica-CI/CI_test_config.py"
+structure_file = "Modelica-CI/ci_tests/structure/config_structure.py"
+library_merge_file = "Modelica-CI/ci_tests/deploy/IBPSA_Merge/library_merge.py"
+lock_model_file = "Modelica-CI/CITests/Converter/lock_model.py"
+config_structure_file = "Modelica-CI/ci_tests/structure/config_structure.py"
 
-[CI_setting.ci_commit_message]
-ci_update_ref_commit = "ci_update_ref"
-ci_show_ref_commit = "ci_show_ref"
-ci_dif_ref_commit = "ci_dif_ref"
-ci_create_model_wh_commit = "ci_create_model_wh"
-ci_create_html_wh_commit = "ci_create_html_wh"
-ci_create_simulate_wh_commit = "ci_create_example_wh"
-ci_simulate_commit = "ci_simulate"
-ci_OM_simulate_commit = "ci_om_simulate"
-ci_check_commit = "ci_check"
-ci_OM_check_commit = "ci_om_check"
-ci_regression_test_commit = "ci_regression_test"
-ci_html_commit = "ci_html"
-ci_setting_commit = "ci_setting"
-ci_style_commit = "ci_style_check"
-ci_trigger_ibpsa_commit = "ci_trigger_ibpsa"
-ci_merge_except_commit = "ci_merge_except"
-ci_correct_html_commit = "ci_correct_html"
-ci_build_structure_commit = "ci_build_structure"
-ci_build_whitelist_structure_commit = "ci_build_whitelist"
-bot_merge_commit = "CI message from ebc-aixlib-bot. Merge of IBPSA library. Update files dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt and dymola-ci-tests/ci_whitelist/ci_html_whitelist.txt"
-bot_push_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files. Please pull the new files before push again."
-bot_update_wh_commit = "CI message from ebc-aixlib-bot. Update or created new whitelist. Please pull the new whitelist before push again."
-bot_create_ref_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files.Please pull the new files before push again. Plottet Results $GITLAB_Page/$CI_COMMIT_REF_NAME/plots/"
-bot_create_CI_template_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new created CI templates. Please pull the new files before push again."
-bot_update_model_wh_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt. Please pull the new files before push again."
-bot_update_example_wh_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt. Please pull the new files before push again."
-bot_create_structure_commit = "CI message from ebc-aixlib-bot. Add files for ci structure"
-bot_create_html_file_commit = "CI message from ebc-aixlib-bot. Push new files with corrected html Syntax ."
-bot_build_whitelist_commit = "CI message from ebc-aixlib-bot. Push new created whitelists."
+[template_files]
+base = "Modelica-CI/templates/ci_templates"
+regression_file = "UnitTests/regression_test.txt"
+check_file = "UnitTests/check_model.txt"
+simulate_file = "UnitTests/simulate_model.txt"
+page_file = "deploy/gitlab_pages.txt"
+ibpsa_merge_file = "deploy/IBPSA_Merge.txt"
+html_file = "syntaxtest/html_check.txt"
+style_check_file = "syntaxtest/style_check.txt"
+structure_file = "deploy/create_CI_path.txt"
+main_yml_file = ".gitlab-ci.txt"
+setting_file = "cleanupscript/ci_setting.txt"
+deploy_test_file = "deploy/deploy_ci_tests.txt"
+build_whitelist_file = "cleanupscript/ci_build_whitelist.txt"
+OM_check_file = "UnitTests/check_OM_model.txt"
+OM_simulate_file = "UnitTests/simulate_OM_model.txt"
 
-[[CI_setting]]
+[commit_interaction]
+update_ref = "ci_update_ref"
+show_ref = "ci_show_ref"
+dif_ref = "ci_dif_ref"
+create_model_wh = "ci_create_model_wh"
+create_html_wh = "ci_create_html_wh"
+create_simulate_wh = "ci_create_example_wh"
+simulate = "ci_simulate"
+OM_simulate = "ci_om_simulate"
+check = "ci_check"
+OM_check = "ci_om_check"
+regression_test = "ci_regression_test"
+html = "ci_html"
+setting = "ci_setting"
+style = "ci_style_check"
+trigger_ibpsa = "ci_trigger_ibpsa"
+merge_except = "ci_merge_except"
+correct_html = "ci_correct_html"
+build_structure = "ci_build_structure"
+build_whitelist_structure = "ci_build_whitelist"
+reference_check = "ci_reference_check"
 
-[CI_setting.dymola_python_script]
-dymola_python_test_validate_file = "Dymola_python_tests/ci_tests/UnitTests/CheckPackages/validatetest.py"
-dymola_python_test_reference_file = "Dymola_python_tests/ci_tests/UnitTests/reference_check.py"
-dymola_python_google_chart_file = "Dymola_python_tests/ci_tests/Converter/google_charts.py"
-dymola_python_api_github_file = "Dymola_python_tests/ci_tests/api_script/api_github.py"
-dymola_python_deploy_artifacts_file = "Dymola_python_tests/ci_tests/deploy/deploy_artifacts.py"
-dymola_python_html_tidy_file = "Dymola_python_tests/ci_tests/SyntaxTests/html_tidy_errors.py"
-dymola_python_syntax_test_file = "Dymola_python_tests/ci_tests/SyntaxTests/StyleChecking.py"
-dymola_python_configuration_file = "Dymola_python_tests/CI_test_config.py"
-OM_python_check_model_file = "Dymola_python_tests/ci_tests/UnitTests/OM_Check.py"
-dymola_python_structure_file = "Dymola_python_tests/ci_tests/structure/config_structure.py"
-dymola_python_library_merge_file = "Dymola_python_tests/ci_tests/deploy/IBPSA_Merge/library_merge.py"
-dymola_python_lock_model_file = "Dymola_python_tests/CITests/Converter/lock_model.py"
-dymola_python_config_structure_file = "Dymola_python_tests/ci_tests/structure/config_structure.py"
+[ci_config_files]
+dir = "dymola-ci-tests/Configfiles"
+exit_file = "dymola-ci-tests/Configfiles/exit.sh"
+new_ref_file = "dymola-ci-tests/Configfiles/ci_new_ref_file.txt"
+new_create_ref_file = "dymola-ci-tests/Configfiles/ci_new_created_reference.txt"
+changed_file = "dymola-ci-tests/Configfiles/ci_changed_model_list.txt"
+ref_file = "dymola-ci-tests/Configfiles/ci_reference_list.txt"
+eof_file = "dymola-ci-tests/Configfiles/EOF.sh"
 
-[[CI_setting]]
+[result]
+dir = "dymola-ci-tests/result"
+whitelist_dir = "dymola-ci-tests/result/ci_whitelist"
+config_dir = "dymola-ci-tests/result/configfiles"
+plot_dir = "dymola-ci-tests/result/charts"
+syntax_dir = "dymola-ci-tests/result/syntax"
+regression_dir = "dymola-ci-tests/result/regression"
+interact_ci_dir = "dymola-ci-tests/result/interact_CI"
+ci_template_dir = "dymola-ci-tests/result/ci_template"
+check_result_dir = "dymola-ci-tests/result/Dymola_check"
+OM_check_result_dir = "dymola-ci-tests/result/OM_check"
 
-[CI_setting.except_commit_list]
-ci_update_ref_commit = "ci_update_ref"
-ci_show_ref_commit = "ci_show_ref"
-ci_dif_ref_commit = "ci_dif_ref"
-ci_create_model_wh_commit = "ci_create_model_wh"
-ci_create_html_wh_commit = "ci_create_html_wh"
-ci_create_simulate_wh_commit = "ci_create_example_wh"
-ci_simulate_commit = "ci_simulate"
-ci_OM_simulate_commit = "ci_om_simulate"
-ci_check_commit = "ci_check"
-ci_OM_check_commit = "ci_om_check"
-ci_regression_test_commit = "ci_regression_test"
-ci_html_commit = "ci_html"
-ci_setting_commit = "ci_setting"
-ci_style_commit = "ci_style_check"
-ci_trigger_ibpsa_commit = "ci_trigger_ibpsa"
-ci_merge_except_commit = "ci_merge_except"
-ci_correct_html_commit = "ci_correct_html"
-ci_build_structure_commit = "ci_build_structure"
-ci_build_whitelist_structure_commit = "ci_build_whitelist"
+[whitelist]
+ci_dir = "dymola-ci-tests/ci_whitelist"
+check_file = "dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt"
+simulate_file = "dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt"
+html_file = "dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
+ref_file = "dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt"
+
+[bot_messages]
+merge_commit = "CI message from ebc-aixlib-bot. Merge of None library. Update files dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt and dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
+push_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files. Please pull the new files before push again."
+create_ref_message = "CI message from ebc-aixlib-bot. New reference files were pushed to this branch. The job was successfully and the newly added files are tested in another commit."
+update_whitelist_commit = "CI message from ebc-aixlib-bot. Update or created new whitelist. Please pull the new whitelist before push again."
+create_ref_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files. Please pull the new files before push again. Plottet Results $GITLAB_Page/$CI_COMMIT_REF_NAME/charts/"
+create_CI_template_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new created CI templates. Please pull the new files before push again."
+update_model_whitelist_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt. Please pull the new files before push again."
+update_example_whitelist_commit = "CI message from ebc-aixlib-bot. Update file dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt. Please pull the new files before push again."
+create_structure_commit = "CI message from ebc-aixlib-bot. Add files for ci structure"
+create_html_file_commit = "CI message from ebc-aixlib-bot. Push new files with corrected html Syntax ."
+build_whitelist_commit = "CI message from ebc-aixlib-bot. Push new created whitelists."

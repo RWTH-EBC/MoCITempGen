@@ -55,7 +55,7 @@ class HTML_Tidy(ci_config):
                  log: bool,
                  correct_view: bool,
                  library: str,
-                 wh_library: str,
+                 whitelist_library: str,
                  filter_whitelist: bool):
         """
         Args:
@@ -65,7 +65,7 @@ class HTML_Tidy(ci_config):
             log (): argument(default:false): write a html log of the html check
             correct_view (): argument(default:false): print models that failed html test
             library ():  library to test
-            wh_library ():  library on the whitelist
+            whitelist_library ():  library on the whitelist
             filter_whitelist (): argument(default:false): filter models that are on the whitelist
         """
         self.package = package
@@ -74,7 +74,7 @@ class HTML_Tidy(ci_config):
         self.log = log
         self.correct_view = correct_view
         self.library = library
-        self.wh_library = wh_library
+        self.whitelist_library = whitelist_library
         self.filter_whitelist = filter_whitelist
         self.root_dir = self.package.replace(".", os.sep)
         data_structure().check_arguments_settings(self.root_dir)
@@ -90,10 +90,10 @@ class HTML_Tidy(ci_config):
         """
         library_list = self._get_library_model()
         if self.filter_whitelist is True:
-            wh_library_list = self._get_wh_library_model()
+            whitelist_library_list = self._get_whitelist_library_model()
         else:
-            wh_library_list = []
-        html_model_list = self._remove_whitelist_model(library_list=library_list, wh_library_list=wh_library_list)
+            whitelist_library_list = []
+        html_model_list = self._remove_whitelist_model(library_list=library_list, whitelist_library_list=whitelist_library_list)
         return html_model_list
 
     def run_files(self):
@@ -593,24 +593,24 @@ class HTML_Tidy(ci_config):
                                                        substitutions_dict=substitutions_dict)
         return document_corr, errors
 
-    def _get_wh_library_model(self):
+    def _get_whitelist_library_model(self):
         """
         Returns: models from html whitelist, if whitelist not found return an empty list
         """
-        wh_library_list = []
+        whitelist_library_list = []
         try:
-            file = open(self.wh_html_file, "r")
+            file = open(self.whitelist_html_file, "r")
             lines = file.readlines()
             file.close()
             for line in lines:
                 if line.find(".mo") > -1:
-                    line = line.replace(self.wh_library, self.library)
+                    line = line.replace(self.whitelist_library, self.library)
                     line = line.replace("\n", "")
-                    wh_library_list.append(line)
-            return wh_library_list
+                    whitelist_library_list.append(line)
+            return whitelist_library_list
         except IOError:
-            print(f'Error: File {self.wh_html_file} does not exist. Check without a whitelist.')
-            return wh_library_list
+            print(f'Error: File {self.whitelist_html_file} does not exist. Check without a whitelist.')
+            return whitelist_library_list
 
     def _get_library_model(self):
         """
@@ -627,15 +627,15 @@ class HTML_Tidy(ci_config):
         return library_list
 
     @staticmethod
-    def _remove_whitelist_model(library_list, wh_library_list):
+    def _remove_whitelist_model(library_list, whitelist_library_list):
         """
         remove models that are on the whitelist
         Returns: return a list of models, that are not on the whitelist
         """
         remove_models_list = []
         for model in library_list:
-            for wh_model in wh_library_list:
-                if model == wh_model:
+            for whitelist_model in whitelist_library_list:
+                if model == whitelist_model:
                     remove_models_list.append(model)
         for remove_model in remove_models_list:
             library_list.remove(remove_model)
@@ -656,7 +656,7 @@ class htmlWhitelist(ci_config):
         Args:
             model_list (): models on the whitelist
         """
-        file = open(self.wh_html_file, "w")
+        file = open(self.whitelist_html_file, "w")
         for model in model_list:
             file.write("\n" + model + ".mo" + "\n")
         file.close()
@@ -704,15 +704,15 @@ if __name__ == '__main__':
     check.create_files(conf.config_ci_exit_file)
     mo = modelica_model()
     if args.whitelist_flag is True:
-        check.create_path(conf.wh_ci_dir)
-        check.create_files(conf.wh_html_file)
-        GitRepository.clone_repository(repo_dir=args.root_wh_library, git_url=args.git_url)
-        model_list = mo.get_models(library=args.wh_library,
-                                   path=args.root_wh_library,
+        check.create_path(conf.whitelist_ci_dir)
+        check.create_files(conf.whitelist_html_file)
+        GitRepository.clone_repository(repo_dir=args.root_whitelist_library, git_url=args.git_url)
+        model_list = mo.get_models(library=args.whitelist_library,
+                                   path=args.root_whitelist_library,
                                    simulate_flag=False,
                                    extended_ex_flag=False)
         htmlWhitelist().write_whitelist(model_list=model_list)
-        data_structure.prepare_data(source_target_dict={conf.wh_html_file: conf.result_whitelist_dir})
+        data_structure.prepare_data(source_target_dict={conf.whitelist_html_file: conf.result_whitelist_dir})
         exit(0)
     else:
         html_tidy_check = HTML_Tidy(package=args.packages,
@@ -721,13 +721,13 @@ if __name__ == '__main__':
                                     log=args.log_flag,
                                     correct_view=args.correct_view_flag,
                                     library=args.library,
-                                    wh_library=args.wh_library,
+                                    whitelist_library=args.whitelist_library,
                                     filter_whitelist=args.filter_whitelist_flag)
 
         html_model = mo.get_option_model(library=args.library,
                                          package=args.library,
-                                         filter_wh_flag=args.filter_whitelist_flag,
-                                         wh_library=args.wh_library,
+                                         filter_whitelist_flag=args.filter_whitelist_flag,
+                                         whitelist_library=args.whitelist_library,
                                          root_package=Path(args.library))
         html_tidy_check.run_files()
         html_tidy_check.check_html_files(model_list=html_model)

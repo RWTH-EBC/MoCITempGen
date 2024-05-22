@@ -4,10 +4,10 @@
 # dymola_python_test_url: ${dymola_python_test_url}
 # dymola_python_config_structure_file:  ${dymola_python_config_structure_file}
 # arg_struc_wh : ${arg_struc_wh}
-# arg_wh_check : ${arg_wh_check}
+# arg_whitelist_check : ${arg_whitelist_check}
 # dymola_python_html_tidy_file: ${dymola_python_html_tidy_file}
-# arg_wh_html : ${arg_wh_html}
-# arg_wh_sim : ${arg_wh_sim}
+# arg_whitelist_html : ${arg_whitelist_html}
+# arg_whitelist_sim : ${arg_whitelist_sim}
 # bot_build_whitelist_commit : ${bot_build_whitelist_commit}
 # dymola_ci_test_dir : ${dymola_ci_test_dir}
 # ci_build_whitelist_structure_commit : ${ci_build_whitelist_structure_commit}
@@ -36,8 +36,8 @@ CI_Whitelist_Setting:
         - cd $CI_PROJECT_NAME
         - python ${dymola_python_configuration_module} ${arg_struc_wh}
 
-        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_wh_check}
-        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_wh_sim}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_whitelist_check}
+        - ${xvfb_flag} python ${dymola_python_test_validate_module} ${arg_whitelist_sim}
         - message="${bot_build_whitelist_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${dymola_ci_test_dir})
         - git add  $push_model

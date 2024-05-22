@@ -3,11 +3,11 @@ dymola_ci_test_dir = 'dymola-ci-tests'
 dymola_python_test_dir = 'Modelica-CI'
 
 [whitelist]
-wh_ci_dir = "dymola-ci-tests/ci_whitelist"
-wh_model_file = 'dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt'
-wh_simulate_file = 'dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt'
-wh_html_file = 'dymola-ci-tests/ci_whitelist/ci_html_whitelist.txt'
-wh_ref_file = 'dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt'
+whitelist_ci_dir = "dymola-ci-tests/ci_whitelist"
+whitelist_model_file = 'dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt'
+whitelist_simulate_file = 'dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt'
+whitelist_html_file = 'dymola-ci-tests/ci_whitelist/ci_html_whitelist.txt'
+whitelist_ref_file = 'dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt'
 
 [config_ci]
 config_ci_dir = 'dymola-ci-tests/Configfiles'

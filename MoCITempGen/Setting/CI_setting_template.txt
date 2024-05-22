@@ -2,7 +2,7 @@
 library_name =  "${library}"
 
 [whitelist_library]
-wh_library_name = "${wh_library}"
+whitelist_library_name = "${whitelist_library}"
 
 [dymola_version]
 dymola_version = "${dymola_version}"
@@ -27,8 +27,8 @@ python_version= "${python_version}"
 [git_url]
 git_url = "${git_url}"
 	
-[wh_library_path]
-wh_path = "${wh_path}"
+[whitelist_library_path]
+whitelist_path = "${whitelist_path}"
 
 [Merge_Branch]
 merge_branch = "${merge_branch}"

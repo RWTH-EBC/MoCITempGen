@@ -31,7 +31,7 @@ class Buildingspy_Regression_Check(ci_config):
         self.path = path
         self.library = library
         super().__init__()
-        self.wh_ref_file = Path("..", self.wh_ref_file)
+        self.whitelist_ref_file = Path("..", self.whitelist_ref_file)
         self.config_ci_exit_file = Path("..", self.config_ci_exit_file)
         self.config_ci_ref_file = Path("..", self.config_ci_ref_file)
         self.ut = buildingspy_regression.Tester(tool=self.tool)
@@ -116,7 +116,7 @@ class Ref_model(ci_config):
         """
         super().__init__()
         self.library = library
-        self.wh_ref_file = Path("..", self.wh_ref_file)
+        self.whitelist_ref_file = Path("..", self.whitelist_ref_file)
         self.config_ci_ref_file = Path("..", self.config_ci_ref_file)
 
     def delete_ref_file(self, ref_list):
@@ -133,18 +133,18 @@ class Ref_model(ci_config):
             else:
                 print(f'File {Path(ref_dir, ref)} does not exist\n')
 
-    def _compare_wh_mos(self, package_list, wh_list):
+    def _compare_whitelist_mos(self, package_list, whitelist_list):
         """
         Filter model from whitelist.
         Args:
             package_list ():
-            wh_list ():
+            whitelist_list ():
         Returns:
         """
         err_list = []
         for package in package_list:
-            for wh_package in wh_list:
-                if package[:package.rfind(".")].find(wh_package) > -1:
+            for whitelist_package in whitelist_list:
+                if package[:package.rfind(".")].find(whitelist_package) > -1:
                     print(
                         f'{self.green}Don´t Create reference results for model{self.CEND} {package} This package is '
                         f'on the whitelist')
@@ -166,9 +166,9 @@ class Ref_model(ci_config):
         reference_list = self._get_check_ref()  # Reference files
         mos_list = self._compare_ref_mos(mos_script_list=mos_script_list,
                                          reference_list=reference_list)
-        wh_list = self._get_whitelist_package()
-        model_list = self._compare_wh_mos(package_list=mos_list,
-                                          wh_list=wh_list)
+        whitelist_list = self._get_whitelist_package()
+        model_list = self._compare_whitelist_mos(package_list=mos_list,
+                                          whitelist_list=whitelist_list)
         model_list = list(set(model_list))
         package_list = []
         for model in model_list:
@@ -198,23 +198,23 @@ class Ref_model(ci_config):
         Get and filter package from reference whitelist
         Returns: return files that are not on the reference whitelist
         """
-        wh_list = []
+        whitelist_list = []
         try:
-            with open(self.wh_ref_file, "r") as ref_wh:
+            with open(self.whitelist_ref_file, "r") as ref_wh:
                 lines = ref_wh.readlines()
                 for line in lines:
                     if len(line.strip()) == 0:
                         continue
                     else:
-                        wh_list.append(line.strip())
-            for wh_package in wh_list:
+                        whitelist_list.append(line.strip())
+            for whitelist_package in whitelist_list:
                 print(
-                    f'{self.CRED} Don´t create reference results for package{self.CEND} {wh_package}: This Package is '
+                    f'{self.CRED} Don´t create reference results for package{self.CEND} {whitelist_package}: This Package is '
                     f'on the whitelist')
-            return wh_list
+            return whitelist_list
         except IOError:
-            print(f'Error: File {self.wh_ref_file} does not exist.')
-            return wh_list
+            print(f'Error: File {self.whitelist_ref_file} does not exist.')
+            return whitelist_list
 
     def _compare_ref_mos(self, mos_script_list, reference_list):
         """
@@ -288,9 +288,9 @@ class Ref_model(ci_config):
         """
         mos_list = self._get_mos_scripts()
         try:
-            with open(self.config_ci_ref_file, "w") as wh_file:
+            with open(self.config_ci_ref_file, "w") as whitelist_file:
                 for mos in mos_list:
-                    wh_file.write(f'\n{mos}\n')
+                    whitelist_file.write(f'\n{mos}\n')
         except IOError:
             print(f'Error: File {self.config_ci_ref_file} does not exist.')
 

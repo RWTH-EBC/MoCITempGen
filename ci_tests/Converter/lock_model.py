@@ -26,7 +26,7 @@ class Lock_model(ci_config):
             model_list (): return a list of models to lock
         """
         try:
-            wh = open(self.wh_html_file, "r")
+            wh = open(self.whitelist_html_file, "r")
             whitelist_lines = wh.readlines()
             wh.close()
             model_list = []
@@ -35,13 +35,13 @@ class Lock_model(ci_config):
                         "UsersGuide") > -1:
                     continue
                 else:
-                    line = line.replace(self.wh_library, self.library)
+                    line = line.replace(self.whitelist_library, self.library)
                     mo = line.replace(".", os.sep, line.count(".") - 1).lstrip()
                     mo = mo.strip()
                     model_list.append(mo)
             return model_list
         except IOError:
-            print(f'Error: File {self.wh_html_file} does not exist.')
+            print(f'Error: File {self.whitelist_html_file} does not exist.')
             exit(1)
 
     def call_lock_model(self):

@@ -222,35 +222,35 @@ class CreateWhitelist(ci_config):
     def __init__(self,
                  dym,
                  dymola_ex,
-                 wh_library: str,
+                 whitelist_library: str,
                  working_path: Path = Path(Path.cwd()),
                  dymola_version: int = 2022,
                  add_libraries_loc: dict = None,
                  inst_libraries: list = None,
                  repo_dir: Path = None,
                  git_url: str = None,
-                 root_wh_library: Path = None):
+                 root_whitelist_library: Path = None):
         """
-        The class creates a whitelist of faulty models based on wh_library.
+        The class creates a whitelist of faulty models based on whitelist_library.
         Args:
             working_path:
             dymola_version:
             add_libraries_loc:
             inst_libraries:
-            root_wh_library:
+            root_whitelist_library:
             dym (): python_dymola_interface class.
             dymola_ex (): python_dymola_exception class.
             library (): library to be tested.
-            wh_library ():  Library and its models that can be on the whitelist.
+            whitelist_library ():  Library and its models that can be on the whitelist.
             repo_dir ():  Folder of the cloned project.
             git_url (): Git url of the cloned project.
         """
         super().__init__()
-        self.wh_library = wh_library
+        self.whitelist_library = whitelist_library
         self.repo_dir = repo_dir
         self.git_url = git_url
         self.working_path = working_path
-        self.root_library = root_wh_library
+        self.root_library = root_whitelist_library
         # [libraries]
         self.add_libraries_loc = add_libraries_loc
         self.install_libraries = inst_libraries
@@ -271,26 +271,26 @@ class CreateWhitelist(ci_config):
         dym_int.install_library(libraries=self.install_libraries)
 
     @staticmethod
-    def get_root_wh_library(wh_library, git_url, repo_dir, arg_root_wh_library):
+    def get_root_whitelist_library(whitelist_library, git_url, repo_dir, arg_root_whitelist_library):
         """
 
         Args:
-            wh_library (): Library on the whitelist
+            whitelist_library (): Library on the whitelist
             git_url (): git url of the whitelist library
             repo_dir (): Project name of github repository
-            arg_root_wh_library (): root of the whitelist library
+            arg_root_whitelist_library (): root of the whitelist library
         Returns:
-            root_wh_library: Return the full Path of root of the whitelist library
+            root_whitelist_library: Return the full Path of root of the whitelist library
         """
-        root_wh_library = Path(wh_library, "package.mo")
+        root_whitelist_library = Path(whitelist_library, "package.mo")
         if git_url is not None and repo_dir is not None:
             GitRepository.clone_repository(repo_dir=repo_dir, git_url=git_url)
-            root_wh_library = Path(Path.cwd(), repo_dir, wh_library, "package.mo")
-        elif arg_root_wh_library is None:
-            root_wh_library = Path(Path.cwd(), wh_library, "package.mo")
-        elif arg_root_wh_library is not None:
-            root_wh_library = arg_root_wh_library
-        return root_wh_library
+            root_whitelist_library = Path(Path.cwd(), repo_dir, whitelist_library, "package.mo")
+        elif arg_root_whitelist_library is None:
+            root_whitelist_library = Path(Path.cwd(), whitelist_library, "package.mo")
+        elif arg_root_whitelist_library is not None:
+            root_whitelist_library = arg_root_whitelist_library
+        return root_whitelist_library
 
     @staticmethod
     def write_exit_log(vers_check: bool):
@@ -329,7 +329,7 @@ class CreateWhitelist(ci_config):
             return vers
 
     @staticmethod
-    def check_whitelist_version(version, wh_file):
+    def check_whitelist_version(version, whitelist_file):
         """
         Check the latest whitelist version with the latest version of Aixlib conversion script.
         Read the last version of whitelist-
@@ -338,11 +338,11 @@ class CreateWhitelist(ci_config):
         Returns:
             version_check (): Boolean - return true, if the whitelist version is equal to Aixlib conversion script version
             @param version:
-            @param wh_file:
+            @param whitelist_file:
             @return:
         """
         try:
-            version_file = open(wh_file, "r")
+            version_file = open(whitelist_file, "r")
             lines = version_file.readlines()
             vers_check = False
             for line in lines:
@@ -353,29 +353,29 @@ class CreateWhitelist(ci_config):
             version_file.close()
             return vers_check
         except IOError:
-            print(f'Error: File {wh_file} does not exist.')
+            print(f'Error: File {whitelist_file} does not exist.')
             exit(1)
 
-    def check_whitelist_model(self, model_list: list, wh_files: Path, version: float, simulate_examples: bool):
+    def check_whitelist_model(self, model_list: list, whitelist_files: Path, version: float, simulate_examples: bool):
         """
         Check whitelist_library models for creating whitelist and create a whitelist with failed models.
         Write an error log with all models, that don´t pass the check.
         Args:
             model_list (): List of models that are being tested
             version (): version number of whitelist based on the latest Aixlib conversion script.
-            wh_files (): Path to whitelist file
+            whitelist_files (): Path to whitelist file
             simulate_examples() : bool simulate or not
         """
         error_model_message_dic = {}
-        err_log = Path(Path(self.root_library).parent, f'{self.wh_library}-error_log.txt')
-        dymola_log = Path(Path(self.root_library).parent, f'{self.wh_library}-log.txt')
+        err_log = Path(Path(self.root_library).parent, f'{self.whitelist_library}-error_log.txt')
+        dymola_log = Path(Path(self.root_library).parent, f'{self.whitelist_library}-log.txt')
         if model_list is None or len(model_list) == 0:
             print(f'{self.CRED}Error:{self.CEND} Found no models')
             exit(0)
         try:
-            with open(wh_files, "w") as whitelist_file, open(err_log, "w") as error_log:
+            with open(whitelist_files, "w") as whitelist_file, open(err_log, "w") as error_log:
                 print(
-                    f'Write new whitelist for {self.wh_library} library\nNew whitelist was created with the version {version}')
+                    f'Write new whitelist for {self.whitelist_library} library\nNew whitelist was created with the version {version}')
                 whitelist_file.write(f'\n{version} \n \n')
                 for model in model_list:
                     result = self.dymola.checkModel(model, simulate=simulate_examples)
@@ -391,12 +391,12 @@ class CreateWhitelist(ci_config):
                 self.dymola.close()
             print(f'{self.green}Whitelist check finished.{self.CEND}')
             data_structure().prepare_data(source_target_dict={
-                err_log: Path(self.result_whitelist_dir, f'{self.wh_library}'),
-                dymola_log: Path(self.result_whitelist_dir, f'{self.wh_library}'),
-                wh_files: Path(self.result_whitelist_dir, f'{self.wh_library}')})
+                err_log: Path(self.result_whitelist_dir, f'{self.whitelist_library}'),
+                dymola_log: Path(self.result_whitelist_dir, f'{self.whitelist_library}'),
+                whitelist_files: Path(self.result_whitelist_dir, f'{self.whitelist_library}')})
             return error_model_message_dic
         except IOError:
-            print(f'Error: File {wh_files} or {err_log} does not exist.')
+            print(f'Error: File {whitelist_files} or {err_log} does not exist.')
             exit(1)
 
 
@@ -463,7 +463,7 @@ if __name__ == '__main__':
         except_list = data["Dymola_Check"]["except_list"]
         additional_libraries_local = data["Dymola_Check"]["additional_libraries_local"]
         additional_libraries_local = Convert_types().convert_list_to_dict_toml(convert_list=additional_libraries_local,
-                                                                               wh_library=args.wh_library)
+                                                                               whitelist_library=args.whitelist_library)
     else:
         install_libraries = None
         except_list = None
@@ -477,7 +477,7 @@ if __name__ == '__main__':
             add_lib_path = Path(additional_libraries_local[lib], lib, "package.mo")
             check.check_file_setting(add_lib_path)
     dymola, dymola_exception = PythonDymolaInterface.load_dymola_python_interface(dymola_version=args.dymola_version)
-    if args.create_wh_flag is False:
+    if args.create_whitelist_flag is False:
         dym = CheckPythonDymola(dym=dymola,
                                 dym_exp=dymola_exception,
                                 library=args.library,
@@ -493,10 +493,10 @@ if __name__ == '__main__':
                     # todo: Funktionen Zusammenfassen
                     model_list = mm.get_option_model(library=args.library,
                                                      package=package,
-                                                     wh_library=args.wh_library,
+                                                     whitelist_library=args.whitelist_library,
                                                      changed_flag=args.changed_flag,
                                                      simulate_flag=False,
-                                                     filter_wh_flag=args.filter_wh_flag,
+                                                     filter_whitelist_flag=args.filter_whitelist_flag,
                                                      root_library=args.root_library)
 
                     error_model_dict = dym.check_dymola_model(check_model_list=model_list,
@@ -511,10 +511,10 @@ if __name__ == '__main__':
                 if options == "DYM_SIM":
                     model_list = mm.get_option_model(library=args.library,
                                                      package=package,
-                                                     wh_library=args.wh_library,
+                                                     whitelist_library=args.whitelist_library,
                                                      changed_flag=args.changed_flag,
                                                      simulate_flag=True,
-                                                     filter_wh_flag=args.filter_wh_flag,
+                                                     filter_whitelist_flag=args.filter_whitelist_flag,
                                                      root_library=args.root_library)
                     error_model_dict = dym.check_dymola_model(check_model_list=model_list,
                                                               exception_list=except_list,
@@ -525,76 +525,76 @@ if __name__ == '__main__':
                     var = dym.read_error_log(pack=package, err_log=error_log, check_log=ch_log)
                     option_check_dictionary[options] = var
             dym.return_exit_var(opt_check_dict=option_check_dictionary, pack=package)
-    if args.create_wh_flag is True:
-        check.check_arguments_settings(args.wh_library)
+    if args.create_whitelist_flag is True:
+        check.check_arguments_settings(args.whitelist_library)
         mo = modelica_model()
         conf = ci_config()
-        check.create_path(conf.config_ci_dir, conf.wh_ci_dir)
+        check.create_path(conf.config_ci_dir, conf.whitelist_ci_dir)
 
         version = CreateWhitelist.read_script_version(root_library=args.root_library)
         for options in args.dym_options:
             if options == "DYM_CHECK":
-                check.create_files(conf.wh_model_file, conf.config_ci_exit_file)
+                check.create_files(conf.whitelist_model_file, conf.config_ci_exit_file)
                 version_check = CreateWhitelist.check_whitelist_version(version=version,
-                                                                        wh_file=conf.wh_model_file)
+                                                                        whitelist_file=conf.whitelist_model_file)
                 if version_check is False:
-                    root_wh_library = CreateWhitelist.get_root_wh_library(wh_library=args.wh_library,
+                    root_whitelist_library = CreateWhitelist.get_root_whitelist_library(whitelist_library=args.whitelist_library,
                                                                           git_url=args.git_url,
                                                                           repo_dir=args.repo_dir,
-                                                                          arg_root_wh_library=args.root_wh_library)
+                                                                          arg_root_whitelist_library=args.root_whitelist_library)
 
-                    check.check_file_setting(root_wh_library)
+                    check.check_file_setting(root_whitelist_library)
                     wh = CreateWhitelist(dym=dymola,
                                          dymola_ex=dymola_exception,
-                                         wh_library=args.wh_library,
+                                         whitelist_library=args.whitelist_library,
                                          repo_dir=args.repo_dir,
                                          git_url=args.git_url,
                                          dymola_version=args.dymola_version,
                                          add_libraries_loc=additional_libraries_local,
-                                         root_wh_library=root_wh_library)
+                                         root_whitelist_library=root_whitelist_library)
                     wh()
-                    model_list = mo.get_option_model(library=args.wh_library,
+                    model_list = mo.get_option_model(library=args.whitelist_library,
                                                      package=".",
-                                                     wh_library=args.wh_library,
+                                                     whitelist_library=args.whitelist_library,
                                                      changed_flag=False,
                                                      simulate_flag=False,
-                                                     filter_wh_flag=False,
+                                                     filter_whitelist_flag=False,
                                                      extended_ex_flag=False,
-                                                     root_library=root_wh_library)
+                                                     root_library=root_whitelist_library)
                     wh.check_whitelist_model(model_list=model_list,
-                                             wh_files=conf.wh_model_file,
+                                             whitelist_files=conf.whitelist_model_file,
                                              version=version,
                                              simulate_examples=False)
                 CreateWhitelist.write_exit_log(vers_check=version_check)
             if options == "DYM_SIM":
-                check.create_files(conf.wh_simulate_file, conf.config_ci_exit_file)
+                check.create_files(conf.whitelist_simulate_file, conf.config_ci_exit_file)
                 version_check = CreateWhitelist.check_whitelist_version(version=version,
-                                                                        wh_file=conf.wh_simulate_file)
+                                                                        whitelist_file=conf.whitelist_simulate_file)
                 if version_check is False:
-                    root_wh_library = CreateWhitelist.get_root_wh_library(wh_library=args.wh_library,
+                    root_whitelist_library = CreateWhitelist.get_root_whitelist_library(whitelist_library=args.whitelist_library,
                                                                           git_url=args.git_url,
                                                                           repo_dir=args.repo_dir,
-                                                                          arg_root_wh_library=args.root_wh_library)
-                    check.check_file_setting(root_wh_library)
+                                                                          arg_root_whitelist_library=args.root_whitelist_library)
+                    check.check_file_setting(root_whitelist_library)
                     wh = CreateWhitelist(dym=dymola,
                                          dymola_ex=dymola_exception,
-                                         wh_library=args.wh_library,
+                                         whitelist_library=args.whitelist_library,
                                          repo_dir=args.repo_dir,
                                          git_url=args.git_url,
                                          dymola_version=args.dymola_version,
                                          add_libraries_loc=additional_libraries_local,
-                                         root_wh_library=root_wh_library)
+                                         root_whitelist_library=root_whitelist_library)
                     wh()
-                    model_list = mo.get_option_model(library=args.wh_library,
+                    model_list = mo.get_option_model(library=args.whitelist_library,
                                                      package=".",
-                                                     wh_library=args.wh_library,
+                                                     whitelist_library=args.whitelist_library,
                                                      changed_flag=False,
                                                      simulate_flag=True,
-                                                     filter_wh_flag=False,
+                                                     filter_whitelist_flag=False,
                                                      extended_ex_flag=False,
-                                                     root_library=root_wh_library)
+                                                     root_library=root_whitelist_library)
                     wh.check_whitelist_model(model_list=model_list,
-                                             wh_files=conf.wh_simulate_file,
+                                             whitelist_files=conf.whitelist_simulate_file,
                                              version=version,
                                              simulate_examples=True)
                 CreateWhitelist.write_exit_log(vers_check=version_check)  # todo: Brauch ich die Datei noch?

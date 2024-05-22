@@ -4,7 +4,7 @@ install_libraries = [["Modelica_DeviceDrivers", "2.0.0", "exactMatch=true"],
 except_list = ["Warning: Conversion-annotation contains unknown element: nonFromVersion",
                "failed with no error message.",
                "Warning: Requested package Modelica_DeviceDrivers"]
-additional_libraries_local = [["wh_library: os.getcwd(), modelica-ibpsa"]]
+additional_libraries_local = [["whitelist_library: os.getcwd(), modelica-ibpsa"]]
 
 [Dymola_Check]
 install_libraries = [["Modelica_DeviceDrivers", "2.0.0", "exactMatch=true"],
@@ -12,4 +12,4 @@ install_libraries = [["Modelica_DeviceDrivers", "2.0.0", "exactMatch=true"],
 except_list = ["Warning: Conversion-annotation contains unknown element: nonFromVersion",
                "failed with no error message.",
                "Warning: Requested package Modelica_DeviceDrivers"]
-additional_libraries_local = [["wh_library: os.getcwd(), modelica-ibpsa"]]
+additional_libraries_local = [["whitelist_library: os.getcwd(), modelica-ibpsa"]]

@@ -102,8 +102,8 @@ html_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python ${dymola_python_html_tidy_module} ${arg_wh}        - message="${bot_update_wh_commit}"
-        - git add ${wh_html_file}
+        - python ${dymola_python_html_tidy_module} ${arg_wh}        - message="${bot_update_whitelist_commit}"
+        - git add ${whitelist_html_file}
         - git commit -m "$message"
         - git push git@github.com:$Github_Repository.git
     artifacts:
@@ -111,5 +111,5 @@ html_whitelist_job:
             - ${result_dir}/
         expire_in: 7 day
     rules:
-        - if: $CI_COMMIT_MESSAGE =~ /${ci_create_html_wh_commit}/ && $CI_PIPELINE_SOURCE == "push"
+        - if: $CI_COMMIT_MESSAGE =~ /${ci_create_html_whitelist_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always

@@ -8,7 +8,7 @@ The script sets all models of the library for which a whitelist has been created
 |--lock-library|    Library to lock        | 
 
 #### Example: Execution on gitlab runner (linux)
-    python MoCITempGen/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
+    python MoCITempGen/CITests/Converter/lock_model.py --library ${library} --lock-library ${whitelist_library}
 ### google_charts.py
 The script visualizes the deviation of failing models that failed the regression test. It also creates graphs of the generated values based on the reference files.
 #### Parser Arguments
