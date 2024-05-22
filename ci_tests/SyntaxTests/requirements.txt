@@ -1,6 +1,0 @@
-argparse
-pytest-shutil
-GitPython
-pytidylib
-openapi-codec
-python-time

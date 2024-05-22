@@ -2,20 +2,16 @@ dymola_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_
 open_modelica_image = "registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:main"
 gitlab_page = "https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
 github_repository = "RWTH-EBC/AixLib"
-whitelist_library = "None"
-stage_list = [ "html", "style", "check", "simulate", "regression", "Merge",]
-whitelist_path = "None"
-changed_flag = false
-extended_examples_flag = false
+stage_list = [ "Merge",]
+changed_flag = true
+extended_examples_flag = true
 html_praefix = "correct_HTML_"
 expire_in_time = "7h"
 library = "AixLib"
 dymola_version = "2022"
 conda_environment = "myenv"
-git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
 xvfb_flag = "xvfb-run -n 77"
 bot_name = "ebc-aixlib-bot"
-except_branch_list = [ "IBPSA",]
 main_branch_list = [ "main", "development",]
 buildingspy_upgrade = "git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage"
 toml_setting_file_template = "Setting/CI_setting_template.txt"
@@ -51,22 +47,20 @@ whitelist_setting = "build_ci_whitelist"
 
 [modelica_py_ci]
 dir = "Modelica-GitLab-CI/ci_tests"
-OM_python_check_model_file = "Modelica-CI/ci_tests/UnitTests/OM_Check.py"
-test_validate_file = "Modelica-CI/ci_tests/UnitTests/CheckPackages/validatetest.py"
-test_reference_file = "Modelica-CI/ci_tests/UnitTests/reference_check.py"
-google_chart_file = "Modelica-CI/ci_tests/Converter/google_charts.py"
-api_github_file = "Modelica-CI/ci_tests/api_script/api_github.py"
-deploy_artifacts_file = "Modelica-CI/ci_tests/deploy/deploy_artifacts.py"
-html_tidy_file = "Modelica-CI/ci_tests/SyntaxTests/html_tidy_errors.py"
-syntax_test_file = "Modelica-CI/ci_tests/SyntaxTests/StyleChecking.py"
-configuration_file = "Modelica-CI/CI_test_config.py"
-structure_file = "Modelica-CI/ci_tests/structure/config_structure.py"
-library_merge_file = "Modelica-CI/ci_tests/deploy/IBPSA_Merge/library_merge.py"
-lock_model_file = "Modelica-CI/CITests/Converter/lock_model.py"
-config_structure_file = "Modelica-CI/ci_tests/structure/config_structure.py"
+OM_python_check_model_file = "ModelicaPyCI.unittest.om_check"
+test_validate_file = "ModelicaPyCI.unittest.checkpackages.validatetest"
+test_reference_file = "ModelicaPyCI.unittest.reference_check"
+google_chart_file = "ModelicaPyCI.converter.google_charts"
+api_github_file = "ModelicaPyCI.api_script.api_github.py"
+html_tidy_file = "ModelicaPyCI.syntax.html_tidy"
+syntax_test_file = "ModelicaPyCI.syntax.style_checking"
+configuration_file = "ModelicaPyCI.config"
+library_merge_file = "ModelicaPyCI.deploy.ibpsa_merge"
+lock_model_file = "ModelicaPyCI.converter.lock_model"
+config_structure_file = "ModelicaPyCI.structure.config_structure"
 
 [template_files]
-base = "Modelica-CI/templates/ci_templates"
+base = "D:/04_git/MoCITempGen/templates/ci_templates"
 regression_file = "UnitTests/regression_test.txt"
 check_file = "UnitTests/check_model.txt"
 simulate_file = "UnitTests/simulate_model.txt"
@@ -125,15 +119,20 @@ ci_template_dir = "dymola-ci-tests/result/ci_template"
 check_result_dir = "dymola-ci-tests/result/Dymola_check"
 OM_check_result_dir = "dymola-ci-tests/result/OM_check"
 
-[whitelist]
+[whitelist_scripts]
 ci_dir = "dymola-ci-tests/ci_whitelist"
 check_file = "dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt"
 simulate_file = "dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt"
 html_file = "dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
 ref_file = "dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt"
 
+[whitelist_library]
+local_path = "modelica-ibpsa"
+library = "IBPSA"
+git_url = "https://github.com/ibpsa/modelica-ibpsa.git"
+
 [bot_messages]
-merge_commit = "CI message from ebc-aixlib-bot. Merge of None library. Update files dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt and dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
+merge_commit = "CI message from ebc-aixlib-bot. Merge of 'IBPSA' library. Update files dymola-ci-tests/ci_whitelist/ci_check_whitelist.txt and dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
 push_commit = "CI message from ebc-aixlib-bot. Automatic push of CI with new regression reference files. Please pull the new files before push again."
 create_ref_message = "CI message from ebc-aixlib-bot. New reference files were pushed to this branch. The job was successfully and the newly added files are tested in another commit."
 update_whitelist_commit = "CI message from ebc-aixlib-bot. Update or created new whitelist. Please pull the new whitelist before push again."

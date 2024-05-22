@@ -4,7 +4,6 @@ import argparse
 import toml
 import glob
 from pathlib import Path
-import tomli_w as tomlwriter
 from MoCITempGen import ci_templates_config
 from pydantic import Field, field_validator, ValidationInfo
 from typing import Optional
@@ -49,30 +48,28 @@ def _recursive_types(args):
         return args
 
 
-def load_parser_args(file: Path):
-    import importlib.util
+def load_parser_args(python_module: str):
+    import importlib
     import inspect
     import sys
-    file = Path(file)
-    filename = file.name.replace(file.suffix, "")
-    spec = importlib.util.spec_from_file_location(filename, file)
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
-    for name, obj in inspect.getmembers(foo):
-        if inspect.isfunction(obj) and name == "parse_args":
-            pars_arg_dict = {}
-            sys.argv[1:] = []
-            arguments = obj.main([])
-            for args in vars(arguments):
-                if getattr(arguments, args) is None or isinstance(getattr(arguments, args), Path):
-                    pars_arg_dict[args] = str(getattr(arguments, args))
-                else:
-                    pars_arg_dict[args] = getattr(arguments, args)
-            return pars_arg_dict
+    module = importlib.import_module(python_module)
+    try:
+        parse_args_function = getattr(module, "parse_args")
+    except AttributeError:
+        raise ImportError(f"Given module {python_module} has no 'parse_args' function!")
+    pars_arg_dict = {}
+    sys.argv[1:] = []
+    arguments = parse_args_function()
+    for args in vars(arguments):
+        if getattr(arguments, args) is None or isinstance(getattr(arguments, args), Path):
+            pars_arg_dict[args] = str(getattr(arguments, args))
+        else:
+            pars_arg_dict[args] = getattr(arguments, args)
+    return pars_arg_dict
 
 
-def write_parser_args(py_file: Path = None, repl_parser_arg: dict = None, out: list = None):
-    arg_parser = load_parser_args(file=py_file)
+def write_parser_args(python_module: str, repl_parser_arg: dict = None, out: list = None):
+    arg_parser = load_parser_args(python_module=python_module)
     parser_str = ""
     for var in arg_parser:
         out_flag = False
@@ -218,15 +215,15 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             return CITemplatesConfig(**toml.load(file))
 
     def write_OM_check_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.OM_check_file)
+        ci_temp = Path(self.template_files.base, self.template_files.OM_check_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         # out = ["root_library", "library"]
-        arg_PR = write_parser_args(py_file=Path(self.modelica_py_ci.OM_python_check_model_file).name.replace(".py", ""),
+        arg_PR = write_parser_args(python_module=self.modelica_py_ci.OM_python_check_model_file,
                                    repl_parser_arg={"packages": "$lib_package", "om_options": "OM_CHECK",
                                                     "changed_flag": False, "extended_ex_flag": False})
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.OM_python_check_model_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.OM_python_check_model_file,
             repl_parser_arg={"packages": "$lib_package", "om_options": "OM_CHECK",
                              "changed_flag": True, "extended_ex_flag": False})
 
@@ -260,7 +257,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         """
         Write page template, deploy artifacts, plots, reference results
         """
-        ci_temp = Path(self.template_files.dir, self.template_files.page_file)
+        ci_temp = Path(self.template_files.base, self.template_files.page_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.dymola_image,
@@ -298,23 +295,23 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_html_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.html_file)
+        ci_temp = Path(self.template_files.base, self.template_files.html_file)
         print(f"Write {ci_temp}")
-        arg_PR = write_parser_args(py_file=Path(self.modelica_py_ci.html_tidy_file).name.replace(".py", ""),
+        arg_PR = write_parser_args(python_module=self.modelica_py_ci.html_tidy_file,
                                    repl_parser_arg={"packages": self.library, "correct_view_flag": True,
                                                     "log_flag": True, "filter_whitelist_flag": True,
                                                     "changed_flag": False}, out=["git_url"])
-        arg_push = write_parser_args(py_file=Path(self.modelica_py_ci.html_tidy_file).name.replace(".py", ""),
+        arg_push = write_parser_args(python_module=self.modelica_py_ci.html_tidy_file,
                                      repl_parser_arg={"packages": self.library, "correct_view_flag": True,
                                                       "log_flag": True, "filter_whitelist_flag": True,
                                                       "changed_flag": True}, out=["git_url"])
-        arg_wh = write_parser_args(py_file=Path(self.modelica_py_ci.html_tidy_file).name.replace(".py", ""),
+        arg_wh = write_parser_args(python_module=self.modelica_py_ci.html_tidy_file,
                                    repl_parser_arg={"whitelist_flag": True,
                                                     "changed_flag": True}, out=["packages", "library"])
-        arg_correct_html = write_parser_args(py_file=Path(self.modelica_py_ci.html_tidy_file).name.replace(".py", ""),
+        arg_correct_html = write_parser_args(python_module=self.modelica_py_ci.html_tidy_file,
                                              repl_parser_arg={"whitelist_flag": True,
                                                               "changed_flag": True})
-        arg_github_PR = write_parser_args(py_file=Path(self.modelica_py_ci.api_github_file).name.replace(".py", ""),
+        arg_github_PR = write_parser_args(python_module=self.modelica_py_ci.api_github_file,
                                           repl_parser_arg={"github_repo": self.github_repository,
                                                            "working_branch": "$CI_COMMIT_REF_NAME",
                                                            "github_token": "$GITHUB_API_TOKEN", "create_pr_flag": True,
@@ -345,7 +342,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                       arg_push=arg_push,
                                       bot_create_html_file_commit=self.bot_messages.create_html_file_commit,
                                       bot_update_whitelist_commit=self.bot_messages.update_whitelist_commit,
-                                      whitelist_html_file=self.whitelist.html_file,
+                                      whitelist_html_file=self.whitelist_scripts.html_file,
                                       ci_create_html_whitelist_commit=self.ci_create_html_whitelist_commit)
 
         ci_folder = Path(self.templates_dir, self.template_files.html_file).parent
@@ -358,13 +355,13 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         """
         Write Style Check template
         """
-        ci_temp = Path(self.template_files.dir, self.template_files.style_check_file)
+        ci_temp = Path(self.template_files.base, self.template_files.style_check_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
-        arg_PR = write_parser_args(py_file=Path(self.modelica_py_ci.syntax_test_file).name.replace(".py", ""),
+        arg_PR = write_parser_args(python_module=self.modelica_py_ci.syntax_test_file,
                                    repl_parser_arg={"changed_flag": False}, out=["packages"])
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.syntax_test_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.syntax_test_file,
             repl_parser_arg={"changed_flag": True}, out=["packages"])
 
         yml_text = my_template.render(image_name=self.dymola_image,
@@ -389,7 +386,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_ci_whitelist_setting_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.build_whitelist_file)
+        ci_temp = Path(self.template_files.base, self.template_files.build_whitelist_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.dymola_image,
@@ -421,33 +418,33 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         """
         Write (IBPSA) Merge template
         """
-        ci_temp = Path(self.template_files.dir, self.template_files.ibpsa_merge_file)
+        ci_temp = Path(self.template_files.base, self.template_files.ibpsa_merge_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         merge_branch = f'{self.whitelist_library}_Merge'
         arg_whitelist_html = write_parser_args(
-            py_file=Path(self.modelica_py_ci.html_tidy_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.html_tidy_file,
             repl_parser_arg={"whitelist_flag": True}, out=["packages"])
         arg_lib = write_parser_args(
-            py_file=Path(self.modelica_py_ci.library_merge_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.library_merge_file,
             repl_parser_arg={"changed_flag": True})
         arg_whitelist_check = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"changed_flag": False, "dym_options": "DYM_CHECK",
                              "create_whitelist_flag": True, })
         arg_whitelist_sim = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"changed_flag": False,
                              "create_whitelist_flag": True,
                              "dym_options": "DYM_SIM"})
         arg_lock = write_parser_args(
-            py_file=Path(self.modelica_py_ci.lock_model_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.lock_model_file,
             repl_parser_arg={"changed_flag": False,
                              "create_whitelist_flag": True,
                              "dym_options": "DYM_SIM"})
 
         arg_api_pr = write_parser_args(
-            py_file=Path(self.modelica_py_ci.lock_model_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.lock_model_file,
             repl_parser_arg={"gitlab_page": self.gitlab_page,
                              "dym_options": "DYM_SIM"})
 
@@ -486,28 +483,28 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_regression_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.regression_file)
+        ci_temp = Path(self.template_files.base, self.template_files.regression_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_reference_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_reference_file,
             repl_parser_arg={"packages": "$lib_package",
                              "batch": True, "changed_flag": False
                              })
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_reference_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_reference_file,
             repl_parser_arg={"packages": "$lib_package",
                              "batch": True,
                              "changed_flag": True})
         coverage_arg = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_reference_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_reference_file,
             repl_parser_arg={"coverage_only": True,
                              "packages": ".",
                              "batch": False,
                              "changed_flag": False})
 
         arg_ref_check = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_reference_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_reference_file,
             repl_parser_arg={"create_ref": True,
                              "dymola_version": self.dymola_version,
                              "batch": False,
@@ -515,27 +512,27 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             out=["packages", "path", "root_library"])
 
         arg_create_plots = write_parser_args(
-            py_file=Path(self.modelica_py_ci.google_chart_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.google_chart_file,
             repl_parser_arg={"packages": self.library, "create_layout_flag": True,
                              "library": self.library, "funnel_comp_flag": False,
                              "error_flag": False, "line_html_flag": False})
         arg_chart = write_parser_args(
-            py_file=Path(self.modelica_py_ci.google_chart_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.google_chart_file,
             repl_parser_arg={"packages": "$lib_package", "funnel_comp_flag": True,
                              "line_html_flag": True, "error_flag": True})
 
         api_github_arg = write_parser_args(
-            py_file=Path(self.modelica_py_ci.api_github_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.api_github_file,
             repl_parser_arg={"working_branch": "$CI_COMMIT_REF_NAME",
                              "github_token": "${GITHUB_API_TOKEN}",
                              "post_pr_comment_flag": True,
                              "prepare_plot_flag": True})
 
         arg_ref = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_reference_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_reference_file,
             repl_parser_arg={"create_ref_flag": True})
         arg_check_ref_plot = write_parser_args(
-            py_file=Path(self.modelica_py_ci.google_chart_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.google_chart_file,
             repl_parser_arg={"line_html_flag": True, "package": self.library,
                              "funnel_comp_flag:": False, "create_layout_flag": False,
                              "error_flag": False, "new_ref": True,
@@ -571,7 +568,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                       api_github_arg=api_github_arg,
                                       library=self.library,
                                       xvfb_flag=self.xvfb_flag,
-                                      dymola_python_structure_file=self.modelica_py_ci.structure_file,
+                                      dymola_python_structure_file=self.modelica_py_ci.config_structure_file,
                                       arg_ref=arg_ref,
                                       config_ci_eof_file=self.ci_config_files.eof_file,
                                       config_ci_new_create_ref_file=self.ci_config_files.new_create_ref_file,
@@ -587,14 +584,14 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_OM_simulate_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.OM_simulate_file)
+        ci_temp = Path(self.template_files.base, self.template_files.OM_simulate_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
-        arg_PR = write_parser_args(py_file=Path(self.modelica_py_ci.OM_python_check_model_file).name.replace(".py", ""),
+        arg_PR = write_parser_args(python_module=self.modelica_py_ci.OM_python_check_model_file,
                                    repl_parser_arg={"packages": "$lib_package", "om_options": "OM_SIM",
                                                     "changed_flag": False})
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.OM_python_check_model_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.OM_python_check_model_file,
             repl_parser_arg={"packages": "$lib_package", "om_options": "OM_SIM",
                              "changed_flag": True})
 
@@ -622,23 +619,23 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_check_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.check_file)
+        ci_temp = Path(self.template_files.base, self.template_files.check_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
 
         arg_PR = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "changed_flag": False, "extended_ex_flag": False},
             out=["repo_dir", "git_url"])
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "changed_flag": True, "extended_ex_flag": False},
             out=["repo_dir", "git_url"])
 
         arg_wh = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "create_whitelist_flag": True, "extended_ex_flag": False, "filter_whitelist_flag": False,
                              "changed_flag": False, },
@@ -663,7 +660,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                       package_list=self.package_list[self.library],
                                       config_ci_exit_file=self.ci_config_files.exit_file,
                                       bot_update_model_whitelist_commit=self.bot_messages.update_model_whitelist_commit,
-                                      whitelist_model_file=self.whitelist.check_file,
+                                      whitelist_model_file=self.whitelist_scripts.check_file,
                                       python_version=self.conda_environment,
                                       ci_create_model_whitelist_commit=self.ci_create_model_whitelist_commit,
                                       config_ci_changed_file=self.ci_config_files.changed_file,
@@ -676,19 +673,19 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_simulate_template(self):
-        ci_temp = Path(self.template_files.dir, self.template_files.simulate_file)
+        ci_temp = Path(self.template_files.base, self.template_files.simulate_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         arg_PR = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_SIM",
                              "changed_flag": False})
         arg_push = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_SIM",
                              "changed_flag": True})
         arg_wh = write_parser_args(
-            py_file=Path(self.modelica_py_ci.test_validate_file).name.replace(".py", ""),
+            python_module=self.modelica_py_ci.test_validate_file,
             repl_parser_arg={"packages": ".", "dym_options": "DYM_SIM",
                              "create_whitelist_flag": True,
                              "changed_flag": False})
@@ -712,7 +709,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                       package_list=self.package_list[self.library],
                                       arg_wh=arg_wh,
                                       bot_update_model_whitelist_commit=self.bot_messages.update_example_whitelist_commit,
-                                      whitelist_model_file=self.whitelist.simulate_file,
+                                      whitelist_model_file=self.whitelist_scripts.simulate_file,
                                       ci_create_model_whitelist_commit=self.ci_create_simulate_whitelist_commit,
                                       result_dir=self.result.dir,
                                       expire_in_time=self.expire_in_time,
@@ -731,7 +728,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         print(f'The CI settings are saved in file {self.toml_ci_setting_file}')
 
     def write_main_yml(self, stage_list, ci_template_list):
-        ci_temp = Path(self.template_files.dir, self.template_files.main_yml_file)
+        ci_temp = Path(self.template_files.base, self.template_files.main_yml_file)
         print(f"Write {ci_temp}")
         my_template = Template(filename=str(ci_temp))
         yml_text = my_template.render(image_name=self.dymola_image,
@@ -781,142 +778,6 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         for stage in stage_list:
             print(f'Setting stages: {stage}')
         return stage_list
-
-
-class Read_config_data(CITemplatesConfig):
-
-    def call_toml_data(self):
-        data = toml.load(self.toml_ci_setting_file)
-        library = self._read_library(data=data)
-        package_list = self._read_package_list(data=data)
-        dymola_version = self._read_dymola_version(data=data)
-        whitelist_library = self._read_whitelist_library(data=data)
-        git_url = self._read_git_url(data=data)
-        whitelist_path = self._read_whitelist_path(data=data)
-        python_version = self._read_pythonversion(data=data)
-        config_list = self._read_config_list(data=data)
-        ci_template_list = self._read_file_list(data=data)
-        stage_list = self._read_stages(data=data)
-        github_repository = self._read_github_repo(data=data)
-        image_name = self._read_image_name(data=data)
-        gitlab_page = self._read_gitlab_page(data=data)
-        return library, package_list, dymola_version, whitelist_library, git_url, whitelist_path, python_version, config_list, stage_list, ci_template_list, github_repository, image_name, gitlab_page
-
-    @staticmethod
-    def _read_gitlab_page(data):
-        gitlab_page = data["gitlab_page"]
-        gitlab_page = gitlab_page["gitlab_page"]
-        print(f'Setting library: {gitlab_page}')
-        return gitlab_page
-
-    @staticmethod
-    def _read_github_repo(data):
-
-        github_repo = data["github_repo"]
-        github_repo = github_repo["github_repo"]
-        print(f'Setting library: {github_repo}')
-        return github_repo
-
-    @staticmethod
-    def _read_library(data):
-
-        library = data["library"]
-        library = library["library_name"]
-        print(f'Setting library: {library}')
-        return library
-
-    @staticmethod
-    def _read_whitelist_library(data):
-        whitelist_library = data["whitelist_library"]
-        whitelist_library = whitelist_library["whitelist_library_name"]
-        if whitelist_library == "None":
-            whitelist_library = None
-        print(f'Setting whitelist_library: {whitelist_library}')
-        return whitelist_library
-
-    @staticmethod
-    def _read_package_list(data):
-        package_list = data["Package"]
-        package_list = package_list["package_list"]
-        for package in package_list:
-            print(f'Setting package: {package}')
-        return package_list
-
-    @staticmethod
-    def _read_dymola_version(data):
-        dymola_version = data["dymola_version"]
-        dymola_version = dymola_version["dymola_version"]
-        print(f'Setting dymola_version: {dymola_version}')
-        return dymola_version
-
-    @staticmethod
-    def _read_pythonversion(data):
-        pythonversion = data["python_version"]
-        pythonversion = pythonversion["python_version"]
-        print(f'Setting python version: {pythonversion}')
-        return pythonversion
-
-    @staticmethod
-    def _read_stages(data):
-        stages = data["stages"]
-        stages = stages["stage_list"]
-        for stage in stages:
-            print(f'Setting stage: {stage}')
-        return stages
-
-    @staticmethod
-    def _read_image_name(data):
-        image_name = data["image_name"]
-        image_name = image_name["image"]
-        print(f'Setting image: {image_name}')
-        return image_name
-
-    @staticmethod
-    def _read_variable_list(data):
-        variable_list = data["variable_list"]
-        variable_list = variable_list["variablelist"]
-        print(f'Setting variables: {variable_list}')
-        return variable_list
-
-    @staticmethod
-    def _read_ci_commands(data):
-        ci_commit_commands = data["ci_commit_commands"]
-        ci_commit_commands = ci_commit_commands["commitlist"]
-        print(f'Setting ci commands: {ci_commit_commands}')
-        return ci_commit_commands
-
-    @staticmethod
-    def _read_file_list(data):
-        file_list = data["File_list"]
-        file_list = file_list["filelist"]
-        for file in file_list:
-            print(f'Setting yaml file list: {file}')
-        return file_list
-
-    @staticmethod
-    def _read_config_list(data):
-        config_list = data["config_list"]
-        config_list = config_list["configlist"]
-        print(f'Setting config list: {config_list}')
-        return config_list
-
-    @staticmethod
-    def _read_git_url(data):
-        git_url = data["git_url"]
-        git_url = git_url["git_url"]
-        if git_url == "None":
-            git_url = None
-        print(f'Setting git whitelist url: {git_url}')
-        return git_url
-
-    @staticmethod
-    def _read_whitelist_path(data):
-        whitelist_path = data["whitelist_library_path"]
-        whitelist_path = whitelist_path["whitelist_path"]
-        if whitelist_path == "None":
-            whitelist_path = None
-        print(f'Setting git whitelist url: {whitelist_path}')
-        return whitelist_path
 
 
 def yes_no_input(message):
@@ -1031,7 +892,7 @@ def setting_ci_whitelist():
         f'longer tested in the future and are filtered out.'
     )
     if not yes:
-        return False, "None", "None"
+        return None
     # Else
     whitelist_library = input_with_default(
         message='What library models should on whitelist: Give the name of the library',
@@ -1039,16 +900,15 @@ def setting_ci_whitelist():
     )
     print(f'Setting whitelist library: {whitelist_library}')
     locally_available = yes_no_input(f'If the foreign library is local on the PC?')
+    lib_path = "modelica-ibpsa"
     if locally_available:
         whitelist_path = input(
-            f'Specify the local path of the library (e.g. ..\..\AixLib). '
+            f'Specify the local path of the library (e.g. ..\..\IBPSA). '
             f'(If the library is located in the directory, do not enter an entry.) '
         )
         lib_path = os.path.join(whitelist_path, whitelist_library, "package.mo").replace(os.sep, "/")
         config_structure.check_file_setting(lib_path)
         print(f'path of library: {lib_path}')
-        return True, whitelist_library, ("root_whitelist_library", lib_path)
-    # Else
     git_url = input_with_default(
         message='Give the url of the library repository',
         default="https://github.com/ibpsa/modelica-ibpsa.git"
@@ -1059,7 +919,11 @@ def setting_ci_whitelist():
         default="modelica-ibpsa"
     )
     print(f'Setting repo_dir: {repo_dir}')
-    return True, whitelist_library, {"git_url": git_url, "repo_dir": repo_dir}
+    return ci_templates_config.WhitelistAndMergeLibraryConfig(
+        library=whitelist_library,
+        local_path=lib_path,
+        git_url=git_url
+    )
 
 
 def setting_ci_github_repo():
@@ -1160,7 +1024,7 @@ def get_toml_var(self, pattern_1: str, pattern_2: str, to_group: str):
 def create_toml_config(path):
     library_path, library = setting_ci_libraries()
 
-    filter_whitelist_flag, whitelist_library, whitelist_path = setting_ci_whitelist()
+    whitelist_library = setting_ci_whitelist()
     package_list = setting_ci_packages(library=library, library_path=library_path)
     stage_list = setting_ci_templates_types()
     conda_environment = setting_ci_python_conda_env()
@@ -1174,10 +1038,7 @@ def create_toml_config(path):
     CITemplatesConfig(
         stage_list=stage_list,
         library=library,
-        library_path=library_path,
         package_list=package_list,
-        filter_whitelist_flag=filter_whitelist_flag,
-        whitelist_path=whitelist_path,
         whitelist_library=whitelist_library,
         conda_environment=conda_environment,
         dymola_version=dymola_version,
@@ -1185,8 +1046,34 @@ def create_toml_config(path):
         gitlab_page=gitlab_page,
         dymola_image=dymola_image,
         changed_flag=changed_flag,
-        extended_examples_flag=extended_examples_flag
+        extended_examples_flag=extended_examples_flag,
+        template_files=ci_templates_config.TemplateFilesConfig(base=Path(__file__).parents[1].absolute())
     ).to_toml(path=path)
+
+
+def write_templates(path: Path):
+    ci_templates_config = CITemplatesConfig.from_toml(path=path)
+
+    for temp in ci_templates_config.stage_list:
+        if temp == "check":
+            ci_templates_config.write_check_template()
+            ci_templates_config.write_OM_check_template()
+        if temp == "simulate":
+            ci_templates_config.write_simulate_template()
+            ci_templates_config.write_OM_simulate_template()
+        if temp == "regression":
+            ci_templates_config.write_regression_template()
+        if temp == "html":
+            ci_templates_config.write_html_template()
+        if temp == "style":
+            ci_templates_config.write_style_template()
+        if temp == "Merge" and ci_templates_config.whitelist_library is not None:
+            ci_templates_config.write_merge_template()
+    ci_templates_config.write_ci_whitelist_setting_template()
+    ci_templates_config.write_page_template()
+    ci_template_list = ci_templates_config.get_ci_templates()
+    stage_list = ci_templates_config.get_ci_stages(file_list=ci_template_list)
+    ci_templates_config.write_main_yml(stage_list=stage_list, ci_template_list=ci_template_list)
 
 
 if __name__ == '__main__':
@@ -1197,6 +1084,9 @@ if __name__ == '__main__':
     PARSER_TOML_FILE = Path(__file__).parent.joinpath(
         "ci_config", "toml_files", "parser.toml"
     )
+    #create_toml_config(path=TEMPLATES_TOML_FILE)
+    write_templates(path=TEMPLATES_TOML_FILE)
+
     if args.set_setting is True:
         create_toml_config(path=TEMPLATES_TOML_FILE)
     if args.update_toml:
@@ -1205,25 +1095,4 @@ if __name__ == '__main__':
             ci_templates_toml=TEMPLATES_TOML_FILE
         )
     if args.write_templates is True:
-        CI_CONFIG = CITemplatesConfig.from_toml(path=TEMPLATES_TOML_FILE)
-
-        for temp in CI_CONFIG.stage_list:
-            if temp == "check":
-                CI_CONFIG.write_check_template()
-                CI_CONFIG.write_OM_check_template()
-            if temp == "simulate":
-                CI_CONFIG.write_simulate_template()
-                CI_CONFIG.write_OM_simulate_template()
-            if temp == "regression":
-                CI_CONFIG.write_regression_template()
-            if temp == "html":
-                CI_CONFIG.write_html_template()
-            if temp == "style":
-                CI_CONFIG.write_style_template()
-            if temp == "Merge" and data_dict["whitelist_library"] is not None:
-                CI_CONFIG.write_merge_template()
-        CI_CONFIG.write_ci_whitelist_setting_template()
-        CI_CONFIG.write_page_template()
-        ci_template_list = CI_CONFIG.get_ci_templates()
-        stage_list = CI_CONFIG.get_ci_stages(file_list=ci_template_list)
-        CI_CONFIG.write_main_yml(stage_list=stage_list, ci_template_list=ci_template_list)
+        write_templates(path=TEMPLATES_TOML_FILE)

@@ -1,4 +1,4 @@
-from ci_test_config import ci_config
+from ModelicaPyCI.config import CI_CONFIG
 
 
 class ci_template_config(ci_config):
