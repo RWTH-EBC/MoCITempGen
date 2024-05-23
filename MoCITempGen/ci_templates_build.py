@@ -439,9 +439,10 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "dym_options": "DYM_SIM"})
 
         arg_api_pr = write_parser_args(
-            python_module=self.modelica_py_ci.lock_model_module,
+            python_module=self.modelica_py_ci.api_github_module,
             user_args=self.dict(),
-            template_script_args={"dym_options": "DYM_SIM"})
+            template_script_args={"dym_options": "DYM_SIM"}
+        )
 
         yml_text = my_template.render(
             utilities_directory=self.get_utilities_path(),
