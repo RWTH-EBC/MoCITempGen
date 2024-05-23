@@ -3,9 +3,8 @@
 # library: ${library}
 # PR_main_branch_rule : ${PR_main_branch_rule}
 # ci_OM_sim_commit: ${ci_OM_sim_commit}
-# dymola_python_test_url : ${dymola_python_test_url}
-# dymola_python_dir: ${dymola_python_dir}
-# OM_python_check_model_file: ${OM_python_check_model_file}
+# modelica_py_ci_url : ${modelica_py_ci_url}
+# OM_python_check_model_module: ${OM_python_check_model_module}
 # arg_PR : ${arg_PR}
 # arg_push: ${arg_push}
 # result_dir: ${result_dir}
@@ -38,10 +37,10 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_simulate}
     before_script:
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - git clone ${modelica_py_ci_url}
+        - pip install -e  ${modelica_py_ci_package_name}
     script:
-        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_PR}
+        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -57,12 +56,12 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_simulate}
     before_script:
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - git clone ${modelica_py_ci_url}
+        - pip install -e  ${modelica_py_ci_package_name}
     script:
-        - python3 ${dymola_python_config_structure_file} --changed-model
+        - python3 ${modelicapyci_config_structure_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_file}  ${arg_push}
+        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_push}
     artifacts:
         when: on_failure
         paths:

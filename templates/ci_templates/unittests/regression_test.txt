@@ -3,12 +3,11 @@
 # ci_stage_ref_check :${ci_stage_ref_check}
 # ci_stage_plot_ref : ${ci_stage_plot_ref}
 # ci_stage_prepare : ${ci_stage_prepare}
-# dymola_python_test_url_  ${dymola_python_test_url}
+# modelica_py_ci_url_  ${modelica_py_ci_url}
 # python_version : ${python_version}
 # buildingspy_upgrade : ${buildingspy_upgrade}
-# ${dymola_python_dir} : dymola_python_dir
-# dymola_python_test_reference_file: ${dymola_python_test_reference_file}
-# dymola_python_google_chart_file : ${dymola_python_google_chart_file}
+# modelicapyci_test_reference_module: ${modelicapyci_test_reference_module}
+# modelicapyci_google_chart_module : ${modelicapyci_google_chart_module}
 # config_ci_exit_file : ${config_ci_exit_file}
 # result_dir : ${result_dir}
 # arg_chart : ${arg_chart}
@@ -18,7 +17,7 @@
 # arg_push: ${arg_push}
 # arg_chart: ${arg_chart}
 # package_list: ${package_list}
-# dymola_python_api_github_file: ${dymola_python_api_github_file}
+# modelicapyci_api_github_module: ${modelicapyci_api_github_module}
 # {arg_create_plots} : ${arg_create_plots}
 # api_github_arg: ${api_github_arg}
 # commit_string = ${commit_string}
@@ -26,7 +25,7 @@
 # library: ${library}
 # ci_regression_test_commit :  ${ci_regression_test_commit}
 # xvfb_flag: ${xvfb_flag}
-# dymola_python_structure_file: ${dymola_python_structure_file}
+# modelicapyci_structure_module: ${modelicapyci_structure_module}
 # arg_ref: ${arg_ref}
 # config_ci_eof_file: ${config_ci_eof_file}
 # config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
@@ -65,11 +64,11 @@ stages:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${arg_PR}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_PR}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            python ${dymola_python_google_chart_file} ${arg_chart} ;
+            python -m ${modelicapyci_google_chart_module} ${arg_chart} ;
             exit 1 ;
           else
             exit 0 ;
@@ -94,12 +93,12 @@ stages:
 
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${arg_push}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_push}
 
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
-            python ${dymola_python_google_chart_file} ${arg_chart} ;
+            python -m ${modelicapyci_google_chart_module} ${arg_chart} ;
             exit 1 ;
           else
             exit 0 ;
@@ -137,7 +136,7 @@ Regression_overall_coverage:PR:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module} ${coverage_arg}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${coverage_arg}
     artifacts:
         when: on_failure
         paths:
@@ -156,7 +155,7 @@ Regression_overall_coverage:Push:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module}  ${coverage_arg}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${coverage_arg}
     artifacts:
         when: on_failure
         paths:
@@ -176,8 +175,8 @@ prepare_create_plots:Push:
         - pip install pandas mako matplot toml requests
 
     script:
-        - python ${dymola_python_google_chart_module} ${arg_create_plots}
-        - python ${dymola_python_api_github_modulehon_api}   ${api_github_arg}
+        - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
+        - python -m ${modelicapyci_api_github_modulehon_api}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
@@ -193,12 +192,9 @@ prepare_create_plots:PR:
     stage: ${ci_stage_prepare}
     before_script:
         - !reference [.clone_ci_templates, script]
-
-
-        - pip install -e ${dymola_python_test_dir}
     script:
-        - python ${dymola_python_google_chart_module} ${arg_create_plots}
-        - python ${dymola_python_api_github_module}   ${api_github_arg}
+        - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
+        - python -m ${modelicapyci_api_github_module}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
@@ -227,8 +223,8 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python ${dymola_python_configuration_module} --create-ref
-        - cd ${library} && ${xvfb_flag} python ${dymola_python_test_reference_module}  ${arg_ref_check}  < ../${config_ci_eof_file}
+        - python -m ${modelicapyci_configuration_module} --create-ref
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}  < ../${config_ci_eof_file}
     after_script:
         - source activate ${python_version}
         - cd CorrectedVersion/$CI_PROJECT_NAME
@@ -237,7 +233,7 @@ RegressionTest_Check_References:
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
             message="${bot_create_ref_commit}" ;
             pip install pandas mako matplot;
-            python ${dymola_python_google_chart_module} ${arg_check_ref_plot} ;
+            python -m ${modelicapyci_google_chart_module} ${arg_check_ref_plot} ;
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
@@ -265,8 +261,8 @@ plot_reference_results:
         - pip install pandas mako matplot toml requests
 
     script:
-        - python ${dymola_python_google_chart_module} --line-html --show-ref --single-package ${library} --library ${library}
-        - python ${dymola_python_api_github_module} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
+        - python -m ${modelicapyci_google_chart_module} --line-html --show-ref --single-package ${library} --library ${library}
+        - python -m ${modelicapyci_api_github_module} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
     artifacts:
         when: always
         paths:

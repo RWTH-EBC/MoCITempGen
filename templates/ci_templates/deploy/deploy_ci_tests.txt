@@ -15,6 +15,6 @@ CI_tests:
         - chmod 600 ~/.ssh/id_rsa
         - git config --global user.name "${GITLAB_USER_NAME}"
         - git config --global user.email "${GITLAB_USER_EMAIL}"
-        - git clone ${dymola_python_test_url}
-        - pip install -e  ${dymola_python_test_dir}
+        - git clone ${modelica_py_ci_url}
+        - pip install -e  ${modelica_py_ci_package_name}
     when: always

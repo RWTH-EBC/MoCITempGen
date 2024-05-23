@@ -8,9 +8,8 @@
 # library: ${library}
 # ci_check_commit ${ci_check_commit}
 # python_version: ${python_version}
-# dymola_python_test_url: ${dymola_python_test_url}
-# dymola_python_dir: ${dymola_python_dir}
-# dymola_python_test_validate_file: ${dymola_python_test_validate_file}
+# modelica_py_ci_url: ${modelica_py_ci_url}
+# modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
 # package_list: ${package_list}
 # arg_wh: ${arg_wh}
 # bot_update_model_whitelist_commit: ${bot_update_model_whitelist_commit}
@@ -51,7 +50,7 @@ stages:
         - !reference [.custom_install_additional_modelica_libraries, script]
 
     script:
-        - ${xvfb_flag} python ${dymola_python_test_validate_module}  ${arg_PR}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -68,10 +67,10 @@ stages:
         - !reference [.custom_install_additional_modelica_libraries, script]
 
     script:
-        -  ${xvfb_flag} python ${dymola_python_test_validate_modulelidate_file} --single-package $lib_package --library ${library} -DS ${dymola_version} ${whitelist_flag} ${filter_flag} --simulate-examples
-        - python ${dymola_python_config_structure_file} --changed-model
+        -  ${xvfb_flag} python -m ${modelicapyci_test_validate_modulelidate_module} --single-package $lib_package --library ${library} -DS ${dymola_version} ${whitelist_flag} ${filter_flag} --simulate-examples
+        - python -m ${modelicapyci_config_structure_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python ${dymola_python_test_validate_module}  ${arg_push}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_push}
     artifacts:
         when: on_failure
         paths:
@@ -109,7 +108,7 @@ simulate_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - ${xvfb_flag} python ${dymola_python_test_validate_module}  ${arg_wh}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then

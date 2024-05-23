@@ -4,9 +4,8 @@
 #  ci_stage_open_PR : ${ci_stage_open_PR}
 #  html_praefix : ${html_praefix}
 # python_version : ${python_version}
-# dymola_python_test_url : ${dymola_python_test_url}
-# dymola_python_dir : ${dymola_python_dir}
-# ${dymola_python_html_tidy_file} : dymola_python_html_tidy_file
+# modelica_py_ci_url : ${modelica_py_ci_url}
+# ${modelicapyci_html_tidy_module} : modelicapyci_html_tidy_module
 # arg_correct_html: ${arg_correct_html}
 # result_dir : ${result_dir}
 # expire_in_time : ${expire_in_time}
@@ -14,7 +13,7 @@
 # library : ${library}
 # PR_main_branch_rule : ${PR_main_branch_rule}
 # ci_html_commit : ${ci_html_commit}
-# ${dymola_python_api_github_file} : dymola_python_api_github_file
+# ${modelicapyci_api_github_module} : modelicapyci_api_github_module
 # arg_PR : ${arg_PR}
 # arg_wh : ${arg_wh}
 # bot_create_html_file_commit : ${bot_create_html_file_commit}
@@ -56,7 +55,7 @@ Check_HTML:PR:
         - !reference [.clone_ci_templates, script]
 
     script:
-        - python ${dymola_python_html_tidy_module} ${arg_PR}
+        - python -m ${modelicapyci_html_tidy_module} ${arg_PR}
     artifacts:
         paths:
             - ${result_dir}/
@@ -70,7 +69,7 @@ Check_HTML:push:
         - !reference [.github_ssh_auth, script]
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_html_tidy_module} ${arg_push}
+        - python -m ${modelicapyci_html_tidy_module} ${arg_push}
     artifacts:
         paths:
             - ${result_dir}/
@@ -86,7 +85,7 @@ Open_Pull_HTML_Request:
         - !reference [.github_ssh_auth, script]
         - !reference [.clone_ci_templates, script]
     script:
-        - python ${dymola_python_api_github_file} ${arg_github_PR}
+        - python -m ${modelicapyci_api_github_module} ${arg_github_PR}
     rules:
         - if: $CI_COMMIT_MESSAGE =~ /${bot_create_html_file_commit}/ && $CI_COMMIT_BRANCH =~ /^${html_praefix}.*$/ && $CI_PIPELINE_SOURCE == "push"
           when: on_success
@@ -102,7 +101,7 @@ html_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python ${dymola_python_html_tidy_module} ${arg_wh}        - message="${bot_update_whitelist_commit}"
+        - python -m ${modelicapyci_html_tidy_module} ${arg_wh}        - message="${bot_update_whitelist_commit}"
         - git add ${whitelist_html_file}
         - git commit -m "$message"
         - git push git@github.com:$Github_Repository.git

@@ -1,9 +1,8 @@
 # image_name : ${image_name}
 # ci_stage_style_check : ${ci_stage_style_check}
 # python_version :   ${python_version}
-# dymola_python_test_url : ${dymola_python_test_url}
-# dymola_python_dir : ${dymola_python_dir}
-# dymola_python_syntax_test_file : ${dymola_python_syntax_test_file}
+# modelica_py_ci_url : ${modelica_py_ci_url}
+# modelicapyci_syntax_test_module : ${modelicapyci_syntax_test_module}
 # xvfb_flag : ${xvfb_flag}
 # library : ${library}
 # commit_string : ${commit_string}
@@ -41,7 +40,7 @@ StyleCheck:${library}:PR:
         - !reference [.clone_ci_templates, script]
 
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_file} ${arg_PR}
+        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -56,9 +55,9 @@ StyleCheck:${library}:Push:
     stage: ${ci_stage_style_check}
     before_script:
         - !reference [.clone_ci_templates, script]
-        - pip install -e  ${dymola_python_test_dir}
+        - pip install -e  ${modelica_py_ci_package_name}
     script:
-        - ${xvfb_flag} python ${dymola_python_syntax_test_module} ${arg_Push}
+        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_Push}
     artifacts:
         when: on_failure
         paths:

@@ -21,7 +21,7 @@
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
     - git clone ${modelica_ci_test_url}
-    - pip install -e ${dymola_python_test_dir}
+    - pip install -e ${modelica_py_ci_package_name}
 
 .custom_install_additional_modelica_libraries:
   script:
