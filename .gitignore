@@ -2,3 +2,78 @@
 *.pyc
 CI_templates_python/dymola-ci-tests/*
 __pycache__
+
+
+# Python #
+##########
+.metadata
+*.bak
+.project
+.pydevproject
+
+
+# Windows Office #
+##################
+~$*
+
+
+# pip install #
+###############
+*.egg-info/
+*.egg/
+*.eggs
+dist
+*.pypirc
+
+# PyCharm #
+###########
+.idea/
+
+
+# Modelica / Dymola #
+#####################
+*.bak-mo
+*.mat
+!AixLib/Resources/**/*.mat
+*.mof
+buildlog.txt
+diagnostics.txt
+diagnostics_summary.txt
+dsfinal.txt
+dsin.txt
+dslog.txt
+dsmodel_fmuconf.h
+dsmodel.c
+dsmodelext*.c
+dsmodelext*.obj
+dsres.txt
+dymosim
+dymosim.exe
+dymosim.exp
+dymosim.lib
+empty.txt
+eventlog.txt
+failure
+fmiModelIdentifier.h
+help/
+modelDescription.xml
+request
+stat
+status
+stop
+success
+
+
+# Ignore files created by BuildingsPy #
+#######################################
+*.py[cod]
+*simulator*.log
+*unitTests*.log
+*comparison*.log
+funnel_comp
+
+#Ignore files create by HTML Check
+HTML_correct_log.txt
+HTML_error_log.txt
+#Ignore Dymola License log
+Log_NO_DYM_STANDARD_LIC_AVAILABLE.txt
