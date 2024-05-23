@@ -417,7 +417,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             user_args=self.dict(),
             template_script_args={
                 "merge_library_dir": merge_library_dir,
-                "library_dir": f"{self.library}"
+                "library_dir": f"temp_{self.library}"
             }
         )
         arg_whitelist_check = write_parser_args(
