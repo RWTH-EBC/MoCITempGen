@@ -23,6 +23,7 @@
     - source activate ${conda_environment}
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
+    - pip install git+https://github.com/FWuellhorst/BuildingsPy.git@554_join_error
     - pip install git+${modelica_py_ci_url}
 
 .custom_install_additional_modelica_libraries:
