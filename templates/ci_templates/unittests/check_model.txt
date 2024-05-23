@@ -53,7 +53,6 @@ stages:
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install -e  ${modelica_py_ci_package_name}
     script:
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_PR}
     artifacts:
@@ -70,7 +69,6 @@ stages:
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install -e  ${modelica_py_ci_package_name}
     script:
         - python -m ${modelicapyci_configuration_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}

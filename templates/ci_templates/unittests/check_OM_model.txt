@@ -14,6 +14,8 @@
 # ${packages}
 # modelica_py_ci_package_name : ${modelica_py_ci_package_name}
 
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_OM_model_check}
 
@@ -37,8 +39,7 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - git clone ${modelica_py_ci_url}
-        - pip install -e  ${modelica_py_ci_package_name}
+        - !reference [.clone_ci_templates, script]
     script:
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_PR}
     artifacts:
@@ -56,8 +57,7 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - git clone ${modelica_py_ci_url}
-        - pip install -e  ${modelica_py_ci_package_name}
+        - !reference [.clone_ci_templates, script]
     script:
         - python3 ${modelicapyci_config_structure_module} --changed-model
         - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}

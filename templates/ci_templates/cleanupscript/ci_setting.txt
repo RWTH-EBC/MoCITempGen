@@ -10,7 +10,6 @@ Test_CI_Setting:
     before_script:
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - !reference [.clone_ci_templates, script]
-        - pip install -e  ${modelica_py_ci_package_name}
     script:
         - python MoCITempGen/CITests/CleanUp/setting_check.py --github-private-key $GITHUB_PRIVATE_KEY --github-token $GITHUB_API_TOKEN
     only:
@@ -25,7 +24,6 @@ Create_templates:
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.github_ssh_auth, script]
-        - pip install -e  ${modelica_py_ci_package_name}
     script:
         - mkdir build_template && cd build_template
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git

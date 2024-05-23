@@ -55,7 +55,6 @@ StyleCheck:${library}:Push:
     stage: ${ci_stage_style_check}
     before_script:
         - !reference [.clone_ci_templates, script]
-        - pip install -e  ${modelica_py_ci_package_name}
     script:
         - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_Push}
     artifacts:

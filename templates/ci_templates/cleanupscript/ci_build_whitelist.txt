@@ -27,8 +27,6 @@ CI_Whitelist_Setting:
     before_script:
         - !reference [.github_ssh_auth, script]
         - !reference [.clone_ci_templates, script]
-        - pip install -e  ${modelica_py_ci_package_name}
-
     script:
         - mkdir build_whitelist
         - cd build_whitelist

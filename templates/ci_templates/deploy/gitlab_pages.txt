@@ -22,7 +22,3 @@ pages:
         expire_in: ${expire_in_time}
     when: always
     allow_failure: true
-
-
-
-    allow_failure: true 

@@ -16,7 +16,9 @@ main_branch_list = [ "main", "development",]
 buildingspy_upgrade = "git+https://github.com/MichaMans/BuildingsPy@testexamplescoverage"
 toml_setting_file_template = "Setting/CI_setting_template.txt"
 toml_setting_file = "Setting/CI_setting.toml"
-templates_dir = "dymola-ci-tests/ci_templates"
+library_path = "D:/04_git/AixLib"
+templates_dir = "bin/ci-tests"
+utilities_directory = "utilities.yml"
 
 [package_list]
 AixLib = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete", "Resources", "Systems", "ThermalZones", "Types", "UsersGuide", "Utilities",]

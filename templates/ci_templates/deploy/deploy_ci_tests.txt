@@ -16,5 +16,4 @@ CI_tests:
         - git config --global user.name "${GITLAB_USER_NAME}"
         - git config --global user.email "${GITLAB_USER_EMAIL}"
         - git clone ${modelica_py_ci_url}
-        - pip install -e  ${modelica_py_ci_package_name}
     when: always

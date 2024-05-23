@@ -1,3 +1,4 @@
+# You can adjust the sequence of the stages to your needs
 stages:
     %for stage in stage_list:
     - ${stage}
@@ -6,8 +7,6 @@ stages:
 variables:
     Github_Repository: ${github_repository}
     GITLAB_Page:  ${gitlab_page}
-
-
 
 include:
   %for file in file_list:
