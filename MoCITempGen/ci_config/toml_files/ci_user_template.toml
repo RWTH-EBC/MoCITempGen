@@ -128,7 +128,7 @@ simulate_file = "dymola-ci-tests/ci_whitelist/ci_simulate_whitelist.txt"
 html_file = "dymola-ci-tests/ci_whitelist/rci_html_whitelist.txt"
 ref_file = "dymola-ci-tests/ci_whitelist/ci_reference_check_whitelist.txt"
 
-[whitelist_library]
+[whitelist_library_config]
 local_path = "modelica-ibpsa"
 library = "IBPSA"
 git_url = "https://github.com/ibpsa/modelica-ibpsa.git"

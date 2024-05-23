@@ -405,13 +405,19 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         ci_temp = Path(self.template_files.base, self.template_files.ibpsa_merge_file)
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        merge_branch = f'Custom{self.whitelist_library.library}_Merge'
-        merge_library_dir = f"{self.whitelist_library.library}_folder"
+        merge_branch = f'Custom{self.whitelist_library_config.library}_Merge'
+        merge_library_dir = f"{self.whitelist_library_config.library}_folder"
 
         arg_whitelist_html = write_parser_args(
             python_module=self.modelica_py_ci.html_tidy_module,
             user_args=self.dict(),
-            template_script_args={"whitelist_flag": True}, skip_args=["packages"])
+            template_script_args={
+                "whitelist_library": self.whitelist_library_config.library,
+                "git-url": self.whitelist_library_config.git_url,
+                "root_whitelist_library": self.whitelist_library_config.local_path,
+                "whitelist_flag": True,
+            }, skip_args=["packages"]
+        )
         arg_lib = write_parser_args(
             python_module=self.modelica_py_ci.library_merge_module,
             user_args=self.dict(),
@@ -423,12 +429,20 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_whitelist_check = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"dym_options": "DYM_CHECK",
-                                  "create_whitelist_flag": True, })
+            template_script_args={
+                "whitelist_library": self.whitelist_library_config.library,
+                "git-url": self.whitelist_library_config.git_url,
+                "root_whitelist_library": self.whitelist_library_config.local_path,
+                "dym_options": "DYM_CHECK",
+                "create_whitelist_flag": True, }
+        )
         arg_whitelist_sim = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
             template_script_args={
+                "whitelist_library": self.whitelist_library_config.library,
+                "git-url": self.whitelist_library_config.git_url,
+                "root_whitelist_library": self.whitelist_library_config.local_path,
                 "create_whitelist_flag": True,
                 "dym_options": "DYM_SIM"})
         arg_lock = write_parser_args(
@@ -451,7 +465,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_stage_update_whitelist=self.stage_names.update_whitelist,
             ci_stage_open_PR=self.stage_names.open_PR,
             python_version=self.conda_environment,
-            git_url=self.whitelist_library.git_url,
+            git_url=self.whitelist_library_config.git_url,
             merge_library_dir=merge_library_dir,
             library=self.library,
             merge_branch=merge_branch,
@@ -467,7 +481,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
             xvfb_flag=self.xvfb_flag,
             arg_lock=arg_lock,
-            whitelist_library=self.whitelist_library.library,
+            whitelist_library=self.whitelist_library_config.library,
             bot_merge_commit=self.bot_messages.merge_commit,
             result_dir=self.result.dir,
             modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
@@ -1094,7 +1108,7 @@ def write_templates(path: Path):
             ci_templates_config.write_html_template()
         if temp == "style":
             ci_templates_config.write_style_template()
-        if temp == "Merge" and ci_templates_config.whitelist_library is not None:
+        if temp == "Merge" and ci_templates_config.whitelist_library_config is not None:
             ci_templates_config.write_merge_template()
     #ci_templates_config.write_ci_whitelist_setting_template()
     ci_templates_config.write_page_template()
