@@ -23,7 +23,7 @@
     - source activate ${conda_environment} || echo "${conda_environment} is not installed, can't activate it"
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
-    - pip install git+https://github.com/FWuellhorst/BuildingsPy.git@554_join_error
+    - pip install git+https://github.com/lbl-srg/BuildingsPy.git@master
     - pip install git+${modelica_py_ci_url}
 
 .custom_install_additional_modelica_libraries:
