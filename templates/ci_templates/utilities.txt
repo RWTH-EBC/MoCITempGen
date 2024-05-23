@@ -20,7 +20,7 @@
 .clone_ci_templates:
   script:
     - export PIP_CACHE_DIR="/opt/cache/pip"
-    - source activate ${conda_environment}
+    - source activate ${conda_environment} || echo "${conda_environment} is not installed, can't activate it"
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
     - pip install git+https://github.com/FWuellhorst/BuildingsPy.git@554_join_error
