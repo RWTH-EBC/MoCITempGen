@@ -68,71 +68,84 @@ def load_parser_args(python_module: str):
     return pars_arg_dict
 
 
-def write_parser_args(python_module: str, repl_parser_arg: dict = None, out: list = None):
+def write_parser_args(
+        python_module: str,
+        user_args: dict,
+        template_script_args: dict,
+        skip_args: list = None
+):
     arg_parser = load_parser_args(python_module=python_module)
     parser_str = ""
+    if skip_args is None:
+        skip_args = []
+    if template_script_args is None:
+        template_script_args = {}
+    if user_args is None:
+        user_args = {}
+    duplicates = set(user_args).intersection(template_script_args)
+    if duplicates:
+        raise KeyError("user_args and template_script_args have duplicate names, "
+                       f"ensure separate names for both. Duplicates: {duplicates}")
+    replace_parsers_args_defaults = {**user_args, **template_script_args}
     for var in arg_parser:
-        out_flag = False
-        if out is not None:
-            for o in out:
-                if o == var:
-                    out_flag = True
-                    break
-        if out_flag is False:
-            rep_flag = True
-            if repl_parser_arg is not None:
-                while rep_flag is True:
-                    for rep in repl_parser_arg:
-                        if rep == var:
-                            if isinstance(repl_parser_arg[rep], bool):
-                                if repl_parser_arg[rep] is True:
-                                    arg = f'--{var.replace("_", "-")}  '
-                                else:
-                                    arg = ""
-                            elif isinstance(repl_parser_arg[rep], dict):
-                                value_str = _arg_dict(arg_parser[var])
-                                arg = f'--{var.replace("_", "-")} {value_str} '
-                            elif isinstance(repl_parser_arg[rep], list):
-                                value_str = _arg_list(repl_parser_arg[rep])
-                                arg = f'--{var.replace("_", "-")} {value_str} '
-                            else:
-                                arg = f'--{var.replace("_", "-")} {repl_parser_arg[rep]} '
-                            parser_str = arg + parser_str
-                            rep_flag = False
-                            break
-                    if rep_flag is True:
-                        if isinstance(arg_parser[var], bool):
-                            if arg_parser[var] is True:
+        if var in skip_args:
+            continue
+        rep_flag = True
+        if replace_parsers_args_defaults is not None:
+            while rep_flag is True:
+                value = replace_parsers_args_defaults.get(var, arg_parser[var])
+                if value is None or value == "None":
+                    continue
+                for rep in replace_parsers_args_defaults:
+                    if rep == var:
+                        if isinstance(value, bool):
+                            if value is True:
                                 arg = f'--{var.replace("_", "-")}  '
-
                             else:
                                 arg = ""
-                        elif arg_parser[var] is None or arg_parser[var] == "None":
-                            break
-                        elif isinstance(arg_parser[var], dict):
-                            value_str = _arg_dict(arg_parser[var])
+                        elif isinstance(value, dict):
+                            value_str = _arg_dict(value)
                             arg = f'--{var.replace("_", "-")} {value_str} '
-                        elif isinstance(arg_parser[var], list):
-                            value_str = _arg_list(arg_parser[var])
+                        elif isinstance(value, list):
+                            value_str = _arg_list(value)
                             arg = f'--{var.replace("_", "-")} {value_str} '
                         else:
-                            arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
+                            arg = f'--{var.replace("_", "-")} {value} '
                         parser_str = arg + parser_str
                         rep_flag = False
-            else:
-                if arg_parser[var] is None or arg_parser[var] == "None":
-                    continue
-                elif isinstance(arg_parser[var], bool):
-                    if arg_parser[var] is True:
-                        arg = f'--{var.replace("_", "-")}  '
+                        break
+                if rep_flag is True:
+                    if isinstance(value, bool):
+                        if value is True:
+                            arg = f'--{var.replace("_", "-")}  '
+                        else:
+                            arg = ""
+                    elif value is None or value == "None":
+                        break
+                    elif isinstance(value, dict):
+                        value_str = _arg_dict(value)
+                        arg = f'--{var.replace("_", "-")} {value_str} '
+                    elif isinstance(value, list):
+                        value_str = _arg_list(value)
+                        arg = f'--{var.replace("_", "-")} {value_str} '
                     else:
-                        arg = ""
-                elif isinstance(arg_parser[var], list):
-                    value_str = _arg_list(arg_parser[var])
-                    arg = f'--{var.replace("_", "-")} {value_str} '
+                        arg = f'--{var.replace("_", "-")} {value} '
+                    parser_str = arg + parser_str
+                    rep_flag = False
+        else:
+            if value is None or value == "None":
+                continue
+            elif isinstance(value, bool):
+                if value is True:
+                    arg = f'--{var.replace("_", "-")}  '
                 else:
-                    arg = f'--{var.replace("_", "-")} {arg_parser[var]} '
-                parser_str = arg + parser_str
+                    arg = ""
+            elif isinstance(value, list):
+                value_str = _arg_list(value)
+                arg = f'--{var.replace("_", "-")} {value_str} '
+            else:
+                arg = f'--{var.replace("_", "-")} {value} '
+            parser_str = arg + parser_str
 
     return parser_str
 
@@ -304,14 +317,14 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.html_tidy_module,
                                    repl_parser_arg={"packages": self.library, "correct_view_flag": True,
                                                     "log_flag": True, "filter_whitelist_flag": True,
-                                                    "changed_flag": False}, out=["git_url"])
+                                                    "changed_flag": False}, skip_args=["git_url"])
         arg_push = write_parser_args(python_module=self.modelica_py_ci.html_tidy_module,
                                      repl_parser_arg={"packages": self.library, "correct_view_flag": True,
                                                       "log_flag": True, "filter_whitelist_flag": True,
-                                                      "changed_flag": True}, out=["git_url"])
+                                                      "changed_flag": True}, skip_args=["git_url"])
         arg_wh = write_parser_args(python_module=self.modelica_py_ci.html_tidy_module,
                                    repl_parser_arg={"whitelist_flag": True,
-                                                    "changed_flag": True}, out=["packages", "library"])
+                                                    "changed_flag": True}, skip_args=["packages", "library"])
         arg_correct_html = write_parser_args(python_module=self.modelica_py_ci.html_tidy_module,
                                              repl_parser_arg={"whitelist_flag": True,
                                                               "changed_flag": True})
@@ -320,7 +333,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                                            "working_branch": "$CI_COMMIT_REF_NAME",
                                                            "github_token": "$GITHUB_API_TOKEN", "create_pr_flag": True,
                                                            "correct_html_flag": True},
-                                          out=["gitlab_page", "base_branch"])
+                                          skip_args=["gitlab_page", "base_branch"])
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
         yml_text = my_template.render(
             utilities_directory=self.utilities_directory,
@@ -364,10 +377,10 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.syntax_test_module,
-                                   repl_parser_arg={"changed_flag": False}, out=["packages"])
+                                   repl_parser_arg={"changed_flag": False}, skip_args=["packages"])
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.syntax_test_module,
-            repl_parser_arg={"changed_flag": True}, out=["packages"])
+            repl_parser_arg={"changed_flag": True}, skip_args=["packages"])
 
         yml_text = my_template.render(
             utilities_directory=self.utilities_directory,
@@ -432,7 +445,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         merge_branch = f'{self.whitelist_library.library}_Merge'
         arg_whitelist_html = write_parser_args(
             python_module=self.modelica_py_ci.html_tidy_module,
-            repl_parser_arg={"whitelist_flag": True}, out=["packages"])
+            repl_parser_arg={"whitelist_flag": True}, skip_args=["packages"])
         arg_lib = write_parser_args(
             python_module=self.modelica_py_ci.library_merge_module,
             repl_parser_arg={"changed_flag": True})
@@ -518,7 +531,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                              "dymola_version": self.dymola_version,
                              "batch": False,
                              "changed_flag": False},
-            out=["packages", "path", "root_library"])
+            skip_args=["packages", "path", "root_library"])
 
         arg_create_plots = write_parser_args(
             python_module=self.modelica_py_ci.google_chart_module,
@@ -546,7 +559,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                              "funnel_comp_flag:": False, "create_layout_flag": False,
                              "error_flag": False, "new_ref": True,
                              "funnel_comp_flag": False, "new_ref_flag": True},
-            out=["packages"])
+            skip_args=["packages"])
         # python ${modelicapyci_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
         yml_text = my_template.render(
@@ -640,19 +653,19 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             python_module=self.modelica_py_ci.test_validate_module,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "changed_flag": False, "extended_ex_flag": False},
-            out=["repo_dir", "git_url"])
+            skip_args=["repo_dir", "git_url"])
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "changed_flag": True, "extended_ex_flag": False},
-            out=["repo_dir", "git_url"])
+            skip_args=["repo_dir", "git_url"])
 
         arg_wh = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             repl_parser_arg={"packages": "$lib_package", "dym_options": "DYM_CHECK",
                              "create_whitelist_flag": True, "extended_ex_flag": False, "filter_whitelist_flag": False,
                              "changed_flag": False, },
-            out=["root_library", "packages"])
+            skip_args=["root_library", "packages"])
 
         yml_text = my_template.render(
             utilities_directory=self.utilities_directory,
