@@ -5,14 +5,12 @@
 # (${PR_main_branch_rule})
 # ${ci_OM_check_commit}
 # ${OM_Image}
-# ${modelica_py_ci_url}
 # ${OM_python_check_model_module}
 # ${result_dir}
 # ${expire_in_time}
 # ${arg_PR}
 # ${arg_push}
 # ${packages}
-# modelica_py_ci_package_name : ${modelica_py_ci_package_name}
 
 include: '${utilities_directory}'
 

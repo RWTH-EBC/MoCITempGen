@@ -3,7 +3,6 @@
 # library: ${library}
 # PR_main_branch_rule : ${PR_main_branch_rule}
 # ci_OM_sim_commit: ${ci_OM_sim_commit}
-# modelica_py_ci_url : ${modelica_py_ci_url}
 # OM_python_check_model_module: ${OM_python_check_model_module}
 # arg_PR : ${arg_PR}
 # arg_push: ${arg_push}

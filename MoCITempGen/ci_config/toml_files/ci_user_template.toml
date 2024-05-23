@@ -48,7 +48,7 @@ deploy = "deploy"
 whitelist_setting = "build_ci_whitelist"
 
 [modelica_py_ci]
-dir = "Modelica-GitLab-CI/ci_tests"
+url = "https://github.com/RWTH-EBC/ModelicaPyCI.git@2_pydantic_config"
 OM_python_check_model_file = "ModelicaPyCI.unittest.om_check"
 test_validate_file = "ModelicaPyCI.unittest.checkpackages.validatetest"
 test_reference_file = "ModelicaPyCI.unittest.reference_check"

@@ -5,7 +5,6 @@
 # library: ${library}
 # PR_main_branch_rule: ${PR_main_branch_rule}
 # ci_check_commit: ${ci_check_commit}
-# modelica_py_ci_url: ${modelica_py_ci_url}
 # xvfb_flag: ${xvfb_flag}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
 # result_dir: ${result_dir}
@@ -21,7 +20,6 @@
 # package_list: ${package_list}
 # config_ci_changed_file: ${config_ci_changed_file}
 # modelicapyci_config_structure_module: ${modelicapyci_config_structure_module}
-# modelica_py_ci_package_name : ${modelica_py_ci_package_name}
 
 include: '${utilities_directory}'
 

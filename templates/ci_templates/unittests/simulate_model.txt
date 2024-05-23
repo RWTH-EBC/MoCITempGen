@@ -8,7 +8,6 @@
 # library: ${library}
 # ci_check_commit ${ci_check_commit}
 # python_version: ${python_version}
-# modelica_py_ci_url: ${modelica_py_ci_url}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
 # package_list: ${package_list}
 # arg_wh: ${arg_wh}

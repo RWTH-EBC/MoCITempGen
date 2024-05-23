@@ -3,7 +3,6 @@
 # ci_stage_ref_check :${ci_stage_ref_check}
 # ci_stage_plot_ref : ${ci_stage_plot_ref}
 # ci_stage_prepare : ${ci_stage_prepare}
-# modelica_py_ci_url_  ${modelica_py_ci_url}
 # python_version : ${python_version}
 # buildingspy_upgrade : ${buildingspy_upgrade}
 # modelicapyci_test_reference_module: ${modelicapyci_test_reference_module}

@@ -1,6 +1,5 @@
 # conda_environment: ${conda_environment}
-# modelica_ci_test_url: ${modelica_ci_test_url}
-# modelica_py_ci_package_name: ${modelica_py_ci_package_name}
+# modelica_py_ci_url: ${modelica_py_ci_url}
 
 # This file contains small scripts, rules or other templates
 # which can be referenced by other templates in this repo (or other repos as well).
@@ -24,8 +23,7 @@
     - source activate ${conda_environment}
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
-    - git clone ${modelica_ci_test_url}
-    - pip install -e ${modelica_py_ci_package_name}
+    - pip install git+${modelica_py_ci_url}
 
 .custom_install_additional_modelica_libraries:
   script:
