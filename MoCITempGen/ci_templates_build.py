@@ -158,7 +158,6 @@ def write_multiple_rules(rule_list: list = None,
         return rule_string
 
 
-
 class CITemplatesConfig(ci_templates_config.GeneralConfig):
     commit_string: Optional[str] = Field(validate_default=True, default=None)
     pr_main_branch_rule: Optional[str] = Field(validate_default=True, default=None)
@@ -199,9 +198,6 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         return str(Path(self.templates_dir).joinpath(self.utilities_directory).as_posix())
 
     def write_OM_check_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.OM_check_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         # out = ["root_library", "library"]
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
@@ -214,7 +210,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={"om_options": "OM_CHECK",
                                   "changed_flag": True, })
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             ci_stage_OM_model_check=self.stage_names.OM_model_check,
             commit_string=self.commit_string,
@@ -233,40 +229,33 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
             config_ci_changed_file=self.ci_config_files.changed_file
         )
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.OM_check_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.OM_check_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.OM_check_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_page_template(self):
         """
         Write page template, deploy artifacts, plots, reference results
         """
-        ci_temp = Path(self.template_files.base, self.template_files.page_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             image_name=self.dymola_image,
             ci_stage_deploy=self.stage_names.deploy,
             expire_in_time=self.expire_in_time,
             result_dir=self.result.dir,
-            PR_main_branch_rule=self.pr_main_branch_rule)
-
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.page_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.page_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+            PR_main_branch_rule=self.pr_main_branch_rule
+        )
+        self._write_yml_templates(
+            file=self.template_files.page_file,
+            template_kwargs=template_kwargs
+        )
 
     def _write_setting_template(self):
         """
         Write setting template, create template with own Syntax
         """
-
-        my_template = Template(strict_undefined=True, filename=self.template_files.setting_file)
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             image_name=self.dymola_image,
             github_repo=self.github_repo,
@@ -275,16 +264,14 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_stage_check_setting=self.stage_names.check_setting,
             ci_stage_build_templates=self.stage_names.build_templates,
             bot_create_CI_template_commit=self.bot_messages.create_CI_template_commit,
-            temp_dir=self.templates_dir)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.setting_file).parent
-        self.check_path_setting(ci_folder)
-        yml_file = ci_folder.joinpath(Path(self.template_files.page_file).name.replace(".txt", ".gitlab-ci.yml"))
-        with open(yml_file.replace(".txt", ".gitlab-ci.yml"), "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+            temp_dir=self.templates_dir
+        )
+        self._write_yml_templates(
+            file=self.template_files.page_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_html_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.html_file)
-        print(f"Write {ci_temp}")
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.html_tidy_module,
             user_args=self.dict(),
@@ -316,8 +303,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                   "create_pr_flag": True,
                                   "correct_html_flag": True},
             skip_args=["gitlab_page", "base_branch"])
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             image_name=self.dymola_image,
             ci_stage_html_check=self.stage_names.html_check,
@@ -341,21 +327,17 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             bot_create_html_file_commit=self.bot_messages.create_html_file_commit,
             bot_update_whitelist_commit=self.bot_messages.update_whitelist_commit,
             whitelist_html_file=self.whitelist_scripts.html_file,
-            ci_create_html_whitelist_commit=self.ci_create_html_whitelist_commit)
-
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.html_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.html_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+            ci_create_html_whitelist_commit=self.ci_create_html_whitelist_commit
+        )
+        self._write_yml_templates(
+            file=self.template_files.html_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_style_template(self):
         """
         Write Style Check template
         """
-        ci_temp = Path(self.template_files.base, self.template_files.style_check_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.syntax_test_module,
                                    template_script_args={"changed_flag": False}, skip_args=["packages"])
         arg_push = write_parser_args(
@@ -363,7 +345,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             user_args=self.dict(),
             template_script_args={"changed_flag": True}, skip_args=["packages"])
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             image_name=self.dymola_image,
             ci_stage_style_check=self.stage_names.style_check,
@@ -377,17 +359,13 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             result_dir=self.result.dir,
             arg_PR=arg_PR,
             arg_Push=arg_push)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.style_check_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.style_check_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.style_check_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_ci_whitelist_setting_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.build_whitelist_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             image_name=self.dymola_image,
             ci_stage_whitelist_setting=self.stage_names.whitelist_setting,
@@ -404,13 +382,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             expire_in_time=self.expire_in_time,
             xvfb_flag=self.xvfb_flag,
             modelicapyci_configuration_module=self.modelica_py_ci.configuration_module,
-            modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.build_whitelist_file).parent
-        config_structure.create_path(ci_folder)
-        with open(
-                Path(ci_folder, Path(self.template_files.build_whitelist_file).name.replace(".txt", ".gitlab-ci.yml")),
-                "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+            modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module
+        )
+        self._write_yml_templates(
+            file=self.template_files.build_whitelist_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_merge_template(self):
         """
@@ -462,51 +439,51 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             }
         )
 
-        self._write_yml_templates(
-            file=self.template_files.ibpsa_merge_file,
-            kwargs=dict(
-                utilities_directory=self.get_utilities_path(),
-                image_name=self.dymola_image,
-                ci_stage_lib_merge=self.stage_names.lib_merge,
-                ci_stage_update_whitelist=self.stage_names.update_whitelist,
-                ci_stage_open_PR=self.stage_names.open_PR,
-                python_version=self.conda_environment,
-                git_url=self.whitelist_library_config.git_url,
-                merge_library_dir=merge_library_dir,
-                library=self.library,
-                merge_branch=merge_branch,
-                modelicapyci_lock_model_module=self.modelica_py_ci.lock_model_module,
-                modelicapyci_library_merge_module=self.modelica_py_ci.library_merge_module,
-                arg_lib=arg_lib,
-                ci_trigger_ibpsa_commit=self.commit_interaction.trigger_ibpsa,
-                expire_in_time=self.expire_in_time,
-                modelicapyci_create_whitelist_module=self.modelica_py_ci.create_whitelist_module,
-                arg_whitelist_html=arg_whitelist_html,
-                arg_whitelist_check_sim=arg_whitelist_check_sim,
-                modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
-                xvfb_flag=self.xvfb_flag,
-                arg_lock=arg_lock,
-                whitelist_library=self.whitelist_library_config.library,
-                bot_merge_commit=self.bot_messages.merge_commit,
-                result_dir=self.result.dir,
-                modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
-                arg_api_pr=arg_api_pr)
+        template_kwargs = dict(
+            utilities_directory=self.get_utilities_path(),
+            image_name=self.dymola_image,
+            ci_stage_lib_merge=self.stage_names.lib_merge,
+            ci_stage_update_whitelist=self.stage_names.update_whitelist,
+            ci_stage_open_PR=self.stage_names.open_PR,
+            python_version=self.conda_environment,
+            git_url=self.whitelist_library_config.git_url,
+            merge_library_dir=merge_library_dir,
+            library=self.library,
+            merge_branch=merge_branch,
+            modelicapyci_lock_model_module=self.modelica_py_ci.lock_model_module,
+            modelicapyci_library_merge_module=self.modelica_py_ci.library_merge_module,
+            arg_lib=arg_lib,
+            ci_trigger_ibpsa_commit=self.commit_interaction.trigger_ibpsa,
+            expire_in_time=self.expire_in_time,
+            modelicapyci_create_whitelist_module=self.modelica_py_ci.create_whitelist_module,
+            arg_whitelist_html=arg_whitelist_html,
+            arg_whitelist_check_sim=arg_whitelist_check_sim,
+            modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
+            xvfb_flag=self.xvfb_flag,
+            arg_lock=arg_lock,
+            whitelist_library=self.whitelist_library_config.library,
+            bot_merge_commit=self.bot_messages.merge_commit,
+            result_dir=self.result.dir,
+            modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
+            arg_api_pr=arg_api_pr
         )
 
-    def _write_yml_templates(self, file: str, kwargs: dict):
+        self._write_yml_templates(
+            file=self.template_files.ibpsa_merge_file,
+            template_kwargs=template_kwargs
+        )
+
+    def _write_yml_templates(self, file: str, template_kwargs: dict):
         ci_temp = Path(self.template_files.base, file)
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        yml_text = my_template.render(**kwargs)
+        yml_text = my_template.render(**template_kwargs)
         ci_folder = Path(self.library_path, self.templates_dir, file).parent
         config_structure.create_path(ci_folder)
         with open(ci_folder.joinpath(Path(file).name.replace(".txt", ".gitlab-ci.yml")), "w") as yml_tmp:
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_regression_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.regression_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_reference_module,
             user_args=self.dict(),
@@ -567,7 +544,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             skip_args=["packages"])
         # python ${modelicapyci_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             dym_image=self.dymola_image,
             coverage_arg=coverage_arg,
@@ -603,16 +580,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_show_ref_commit=self.ci_show_ref_commit,
             arg_check_ref_plot=arg_check_ref_plot,
             ci_reference_check=self.ci_reference_check)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.regression_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.regression_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.regression_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_OM_simulate_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.OM_simulate_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.OM_python_check_model_module,
                                    template_script_args={"om_options": "OM_SIM",
                                                          "changed_flag": False})
@@ -622,7 +595,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={"om_options": "OM_SIM",
                                   })
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             ci_stage_OM_simulate=self.stage_names.OM_simulate,
             commit_string=self.commit_string,
@@ -638,17 +611,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
             config_ci_changed_file=self.ci_config_files.changed_file)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.OM_simulate_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.OM_simulate_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.OM_simulate_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_check_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.check_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
-
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
@@ -670,7 +638,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                   },
             skip_args=["root_library", "packages"])
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             dym_image_name=self.dymola_image,
             ci_stage_model_check=self.stage_names.dymola_model_check,
@@ -695,16 +663,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             config_ci_changed_file=self.ci_config_files.changed_file,
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module
         )
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.check_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.check_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.check_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_simulate_template(self):
-        ci_temp = Path(self.template_files.base, self.template_files.simulate_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
@@ -722,7 +686,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                                   "create_whitelist_flag": True,
                                   "changed_flag": False})
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
             dym_image_name=self.dymola_image,
             ci_stage_simulate=self.stage_names.simulate,
@@ -747,11 +711,10 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             xvfb_flag=self.xvfb_flag,
             config_ci_exit_file=self.ci_config_files.exit_file,
             ci_stage_create_whitelist=self.stage_names.create_whitelist)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.simulate_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.simulate_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.simulate_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_toml_settings(self):
         with open(self.toml_ci_setting_file, "w") as file:
@@ -759,36 +722,28 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         print(f'The CI settings are saved in file {self.toml_ci_setting_file}')
 
     def write_main_yml(self, stage_list, ci_template_list):
-        ci_temp = Path(self.template_files.base, self.template_files.main_yml_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         ci_template_list = [file.replace(self.library_path + "/", "") for file in ci_template_list]
 
-        yml_text = my_template.render(
+        template_kwargs = dict(
             image_name=self.dymola_image,
             stage_list=stage_list,
             github_repository=self.github_repository,
             gitlab_page=self.gitlab_page,
             file_list=ci_template_list)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.main_yml_file).parent
-        config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.main_yml_file).name.replace(".txt", ".yml")),
-                  "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.main_yml_file,
+            template_kwargs=template_kwargs
+        )
 
     def write_utilities_yml(self):
-        ci_temp = Path(self.template_files.base, self.template_files.utilities_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
-        yml_text = my_template.render(
+        template_kwargs = dict(
             conda_environment=self.conda_environment,
             modelica_py_ci_url=self.modelica_py_ci.url
         )
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.utilities_file).parent
-        config_structure.create_path(ci_folder)
-        yml_path_out = Path(ci_folder, Path(self.template_files.utilities_file).name.replace(".txt", ".yml"))
-        with open(yml_path_out, "w") as yml_tmp:
-            yml_tmp.write(yml_text.replace('\n', ''))
+        self._write_yml_templates(
+            file=self.template_files.utilities_file,
+            template_kwargs=template_kwargs
+        )
 
     def get_ci_templates(self):
         path = Path(self.library_path).joinpath(self.templates_dir)
@@ -1118,7 +1073,7 @@ def write_templates(path: Path):
             ci_templates_config.write_style_template()
         if temp == "Merge" and ci_templates_config.whitelist_library_config is not None:
             ci_templates_config.write_merge_template()
-    #ci_templates_config.write_ci_whitelist_setting_template()
+    # ci_templates_config.write_ci_whitelist_setting_template()
     ci_templates_config.write_page_template()
     ci_template_list = ci_templates_config.get_ci_templates()
     stage_list = get_ci_stages(file_list=ci_template_list)
