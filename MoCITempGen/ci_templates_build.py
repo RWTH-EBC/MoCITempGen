@@ -85,8 +85,7 @@ def write_parser_args(
             continue
         value = replace_parsers_args_defaults.get(var, arg_parser[var])
         if value is None or value == "None":
-            print(f"Parser argument {var} is None, can't set")
-            continue
+            raise ValueError(f"Parser argument {var} is None, can't set")
         if isinstance(value, bool):
             if value is True:
                 arg = f'--{var.replace("_", "-")}  '
@@ -474,7 +473,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_lib=arg_lib,
             ci_trigger_ibpsa_commit=self.commit_interaction.trigger_ibpsa,
             expire_in_time=self.expire_in_time,
-            modelicapyci_html_tidy_module=self.modelica_py_ci.html_tidy_module,
+            modelicapyci_create_whitelist_module=self.modelica_py_ci.create_whitelist_module,
             arg_whitelist_html=arg_whitelist_html,
             arg_whitelist_check=arg_whitelist_check,
             arg_whitelist_sim=arg_whitelist_sim,
