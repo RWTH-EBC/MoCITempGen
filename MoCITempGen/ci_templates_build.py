@@ -297,11 +297,14 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_github_PR = write_parser_args(
             python_module=self.modelica_py_ci.api_github_module,
             user_args=self.dict(),
-            template_script_args={"github_repo": self.github_repository,
-                                  "working_branch": "$CI_COMMIT_REF_NAME",
-                                  "github_token": "$GITHUB_API_TOKEN",
-                                  "create_pr_flag": True,
-                                  "correct_html_flag": True},
+            template_script_args={
+                "github_repo": self.github_repository,
+                "working_branch": "$CI_COMMIT_REF_NAME",
+                "github_token": "$GITHUB_API_TOKEN",
+                "create_pr_flag": True,
+                "correct_html_flag": True,
+                "base_branch": self.main_branch_list[-1]
+            },
             skip_args=["gitlab_page", "base_branch"])
         template_kwargs = dict(
             utilities_directory=self.get_utilities_path(),
@@ -435,7 +438,9 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             python_module=self.modelica_py_ci.api_github_module,
             user_args=self.dict(),
             template_script_args={
-                "working_branch": self.main_branch_list[-1]
+                "create_pr_flag": True,
+                "ibpsa_merge_flag": True,
+                "base_branch": self.main_branch_list[-1]
             }
         )
 
