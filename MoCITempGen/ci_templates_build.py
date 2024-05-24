@@ -199,7 +199,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
 
     def write_OM_check_template(self):
         # out = ["root_library", "library"]
-        arg_PR = write_parser_args(
+        arg_pull_request = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),
             template_script_args={"om_options": "OM_CHECK",
@@ -223,7 +223,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             OM_python_check_model_file=self.modelica_py_ci.OM_python_check_model_module,
             result_dir=self.result.dir,
             expire_in_time=self.expire_in_time,
-            arg_PR=arg_PR,
+            arg_PR=arg_pull_request,
             arg_push=arg_push,
             packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
@@ -341,8 +341,11 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         """
         Write Style Check template
         """
-        arg_PR = write_parser_args(python_module=self.modelica_py_ci.syntax_test_module,
-                                   template_script_args={"changed_flag": False}, skip_args=["packages"])
+        arg_PR = write_parser_args(
+            python_module=self.modelica_py_ci.syntax_test_module,
+            template_script_args={"changed_flag": False}, skip_args=["packages"],
+            user_args=self.dict()
+        )
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.syntax_test_module,
             user_args=self.dict(),
@@ -424,7 +427,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
                 "create_whitelist_flag": True,
-                "library_package_mo": f"{self.library}/{self.library}/package.mo",
+                "library_package_mo": f"{self.library}/package.mo",
                 "dym_options": ["DYM_SIM", "DYM_CHECK"]}
         )
         arg_lock = write_parser_args(
@@ -593,7 +596,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
     def write_OM_simulate_template(self):
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.OM_python_check_model_module,
                                    template_script_args={"om_options": "OM_SIM",
-                                                         "changed_flag": False})
+                                                         "changed_flag": False},
+                                   user_args=self.dict())
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),
@@ -1089,7 +1093,7 @@ def write_templates(path: Path):
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    ARGS = parse_args()
     TEMPLATES_TOML_FILE = Path(__file__).parent.joinpath(
         "ci_config", "toml_files", "ci_user_template.toml"
     )
@@ -1099,12 +1103,12 @@ if __name__ == '__main__':
     # create_toml_config(path=TEMPLATES_TOML_FILE)
     write_templates(path=TEMPLATES_TOML_FILE)
 
-    if args.set_setting is True:
+    if ARGS.set_setting is True:
         create_toml_config(path=TEMPLATES_TOML_FILE)
-    if args.update_toml:
+    if ARGS.update_toml:
         overwrite_args_parser_toml(
             ci_parser_toml=PARSER_TOML_FILE,
             ci_templates_toml=TEMPLATES_TOML_FILE
         )
-    if args.write_templates is True:
+    if ARGS.write_templates is True:
         write_templates(path=TEMPLATES_TOML_FILE)

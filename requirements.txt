@@ -1,3 +1,4 @@
 templates
 argparse
 toml
+pydantic
