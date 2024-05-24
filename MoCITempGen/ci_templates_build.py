@@ -15,6 +15,11 @@ def _arg_list(_list: list):
 
 
 def _arg_dict(_dict: dict):
+    if len(_dict) == 1:
+        k, v = _dict.popitem()
+        if isinstance(v, list):
+            return " ".join(v)
+        return v
     return " ".join(list(_dict.values()))
 
 
@@ -89,7 +94,7 @@ def write_parser_args(
             continue
         value = replace_parsers_args_defaults.get(var, arg_parser[var])
         if value is None or value == "None":
-            raise ValueError(f"Parser argument {var} is None, can't set")
+            raise ValueError(f"Parser argument {var} is None, but needs to be set")
         if isinstance(value, bool):
             if value is True:
                 arg = f'--{var.replace("_", "-")}  '
@@ -201,12 +206,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "om_options": "OM_CHECK",
+            template_script_args={"om_options": "OM_CHECK",
                                   })
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "om_options": "OM_CHECK",
+            template_script_args={"om_options": "OM_CHECK",
                                   "changed_flag": True, })
 
         yml_text = my_template.render(
@@ -224,7 +229,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             expire_in_time=self.expire_in_time,
             arg_PR=arg_PR,
             arg_push=arg_push,
-            packages=self.package_list[self.library],
+            packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
             config_ci_changed_file=self.ci_config_files.changed_file
         )
@@ -283,13 +288,13 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.html_tidy_module,
             user_args=self.dict(),
-            template_script_args={"packages": self.library, "correct_view_flag": True,
+            template_script_args={"correct_view_flag": True,
                                   "log_flag": True, "filter_whitelist_flag": True,
                                   "changed_flag": False}, skip_args=["git_url"])
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.html_tidy_module,
             user_args=self.dict(),
-            template_script_args={"packages": self.library, "correct_view_flag": True,
+            template_script_args={"correct_view_flag": True,
                                   "log_flag": True, "filter_whitelist_flag": True,
                                   "changed_flag": True}, skip_args=["git_url"])
         arg_wh = write_parser_args(
@@ -411,9 +416,6 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         """
         Write (IBPSA) Merge template
         """
-        ci_temp = Path(self.template_files.base, self.template_files.ibpsa_merge_file)
-        print(f"Write {ci_temp}")
-        my_template = Template(strict_undefined=True, filename=str(ci_temp))
         merge_branch = f'Custom{self.whitelist_library_config.library}_Merge'
         merge_library_dir = f"{self.whitelist_library_config.library}_folder"
 
@@ -434,17 +436,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "library_dir": f"temp_{self.library}"
             }
         )
-        arg_whitelist_check = write_parser_args(
-            python_module=self.modelica_py_ci.test_validate_module,
-            user_args=self.dict(),
-            template_script_args={
-                "whitelist_library": self.whitelist_library_config.library,
-                "git_url": self.whitelist_library_config.git_url,
-                "root_whitelist_library": self.whitelist_library_config.local_path,
-                "dym_options": "DYM_CHECK",
-                "create_whitelist_flag": True, }
-        )
-        arg_whitelist_sim = write_parser_args(
+        arg_whitelist_check_sim = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
             template_script_args={
@@ -452,7 +444,9 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
                 "create_whitelist_flag": True,
-                "dym_options": "DYM_SIM"})
+                "root_library": self.library,
+                "dym_options": ["DYM_SIM", "DYM_CHECK"]}
+        )
         arg_lock = write_parser_args(
             python_module=self.modelica_py_ci.lock_model_module,
             user_args=self.dict(),
@@ -468,38 +462,45 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             }
         )
 
-        yml_text = my_template.render(
-            utilities_directory=self.get_utilities_path(),
-            image_name=self.dymola_image,
-            ci_stage_lib_merge=self.stage_names.lib_merge,
-            ci_stage_update_whitelist=self.stage_names.update_whitelist,
-            ci_stage_open_PR=self.stage_names.open_PR,
-            python_version=self.conda_environment,
-            git_url=self.whitelist_library_config.git_url,
-            merge_library_dir=merge_library_dir,
-            library=self.library,
-            merge_branch=merge_branch,
-            modelicapyci_lock_model_module=self.modelica_py_ci.lock_model_module,
-            modelicapyci_library_merge_module=self.modelica_py_ci.library_merge_module,
-            arg_lib=arg_lib,
-            ci_trigger_ibpsa_commit=self.commit_interaction.trigger_ibpsa,
-            expire_in_time=self.expire_in_time,
-            modelicapyci_create_whitelist_module=self.modelica_py_ci.create_whitelist_module,
-            arg_whitelist_html=arg_whitelist_html,
-            arg_whitelist_check=arg_whitelist_check,
-            arg_whitelist_sim=arg_whitelist_sim,
-            modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
-            xvfb_flag=self.xvfb_flag,
-            arg_lock=arg_lock,
-            whitelist_library=self.whitelist_library_config.library,
-            bot_merge_commit=self.bot_messages.merge_commit,
-            result_dir=self.result.dir,
-            modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
-            arg_api_pr=arg_api_pr)
-        ci_folder = Path(self.library_path, self.templates_dir, self.template_files.ibpsa_merge_file).parent
+        self._write_yml_templates(
+            file=self.template_files.ibpsa_merge_file,
+            kwargs=dict(
+                utilities_directory=self.get_utilities_path(),
+                image_name=self.dymola_image,
+                ci_stage_lib_merge=self.stage_names.lib_merge,
+                ci_stage_update_whitelist=self.stage_names.update_whitelist,
+                ci_stage_open_PR=self.stage_names.open_PR,
+                python_version=self.conda_environment,
+                git_url=self.whitelist_library_config.git_url,
+                merge_library_dir=merge_library_dir,
+                library=self.library,
+                merge_branch=merge_branch,
+                modelicapyci_lock_model_module=self.modelica_py_ci.lock_model_module,
+                modelicapyci_library_merge_module=self.modelica_py_ci.library_merge_module,
+                arg_lib=arg_lib,
+                ci_trigger_ibpsa_commit=self.commit_interaction.trigger_ibpsa,
+                expire_in_time=self.expire_in_time,
+                modelicapyci_create_whitelist_module=self.modelica_py_ci.create_whitelist_module,
+                arg_whitelist_html=arg_whitelist_html,
+                arg_whitelist_check_sim=arg_whitelist_check_sim,
+                modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
+                xvfb_flag=self.xvfb_flag,
+                arg_lock=arg_lock,
+                whitelist_library=self.whitelist_library_config.library,
+                bot_merge_commit=self.bot_messages.merge_commit,
+                result_dir=self.result.dir,
+                modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
+                arg_api_pr=arg_api_pr)
+        )
+
+    def _write_yml_templates(self, file: str, kwargs: dict):
+        ci_temp = Path(self.template_files.base, file)
+        print(f"Write {ci_temp}")
+        my_template = Template(strict_undefined=True, filename=str(ci_temp))
+        yml_text = my_template.render(**kwargs)
+        ci_folder = Path(self.library_path, self.templates_dir, file).parent
         config_structure.create_path(ci_folder)
-        with open(Path(ci_folder, Path(self.template_files.ibpsa_merge_file).name.replace(".txt", ".gitlab-ci.yml")),
-                  "w") as yml_tmp:
+        with open(ci_folder.joinpath(Path(file).name.replace(".txt", ".gitlab-ci.yml")), "w") as yml_tmp:
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_regression_template(self):
@@ -509,20 +510,17 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_reference_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package",
-                                  "batch": True, "changed_flag": False
+            template_script_args={"batch": True, "changed_flag": False
                                   })
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.test_reference_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package",
-                                  "batch": True,
+            template_script_args={"batch": True,
                                   })
         coverage_arg = write_parser_args(
             python_module=self.modelica_py_ci.test_reference_module,
             user_args=self.dict(),
             template_script_args={"coverage_only": True,
-                                  "packages": ".",
                                   "batch": False,
                                   "changed_flag": False})
 
@@ -538,13 +536,13 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_create_plots = write_parser_args(
             python_module=self.modelica_py_ci.google_chart_module,
             user_args=self.dict(),
-            template_script_args={"packages": self.library, "create_layout_flag": True,
+            template_script_args={"create_layout_flag": True,
                                   "library": self.library, "funnel_comp_flag": False,
                                   "error_flag": False, "line_html_flag": False})
         arg_chart = write_parser_args(
             python_module=self.modelica_py_ci.google_chart_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "funnel_comp_flag": True,
+            template_script_args={"funnel_comp_flag": True,
                                   "line_html_flag": True, "error_flag": True})
 
         api_github_arg = write_parser_args(
@@ -591,7 +589,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_push=arg_push,
             PR_main_branch_rule=self.pr_main_branch_rule,
             commit_string=self.commit_string,
-            package_list=self.package_list[self.library],
+            package_list=self.packages[self.library],
             modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
             arg_create_plots=arg_create_plots,
             api_github_arg=api_github_arg,
@@ -616,12 +614,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
         arg_PR = write_parser_args(python_module=self.modelica_py_ci.OM_python_check_model_module,
-                                   template_script_args={"packages": "$lib_package", "om_options": "OM_SIM",
+                                   template_script_args={"om_options": "OM_SIM",
                                                          "changed_flag": False})
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "om_options": "OM_SIM",
+            template_script_args={"om_options": "OM_SIM",
                                   })
 
         yml_text = my_template.render(
@@ -637,7 +635,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             result_dir=self.result.dir,
             OM_Image=self.open_modelica_image,
             expire_in_time=self.expire_in_time,
-            packages=self.package_list[self.library],
+            packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
             config_ci_changed_file=self.ci_config_files.changed_file)
         ci_folder = Path(self.library_path, self.templates_dir, self.template_files.OM_simulate_file).parent
@@ -654,19 +652,19 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "dym_options": "DYM_CHECK",
+            template_script_args={"dym_options": "DYM_CHECK",
                                   },
             skip_args=["repo_dir", "git_url"])
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "dym_options": "DYM_CHECK", },
+            template_script_args={"dym_options": "DYM_CHECK", },
             skip_args=["repo_dir", "git_url"])
 
         arg_wh = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "dym_options": "DYM_CHECK",
+            template_script_args={"dym_options": "DYM_CHECK",
                                   "create_whitelist_flag": True,
                                   "filter_whitelist_flag": False,
                                   },
@@ -688,7 +686,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_push=arg_push,
             arg_wh=arg_wh,
             arg_PR=arg_PR,
-            package_list=self.package_list[self.library],
+            package_list=self.packages[self.library],
             config_ci_exit_file=self.ci_config_files.exit_file,
             bot_update_model_whitelist_commit=self.bot_messages.update_model_whitelist_commit,
             whitelist_model_file=self.whitelist_scripts.check_file,
@@ -710,17 +708,17 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_PR = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "dym_options": "DYM_SIM",
+            template_script_args={"dym_options": "DYM_SIM",
                                   "changed_flag": False})
         arg_push = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": "$lib_package", "dym_options": "DYM_SIM",
+            template_script_args={"dym_options": "DYM_SIM",
                                   })
         arg_wh = write_parser_args(
             python_module=self.modelica_py_ci.test_validate_module,
             user_args=self.dict(),
-            template_script_args={"packages": ".", "dym_options": "DYM_SIM",
+            template_script_args={"dym_options": "DYM_SIM",
                                   "create_whitelist_flag": True,
                                   "changed_flag": False})
 
@@ -739,7 +737,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_check_commit=self.ci_simulate_commit,
             python_version=self.conda_environment,
             modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
-            package_list=self.package_list[self.library],
+            package_list=self.packages[self.library],
             arg_wh=arg_wh,
             bot_update_model_whitelist_commit=self.bot_messages.update_example_whitelist_commit,
             whitelist_model_file=self.whitelist_scripts.simulate_file,

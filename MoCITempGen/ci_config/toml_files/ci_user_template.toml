@@ -20,7 +20,7 @@ library_path = "D:/04_git/AixLib"
 templates_dir = "bin/ci-tests"
 utilities_directory = "utilities.yml"
 
-[package_list]
+[packages]
 AixLib = [ "Airflow", "BoundaryConditions", "Controls", "DataBase", "Electrical", "Fluid", "Media", "Obsolete", "Resources", "Systems", "ThermalZones", "Types", "UsersGuide", "Utilities",]
 
 [stage_names]
