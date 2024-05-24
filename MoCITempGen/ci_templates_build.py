@@ -79,6 +79,10 @@ def write_parser_args(
     if duplicates:
         raise KeyError("user_args and template_script_args have duplicate names, "
                        f"ensure separate names for both. Duplicates: {duplicates}")
+    difference = set(template_script_args).difference(arg_parser)
+    if difference:
+        raise KeyError("template_script_args has names not listed in parse_args, "
+                       f"can't use them: {difference}")
     replace_parsers_args_defaults = {**user_args, **template_script_args}
     for var in arg_parser:
         if var in skip_args:
@@ -109,40 +113,45 @@ def write_multiple_rules(rule_list: list = None,
                          rule_option: str = "&&",
                          compare_str: str = "!~",
                          ci_variable: str = None):
-    if rule_list is not None:
-        if isinstance(rule_list, dict):
-            if except_string is not None:
-                _list = []
-                for var in rule_list:
-                    if var != except_string:
-                        _list.append(f'{ci_variable}  {compare_str} /{rule_list[var]}/')
-            else:
-                _list = []
-                for var in rule_list:
-                    _list.append(f'{ci_variable}  {compare_str} /{rule_list[var]}/')
-            rule_string = ""
-            for rule in _list:
-                if rule == _list[0]:
-                    rule_string = f'{rule}  '
-                else:
-                    rule_string = f'{rule_string} {rule_option} {rule}'
-            return rule_string
-        if isinstance(rule_list, list):
-            if except_string is not None:
-                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list if
-                             value != except_string]
-            else:
-                rule_list = [f'{ci_variable}  {compare_str} /{value}/' for value in rule_list]
-            rule_string = ""
-            for rule in rule_list:
-                if rule == rule_list[0]:
-                    rule_string = f'{rule}  '
-                else:
-                    rule_string = f'{rule_string} {rule_option} {rule}'
-            return rule_string
-    else:
+    if rule_list is None:
         print("Rule is None")
         exit(1)
+    if compare_str == "==":
+        syntax = '"'
+    else:
+        syntax = "/"
+
+    if isinstance(rule_list, dict):
+        if except_string is not None:
+            _list = []
+            for var in rule_list:
+                if var != except_string:
+                    _list.append(f'{ci_variable}  {compare_str} {syntax}{rule_list[var]}{syntax}')
+        else:
+            _list = []
+            for var in rule_list:
+                _list.append(f'{ci_variable}  {compare_str} {syntax}{rule_list[var]}{syntax}')
+        rule_string = ""
+        for rule in _list:
+            if rule == _list[0]:
+                rule_string = f'{rule}  '
+            else:
+                rule_string = f'{rule_string} {rule_option} {rule}'
+        return rule_string
+    if isinstance(rule_list, list):
+        if except_string is not None:
+            rule_list = [f'{ci_variable}  {compare_str} {syntax}{value}{syntax}' for value in rule_list if
+                         value != except_string]
+        else:
+            rule_list = [f'{ci_variable}  {compare_str} {syntax}{value}{syntax}' for value in rule_list]
+        rule_string = ""
+        for rule in rule_list:
+            if rule == rule_list[0]:
+                rule_string = f'{rule}  '
+            else:
+                rule_string = f'{rule_string} {rule_option} {rule}'
+        return rule_string
+
 
 
 class CITemplatesConfig(ci_templates_config.GeneralConfig):
@@ -413,7 +422,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             user_args=self.dict(),
             template_script_args={
                 "whitelist_library": self.whitelist_library_config.library,
-                "git-url": self.whitelist_library_config.git_url,
+                "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
             }, skip_args=["packages"]
         )
@@ -430,7 +439,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             user_args=self.dict(),
             template_script_args={
                 "whitelist_library": self.whitelist_library_config.library,
-                "git-url": self.whitelist_library_config.git_url,
+                "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
                 "dym_options": "DYM_CHECK",
                 "create_whitelist_flag": True, }
@@ -440,7 +449,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             user_args=self.dict(),
             template_script_args={
                 "whitelist_library": self.whitelist_library_config.library,
-                "git-url": self.whitelist_library_config.git_url,
+                "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
                 "create_whitelist_flag": True,
                 "dym_options": "DYM_SIM"})
@@ -448,13 +457,15 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             python_module=self.modelica_py_ci.lock_model_module,
             user_args=self.dict(),
             template_script_args={
-                "create_whitelist_flag": True,
-                "dym_options": "DYM_SIM"})
+                "lock_library": self.whitelist_library_config.library
+            })
 
         arg_api_pr = write_parser_args(
             python_module=self.modelica_py_ci.api_github_module,
             user_args=self.dict(),
-            template_script_args={"dym_options": "DYM_SIM"}
+            template_script_args={
+                "working_branch": self.main_branch_list[-1]
+            }
         )
 
         yml_text = my_template.render(
