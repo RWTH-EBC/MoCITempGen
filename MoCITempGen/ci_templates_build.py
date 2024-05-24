@@ -85,6 +85,7 @@ def write_parser_args(
             continue
         value = replace_parsers_args_defaults.get(var, arg_parser[var])
         if value is None or value == "None":
+            print(f"Parser argument {var} is None, can't set")
             continue
         if isinstance(value, bool):
             if value is True:
@@ -409,13 +410,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         merge_library_dir = f"{self.whitelist_library_config.library}_folder"
 
         arg_whitelist_html = write_parser_args(
-            python_module=self.modelica_py_ci.html_tidy_module,
+            python_module=self.modelica_py_ci.create_whitelist_module,
             user_args=self.dict(),
             template_script_args={
                 "whitelist_library": self.whitelist_library_config.library,
                 "git-url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
-                "whitelist_flag": True,
             }, skip_args=["packages"]
         )
         arg_lib = write_parser_args(
