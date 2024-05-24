@@ -478,14 +478,14 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_kwargs=template_kwargs
         )
 
-    def _write_yml_templates(self, file: str, template_kwargs: dict):
+    def _write_yml_templates(self, file: str, template_kwargs: dict, extra_name: str = ".gitlab-ci"):
         ci_temp = Path(self.template_files.base, file)
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
         yml_text = my_template.render(**template_kwargs)
         ci_folder = Path(self.library_path, self.templates_dir, file).parent
         config_structure.create_path(ci_folder)
-        with open(ci_folder.joinpath(Path(file).name.replace(".txt", ".gitlab-ci.yml")), "w") as yml_tmp:
+        with open(ci_folder.joinpath(Path(file).name.replace(".txt", f"{extra_name}.yml")), "w") as yml_tmp:
             yml_tmp.write(yml_text.replace('\n', ''))
 
     def write_regression_template(self):
@@ -737,7 +737,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             file_list=ci_template_list)
         self._write_yml_templates(
             file=self.template_files.main_yml_file,
-            template_kwargs=template_kwargs
+            template_kwargs=template_kwargs,
+            extra_name=""
         )
 
     def write_utilities_yml(self):
@@ -747,7 +748,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         )
         self._write_yml_templates(
             file=self.template_files.utilities_file,
-            template_kwargs=template_kwargs
+            template_kwargs=template_kwargs,
+            extra_name=""
         )
 
     def get_ci_templates(self):
