@@ -444,7 +444,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "git_url": self.whitelist_library_config.git_url,
                 "root_whitelist_library": self.whitelist_library_config.local_path,
                 "create_whitelist_flag": True,
-                "root_library": f"{self.library}/package.mo",
+                "library_package_mo": f"{self.library}/package.mo",
                 "dym_options": ["DYM_SIM", "DYM_CHECK"]}
         )
         arg_lock = write_parser_args(
