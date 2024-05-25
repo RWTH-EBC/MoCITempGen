@@ -5,9 +5,8 @@ import toml
 import glob
 from pathlib import Path
 from MoCITempGen import ci_templates_config
-from pydantic import Field, field_validator, ValidationInfo
-from typing import Optional
 from ModelicaPyCI.structure import config_structure
+from ModelicaPyCI.config import CIConfig
 
 
 def _arg_list(_list: list):
@@ -113,89 +112,7 @@ def write_parser_args(
     return parser_str
 
 
-def write_multiple_rules(rule_list: list = None,
-                         except_string: str = None,
-                         rule_option: str = "&&",
-                         compare_str: str = "!~",
-                         ci_variable: str = None):
-    if rule_list is None:
-        print("Rule is None")
-        exit(1)
-    if compare_str == "==":
-        syntax = '"'
-    else:
-        syntax = "/"
-
-    if isinstance(rule_list, dict):
-        if except_string is not None:
-            _list = []
-            for var in rule_list:
-                if var != except_string:
-                    _list.append(f'{ci_variable}  {compare_str} {syntax}{rule_list[var]}{syntax}')
-        else:
-            _list = []
-            for var in rule_list:
-                _list.append(f'{ci_variable}  {compare_str} {syntax}{rule_list[var]}{syntax}')
-        rule_string = ""
-        for rule in _list:
-            if rule == _list[0]:
-                rule_string = f'{rule}  '
-            else:
-                rule_string = f'{rule_string} {rule_option} {rule}'
-        return rule_string
-    if isinstance(rule_list, list):
-        if except_string is not None:
-            rule_list = [f'{ci_variable}  {compare_str} {syntax}{value}{syntax}' for value in rule_list if
-                         value != except_string]
-        else:
-            rule_list = [f'{ci_variable}  {compare_str} {syntax}{value}{syntax}' for value in rule_list]
-        rule_string = ""
-        for rule in rule_list:
-            if rule == rule_list[0]:
-                rule_string = f'{rule}  '
-            else:
-                rule_string = f'{rule_string} {rule_option} {rule}'
-        return rule_string
-
-
 class CITemplatesConfig(ci_templates_config.GeneralConfig):
-    commit_string: Optional[str] = Field(validate_default=True, default=None)
-    pr_main_branch_rule: Optional[str] = Field(validate_default=True, default=None)
-
-    @field_validator("bot_messages")
-    @classmethod
-    def create_commit_string(cls, commit_string, info: ValidationInfo):
-        if commit_string is not None:
-            return commit_string
-        return write_multiple_rules(
-            rule_list=list(info.data["commit_interaction"].dict().values()),
-            rule_option="&&",
-            compare_str="!~",
-            ci_variable="$CI_COMMIT_MESSAGE"
-        )
-
-    @field_validator("bot_messages")
-    @classmethod
-    def create_pr_main_branch_rule(cls, pr_main_branch_rule, info: ValidationInfo):
-        if pr_main_branch_rule is not None:
-            return pr_main_branch_rule
-        return write_multiple_rules(rule_list=info.data["main_branch_list"],
-                                    rule_option="||",
-                                    compare_str="==",
-                                    ci_variable="$CI_COMMIT_BRANCH")
-
-    def to_toml(self, path: Path):
-        with open(path, "w+") as file:
-            toml.dump(self.dict(), file)
-        print(self.dict())
-
-    @staticmethod
-    def from_toml(path: Path):
-        with open(path, "r") as file:
-            return CITemplatesConfig(**toml.load(file))
-
-    def get_utilities_path(self):
-        return str(Path(self.templates_dir).joinpath(self.utilities_directory).as_posix())
 
     def write_OM_check_template(self):
         # out = ["root_library", "library"]
@@ -221,13 +138,13 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             HOME="${HOME}",
             TIMESTAMP="${TIMESTAMP}",
             OM_python_check_model_file=self.modelica_py_ci.OM_python_check_model_module,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             expire_in_time=self.expire_in_time,
             arg_PR=arg_pull_request,
             arg_push=arg_push,
             packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
-            config_ci_changed_file=self.ci_config_files.changed_file
+            config_ci_changed_file=self.ci_config.ci_files.changed_file
         )
         self._write_yml_templates(
             file=self.template_files.OM_check_file,
@@ -243,7 +160,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             image_name=self.dymola_image,
             ci_stage_deploy=self.stage_names.deploy,
             expire_in_time=self.expire_in_time,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             PR_main_branch_rule=self.pr_main_branch_rule
         )
         self._write_yml_templates(
@@ -303,7 +220,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "github_token": "$GITHUB_API_TOKEN",
                 "create_pr_flag": True,
                 "correct_html_flag": True,
-                "base_branch": self.main_branch_list[-1]
+                "base_branch": self.main_branch
             },
             skip_args=["gitlab_page", "base_branch"])
         template_kwargs = dict(
@@ -316,7 +233,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             python_version=self.conda_environment,
             modelicapyci_html_tidy_module=self.modelica_py_ci.html_tidy_module,
             arg_correct_html=arg_correct_html,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             expire_in_time=self.expire_in_time,
             commit_string=self.commit_string,
             library=self.library,
@@ -329,7 +246,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_push=arg_push,
             bot_create_html_file_commit=self.bot_messages.create_html_file_commit,
             bot_update_whitelist_commit=self.bot_messages.update_whitelist_commit,
-            whitelist_html_file=self.whitelist_scripts.html_file,
+            whitelist_html_file=self.ci_config.whitelist.html_file,
             ci_create_html_whitelist_commit=self.ci_create_html_whitelist_commit
         )
         self._write_yml_templates(
@@ -362,7 +279,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             commit_string=self.commit_string,
             PR_main_branch_rule=self.pr_main_branch_rule,
             ci_style_commit=self.ci_style_commit,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             arg_PR=arg_PR,
             arg_Push=arg_push)
         self._write_yml_templates(
@@ -383,7 +300,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_whitelist_html=2,
             arg_whitelist_sim=2,
             bot_build_whitelist_commit=self.bot_messages.build_whitelist_commit,
-            dymola_ci_test_dir=self.dymola_ci_test_dir,
+            ci_dir=self.ci_config.dir,
             ci_build_whitelist_structure_commit=self.commit_interaction.build_whitelist_structure,
             expire_in_time=self.expire_in_time,
             xvfb_flag=self.xvfb_flag,
@@ -443,7 +360,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "create_pr_flag": True,
                 "ibpsa_merge_flag": True,
-                "base_branch": self.main_branch_list[-1]
+                "base_branch": self.main_branch
             }
         )
 
@@ -471,7 +388,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_lock=arg_lock,
             whitelist_library=self.whitelist_library_config.library,
             bot_merge_commit=self.bot_messages.merge_commit,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
             arg_api_pr=arg_api_pr
         )
@@ -486,7 +403,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         print(f"Write {ci_temp}")
         my_template = Template(strict_undefined=True, filename=str(ci_temp))
         yml_text = my_template.render(**template_kwargs)
-        ci_folder = Path(self.library_path, self.templates_dir, file).parent
+        ci_folder = self.templates_dir.joinpath(file).parent
         config_structure.create_path(ci_folder)
         with open(ci_folder.joinpath(Path(file).name.replace(".txt", f"{extra_name}.yml")), "w") as yml_tmp:
             yml_tmp.write(yml_text.replace('\n', ''))
@@ -565,8 +482,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             buildingspy_upgrade=self.buildingspy_upgrade,
             modelicapyci_test_reference_module=self.modelica_py_ci.test_reference_module,
             modelicapyci_google_chart_module=self.modelica_py_ci.google_chart_module,
-            config_ci_exit_file=self.ci_config_files.exit_file,
-            result_dir=self.result.dir,
+            config_ci_exit_file=self.ci_config.ci_files.exit_file,
+            result_dir=self.ci_config.result.dir,
             arg_chart=arg_chart,
             ci_regression_test_commit=self.ci_regression_test_commit,
             expire_in_time=self.expire_in_time,
@@ -582,8 +499,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             xvfb_flag=self.xvfb_flag,
             modelicapyci_structure_module=self.modelica_py_ci.config_structure_module,
             arg_ref=arg_ref,
-            config_ci_eof_file=self.ci_config_files.eof_file,
-            config_ci_new_create_ref_file=self.ci_config_files.new_create_ref_file,
+            config_ci_eof_file=self.ci_config.ci_files.eof_file,
+            config_ci_new_create_ref_file=self.ci_config.ci_files.new_create_ref_file,
             bot_create_ref_commit=self.bot_messages.create_ref_commit,
             ci_show_ref_commit=self.ci_show_ref_commit,
             arg_check_ref_plot=arg_check_ref_plot,
@@ -614,12 +531,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             OM_python_check_model_module=self.modelica_py_ci.OM_python_check_model_module,
             arg_PR=arg_PR,
             arg_push=arg_push,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             OM_Image=self.open_modelica_image,
             expire_in_time=self.expire_in_time,
             packages=self.packages[self.library],
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
-            config_ci_changed_file=self.ci_config_files.changed_file)
+            config_ci_changed_file=self.ci_config.ci_files.changed_file)
         self._write_yml_templates(
             file=self.template_files.OM_simulate_file,
             template_kwargs=template_kwargs
@@ -658,18 +575,18 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_check_commit=self.ci_check_commit,
             xvfb_flag=self.xvfb_flag,
             modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             expire_in_time=self.expire_in_time,
             arg_push=arg_push,
             arg_wh=arg_wh,
             arg_PR=arg_PR,
             package_list=self.packages[self.library],
-            config_ci_exit_file=self.ci_config_files.exit_file,
+            config_ci_exit_file=self.ci_config.ci_files.exit_file,
             bot_update_model_whitelist_commit=self.bot_messages.update_model_whitelist_commit,
-            whitelist_model_file=self.whitelist_scripts.check_file,
+            whitelist_model_file=self.ci_config.whitelist.check_file,
             python_version=self.conda_environment,
             ci_create_model_whitelist_commit=self.ci_create_model_whitelist_commit,
-            config_ci_changed_file=self.ci_config_files.changed_file,
+            config_ci_changed_file=self.ci_config.ci_files.changed_file,
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module
         )
         self._write_yml_templates(
@@ -702,7 +619,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_stage_create_exampeL_whitelist=self.stage_names.create_example_whitelist,
             modelicapyci_config_structure_module=self.modelica_py_ci.config_structure_module,
             arg_push=arg_push,
-            config_ci_changed_file=self.ci_config_files.changed_file,
+            config_ci_changed_file=self.ci_config.ci_files.changed_file,
             arg_PR=arg_PR,
             commit_string=self.commit_string,
             PR_main_branch_rule=self.pr_main_branch_rule,
@@ -713,12 +630,12 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             package_list=self.packages[self.library],
             arg_wh=arg_wh,
             bot_update_model_whitelist_commit=self.bot_messages.update_example_whitelist_commit,
-            whitelist_model_file=self.whitelist_scripts.simulate_file,
+            whitelist_model_file=self.ci_config.whitelist.simulate_file,
             ci_create_model_whitelist_commit=self.ci_create_simulate_whitelist_commit,
-            result_dir=self.result.dir,
+            result_dir=self.ci_config.result.dir,
             expire_in_time=self.expire_in_time,
             xvfb_flag=self.xvfb_flag,
-            config_ci_exit_file=self.ci_config_files.exit_file,
+            config_ci_exit_file=self.ci_config.ci_files.exit_file,
             ci_stage_create_whitelist=self.stage_names.create_whitelist)
         self._write_yml_templates(
             file=self.template_files.simulate_file,
@@ -757,8 +674,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         )
 
     def get_ci_templates(self):
-        path = Path(self.library_path).joinpath(self.templates_dir)
-        py_f = glob.glob(f'{path}/**/*.yml', recursive=True)
+        py_f = glob.glob(f'{self.template_scripts_dir}/**/*.yml', recursive=True)
         mo_py_files = []
         for file in py_f:
             if file.find(".gitlab-ci.yml") > -1:
@@ -841,17 +757,33 @@ def setting_ci_templates_types():
     return stages_list
 
 
-def setting_ci_libraries():
-    library = input_with_default(message='Which library should be tested?', default="AixLib")
-    path_library = input(
-        f'Path of library? (If the library is located in the directory, do not enter an entry.)'
+def setting_ci_library():
+    library = input_with_default(
+        message='Which library should be tested?',
+        default="AixLib"
     )
-    lib_path = Path(path_library).joinpath(library, "package.mo")
-    config_structure.check_file_setting(lib_path)
-    print(f'Setting library root: {lib_path}')
-    print(f'Setting library : {library}')
-    return lib_path, library
+    path_library = input(
+        f'Path of library? (If the library is located in '
+        f'the directory, do not enter an entry.)'
+    )
+    main_branch = input_with_default(
+        message="What is the name of your default/main/master branch?",
+        default="master"
+    )
+    library_path = Path(path_library).joinpath(library, "package.mo")
+    config_structure.check_file_setting(library_path)
+    print(f'Setting {library=}, {library_path=}, and {main_branch=}')
+    return library_path, library, main_branch
 
+
+def setting_ci_dir():
+    ci_dir = input_with_default(
+        message="In which folder of your library "
+                "should the CI templates be stored",
+        default="bin/ci-tests"
+    )
+    print(f"Setting {ci_dir=}")
+    return ci_dir
 
 def setting_ci_packages(library: str, library_path: Path):
     packages = {}
@@ -958,13 +890,18 @@ def setting_ci_gitlab_page():
     return gitlab_page
 
 
-def setting_dymola_image_name():
+def setting_image_names():
     dymola_image = input_with_default(
-        message=f'Which docker image should be used? ',
+        message=f'Which dymola docker image should be used? ',
         default="registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
     )
-    print(f'Setting dymola version: {dymola_image}')
-    return dymola_image
+    print(f'Setting dymola image: {dymola_image}')
+    open_modelica_image = input_with_default(
+        message=f'Which OpenModelica docker image should be used? ',
+        default="registry.git.rwth-aachen.de/ebc/ebc_intern/openmodelica-docker:main"
+    )
+    print(f'Setting OpenModelica image: {open_modelica_image}')
+    return dymola_image, open_modelica_image
 
 
 def overwrite_args_parser_toml(ci_parser_toml: Path, ci_templates_toml: Path):
@@ -1020,95 +957,97 @@ def parse_args():
     check_test_group.add_argument("--update-toml",
                                   default=False,
                                   action="store_true")
+    check_test_group.add_argument("--toml-file",
+                                  help="Path to the toml used if write-templates=True",
+                                  default=None)
 
     return parser.parse_args()
 
 
-def get_toml_var(self, pattern_1: str, pattern_2: str, to_group: str):
-    _list = {}
-    var_dict = vars(CITemplatesConfig())
-    _dict = {}
-    for var in var_dict:
-        if var.find(pattern_1) > -1 and var.find(pattern_2) > -1:
-            _list[var] = var_dict[var]
-    _dict[to_group] = _list
-    return _dict
+def create_toml_config():
+    library_path, library, main_branch = setting_ci_library()
+    ci_dir = setting_ci_dir()
 
-
-def create_toml_config(path):
-    library_path, library = setting_ci_libraries()
-
-    whitelist_library = setting_ci_whitelist()
-    package_list = setting_ci_packages(library=library, library_path=library_path)
+    whitelist_library_config = setting_ci_whitelist()
+    packages = setting_ci_packages(library=library, library_path=library_path)
     stage_list = setting_ci_templates_types()
     conda_environment = setting_ci_python_conda_env()
     dymola_version = setting_ci_dymola_version()
     github_repository = setting_ci_github_repo()
     gitlab_page = setting_ci_gitlab_page()
-    dymola_image = setting_dymola_image_name()
+    dymola_image, open_modelica_image = setting_image_names()
     changed_flag = setting_ci_changed_flag()
     extended_examples_flag = extended_simulates()
+    ci_config = CIConfig(dir=ci_dir, library_root=library_path)
+    toml_save_path = ci_config.get_dir_path().joinpath("config", "ci_config.toml")
 
     CITemplatesConfig(
         stage_list=stage_list,
         library=library,
         library_path=library_path,
-        package_list=package_list,
-        whitelist_library=whitelist_library,
+        main_branch=main_branch,
+        ci_config=ci_config,
+        packages=packages,
         conda_environment=conda_environment,
         dymola_version=dymola_version,
         github_repository=github_repository,
         gitlab_page=gitlab_page,
         dymola_image=dymola_image,
+        open_modelica_image=open_modelica_image,
         changed_flag=changed_flag,
+        whitelist_library_config=whitelist_library_config,
         extended_examples_flag=extended_examples_flag,
-        template_files=ci_templates_config.TemplateFilesConfig(base=Path(__file__).parents[1].absolute())
-    ).to_toml(path=path)
+        template_files=ci_templates_config.TemplateFilesConfig(
+            base=Path(__file__).parents[1].absolute()
+        )
+    ).to_toml(path=toml_save_path)
+    print(f"CI-Config saved under: {toml_save_path}")
+    return toml_save_path
 
 
 def write_templates(path: Path):
-    ci_templates_config = CITemplatesConfig.from_toml(path=path)
+    templates_config = CITemplatesConfig.from_toml(path=path)
 
-    for temp in ci_templates_config.stage_list:
+    for temp in templates_config.stage_list:
         if temp == "check":
-            ci_templates_config.write_check_template()
-            ci_templates_config.write_OM_check_template()
+            templates_config.write_check_template()
+            templates_config.write_OM_check_template()
         if temp == "simulate":
-            ci_templates_config.write_simulate_template()
-            ci_templates_config.write_OM_simulate_template()
+            templates_config.write_simulate_template()
+            templates_config.write_OM_simulate_template()
         if temp == "regression":
-            ci_templates_config.write_regression_template()
+            templates_config.write_regression_template()
         if temp == "html":
-            ci_templates_config.write_html_template()
+            templates_config.write_html_template()
         if temp == "style":
-            ci_templates_config.write_style_template()
-        if temp == "Merge" and ci_templates_config.whitelist_library_config is not None:
-            ci_templates_config.write_merge_template()
-    # ci_templates_config.write_ci_whitelist_setting_template()
-    ci_templates_config.write_page_template()
-    ci_template_list = ci_templates_config.get_ci_templates()
+            templates_config.write_style_template()
+        if temp == "Merge" and templates_config.whitelist_library_config is not None:
+            templates_config.write_merge_template()
+    # templates_config.write_ci_whitelist_setting_template()
+    templates_config.write_page_template()
+    ci_template_list = templates_config.get_ci_templates()
     stage_list = get_ci_stages(file_list=ci_template_list)
-    ci_templates_config.write_utilities_yml()
-    ci_templates_config.write_main_yml(stage_list=stage_list, ci_template_list=ci_template_list)
+    templates_config.write_utilities_yml()
+    templates_config.write_main_yml(stage_list=stage_list, ci_template_list=ci_template_list)
 
 
 if __name__ == '__main__':
     ARGS = parse_args()
-    TEMPLATES_TOML_FILE = Path(__file__).parent.joinpath(
-        "ci_config", "toml_files", "ci_user_template.toml"
-    )
-    PARSER_TOML_FILE = Path(__file__).parent.joinpath(
-        "ci_config", "toml_files", "parser.toml"
-    )
-    # create_toml_config(path=TEMPLATES_TOML_FILE)
+    TEMPLATES_TOML_FILE = create_toml_config()
     write_templates(path=TEMPLATES_TOML_FILE)
 
     if ARGS.set_setting is True:
-        create_toml_config(path=TEMPLATES_TOML_FILE)
+        create_toml_config()
     if ARGS.update_toml:
+        # TODO-Jansen: Use-Case for this? I don't think it is useful any more.
+        PARSER_TOML_FILE = Path(__file__).parent.joinpath(
+            "ci_config", "toml_files", "parser.toml"
+        )
         overwrite_args_parser_toml(
             ci_parser_toml=PARSER_TOML_FILE,
             ci_templates_toml=TEMPLATES_TOML_FILE
         )
     if ARGS.write_templates is True:
-        write_templates(path=TEMPLATES_TOML_FILE)
+        if ARGS.toml_file is None:
+            raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
+        write_templates(path=ARGS.toml_file)
