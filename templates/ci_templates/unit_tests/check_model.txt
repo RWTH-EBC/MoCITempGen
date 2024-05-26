@@ -1,31 +1,32 @@
-# dym_image_name : ${dym_image_name}
-# ci_stage_simulate: ${ci_stage_simulate}
-# ci_stage_create_exampeL_whitelist: ${ci_stage_create_exampeL_whitelist}
-# arg_push : ${arg_push}
-# arg_PR : ${arg_PR}
+# dym_image_name: ${dym_image_name}
+# ci_stage_model_check: ${ci_stage_model_check}
+# ci_stage_create_whitelist: ${ci_stage_create_whitelist}
 # commit_string: ${commit_string}
-# PR_main_branch_rule: ${PR_main_branch_rule}
 # library: ${library}
-# ci_check_commit ${ci_check_commit}
-# python_version: ${python_version}
+# PR_main_branch_rule: ${PR_main_branch_rule}
+# ci_check_commit: ${ci_check_commit}
+# xvfb_flag: ${xvfb_flag}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
-# package_list: ${package_list}
-# arg_wh: ${arg_wh}
+# result_dir: ${result_dir}
+# expire_in_time: ${expire_in_time}
+# ci_create_model_whitelist_commit: ${ci_create_model_whitelist_commit}
+# arg_push: ${arg_push}
+# arg_PR: ${arg_PR}
+# config_ci_exit_file: ${config_ci_exit_file}
 # bot_update_model_whitelist_commit: ${bot_update_model_whitelist_commit}
 # whitelist_model_file: ${whitelist_model_file}
-# ci_create_model_whitelist_commit: ${ci_create_model_whitelist_commit}
-# result_dir : ${result_dir}
-# expire_in_time: ${expire_in_time}
-# xvfb_flag : ${xvfb_flag}
-# config_ci_exit_file : ${config_ci_exit_file}
+# arg_wh: ${arg_wh}
+# python_version ${python_version}
+# package_list: ${package_list}
+# modelicapyci_config_structure_module: ${modelicapyci_config_structure_module}
 
 include: '${utilities_directory}'
 
 stages:
-    - ${ci_stage_simulate}
-    - ${ci_stage_create_example_whitelist}
+    - ${ci_stage_model_check}
+    - ${ci_stage_create_whitelist}
 
-.sim_rules:PR:
+.check_rules:PR:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
@@ -34,70 +35,64 @@ stages:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
 
-.sim_rules:Push:
+.check_rules:push:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
 
-.simulate_model_job:PR:
+.check_model_job:PR:
     image: ${dym_image_name}
-    stage: ${ci_stage_simulate}
+    stage: ${ci_stage_model_check}
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_PR}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_PR}
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.sim_rules:PR , rules]
+        - !reference [.check_rules:PR , rules]
 
-.simulate_model_job:Push:
+.check_model_job:Push:
     image: ${dym_image_name}
-    stage: ${ci_stage_simulate}
+    stage: ${ci_stage_model_check}
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-
     script:
-        -  ${xvfb_flag} python -m ${modelicapyci_test_validate_modulelidate_module} --single-package $lib_package --library ${library} -DS ${dymola_version} ${whitelist_flag} ${filter_flag} --simulate-examples
-        - python -m ${modelicapyci_config_structure_module} --changed-model
-        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
-        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_push}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_push}
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.sim_rules:Push , rules]
+        - !reference [.check_rules:push , rules]
 
 %for package in package_list:
-Simulate_${library}_${package}:PR:
+Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
-    extends: .simulate_model_job:PR
+    extends: .check_model_job:PR
 
 %endfor
 
-
 %for package in package_list:
-Simulate_${library}_${package}:Push:
+Check_${library}_${package}:Push:
     variables:
         lib_package: ${package}
-    extends: .simulate_model_job:Push
+    extends: .check_model_job:Push
 
 %endfor
 
-simulate_whitelist_job:
+check_whitelist_job:
     image: ${dym_image_name}
-    stage:  ${ci_stage_create_exampeL_whitelist}
+    stage: ${ci_stage_create_whitelist}
     before_script:
         - !reference [.clone_ci_templates, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
@@ -107,14 +102,14 @@ simulate_whitelist_job:
         - mkdir whitelist && cd whitelist
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_wh}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_wh}
     after_script:
         - cd whitelist && cd $CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             message="${bot_update_model_whitelist_commit}" ;
             git add ${whitelist_model_file} ;
             git commit -m "$message" ;
-            git push git@github.com:$Github_Repository.git ;
+            git push git@github.com:$Github_Repository.git;
             exit 0;
           else
             exit 0 ;
@@ -126,4 +121,3 @@ simulate_whitelist_job:
     rules:
         - if: $CI_COMMIT_MESSAGE =~ /${ci_create_model_whitelist_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
-

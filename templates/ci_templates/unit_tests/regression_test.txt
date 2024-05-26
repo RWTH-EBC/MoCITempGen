@@ -54,7 +54,6 @@ stages:
         - if:  (${PR_main_branch_rule})
           when: never
 
-
 .Regressiontest:PR:
     image: ${dym_image}
     stage: ${ci_stage_regression_test}
@@ -82,7 +81,6 @@ stages:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
 
-
 .Regressiontest:Push:
     image: ${dym_image}
     stage: ${ci_stage_regression_test}
@@ -93,7 +91,6 @@ stages:
         - pip install --upgrade ${buildingspy_upgrade}
     script:
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_push}
-
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             source activate ${python_version} ;
@@ -110,7 +107,6 @@ stages:
     rules:
         - !reference [.regression_rules:Push , rules]
 
-
 %for package in package_list:
 Regressiontest_${library}_${package}:PR:
     variables:
@@ -126,7 +122,6 @@ Regressiontest_${library}_${package}:Push:
     extends: .Regressiontest:Push
 
 %endfor
-
 
 Regression_overall_coverage:PR:
     stage: ${ci_stage_regression_test}
@@ -146,7 +141,6 @@ Regression_overall_coverage:PR:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
 
-
 Regression_overall_coverage:Push:
     stage: ${ci_stage_regression_test}
     before_script:
@@ -163,7 +157,6 @@ Regression_overall_coverage:Push:
     rules:
         - !reference [.regression_rules:Push , rules]
 
-
 prepare_create_plots:Push:
     stage: ${ci_stage_prepare}
     before_script:
@@ -172,10 +165,9 @@ prepare_create_plots:Push:
         - pip install --upgrade ${buildingspy_upgrade}
         - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
-
     script:
         - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
-        - python -m ${modelicapyci_api_github_modulehon_api}   ${api_github_arg}
+        - python -m ${modelicapyci_api_github_module}   ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
@@ -206,8 +198,6 @@ prepare_create_plots:PR:
     - job: Regressiontest_${library}_${package}:PR
       artifacts: true
     %endfor
-
-
 
 RegressionTest_Check_References:
     stage: ${ci_stage_ref_check}

@@ -12,4 +12,3 @@ include:
   %for file in file_list:
     - '${file}'  
   %endfor
-  

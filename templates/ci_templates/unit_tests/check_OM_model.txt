@@ -1,42 +1,41 @@
-# ci_stage_OM_simulate: ${ci_stage_OM_simulate}
+# Variables:
+# ci_stage_OM_model_check: ${ci_stage_OM_model_check}
 # commit_string: ${commit_string}
 # library: ${library}
-# PR_main_branch_rule : ${PR_main_branch_rule}
-# ci_OM_sim_commit: ${ci_OM_sim_commit}
+# PR_main_branch_rule: ${PR_main_branch_rule}
+# ci_OM_check_commit: ${ci_OM_check_commit}
+# OM_Image: ${OM_Image}
 # OM_python_check_model_module: ${OM_python_check_model_module}
-# arg_PR : ${arg_PR}
-# arg_push: ${arg_push}
 # result_dir: ${result_dir}
-# OM_Image:  ${OM_Image}
 # expire_in_time: ${expire_in_time}
+# arg_PR: ${arg_PR}
+# arg_push: ${arg_push}
 # packages: ${packages}
 
 include: '${utilities_directory}'
 
 stages:
-    - ${ci_stage_OM_simulate}
+    - ${ci_stage_OM_model_check}
 
-
-.OM_sim_rules:PR:
+.OM_check_rules:PR:
     rules:
         - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
           when: on_success
         - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
           when: on_success
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_sim_commit}/ && $CI_PIPELINE_SOURCE == "push"
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
 
-.OM_sim_rules:push:
+.OM_check_rules:push:
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
           when: on_success
         - if:  (${PR_main_branch_rule})
           when: never
 
-
-.OM_simulate_model_job:PR:
+.OM_check_model_job:PR:
     image: ${OM_Image}
-    stage: ${ci_stage_OM_simulate}
+    stage: ${ci_stage_OM_model_check}
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
@@ -48,18 +47,14 @@ stages:
         expire_in: ${expire_in_time}
     allow_failure: true
     rules:
-        - !reference [.OM_sim_rules:PR , rules]
+        - !reference [.OM_check_rules:PR , rules]
 
-
-
-.OM_simulate_model_job:push:
+.OM_check_model_job:push:
     image: ${OM_Image}
-    stage: ${ci_stage_OM_simulate}
+    stage: ${ci_stage_OM_model_check}
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - python3 ${modelicapyci_config_structure_module} --changed-model
-        - git diff --raw --diff-filter=AMT HEAD^1 >  ${config_ci_changed_file}
         - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_push}
     artifacts:
         when: on_failure
@@ -68,28 +63,20 @@ stages:
         expire_in: ${expire_in_time}
     allow_failure: true
     rules:
-        - !reference [.OM_sim_rules:push, rules]
-
-
-
-
+        - !reference [.OM_check_rules:push, rules]
 
 %for package in packages:
-OM_Simulate_${library}_${package}:PR:
+OM_Check_${library}_${package}:PR:
     variables:
         lib_package: ${package}
-    extends: .OM_simulate_model_job:PR
+    extends: .OM_check_model_job:PR
 
 %endfor
 
-
 %for package in packages:
-OM_Simulate_${library}_${package}:push:
+OM_Check_${library}_${package}:push:
     variables:
         lib_package: ${package}
-    extends: .OM_simulate_model_job:push
+    extends: .OM_check_model_job:push
 
 %endfor
-
-
-

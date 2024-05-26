@@ -1,0 +1,17 @@
+:: Make sure you have everything installed as in the util scripts:
+:: .clone_ci_templates
+:: .custom_install_additional_modelica_libraries
+:: .github_ssh_auth
+
+python -m ${modelicapyci_html_tidy_module} ${arg_PR_html}
+python -m ${modelicapyci_html_tidy_module} ${arg_push_html}
+
+python -m ${modelicapyci_syntax_test_module} ${arg_PR_syntax}
+python -m ${modelicapyci_syntax_test_module} ${arg_push_syntax}
+
+%for package in package_list:
+:: Check & Simulate ${library} ${package} on PR
+python -m ${modelicapyci_test_validate_module} ${arg_PR} --packages ${package}
+:: Check & Simulate ${library} ${package} on push
+python -m ${modelicapyci_test_validate_module} ${arg_push} --packages ${package}
+%endfor

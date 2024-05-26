@@ -37,7 +37,6 @@ StyleCheck:${library}:PR:
     stage: ${ci_stage_style_check}
     before_script:
         - !reference [.clone_ci_templates, script]
-
     script:
         - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_PR}
     artifacts:
