@@ -509,7 +509,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_stage_prepare=self.stage_names.prepare,
             python_version=self.conda_environment,
             arg_ref_check=arg_ref_check,
-            ci_toml_path=ci_toml_path,
+            ci_toml_path=ci_toml_path.relative_to(self.ci_config.library_root).as_posix(),
             buildingspy_upgrade=self.buildingspy_upgrade,
             modelicapyci_test_reference_module=self.modelica_py_ci.test_reference_module,
             modelicapyci_google_chart_module=self.modelica_py_ci.google_chart_module,
