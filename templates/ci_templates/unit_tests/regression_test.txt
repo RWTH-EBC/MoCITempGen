@@ -212,7 +212,6 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - python -m ${modelicapyci_configuration_module} --create-ref
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}  < ../${config_ci_eof_file}
     after_script:
         - source activate ${python_version}
