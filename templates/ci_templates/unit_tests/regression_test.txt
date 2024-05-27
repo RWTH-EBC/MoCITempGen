@@ -243,7 +243,7 @@ RegressionTest_Check_References:
           when: always
 
 plot_reference_results:
-    stage: plot_ref
+    stage: ${ci_stage_plot_ref}
     before_script:
         - !reference [.clone_ci_templates, script]
         - apt-get update -y && apt-get install zip unzip -y
