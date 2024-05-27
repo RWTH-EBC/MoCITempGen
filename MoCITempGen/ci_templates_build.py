@@ -830,17 +830,17 @@ def get_ci_stages(file_list):
     if len(stage_list) == 0:
         print(f'No stages')
         exit(1)
-    # Sort stages:
-    stages_dict = {}
     for stage in stage_list:
-        try:
-            stage_number = int(stage.split("_")[0])
-        except ValueError:
-            stage_number = 999  # Some high value
-        stages_dict[stage_number] = stage
         print(f'Setting stages: {stage}')
     # Return sorted list
-    return [stages_dict[stage_number] for stage_number in sorted(stages_dict)]
+
+    def key_sort(s: str):
+        try:
+            return int(s.split("_")[0])
+        except ValueError:
+            return 999  # Some high value
+        #
+    return sorted(stage_list, key=key_sort)
 
 
 def yes_no_input(message):
