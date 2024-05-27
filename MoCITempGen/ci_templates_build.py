@@ -971,8 +971,9 @@ def setting_ci_packages(library: str, library_mo: Path):
     package_list = []
     package_lib = []
     print(f'**** Library {library} ****')
-    for package in os.listdir(Path(library_mo).parent):
-        if package.find(".") == -1:
+    library_dir = Path(library_mo).parent
+    for package in os.listdir(library_dir):
+        if package.find(".") == -1 and os.path.isfile(library_dir.joinpath(package, "package.mo")):
             package_list.append(package)
     if package_list is None:
         print(f'Dont find library {library}')
