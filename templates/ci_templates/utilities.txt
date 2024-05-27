@@ -1,5 +1,6 @@
 # conda_environment: ${conda_environment}
 # modelica_py_ci_url: ${modelica_py_ci_url}
+# ci_toml_path: ${ci_toml_path}
 
 # This file contains small scripts, rules or other templates
 # which can be referenced by other templates in this repo (or other repos as well).
@@ -25,6 +26,7 @@
     - export PYTHONIOENCODING=utf-8
     - pip install git+https://github.com/lbl-srg/BuildingsPy.git@master
     - pip install git+${modelica_py_ci_url}
+    - export CI_PYTHON_CONFIG_FILE="${ci_toml_path}"
 
 .custom_install_additional_modelica_libraries:
   script:

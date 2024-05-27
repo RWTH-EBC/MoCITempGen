@@ -725,10 +725,11 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             extra_name=""
         )
 
-    def write_utilities_yml(self):
+    def write_utilities_yml(self, ci_toml_path: Path):
         template_kwargs = dict(
             conda_environment=self.conda_environment,
-            modelica_py_ci_url=self.modelica_py_ci.url
+            modelica_py_ci_url=self.modelica_py_ci.url,
+            ci_toml_path=ci_toml_path.relative_to(self.ci_config.library_root).as_posix()
         )
         self._write_yml_templates(
             file=self.template_files.utilities_file,
@@ -1114,8 +1115,9 @@ def create_toml_config():
     dymola_image, open_modelica_image = setting_image_names()
     extended_examples_flag = extended_simulates()
     ci_config = CIConfig(dir=str(ci_dir), library_root=str(library_path))
-    toml_save_path = ci_config.get_dir_path().joinpath("config", "ci_config.toml")
-    os.makedirs(toml_save_path.parent, exist_ok=True)
+    templates_toml_save_path = ci_config.get_dir_path().joinpath("config", "templates_generator_config.toml")
+    mopyci_toml_save_path = ci_config.get_dir_path().joinpath("config", "modelica_py_ci_config.toml")
+    os.makedirs(templates_toml_save_path.parent, exist_ok=True)
 
     CITemplatesConfig(
         stage_list=stage_list,
@@ -1134,13 +1136,16 @@ def create_toml_config():
         template_files=ci_templates_config.TemplateFilesConfig(
             base=str(Path(__file__).parents[1].absolute())
         )
-    ).to_toml(path=toml_save_path)
-    print(f"CI-Config saved under: {toml_save_path}")
-    return toml_save_path
+    ).to_toml(path=templates_toml_save_path)
+    print(f"Templates CI-Config saved under: {templates_toml_save_path}")
+    with open(mopyci_toml_save_path, "w+") as file:
+        toml.dump(ci_config.dict(), file)
+    print(f"Modelica-Py-CI-Config saved under: {mopyci_toml_save_path}")
+    return templates_toml_save_path, mopyci_toml_save_path
 
 
-def write_templates(path: Path):
-    templates_config = CITemplatesConfig.from_toml(path=path)
+def write_templates(templates_toml: Path, ci_toml_path: Path):
+    templates_config = CITemplatesConfig.from_toml(path=templates_toml)
 
     for temp in templates_config.stage_list:
         if temp == "check":
@@ -1161,16 +1166,17 @@ def write_templates(path: Path):
     templates_config.write_page_template()
     ci_template_list = templates_config.get_ci_templates()
     stage_list = get_ci_stages(file_list=ci_template_list)
-    templates_config.write_utilities_yml()
+    templates_config.write_utilities_yml(ci_toml_path=ci_toml_path)
     templates_config.write_main_yml(stage_list=stage_list, ci_template_list=ci_template_list)
     templates_config.write_local_windows_test()
 
 
 if __name__ == '__main__':
     ARGS = parse_args()
-    # TEMPLATES_TOML_FILE = create_toml_config()
-    TEMPLATES_TOML_FILE = Path(r"D:\04_git\AixLib\bin\ci-tests\config\ci_config.toml")
-    write_templates(path=TEMPLATES_TOML_FILE)
+    # TEMPLATES_TOML_FILE, CI_TOML_FILE = create_toml_config()
+    TEMPLATES_TOML_FILE = Path(r"D:/04_git/AixLib/bin/ci-tests/config/templates_generator_config.toml")
+    CI_TOML_FILE = Path(r"D:/04_git/AixLib/bin/ci-tests/config/modelica_py_ci_config.toml")
+    write_templates(templates_toml=TEMPLATES_TOML_FILE, ci_toml_path=CI_TOML_FILE)
 
     if ARGS.set_setting is True:
         create_toml_config()
@@ -1186,4 +1192,4 @@ if __name__ == '__main__':
     if ARGS.write_templates is True:
         if ARGS.toml_file is None:
             raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
-        write_templates(path=ARGS.toml_file)
+        write_templates(templates_toml=ARGS.toml_file)
