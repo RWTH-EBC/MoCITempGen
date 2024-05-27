@@ -581,6 +581,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "packages": ["$lib_package"],
                 "dym_options": ["DYM_CHECK"],
+                "filter_whitelist_flag": True,
                 "root_whitelist_library": ".."
             },
             overwrite_user_args_with_template_args=True
@@ -592,6 +593,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "packages": ["$lib_package"],
                 "dym_options": ["DYM_CHECK"],
                 "root_whitelist_library": "..",
+                "filter_whitelist_flag": True,
                 "changed_flag": True
             },
             overwrite_user_args_with_template_args=True
@@ -646,6 +648,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "packages": ["$lib_package"],
                 "dym_options": ["DYM_SIM"],
                 "root_whitelist_library": "..",
+                "filter_whitelist_flag": True,
                 "changed_flag": True
             },
             overwrite_user_args_with_template_args=True
@@ -657,6 +660,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
                 "packages": ["$lib_package"],
                 "dym_options": ["DYM_SIM"],
                 "root_whitelist_library": "..",
+                "filter_whitelist_flag": True,
             },
             overwrite_user_args_with_template_args=True
         )
