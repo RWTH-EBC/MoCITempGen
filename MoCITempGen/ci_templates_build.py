@@ -148,7 +148,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             HOME="${HOME}",
             TIMESTAMP="${TIMESTAMP}",
             OM_python_check_model_module=self.modelica_py_ci.OM_python_check_model_module,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             expire_in_time=self.expire_in_time,
             arg_PR=arg_pull_request,
             arg_push=arg_push,
@@ -169,7 +169,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             image_name=self.dymola_image,
             ci_stage_deploy=self.stage_names.deploy,
             expire_in_time=self.expire_in_time,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             PR_main_branch_rule=self.pr_main_branch_rule
         )
         self._write_yml_templates(
@@ -241,7 +241,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             html_praefix=self.html_praefix,
             python_version=self.conda_environment,
             arg_correct_html=arg_correct_html,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             expire_in_time=self.expire_in_time,
             commit_string=self.commit_string,
             library=self.library,
@@ -289,7 +289,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             commit_string=self.commit_string,
             PR_main_branch_rule=self.pr_main_branch_rule,
             ci_style_commit=self.commit_interaction.style,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             arg_PR=arg_PR,
             arg_Push=arg_push)
         self._write_yml_templates(
@@ -395,7 +395,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             arg_lock=arg_lock,
             whitelist_library=self.whitelist_library_config.library,
             bot_merge_commit=self.bot_messages.merge_commit,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             modelicapyci_api_github_module=self.modelica_py_ci.api_github_module,
             arg_api_pr=arg_api_pr
         )
@@ -509,7 +509,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             modelicapyci_test_reference_module=self.modelica_py_ci.test_reference_module,
             modelicapyci_google_chart_module=self.modelica_py_ci.google_chart_module,
             config_ci_exit_file=self.ci_config.ci_files.exit_file,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             arg_chart=arg_chart,
             ci_regression_test_commit=self.commit_interaction.regression_test,
             expire_in_time=self.expire_in_time,
@@ -559,7 +559,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             OM_python_check_model_module=self.modelica_py_ci.OM_python_check_model_module,
             arg_PR=arg_PR,
             arg_push=arg_push,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             OM_Image=self.open_modelica_image,
             expire_in_time=self.expire_in_time,
             packages=self.packages[self.library],
@@ -615,7 +615,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             ci_check_commit=self.commit_interaction.check,
             xvfb_flag=self.xvfb_flag,
             modelicapyci_test_validate_module=self.modelica_py_ci.test_validate_module,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             expire_in_time=self.expire_in_time,
             arg_push=arg_push,
             arg_wh=arg_wh,
@@ -682,7 +682,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             bot_update_model_whitelist_commit=self.bot_messages.update_example_whitelist_commit,
             whitelist_model_file=self.ci_config.whitelist.simulate_file,
             ci_create_model_whitelist_commit=self.commit_interaction.create_simulate_whitelist,
-            result_dir=self.ci_config.result.dir,
+            result_dir=self.ci_config.get_dir_path("result", with_library_root=False).as_posix(),
             expire_in_time=self.expire_in_time,
             xvfb_flag=self.xvfb_flag,
             config_ci_exit_file=self.ci_config.ci_files.exit_file,
