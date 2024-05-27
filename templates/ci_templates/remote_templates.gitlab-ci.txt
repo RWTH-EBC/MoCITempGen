@@ -1,0 +1,4 @@
+include:
+    project: '${project}'
+    ref: ${ref}
+    file: '${file}'

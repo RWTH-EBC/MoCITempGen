@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from mako.template import Template
 import argparse
 import toml
@@ -429,6 +431,7 @@ def _write_yml_templates(
     output_file = ci_folder.joinpath(Path(file).name.replace(".txt", f"{extra_name}.{suffix}"))
     with open(output_file, "w") as file:
         file.write(text)
+    return output_file
 
 
 def write_regression_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path):
@@ -523,7 +526,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         ci_stage_prepare=templates_config.stage_names.prepare,
         python_version=templates_config.conda_environment,
         arg_ref_check=arg_ref_check,
-        ci_toml_path=ci_toml_path.relative_to(templates_config.library_path).as_posix(),
+        ci_toml_path=ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix(),
         buildingspy_upgrade=templates_config.buildingspy_upgrade,
         modelicapyci_test_reference_module=templates_config.modelica_py_ci.test_reference_module,
         modelicapyci_google_chart_module=templates_config.modelica_py_ci.google_chart_module,
@@ -726,7 +729,7 @@ def write_toml_settings(templates_config: TemplateGeneratorConfig, ci_config: CI
 
 def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, stage_list, ci_template_list):
     ci_template_list = [
-        str(Path(file).relative_to(templates_config.library_path).as_posix()) for file in ci_template_list
+        str(Path(file).relative_to(templates_config.templates_store_local_path).as_posix()) for file in ci_template_list
     ]
 
     template_kwargs = dict(
@@ -736,19 +739,47 @@ def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfi
         gitlab_page=templates_config.gitlab_page,
         file_list=ci_template_list
     )
-    _write_yml_templates(
+    gitlab_ci_yml = _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
         file=templates_config.template_files.main_yml_file,
         template_kwargs=template_kwargs,
         extra_name=""
     )
+    if templates_config.templates_store_project:
+        yml_file = _write_yml_templates(
+            templates_config=templates_config, ci_config=ci_config,
+            file=templates_config.template_files.remote_templates_yml_file,
+            template_kwargs=dict(
+                project=templates_config.templates_store_project,
+                ref=templates_config.templates_store_branch_name,
+                file=gitlab_ci_yml.relative_to(templates_config.templates_store_local_path).as_posix()
+            ),
+            extra_name=""
+        )
+        replace_str = "remote_templates"
+    else:
+        yml_file = _write_yml_templates(
+            templates_config=templates_config, ci_config=ci_config,
+            file=templates_config.template_files.local_templates_yml_file,
+            template_kwargs=dict(
+                file=gitlab_ci_yml.relative_to(templates_config.templates_store_local_path).as_posix()
+            ),
+            extra_name=""
+        )
+        replace_str = "local_templates"
+    new_path = Path(templates_config.library_local_path).joinpath(
+        yml_file.relative_to(templates_config.get_templates_dir(ci_config=ci_config))
+    )
+    new_path = new_path.parent.joinpath(new_path.name.replace(replace_str, ""))
+    shutil.copy(yml_file, new_path)
+    os.remove(yml_file)
 
 
 def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: Path):
     template_kwargs = dict(
         conda_environment=templates_config.conda_environment,
         modelica_py_ci_url=templates_config.modelica_py_ci.url,
-        ci_toml_path=ci_toml_path.relative_to(templates_config.library_path).as_posix()
+        ci_toml_path=ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix()
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -941,14 +972,35 @@ def setting_ci_library():
     return library_path, library, main_branch, library_mo
 
 
-def setting_ci_dir():
-    ci_dir = input_with_default(
-        message="In which folder of your library "
-                "should the CI templates be stored",
-        default="bin/ci-tests"
-    )
-    print(f"Setting {ci_dir=}")
-    return ci_dir
+def setting_ci_dir(library_path: str):
+    save_local = yes_no_input("Should the templates and config files be stored in your library? ('n' for another git-repository")
+    if save_local:
+        ci_dir = input_with_default(
+            message="In which folder of your library "
+                    "should the CI templates be stored?",
+            default="bin/ci-tests"
+        )
+        print(f"Setting {ci_dir=}")
+        return library_path, ci_dir, None, None
+    else:
+        repo_location = input(
+            "In which local repository-folder should the templates be saved?"
+        )
+        ci_dir = input_with_default(
+            message="In which folder of this repository"
+                    "should the CI templates be stored?",
+            default="bin/ci-tests"
+        )
+        branch_name = input_with_default(
+            message="What is the name of the branch in this repository?",
+            default="main"
+        )
+        project = input_with_default(
+            message='Give the project name (or url) of the repository',
+            default="EBC/EBC_all/gitlab_ci/templates"
+        )
+
+        return repo_location, ci_dir, project, branch_name
 
 
 def setting_ci_packages(library: str, library_mo: Path):
@@ -1065,47 +1117,6 @@ def setting_image_names():
     return dymola_image, open_modelica_image
 
 
-def overwrite_args_parser_toml(ci_parser_toml: Path, ci_templates_toml: Path):
-    with open(ci_parser_toml, "r") as file:
-        parser_data = toml.load(file)
-    templates_config = TemplateGeneratorConfig.from_toml(path=ci_templates_toml).dict()
-    for file in parser_data:
-        parser_arguments = parser_data[file]
-        for arg_group in parser_arguments:
-            value = None
-            for ci_group in templates_config:
-                value = None
-                if ci_group == arg_group:
-                    if isinstance(templates_config[ci_group], dict):
-                        if ci_group == "whitelist_library":
-                            value = templates_config[ci_group].keys()
-                            pass
-                        else:
-                            for l in templates_config[ci_group]:
-                                if isinstance(templates_config[ci_group][l], list):
-                                    value = templates_config[ci_group][l]
-                                else:
-                                    value = templates_config[ci_group].values()
-                    else:
-                        value = templates_config[ci_group]
-                if value is not None:
-                    print(f"Change for parser arguments in file {file} in group {arg_group} with value {value}")
-                    parser_data[file][arg_group] = value
-
-            if arg_group == "git_url":
-                for wh in templates_config["whitelist_library"]:
-                    value = templates_config["whitelist_library"][wh][arg_group]
-
-            elif arg_group == "repo_dir":
-                for wh in templates_config["whitelist_library"]:
-                    value = templates_config["whitelist_library"][wh][arg_group]
-            if value is not None:
-                print(f"Change for parser arguments in file {file} in group {arg_group} with value {value}")
-                parser_data[file][arg_group] = value
-    with open(ci_parser_toml, "w") as file:
-        toml.dump(parser_data, file)
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Set Github Environment Variables")
     check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
@@ -1124,7 +1135,9 @@ def parse_args():
 
 def create_toml_config():
     library_path, library, main_branch, library_mo = setting_ci_library()
-    ci_dir = setting_ci_dir()
+    templates_store_local_path, ci_dir, templates_store_project, templates_store_branch_name = setting_ci_dir(
+        library_path=library_path
+    )
 
     whitelist_library_config = setting_ci_whitelist()
     packages = setting_ci_packages(library=library, library_mo=library_mo)
@@ -1143,7 +1156,10 @@ def create_toml_config():
     TemplateGeneratorConfig(
         stage_list=stage_list,
         library=library,
-        library_path=library_path,
+        library_local_path=library_path,
+        templates_store_local_path=templates_store_local_path,
+        templates_store_git_url=templates_store_project,
+        templates_store_branch_name=templates_store_branch_name,
         main_branch=main_branch,
         packages=packages,
         conda_environment=conda_environment,
@@ -1199,8 +1215,10 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
 if __name__ == '__main__':
     ARGS = parse_args()
     # TEMPLATES_TOML_FILE, CI_TOML_FILE = create_toml_config()
-    TEMPLATES_TOML_FILE = Path(r"D:/04_git/AixLib/bin/ci-tests/config/templates_generator_config.toml")
-    CI_TOML_FILE = Path(r"D:/04_git/AixLib/bin/ci-tests/config/modelica_py_ci_config.toml")
+    BASE = Path(r"D:/04_git/templates")
+    BASE = Path(r"D:/04_git/AixLib")
+    TEMPLATES_TOML_FILE = BASE.joinpath("bin/ci-tests/config/templates_generator_config.toml")
+    CI_TOML_FILE = BASE.joinpath("bin/ci-tests/config/modelica_py_ci_config.toml")
     write_templates(templates_toml=TEMPLATES_TOML_FILE, ci_toml_path=CI_TOML_FILE)
 
     if ARGS.set_setting is True:
