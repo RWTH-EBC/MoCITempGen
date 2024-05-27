@@ -490,13 +490,16 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
             "create_layout_flag": True,
             "funnel_comp_flag": False,
             "error_flag": False,
+            "templates_url": templates_config.template_files.url,
             "line_html_flag": False}
     )
     arg_chart = write_parser_args(
         python_module=templates_config.modelica_py_ci.google_chart_module,
         user_args=templates_config.dict(),
-        template_script_args={"funnel_comp_flag": True,
-                              "line_html_flag": True, "error_flag": True})
+        template_script_args={
+            "funnel_comp_flag": True,
+            "templates_url": templates_config.template_files.url,
+            "line_html_flag": True, "error_flag": True})
     api_github_arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.api_github_module,
         user_args=templates_config.dict(),
@@ -511,11 +514,13 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
     arg_check_ref_plot = write_parser_args(
         python_module=templates_config.modelica_py_ci.google_chart_module,
         user_args=templates_config.dict(),
-        template_script_args={"line_html_flag": True,
-                              "funnel_comp_flag": False,
-                              "create_layout_flag": False,
-                              "error_flag": False,
-                              "new_ref_flag": True},
+        template_script_args={
+            "line_html_flag": True,
+            "templates_url": templates_config.template_files.url,
+            "funnel_comp_flag": False,
+            "create_layout_flag": False,
+            "error_flag": False,
+            "new_ref_flag": True},
         skip_args=["packages"])
     # python ${modelicapyci_google_chart_file} - -line - html - -new - ref - -packages ${library};
 

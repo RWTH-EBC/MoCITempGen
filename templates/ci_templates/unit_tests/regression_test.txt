@@ -172,7 +172,7 @@ prepare_create_plots:Push:
         - pip install pandas mako matplot toml requests
     script:
         - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
-        - python -m ${modelicapyci_api_github_module}   ${api_github_arg}
+        - python -m ${modelicapyci_api_github_module} ${api_github_arg}
     artifacts:
         paths:
             - ${result_dir}/
