@@ -26,6 +26,7 @@
 # xvfb_flag: ${xvfb_flag}
 # modelicapyci_structure_module: ${modelicapyci_structure_module}
 # arg_ref: ${arg_ref}
+# TODO-Jansen: Whats the purpose of eof-files?
 # config_ci_eof_file: ${config_ci_eof_file}
 # config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
 # bot_create_ref_commit: ${bot_create_ref_commit}
@@ -212,7 +213,7 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
-        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}  < ../${config_ci_eof_file}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}
     after_script:
         - source activate ${python_version}
         - cd CorrectedVersion/$CI_PROJECT_NAME

@@ -429,7 +429,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "packages": ["$lib_package"],
                 "batch": True,
-                "changed_flag": False
+                "changed_flag": False,
+                "library_root": ".."
             },
             overwrite_user_args_with_template_args=True
         )
@@ -439,7 +440,8 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "packages": ["$lib_package"],
                 "batch": True,
-                "changed_flag": True
+                "changed_flag": True,
+                "library_root": ".."
             },
             overwrite_user_args_with_template_args=True
         )
@@ -449,6 +451,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "coverage_only": True,
                 "batch": False,
+                "library_root": "..",
                 "changed_flag": False})
 
         arg_ref_check = write_parser_args(
@@ -457,6 +460,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
             template_script_args={
                 "create_ref": True,
                 "batch": False,
+                "library_root": "..",
                 "changed_flag": False}
         )
         arg_create_plots = write_parser_args(
@@ -483,7 +487,7 @@ class CITemplatesConfig(ci_templates_config.GeneralConfig):
         arg_ref = write_parser_args(
             python_module=self.modelica_py_ci.test_reference_module,
             user_args=self.dict(),
-            template_script_args={"create_ref": True})
+            template_script_args={"create_ref": True, "library_root": ".."})
         arg_check_ref_plot = write_parser_args(
             python_module=self.modelica_py_ci.google_chart_module,
             user_args=self.dict(),
