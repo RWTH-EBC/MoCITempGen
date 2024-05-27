@@ -63,6 +63,7 @@ stages:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_PR}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
@@ -91,6 +92,7 @@ stages:
 
         - pip install --upgrade ${buildingspy_upgrade}
     script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_push}
     after_script:
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
@@ -131,6 +133,7 @@ Regression_overall_coverage:PR:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${coverage_arg}
     artifacts:
         when: on_failure
@@ -149,6 +152,7 @@ Regression_overall_coverage:Push:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - pip install --upgrade ${buildingspy_upgrade}
     script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${coverage_arg}
     artifacts:
         when: on_failure
@@ -213,6 +217,7 @@ RegressionTest_Check_References:
         - mkdir CorrectedVersion && cd CorrectedVersion
         - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
         - cd $CI_PROJECT_NAME
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}
     after_script:
         - source activate ${python_version}
