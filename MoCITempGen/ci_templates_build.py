@@ -117,7 +117,6 @@ def write_parser_args(
 class CITemplatesConfig(ci_templates_config.GeneralConfig):
 
     def write_OM_check_template(self):
-        # out = ["root_library", "library"]
         arg_pull_request = write_parser_args(
             python_module=self.modelica_py_ci.OM_python_check_model_module,
             user_args=self.dict(),

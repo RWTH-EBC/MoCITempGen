@@ -38,7 +38,7 @@ stages:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_PR}
+        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_PR}
     artifacts:
         when: on_failure
         paths:
@@ -54,7 +54,7 @@ stages:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - runuser -u openmodelicausers -- python3 ${OM_python_check_model_module}  ${arg_push}
+        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_push}
     artifacts:
         when: on_failure
         paths:
