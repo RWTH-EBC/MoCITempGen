@@ -265,7 +265,7 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         arg_push=arg_push,
         bot_create_html_file_commit=templates_config.bot_messages.create_html_file_commit,
         bot_update_whitelist_commit=templates_config.bot_messages.update_whitelist_commit,
-        whitelist_html_file=ci_config.whitelist.html_file,
+        whitelist_html_file=ci_config.whitelist.ibpsa_file,
         ci_create_html_whitelist_commit=templates_config.commit_interaction.create_html_whitelist
     )
     _write_yml_templates(
@@ -362,16 +362,6 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
             "library_dir": f"temp_{templates_config.library}"
         }
     )
-    arg_whitelist_check_sim = write_parser_args(
-        python_module=templates_config.modelica_py_ci.test_validate_module,
-        user_args=templates_config.dict(),
-        template_script_args={
-            "whitelist_library": templates_config.whitelist_library_config.library,
-            "git_url": templates_config.whitelist_library_config.git_url,
-            "root_whitelist_library": templates_config.whitelist_library_config.local_path,
-            "create_whitelist_flag": True,
-            "dym_options": ["DYM_SIM", "DYM_CHECK"]}
-    )
     arg_lock = write_parser_args(
         python_module=templates_config.modelica_py_ci.lock_model_module,
         user_args=templates_config.dict(),
@@ -405,7 +395,6 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
         expire_in_time=templates_config.expire_in_time,
         modelicapyci_create_whitelist_module=templates_config.modelica_py_ci.create_whitelist_module,
         arg_whitelist_html=arg_whitelist_html,
-        arg_whitelist_check_sim=arg_whitelist_check_sim,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
         xvfb_flag=templates_config.xvfb_flag,
         arg_lock=arg_lock,
@@ -555,7 +544,6 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         xvfb_flag=templates_config.xvfb_flag,
         modelicapyci_structure_module=templates_config.modelica_py_ci.config_structure_module,
         arg_ref=arg_ref,
-        config_ci_eof_file=ci_config.ci_files.eof_file,
         config_ci_new_create_ref_file=ci_config.ci_files.new_create_ref_file,
         bot_create_ref_commit=templates_config.bot_messages.create_ref_commit,
         ci_show_ref_commit=templates_config.commit_interaction.show_ref,
@@ -612,7 +600,6 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
             "packages": ["$lib_package"],
             "dym_options": ["DYM_CHECK"],
             "filter_whitelist_flag": True,
-            "root_whitelist_library": ".."
         },
         overwrite_user_args_with_template_args=True
     )
@@ -622,7 +609,6 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         template_script_args={
             "packages": ["$lib_package"],
             "dym_options": ["DYM_CHECK"],
-            "root_whitelist_library": "..",
             "filter_whitelist_flag": True,
             "changed_flag": True
         },
@@ -636,7 +622,6 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
             "dym_options": ["DYM_CHECK"],
             "create_whitelist_flag": True,
             "filter_whitelist_flag": False,
-            "root_whitelist_library": ".."
         }
     )
 
@@ -679,7 +664,6 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         template_script_args={
             "packages": ["$lib_package"],
             "dym_options": ["DYM_SIM"],
-            "root_whitelist_library": "..",
             "filter_whitelist_flag": True,
             "changed_flag": True
         },
@@ -691,7 +675,6 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         template_script_args={
             "packages": ["$lib_package"],
             "dym_options": ["DYM_SIM"],
-            "root_whitelist_library": "..",
             "filter_whitelist_flag": True,
         },
         overwrite_user_args_with_template_args=True
@@ -700,8 +683,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={"dym_options": "DYM_SIM",
-                              "create_whitelist_flag": True,
-                              "root_whitelist_library": ".."})
+                              "create_whitelist_flag": True})
 
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
@@ -782,7 +764,6 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         user_args=templates_config.dict(),
         template_script_args={
             "dym_options": ["DYM_SIM", "DYM_CHECK"],
-            "root_whitelist_library": "..",
             "changed_flag": True
         },
         skip_args=["packages"],
@@ -793,7 +774,6 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         user_args=templates_config.dict(),
         template_script_args={
             "dym_options": ["DYM_SIM", "DYM_CHECK"],
-            "root_whitelist_library": "..",
         },
         skip_args=["packages"],
         overwrite_user_args_with_template_args=True
@@ -1135,9 +1115,6 @@ def parse_args():
     check_test_group.add_argument("--write-templates",
                                   default=False,
                                   action="store_true")
-    check_test_group.add_argument("--update-toml",
-                                  default=False,
-                                  action="store_true")
     check_test_group.add_argument("--toml-file",
                                   help="Path to the toml used if write-templates=True",
                                   default=None)
@@ -1228,15 +1205,6 @@ if __name__ == '__main__':
 
     if ARGS.set_setting is True:
         create_toml_config()
-    if ARGS.update_toml:
-        # TODO-Jansen: Use-Case for this? I don't think it is useful any more.
-        PARSER_TOML_FILE = Path(__file__).parent.joinpath(
-            "ci_config", "toml_files", "parser.toml"
-        )
-        overwrite_args_parser_toml(
-            ci_parser_toml=PARSER_TOML_FILE,
-            ci_templates_toml=TEMPLATES_TOML_FILE
-        )
     if ARGS.write_templates is True:
         if ARGS.toml_file is None:
             raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")

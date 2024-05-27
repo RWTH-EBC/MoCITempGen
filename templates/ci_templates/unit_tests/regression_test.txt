@@ -26,8 +26,6 @@
 # xvfb_flag: ${xvfb_flag}
 # modelicapyci_structure_module: ${modelicapyci_structure_module}
 # arg_ref: ${arg_ref}
-# TODO-Jansen: Whats the purpose of eof-files?
-# config_ci_eof_file: ${config_ci_eof_file}
 # config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
 # bot_create_ref_commit: ${bot_create_ref_commit}
 # ci_show_ref_commit: ${ci_show_ref_commit}
