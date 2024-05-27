@@ -830,12 +830,17 @@ def get_ci_stages(file_list):
     if len(stage_list) == 0:
         print(f'No stages')
         exit(1)
-    if "deploy" in stage_list:
-        stage_list.remove("deploy")
-        stage_list.append("deploy")
+    # Sort stages:
+    stages_dict = {}
     for stage in stage_list:
+        try:
+            stage_number = int(stage.split("_")[0])
+        except ValueError:
+            stage_number = 999  # Some high value
+        stages_dict[stage_number] = stage
         print(f'Setting stages: {stage}')
-    return stage_list
+    # Return sorted list
+    return [stages_dict[stage_number] for stage_number in sorted(stages_dict)]
 
 
 def yes_no_input(message):
