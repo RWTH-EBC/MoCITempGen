@@ -951,7 +951,7 @@ def setting_ci_library():
         default="master"
     )
     library_mo = Path(library_path).joinpath(library, "package.mo")
-    config_structure.check_file_setting(library_mo)
+    config_structure.check_file_setting(library_mo=library_mo)
     print(f'Setting {library=}, {library_path=}, {library_mo=}, and {main_branch=}')
     return library_path, library, main_branch, library_mo
 
@@ -1028,7 +1028,7 @@ def setting_ci_whitelist():
             f'(If the library is located in the directory, do not enter an entry.) '
         )
         lib_path = os.path.join(whitelist_path, whitelist_library, "package.mo").replace(os.sep, "/")
-        config_structure.check_file_setting(lib_path)
+        config_structure.check_file_setting(lib_path=lib_path)
         print(f'path of library: {lib_path}')
     git_url = input_with_default(
         message='Give the url of the library repository',
