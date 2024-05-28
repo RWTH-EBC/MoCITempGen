@@ -40,6 +40,7 @@ IBPSA:
         - cp -R ${library} temp_${library}
         - rm -r ${merge_library_dir} || echo "all clear to clone"
         - git clone ${git_url} ${merge_library_dir}
+        - export CI_PYTHON_CONFIG_FILE="${library}/${ci_toml_path}"
         - python -m ${modelicapyci_library_merge_module} ${arg_lib}
         - rm -r ${merge_library_dir}
         - mkdir $CI_PROJECT_NAME/Merge_Package
@@ -77,10 +78,9 @@ WhiteList:
         paths:
             - Merge_Package
         expire_in: ${expire_in_time}
-
-    allow_failure: true
     needs:
-    - job: IBPSA
+    - pipeline: $PARENT_PIPELINE_ID
+      job: IBPSA
       artifacts: true
 
 IBPSA_Pull_Request:
@@ -95,3 +95,7 @@ IBPSA_Pull_Request:
     rules:
        - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/
          when: always
+    needs:
+    - pipeline: $PARENT_PIPELINE_ID
+      job: Whitelist
+      artifacts: true

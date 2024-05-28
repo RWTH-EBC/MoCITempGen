@@ -403,7 +403,7 @@ def write_ci_whitelist_setting_template(templates_config: TemplateGeneratorConfi
     )
 
 
-def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
+def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: str):
     """
     Write (IBPSA) Merge template
     """
@@ -452,6 +452,7 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
         merge_library_dir=merge_library_dir,
         library=templates_config.library,
         merge_branch=merge_branch,
+        ci_toml_path=ci_toml_path,
         modelicapyci_lock_model_module=templates_config.modelica_py_ci.lock_model_module,
         modelicapyci_library_merge_module=templates_config.modelica_py_ci.library_merge_module,
         arg_lib=arg_lib,
@@ -496,7 +497,7 @@ def _write_yml_templates(
     return output_file
 
 
-def write_regression_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path):
+def write_regression_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: str):
     arg_PR = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_reference_module,
         user_args=templates_config.dict(),
@@ -588,7 +589,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         ci_stage_plot_ref=templates_config.stage_names.plot_ref,
         ci_stage_prepare=templates_config.stage_names.prepare,
         arg_ref_check=arg_ref_check,
-        ci_toml_path=ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix(),
+        ci_toml_path=ci_toml_path,
         buildingspy_upgrade=templates_config.buildingspy_upgrade,
         modelicapyci_test_reference_module=templates_config.modelica_py_ci.test_reference_module,
         modelicapyci_google_chart_module=templates_config.modelica_py_ci.google_chart_module,
@@ -835,11 +836,11 @@ def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfi
     os.remove(yml_file)
 
 
-def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: Path):
+def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: str):
     template_kwargs = dict(
         conda_environment=templates_config.conda_environment,
         modelica_py_ci_url=templates_config.modelica_py_ci.url,
-        ci_toml_path=ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix()
+        ci_toml_path=ci_toml_path
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -1177,22 +1178,6 @@ def setting_image_names():
     return dymola_image, open_modelica_image
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Set Github Environment Variables")
-    check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-    check_test_group.add_argument("--set-setting",
-                                  help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
-                                  action="store_true")
-    check_test_group.add_argument("--write-templates",
-                                  default=False,
-                                  action="store_true")
-    check_test_group.add_argument("--toml-file",
-                                  help="Path to the toml used if write-templates=True",
-                                  default=None)
-
-    return parser.parse_args()
-
-
 def create_toml_config():
     library_path, library, main_branch, library_mo = setting_ci_library()
     templates_store_local_path, ci_dir, templates_store_project, templates_store_branch_name = setting_ci_dir(
@@ -1243,6 +1228,8 @@ def create_toml_config():
 def write_templates(templates_toml: Path, ci_toml_path: Path):
     templates_config = TemplateGeneratorConfig.from_toml(path=templates_toml)
     ci_config = load_toml_config(ci_toml_path)
+
+    relative_ci_toml_path = ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix()
     for temp in templates_config.stage_list:
         if temp == "check":
             write_check_template(templates_config=templates_config, ci_config=ci_config)
@@ -1251,21 +1238,30 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
             write_simulate_template(templates_config=templates_config, ci_config=ci_config)
             write_OM_simulate_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "regression":
-            write_regression_template(templates_config=templates_config, ci_config=ci_config, ci_toml_path=ci_toml_path)
+            write_regression_template(
+                templates_config=templates_config, ci_config=ci_config,
+                ci_toml_path=relative_ci_toml_path
+            )
         if temp == "html":
             write_html_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "style":
             write_style_template(templates_config=templates_config, ci_config=ci_config)
             write_naming_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "Merge" and templates_config.whitelist_library_config is not None:
-            write_merge_template(templates_config=templates_config, ci_config=ci_config)
+            write_merge_template(
+                templates_config=templates_config, ci_config=ci_config,
+                ci_toml_path=relative_ci_toml_path
+            )
         if temp == "om_badge":
             write_om_badge_template(templates_config=templates_config, ci_config=ci_config)
     # write_ci_whitelist_setting_template(templates_config=templates_config, ci_config=ci_config)
     write_page_template(templates_config=templates_config, ci_config=ci_config)
     ci_template_list = get_ci_templates(templates_config=templates_config, ci_config=ci_config)
     stage_list = get_ci_stages(file_list=ci_template_list)
-    write_utilities_yml(templates_config=templates_config, ci_config=ci_config, ci_toml_path=ci_toml_path)
+    write_utilities_yml(
+        templates_config=templates_config, ci_config=ci_config,
+        ci_toml_path=relative_ci_toml_path
+    )
     write_main_yml(
         templates_config=templates_config,
         ci_config=ci_config,
@@ -1273,6 +1269,25 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
         ci_template_list=ci_template_list
     )
     write_local_windows_test(templates_config=templates_config, ci_config=ci_config)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Set Github Environment Variables")
+    check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
+    check_test_group.add_argument("--set-setting",
+                                  help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
+                                  action="store_true")
+    check_test_group.add_argument("--write-templates",
+                                  default=False,
+                                  action="store_true")
+    check_test_group.add_argument("--templates-toml-file",
+                                  help="Path to the templates toml used if write-templates=True",
+                                  default=None)
+    check_test_group.add_argument("--ci-toml-file",
+                                  help="Path to the ci-config toml used if write-templates=True",
+                                  default=None)
+
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
@@ -1287,6 +1302,8 @@ if __name__ == '__main__':
     if ARGS.set_setting is True:
         create_toml_config()
     if ARGS.write_templates is True:
-        if ARGS.toml_file is None:
+        if ARGS.templates_toml_file is None:
             raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
-        write_templates(templates_toml=ARGS.toml_file)
+        if ARGS.ci_toml_file is None:
+            raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
+        write_templates(templates_toml=ARGS.templates_toml_file, ci_toml_path=ARGS.ci_toml_file)
