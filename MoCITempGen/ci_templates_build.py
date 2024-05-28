@@ -348,7 +348,8 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
     """
     arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.om_badge_module,
-        template_script_args={},
+        template_script_args={"main_branch": "master"},
+        overwrite_user_args_with_template_args=True,
         user_args=templates_config.dict()
     )
 
