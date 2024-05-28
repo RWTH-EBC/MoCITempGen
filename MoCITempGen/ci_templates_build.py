@@ -354,12 +354,9 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
     """
     Write OM Badge Check template
     """
-    badge_folder = "$CI_COMMIT_REF_NAME/badge_files"
     arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.om_badge_module,
-        template_script_args={
-            "badge_folder": badge_folder
-        },
+        template_script_args={},
         user_args=templates_config.dict()
     )
 
@@ -368,7 +365,8 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
         arg=arg,
         image_name=templates_config.dymola_image,
         modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
-        badge_folder=badge_folder,
+        badge_folder="$CI_COMMIT_REF_NAME/badge_files",
+        badge_name=templates_config.om_badge_name,
         ci_stage_om_badge=templates_config.stage_names.OM_badge
     )
     _write_yml_templates(

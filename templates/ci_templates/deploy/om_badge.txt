@@ -9,6 +9,8 @@ create_om_badge:
     before_script:
         - !reference [.clone_ci_templates, script]
         - pip install --upgrade pip anybadge && apt-get update -y && apt-get install zip unzip -y
+        - mkdir ${badge_folder}
+        - cp ${badge_name} ${badge_folder}/
     script:
         - python -m ${modelicapyci_om_badge_module} ${arg}
     artifacts:
