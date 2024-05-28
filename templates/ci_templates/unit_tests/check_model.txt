@@ -1,9 +1,7 @@
 # dym_image_name: ${dym_image_name}
 # ci_stage_model_check: ${ci_stage_model_check}
 # ci_stage_create_whitelist: ${ci_stage_create_whitelist}
-# commit_string: ${commit_string}
 # library: ${library}
-# PR_main_branch_rule: ${PR_main_branch_rule}
 # ci_check_commit: ${ci_check_commit}
 # xvfb_flag: ${xvfb_flag}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
@@ -25,21 +23,6 @@ stages:
     - ${ci_stage_model_check}
     - ${ci_stage_create_whitelist}
 
-.check_rules:PR:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
-          when: on_success
-        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
-          when: on_success
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
-          when: always
-
-.check_rules:push:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
-          when: on_success
-        - if:  (${PR_main_branch_rule})
-          when: never
 
 .check_model_job:PR:
     image: ${dym_image_name}
@@ -55,7 +38,9 @@ stages:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.check_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:PR , rules]
 
 .check_model_job:Push:
     image: ${dym_image_name}
@@ -71,7 +56,7 @@ stages:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.check_rules:push , rules]
+        - !reference [.rules:push , rules]
 
 %for package in package_list:
 Check_${library}_${package}:PR:

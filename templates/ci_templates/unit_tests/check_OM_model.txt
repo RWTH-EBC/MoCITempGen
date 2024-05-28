@@ -1,8 +1,6 @@
 # Variables:
 # ci_stage_OM_model_check: ${ci_stage_OM_model_check}
-# commit_string: ${commit_string}
 # library: ${library}
-# PR_main_branch_rule: ${PR_main_branch_rule}
 # ci_OM_check_commit: ${ci_OM_check_commit}
 # OM_Image: ${OM_Image}
 # OM_python_check_model_module: ${OM_python_check_model_module}
@@ -17,21 +15,6 @@ include: '${utilities_directory}'
 stages:
     - ${ci_stage_OM_model_check}
 
-.OM_check_rules:PR:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
-          when: on_success
-        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
-          when: on_success
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
-          when: always
-
-.OM_check_rules:push:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
-          when: on_success
-        - if:  (${PR_main_branch_rule})
-          when: never
 
 .OM_check_model_job:PR:
     image: ${OM_Image}
@@ -47,7 +30,9 @@ stages:
         expire_in: ${expire_in_time}
     allow_failure: true
     rules:
-        - !reference [.OM_check_rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:PR , rules]
 
 .OM_check_model_job:push:
     image: ${OM_Image}
@@ -63,7 +48,7 @@ stages:
         expire_in: ${expire_in_time}
     allow_failure: true
     rules:
-        - !reference [.OM_check_rules:push, rules]
+        - !reference [.rules:push, rules]
 
 %for package in packages:
 OM_Check_${library}_${package}:PR:

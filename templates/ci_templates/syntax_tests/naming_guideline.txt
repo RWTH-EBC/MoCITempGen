@@ -2,8 +2,6 @@
 # ci_stage_style_check : ${ci_stage_style_check}
 # modelicapyci_syntax_naming_guideline : ${modelicapyci_syntax_naming_guideline}
 # library : ${library}
-# commit_string : ${commit_string}
-# PR_main_branch_rule : ${PR_main_branch_rule}
 # ci_naming_guideline : ${ci_naming_guideline}
 # result_dir : ${result_dir}
 # arg : ${arg}
@@ -12,15 +10,6 @@ include: '${utilities_directory}'
 stages:
     - ${ci_stage_style_check}
 
-
-.NamingGuideline:PR:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
-          when: on_success
-        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
-          when: on_success
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_naming_guideline}/ && $CI_PIPELINE_SOURCE == "push"
-          when: always
 
 NamingGuideline:${library}:PR:
     image: ${image_name}
@@ -34,4 +23,7 @@ NamingGuideline:${library}:PR:
             - ${result_dir}/
         expire_in: 7 day
     rules:
-        - !reference [.NamingGuideline:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_naming_guideline}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:PR , rules]
+

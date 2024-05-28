@@ -2,7 +2,7 @@
 # image_name : ${image_name}
 # result_dir : ${result_dir}
 # expire_in_time : ${expire_in_time}
-# PR_main_branch_rule : ${PR_main_branch_rule}
+
 
 
 stages:
