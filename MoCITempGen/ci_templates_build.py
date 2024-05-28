@@ -313,6 +313,35 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
     )
 
 
+def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
+    """
+    Write OM Badge Check template
+    """
+    badge_folder = "$CI_COMMIT_REF_NAME/badge_files"
+    arg = write_parser_args(
+        python_module=templates_config.modelica_py_ci.om_badge_module,
+        template_script_args={
+            "badge_folder": badge_folder
+        },
+        user_args=templates_config.dict()
+    )
+
+    template_kwargs = dict(
+        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        arg=arg,
+        image_name="python:3.9",
+        modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
+        badge_folder=badge_folder,
+        ci_stage_om_badge=templates_config.stage_names.OM_badge
+    )
+    _write_yml_templates(
+        templates_config=templates_config, ci_config=ci_config,
+        file=templates_config.template_files.om_badge_file,
+        template_kwargs=template_kwargs
+    )
+
+
+
 def write_ci_whitelist_setting_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
@@ -1198,6 +1227,8 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
             write_style_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "Merge" and templates_config.whitelist_library_config is not None:
             write_merge_template(templates_config=templates_config, ci_config=ci_config)
+        if temp == "om_badge":
+            write_om_badge_template(templates_config=templates_config, ci_config=ci_config)
     # write_ci_whitelist_setting_template(templates_config=templates_config, ci_config=ci_config)
     write_page_template(templates_config=templates_config, ci_config=ci_config)
     ci_template_list = get_ci_templates(templates_config=templates_config, ci_config=ci_config)
