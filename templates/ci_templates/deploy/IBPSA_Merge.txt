@@ -65,7 +65,6 @@ WhiteList:
         - cd Merge_Package/${library}
         - python -m ${modelicapyci_create_whitelist_module} ${arg_whitelist_html}
         - python -m ${modelicapyci_lock_model_module} ${arg_lock}
-        - rm -r ${whitelist_library}
         - message="${bot_merge_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${library})
         - git add $push_model
