@@ -78,10 +78,7 @@ WhiteList:
         paths:
             - Merge_Package
         expire_in: ${expire_in_time}
-    needs:
-    - pipeline: $PARENT_PIPELINE_ID
-      job: IBPSA
-      artifacts: true
+
 
 IBPSA_Pull_Request:
     image: ${image_name}
@@ -95,7 +92,3 @@ IBPSA_Pull_Request:
     rules:
        - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/
          when: always
-    needs:
-    - pipeline: $PARENT_PIPELINE_ID
-      job: Whitelist
-      artifacts: true
