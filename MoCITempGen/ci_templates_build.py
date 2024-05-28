@@ -305,10 +305,47 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
         ci_style_commit=templates_config.commit_interaction.style,
         result_dir=ci_config.get_dir_path("result").as_posix(),
         arg_PR=arg_PR,
-        arg_Push=arg_push)
+        arg_Push=arg_push
+    )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
         file=templates_config.template_files.style_check_file,
+        template_kwargs=template_kwargs
+    )
+
+
+def write_naming_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
+    """
+    Write naming guideline template
+    """
+    arg = write_parser_args(
+        python_module=templates_config.modelica_py_ci.naming_guideline_module,
+        template_script_args={
+            "changed_flag": True,
+            "config": ci_config.get_dir_path().joinpath(ci_config.naming_guideline_file).as_posix()
+        },
+        user_args=templates_config.dict()
+    )
+
+    template_kwargs = dict(
+        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        image_name=templates_config.dymola_image,
+        ci_stage_style_check=templates_config.stage_names.style_check,
+        python_version=templates_config.conda_environment,
+        modelicapyci_syntax_test_module=templates_config.modelica_py_ci.syntax_test_module,
+        xvfb_flag=templates_config.xvfb_flag,
+        library=templates_config.library,
+        commit_string=templates_config.commit_string,
+        PR_main_branch_rule=templates_config.pr_main_branch_rule,
+        ci_naming_guideline=templates_config.commit_interaction.naming,
+        result_dir=ci_config.get_dir_path("result").as_posix(),
+        arg=arg,
+        modelicapyci_syntax_naming_guideline=templates_config.modelica_py_ci.naming_guideline_module,
+        ci_stage_om_badge=templates_config.stage_names.OM_badge
+    )
+    _write_yml_templates(
+        templates_config=templates_config, ci_config=ci_config,
+        file=templates_config.template_files.naming_guideline_file,
         template_kwargs=template_kwargs
     )
 
@@ -329,7 +366,7 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
         arg=arg,
-        image_name="python:3.9",
+        image_name=templates_config.dymola_image,
         modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
         badge_folder=badge_folder,
         ci_stage_om_badge=templates_config.stage_names.OM_badge
@@ -347,7 +384,6 @@ def write_ci_whitelist_setting_template(templates_config: TemplateGeneratorConfi
         utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
         image_name=templates_config.dymola_image,
         ci_stage_whitelist_setting=templates_config.stage_names.whitelist_setting,
-        python_version=templates_config.conda_environment,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
         arg_struc_wh=2,
         arg_whitelist_check=2,
@@ -414,7 +450,6 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
         ci_stage_lib_merge=templates_config.stage_names.lib_merge,
         ci_stage_update_whitelist=templates_config.stage_names.update_whitelist,
         ci_stage_open_PR=templates_config.stage_names.open_PR,
-        python_version=templates_config.conda_environment,
         git_url=templates_config.whitelist_library_config.git_url,
         merge_library_dir=merge_library_dir,
         library=templates_config.library,
@@ -548,12 +583,12 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
         dym_image=templates_config.dymola_image,
+        conda_environment=templates_config.conda_environment,
         coverage_arg=coverage_arg,
         ci_stage_regression_test=templates_config.stage_names.regression_test,
         ci_stage_ref_check=templates_config.stage_names.ref_check,
         ci_stage_plot_ref=templates_config.stage_names.plot_ref,
         ci_stage_prepare=templates_config.stage_names.prepare,
-        python_version=templates_config.conda_environment,
         arg_ref_check=arg_ref_check,
         ci_toml_path=ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix(),
         buildingspy_upgrade=templates_config.buildingspy_upgrade,
@@ -677,7 +712,6 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         config_ci_exit_file=ci_config.ci_files.exit_file,
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_model_whitelist_commit,
         whitelist_model_file=ci_config.whitelist.check_file,
-        python_version=templates_config.conda_environment,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_model_whitelist,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
         modelicapyci_configuration_module=templates_config.modelica_py_ci.configuration_module
@@ -729,7 +763,6 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         PR_main_branch_rule=templates_config.pr_main_branch_rule,
         library=templates_config.library,
         ci_check_commit=templates_config.commit_interaction.simulate,
-        python_version=templates_config.conda_environment,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
         package_list=templates_config.packages[templates_config.library],
         arg_wh=arg_wh,
@@ -1225,6 +1258,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
             write_html_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "style":
             write_style_template(templates_config=templates_config, ci_config=ci_config)
+            write_naming_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "Merge" and templates_config.whitelist_library_config is not None:
             write_merge_template(templates_config=templates_config, ci_config=ci_config)
         if temp == "om_badge":

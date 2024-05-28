@@ -3,7 +3,7 @@
 # ci_stage_html_whitelist : ${ci_stage_html_whitelist}
 #  ci_stage_open_PR : ${ci_stage_open_PR}
 #  html_praefix : ${html_praefix}
-# python_version : ${python_version}
+
 # ${modelicapyci_html_tidy_module} : modelicapyci_html_tidy_module
 # arg_correct_html: ${arg_correct_html}
 # result_dir : ${result_dir}

@@ -7,7 +7,6 @@
 # PR_main_branch_rule: ${PR_main_branch_rule}
 # library: ${library}
 # ci_check_commit ${ci_check_commit}
-# python_version: ${python_version}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
 # package_list: ${package_list}
 # arg_wh: ${arg_wh}

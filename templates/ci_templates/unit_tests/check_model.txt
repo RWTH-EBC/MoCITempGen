@@ -16,7 +16,6 @@
 # bot_update_model_whitelist_commit: ${bot_update_model_whitelist_commit}
 # whitelist_model_file: ${whitelist_model_file}
 # arg_wh: ${arg_wh}
-# python_version ${python_version}
 # package_list: ${package_list}
 # modelicapyci_config_structure_module: ${modelicapyci_config_structure_module}
 

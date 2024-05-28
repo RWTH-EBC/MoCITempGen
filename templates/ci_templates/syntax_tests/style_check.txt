@@ -1,6 +1,5 @@
 # image_name : ${image_name}
 # ci_stage_style_check : ${ci_stage_style_check}
-# python_version :   ${python_version}
 # modelicapyci_syntax_test_module : ${modelicapyci_syntax_test_module}
 # xvfb_flag : ${xvfb_flag}
 # library : ${library}
