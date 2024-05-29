@@ -400,7 +400,7 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
     """
     Write (IBPSA) Merge template
     """
-    merge_branch = f'Custom{templates_config.whitelist_library_config.library}_Merge'
+    merge_branch = f'{templates_config.whitelist_library_config.library}_Merge'
     merge_library_dir = f"{templates_config.whitelist_library_config.library}_folder"
 
     arg_whitelist_html = write_parser_args(
