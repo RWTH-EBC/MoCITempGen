@@ -939,12 +939,14 @@ def get_ci_stages(file_list, template_config: TemplateGeneratorConfig):
     if len(stage_list) == 0:
         print(f'No stages')
         exit(1)
-    for stage in stage_list:
-        print(f'Setting stages: {stage}')
 
     # Return sorted list
     names_with_order = template_config.stage_names.get_names_with_order()
-    return sorted(stage_list, key=lambda x: names_with_order[x])
+    stage_list = sorted(stage_list, key=lambda x: names_with_order[x])
+    stage_list.append("deploy")
+    for stage in stage_list:
+        print(f'Setting stages: {stage}')
+    return stage_list
 
 
 def yes_no_input(message):
