@@ -37,9 +37,10 @@ CI_Whitelist_Setting:
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_whitelist_sim}
         - message="${bot_build_whitelist_commit}"
         - push_model=$(git ls-files --others --exclude-standard --directory ${ci_dir})
+        - git checkout $CI_COMMIT_BRANCH
         - git add  $push_model
         - git commit -m "$message"
-        - git push --force git@github.com:$Github_Repository.git
+        - git push git@github.com:$Github_Repository.git
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  $CI_COMMIT_MESSAGE  =~ /${ci_build_whitelist_structure_commit}/
           when: always
