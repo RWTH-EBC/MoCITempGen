@@ -3,7 +3,7 @@ stages:
     %for stage in stage_list:
     - ${stage}
     %endfor
-    - pages
+    - deploy
 
 variables:
     Github_Repository: ${github_repository}
