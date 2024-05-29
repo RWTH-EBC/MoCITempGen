@@ -11,10 +11,8 @@ create_om_badge:
         - pip install --upgrade pip anybadge && apt-get update -y && apt-get install zip unzip -y
     script:
         - python -m ${modelicapyci_om_badge_module} ${arg}
-        - mkdir -p ${badge_folder}
-        - cp ${badge_name} ${badge_folder}/
     artifacts:
         paths:
-         - ${badge_folder}
+         - ${result_dir}
     when: always
     allow_failure: true

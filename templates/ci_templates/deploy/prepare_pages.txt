@@ -1,19 +1,15 @@
-# ci_stage_deploy : ${ci_stage_deploy}
-# image_name : ${image_name}
+# ci_stage_prepare_page : ${ci_stage_prepare_page}
 # result_dir : ${result_dir}
 # expire_in_time : ${expire_in_time}
 
 
 
 stages:
-    - ${ci_stage_deploy}
+    - ${ci_stage_prepare_page}
 pages:
-    image: ${image_name}
-    stage: ${ci_stage_deploy}
-    before_script:
-        - apt-get update -y
-        - apt-get install zip unzip -y
+    stage: ${ci_stage_prepare_page}
     script:
+        - if [ ! -d "bin/ci-tests/result" ]; then echo "No results in this pipeline, no pages to publish" && exit 0; fi
         - mkdir -p public/$CI_COMMIT_REF_NAME
         - cp -r ${result_dir}/* public/$CI_COMMIT_REF_NAME
     artifacts:

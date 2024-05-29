@@ -122,6 +122,10 @@ def get_utilities_path(templates_config: TemplateGeneratorConfig, ci_config: CIC
     ).as_posix()
 
 
+def get_result_dir_path_for_pages(ci_config: CIConfig):
+    return ci_config.get_dir_path("result").as_posix()
+
+
 def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     arg_pull_request = write_parser_args(
         python_module=templates_config.modelica_py_ci.OM_python_check_model_module,
@@ -152,7 +156,7 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
         HOME="${HOME}",
         TIMESTAMP="${TIMESTAMP}",
         OM_python_check_model_module=templates_config.modelica_py_ci.OM_python_check_model_module,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         arg_PR=arg_pull_request,
         arg_push=arg_push,
@@ -171,12 +175,9 @@ def write_page_template(templates_config: TemplateGeneratorConfig, ci_config: CI
     Write page template, deploy artifacts, plots, reference results
     """
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
-        image_name=templates_config.dymola_image,
-        ci_stage_deploy=templates_config.stage_names.deploy,
+        ci_stage_prepare_page=templates_config.stage_names.prepare_pages,
         expire_in_time=templates_config.expire_in_time,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
-        PR_main_branch_rule=templates_config.pr_main_branch_rule
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -251,7 +252,7 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         html_praefix=templates_config.html_praefix,
         python_version=templates_config.conda_environment,
         arg_correct_html=arg_correct_html,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         library=templates_config.library,
         ci_html_commit=templates_config.commit_interaction.html,
@@ -297,7 +298,7 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
         xvfb_flag=templates_config.xvfb_flag,
         library=templates_config.library,
         ci_style_commit=templates_config.commit_interaction.style,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         arg_PR=arg_PR,
         arg_Push=arg_push
     )
@@ -330,7 +331,7 @@ def write_naming_template(templates_config: TemplateGeneratorConfig, ci_config: 
         xvfb_flag=templates_config.xvfb_flag,
         library=templates_config.library,
         ci_naming_guideline=templates_config.commit_interaction.naming,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         arg=arg,
         modelicapyci_syntax_naming_guideline=templates_config.modelica_py_ci.naming_guideline_module,
         ci_stage_om_badge=templates_config.stage_names.OM_badge
@@ -358,7 +359,7 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
         arg=arg,
         image_name=templates_config.dymola_image,
         modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
-        badge_folder="$CI_COMMIT_REF_NAME/badge_files",
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         badge_name=templates_config.om_badge_name,
         ci_stage_om_badge=templates_config.stage_names.OM_badge
     )
@@ -367,7 +368,6 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
         file=templates_config.template_files.om_badge_file,
         template_kwargs=template_kwargs
     )
-
 
 
 def write_ci_whitelist_setting_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
@@ -458,7 +458,7 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
         arg_lock=arg_lock,
         whitelist_library=templates_config.whitelist_library_config.library,
         bot_merge_commit=templates_config.bot_messages.merge_commit,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         arg_api_pr=arg_api_pr
     )
@@ -587,7 +587,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         modelicapyci_test_reference_module=templates_config.modelica_py_ci.test_reference_module,
         modelicapyci_google_chart_module=templates_config.modelica_py_ci.google_chart_module,
         config_ci_exit_file=ci_config.ci_files.exit_file,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         arg_chart=arg_chart,
         ci_regression_test_commit=templates_config.commit_interaction.regression_test,
         expire_in_time=templates_config.expire_in_time,
@@ -634,7 +634,7 @@ def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_con
         OM_python_check_model_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         arg_PR=arg_PR,
         arg_push=arg_push,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         OM_Image=templates_config.open_modelica_image,
         expire_in_time=templates_config.expire_in_time,
         packages=templates_config.packages[templates_config.library],
@@ -689,7 +689,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         ci_check_commit=templates_config.commit_interaction.check,
         xvfb_flag=templates_config.xvfb_flag,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         arg_push=arg_push,
         arg_wh=arg_wh,
@@ -753,7 +753,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_example_whitelist_commit,
         whitelist_model_file=ci_config.whitelist.simulate_file,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_simulate_whitelist,
-        result_dir=ci_config.get_dir_path("result").as_posix(),
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         xvfb_flag=templates_config.xvfb_flag,
         config_ci_exit_file=ci_config.ci_files.exit_file,
@@ -919,7 +919,7 @@ def get_ci_templates(templates_config: TemplateGeneratorConfig, ci_config: CICon
     return mo_py_files
 
 
-def get_ci_stages(file_list):
+def get_ci_stages(file_list, template_config: TemplateGeneratorConfig):
     stage_list = []
     for file in file_list:
         with open(file, "r") as infile:
@@ -943,15 +943,8 @@ def get_ci_stages(file_list):
         print(f'Setting stages: {stage}')
 
     # Return sorted list
-
-    def key_sort(s: str):
-        try:
-            return int(s.split("_")[0])
-        except ValueError:
-            return 999  # Some high value
-        #
-
-    return sorted(stage_list, key=key_sort)
+    names_with_order = template_config.stage_names.get_names_with_order()
+    return sorted(stage_list, key=lambda x: names_with_order[x])
 
 
 def yes_no_input(message):
@@ -997,6 +990,10 @@ def setting_ci_templates_types():
     if yes:
         print(f'Create merge template')
         stages_list.append("Merge")
+    yes = yes_no_input('Config template: Create OpenModelica badge?')
+    if yes:
+        print('Create OpenModelica badge')
+        stages_list.append("om_badge")
     print(f"Setting stages list: {stages_list}")
     return stages_list
 
@@ -1029,7 +1026,7 @@ def setting_ci_dir(library_path: str):
             default="bin/ci-tests"
         )
         print(f"Setting {ci_dir=}")
-        return library_path, ci_dir, None, None
+        return library_path, ci_dir, "", ""
     else:
         repo_location = input(
             "In which local repository-folder should the templates be saved?"
@@ -1085,12 +1082,6 @@ def setting_ci_python_conda_env():
     return conda_environment
 
 
-def extended_simulates():
-    extended_ex_flag = yes_no_input('Should examples be searched recursively?')
-    print(f'Setting extended_ex_flag: {extended_ex_flag}')
-    return extended_ex_flag
-
-
 def setting_ci_whitelist():
     yes = yes_no_input(
         f'Create whitelist? '
@@ -1106,16 +1097,6 @@ def setting_ci_whitelist():
         default="IBPSA"
     )
     print(f'Setting whitelist library: {whitelist_library}')
-    locally_available = yes_no_input(f'If the foreign library is local on the PC?')
-    lib_path = "modelica-ibpsa"
-    if locally_available:
-        whitelist_path = input(
-            f'Specify the local path of the library (e.g. ..\..\IBPSA). '
-            f'(If the library is located in the directory, do not enter an entry.) '
-        )
-        lib_path = os.path.join(whitelist_path, whitelist_library, "package.mo").replace(os.sep, "/")
-        config_structure.check_file_setting(lib_path=lib_path)
-        print(f'path of library: {lib_path}')
     git_url = input_with_default(
         message='Give the url of the library repository',
         default="https://github.com/ibpsa/modelica-ibpsa.git"
@@ -1128,7 +1109,7 @@ def setting_ci_whitelist():
     print(f'Setting repo_dir: {repo_dir}')
     return WhitelistAndMergeLibraryConfig(
         library=whitelist_library,
-        local_path=lib_path,
+        local_path=repo_dir,
         git_url=git_url
     )
 
@@ -1179,10 +1160,11 @@ def create_toml_config():
     github_repository = setting_ci_github_repo()
     gitlab_page = setting_ci_gitlab_page()
     dymola_image, open_modelica_image = setting_image_names()
-    extended_examples_flag = extended_simulates()
     ci_config = CIConfig(dir=str(ci_dir), library_root="")
-    templates_toml_save_path = ci_config.get_dir_path().joinpath("config", "templates_generator_config.toml")
-    mopyci_toml_save_path = ci_config.get_dir_path().joinpath("config", "modelica_py_ci_config.toml")
+    templates_toml_save_path = ci_config.get_dir_path(
+        different_library_root=templates_store_local_path).joinpath("config", "templates_generator_config.toml")
+    mopyci_toml_save_path = ci_config.get_dir_path(
+        different_library_root=templates_store_local_path).joinpath("config", "modelica_py_ci_config.toml")
     os.makedirs(templates_toml_save_path.parent, exist_ok=True)
 
     TemplateGeneratorConfig(
@@ -1190,7 +1172,7 @@ def create_toml_config():
         library=library,
         library_local_path=library_path,
         templates_store_local_path=templates_store_local_path,
-        templates_store_git_url=templates_store_project,
+        templates_store_project=templates_store_project,
         templates_store_branch_name=templates_store_branch_name,
         main_branch=main_branch,
         packages=packages,
@@ -1201,9 +1183,8 @@ def create_toml_config():
         dymola_image=dymola_image,
         open_modelica_image=open_modelica_image,
         whitelist_library_config=whitelist_library_config,
-        extended_examples_flag=extended_examples_flag,
         template_files=TemplateFilesConfig(
-            base=str(Path(__file__).parents[1].absolute())
+            base=str(Path(__file__).parents[1].absolute().joinpath("templates", "ci_templates"))
         )
     ).to_toml(path=templates_toml_save_path)
     print(f"Templates CI-Config saved under: {templates_toml_save_path}")
@@ -1244,7 +1225,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
     # write_ci_whitelist_setting_template(templates_config=templates_config, ci_config=ci_config)
     write_page_template(templates_config=templates_config, ci_config=ci_config)
     ci_template_list = get_ci_templates(templates_config=templates_config, ci_config=ci_config)
-    stage_list = get_ci_stages(file_list=ci_template_list)
+    stage_list = get_ci_stages(file_list=ci_template_list, template_config=templates_config)
     write_utilities_yml(
         templates_config=templates_config, ci_config=ci_config,
         ci_toml_path=relative_ci_toml_path
