@@ -361,6 +361,7 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
         modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         badge_name=templates_config.om_badge_name,
+        main_branch=templates_config.main_branch,
         ci_stage_om_badge=templates_config.stage_names.OM_badge
     )
     _write_yml_templates(
