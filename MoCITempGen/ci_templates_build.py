@@ -884,6 +884,15 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         user_args=templates_config.dict(),
         template_script_args={"changed_flag": True}
     )
+    arg_naming_guideline = write_parser_args(
+        python_module=templates_config.modelica_py_ci.naming_guideline_module,
+        template_script_args={
+            "changed_flag": True,
+            "config": ci_config.get_dir_path().joinpath(ci_config.naming_guideline_file).as_posix()
+        },
+        user_args=templates_config.dict()
+    )
+
     template_kwargs = dict(
         library=templates_config.library,
         package_list=templates_config.packages[templates_config.library],
@@ -893,6 +902,8 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         modelicapyci_html_tidy_module=templates_config.modelica_py_ci.html_tidy_module,
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
+        modelicapyci_syntax_naming_guideline=templates_config.modelica_py_ci.naming_guideline_module,
+        arg_naming_guideline=arg_naming_guideline,
         arg_push=arg_push,
         arg_PR=arg_PR,
         arg_push_syntax=arg_push_syntax,

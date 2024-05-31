@@ -9,6 +9,8 @@ python -m ${modelicapyci_html_tidy_module} ${arg_push_html}
 python -m ${modelicapyci_syntax_test_module} ${arg_PR_syntax}
 python -m ${modelicapyci_syntax_test_module} ${arg_push_syntax}
 
+python -m ${modelicapyci_syntax_naming_guideline} ${arg_naming_guideline}
+
 %for package in package_list:
 :: Check & Simulate ${library} ${package} on PR
 python -m ${modelicapyci_test_validate_module} ${arg_PR} --packages ${package}

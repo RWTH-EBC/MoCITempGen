@@ -17,7 +17,7 @@ NamingGuideline:${library}:PR:
     before_script:
         - !reference [.clone_ci_templates, script]
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_syntax_naming_guideline} ${arg}
+        - python -m ${modelicapyci_syntax_naming_guideline} ${arg}
     artifacts:
         paths:
             - ${result_dir}/
