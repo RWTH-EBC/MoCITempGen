@@ -699,7 +699,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         package_list=templates_config.packages[templates_config.library],
         config_ci_exit_file=ci_config.ci_files.exit_file,
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_model_whitelist_commit,
-        whitelist_model_file=ci_config.whitelist.check_file,
+        whitelist_model_file=ci_config.whitelist.dymola_check_file,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_model_whitelist,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
         modelicapyci_configuration_module=templates_config.modelica_py_ci.configuration_module
@@ -753,7 +753,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         package_list=templates_config.packages[templates_config.library],
         arg_wh=arg_wh,
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_example_whitelist_commit,
-        whitelist_model_file=ci_config.whitelist.simulate_file,
+        whitelist_model_file=ci_config.whitelist.dymola_simulate_file,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_simulate_whitelist,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
