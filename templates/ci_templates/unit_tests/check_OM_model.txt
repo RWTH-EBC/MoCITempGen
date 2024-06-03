@@ -21,6 +21,7 @@ stages:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.open_modelica_git_user_setting, script]
     script:
         - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_PR}
     artifacts:
@@ -39,6 +40,7 @@ stages:
     stage: ${ci_stage_OM_model_check}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.open_modelica_git_user_setting, script]
     script:
         - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_push}
     artifacts:
