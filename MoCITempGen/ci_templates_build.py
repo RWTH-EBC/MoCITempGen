@@ -116,8 +116,8 @@ def write_parser_args(
     return parser_str
 
 
-def get_utilities_path(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    return ci_config.get_dir_path().joinpath(
+def get_utilities_path(templates_config: TemplateGeneratorConfig):
+    return Path(templates_config.templates_store_folder).joinpath(
         templates_config.template_scripts_dir, templates_config.utilities_directory
     ).as_posix()
 
@@ -148,7 +148,7 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         ci_stage_OM_model_check=templates_config.stage_names.OM_model_check,
         library=templates_config.library,
         ci_OM_check_commit=templates_config.commit_interaction.OM_check,
@@ -191,7 +191,7 @@ def _write_setting_template(templates_config: TemplateGeneratorConfig, ci_config
     Write setting template, create template with own Syntax
     """
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         github_repo=templates_config.github_repo,
         ci_setting_commit=templates_config.commit_interaction.setting,
@@ -244,7 +244,7 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         },
         skip_args=["gitlab_page"])
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_html_check=templates_config.stage_names.html_check,
         ci_stage_html_whitelist=templates_config.stage_names.html_whitelist,
@@ -290,7 +290,7 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_style_check=templates_config.stage_names.style_check,
         python_version=templates_config.conda_environment,
@@ -323,7 +323,7 @@ def write_naming_template(templates_config: TemplateGeneratorConfig, ci_config: 
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_style_check=templates_config.stage_names.style_check,
         python_version=templates_config.conda_environment,
@@ -355,7 +355,7 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         arg=arg,
         image_name=templates_config.dymola_image,
         modelicapyci_om_badge_module=templates_config.modelica_py_ci.om_badge_module,
@@ -373,7 +373,7 @@ def write_om_badge_template(templates_config: TemplateGeneratorConfig, ci_config
 
 def write_ci_whitelist_setting_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_whitelist_setting=templates_config.stage_names.whitelist_setting,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
@@ -437,7 +437,7 @@ def write_merge_template(templates_config: TemplateGeneratorConfig, ci_config: C
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_lib_merge=templates_config.stage_names.lib_merge,
         ci_stage_update_whitelist=templates_config.stage_names.update_whitelist,
@@ -575,7 +575,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
     # python ${modelicapyci_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         dym_image=templates_config.dymola_image,
         conda_environment=templates_config.conda_environment,
         coverage_arg=coverage_arg,
@@ -629,7 +629,7 @@ def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_con
         template_script_args={"om_options": "OM_SIM", "changed_flag": True})
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         ci_stage_OM_simulate=templates_config.stage_names.OM_simulate,
         library=templates_config.library,
         ci_OM_sim_commit=templates_config.commit_interaction.OM_simulate,
@@ -683,7 +683,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
     )
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         dym_image_name=templates_config.dymola_image,
         ci_stage_model_check=templates_config.stage_names.dymola_model_check,
         ci_stage_create_whitelist=templates_config.stage_names.create_whitelist,
@@ -740,7 +740,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
                               "create_whitelist_flag": True})
 
     template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config, ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         dym_image_name=templates_config.dymola_image,
         ci_stage_simulate=templates_config.stage_names.simulate,
         ci_stage_create_exampel_whitelist=templates_config.stage_names.create_example_whitelist,
