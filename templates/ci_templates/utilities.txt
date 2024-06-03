@@ -47,6 +47,6 @@
         - if:  (${PR_main_branch_rule})
           when: never
 
-.open_modelica_git_user_setting
-    script:
-        - runuser -u openmodelicausers -- sh -c 'git config --global --add safe.directory "$(pwd)"'
+.open_modelica_git_user_setting:
+  script:
+    - runuser -u openmodelicausers -- sh -c 'git config --global --add safe.directory "$(pwd)"'
