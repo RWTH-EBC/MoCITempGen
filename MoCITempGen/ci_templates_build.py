@@ -1038,7 +1038,7 @@ def setting_ci_dir(library_path: str):
         ci_dir = input_with_default(
             message="In which folder of your library "
                     "should the CI templates be stored?",
-            default="bin/ci-tests"
+            default="ci"
         )
         print(f"Setting {ci_dir=}")
         return library_path, ci_dir, "", ""
@@ -1049,7 +1049,7 @@ def setting_ci_dir(library_path: str):
         ci_dir = input_with_default(
             message="In which folder of this repository"
                     "should the CI templates be stored?",
-            default="bin/ci-tests"
+            default="ci"
         )
         branch_name = input_with_default(
             message="What is the name of the branch in this repository?",
@@ -1278,8 +1278,8 @@ if __name__ == '__main__':
     # TEMPLATES_TOML_FILE, CI_TOML_FILE = create_toml_config()
     BASE = Path(r"D:/04_git/templates")
     BASE = Path(r"D:/04_git/AixLib")
-    TEMPLATES_TOML_FILE = BASE.joinpath("bin/ci-tests/config/templates_generator_config.toml")
-    CI_TOML_FILE = BASE.joinpath("bin/ci-tests/config/modelica_py_ci_config.toml")
+    TEMPLATES_TOML_FILE = BASE.joinpath("ci/config/templates_generator_config.toml")
+    CI_TOML_FILE = BASE.joinpath("ci/config/modelica_py_ci_config.toml")
     write_templates(templates_toml=TEMPLATES_TOML_FILE, ci_toml_path=CI_TOML_FILE)
 
     if ARGS.set_setting is True:
