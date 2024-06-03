@@ -199,7 +199,7 @@ def _write_setting_template(templates_config: TemplateGeneratorConfig, ci_config
         ci_stage_check_setting=templates_config.stage_names.check_setting,
         ci_stage_build_templates=templates_config.stage_names.build_templates,
         bot_create_CI_template_commit=templates_config.bot_messages.create_CI_template_commit,
-        temp_dir=templates_config.get_templates_dir(ci_config=ci_config)
+        temp_dir=templates_config.get_templates_dir()
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -483,7 +483,7 @@ def _write_yml_templates(
     print(f"Write {ci_temp}")
     my_template = Template(strict_undefined=True, filename=str(ci_temp))
     text = my_template.render(**template_kwargs)
-    ci_folder = templates_config.get_templates_dir(ci_config=ci_config).joinpath(file).parent
+    ci_folder = templates_config.get_templates_dir().joinpath(file).parent
     config_structure.create_path(ci_folder)
     output_file = ci_folder.joinpath(Path(file).name.replace(".txt", f"{extra_name}.{suffix}"))
     with open(output_file, "w") as file:
@@ -816,7 +816,7 @@ def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfi
         )
         replace_str = "local_templates"
     new_path = Path(templates_config.library_local_path).joinpath(
-        yml_file.relative_to(templates_config.get_templates_dir(ci_config=ci_config))
+        yml_file.relative_to(templates_config.get_templates_dir())
     )
     new_path = new_path.parent.joinpath(new_path.name.replace(replace_str, ""))
     shutil.copy(yml_file, new_path)
@@ -923,7 +923,7 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
 
 
 def get_ci_templates(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    yml_files = glob.glob(f'{templates_config.get_templates_dir(ci_config=ci_config)}\\**\\**\\*.yml', recursive=True)
+    yml_files = glob.glob(f'{templates_config.get_templates_dir()}\\**\\**\\*.yml', recursive=True)
     yml_files = list(set(yml_files))
     mo_py_files = []
     for file in yml_files:
@@ -1024,16 +1024,22 @@ def setting_ci_library():
     )
     main_branch = input_with_default(
         message="What is the name of your default/main/master branch?",
-        default="master"
+        default="main"
+    )
+    ci_dir = input_with_default(
+        message="In which folder of this repository "
+                "should configs, whitelists, etc. be stored?",
+        default="ci"
     )
     library_mo = Path(library_path).joinpath(library, "package.mo")
     config_structure.check_file_setting(library_mo=library_mo)
     print(f'Setting {library=}, {library_path=}, {library_mo=}, and {main_branch=}')
-    return library_path, library, main_branch, library_mo
+    return library_path, library, main_branch, library_mo, ci_dir
 
 
 def setting_ci_dir(library_path: str):
-    save_local = yes_no_input("Should the templates and config files be stored in your library? ('n' for another git-repository")
+    save_local = yes_no_input("Should the templates and config files be "
+                              "stored in your library? Type 'n' for another git-repository")
     if save_local:
         ci_dir = input_with_default(
             message="In which folder of your library "
@@ -1047,7 +1053,7 @@ def setting_ci_dir(library_path: str):
             "In which local repository-folder should the templates be saved?"
         )
         ci_dir = input_with_default(
-            message="In which folder of this repository"
+            message="In which folder of this repository "
                     "should the CI templates be stored?",
             default="ci"
         )
@@ -1162,8 +1168,8 @@ def setting_image_names():
 
 
 def create_toml_config():
-    library_path, library, main_branch, library_mo = setting_ci_library()
-    templates_store_local_path, ci_dir, templates_store_project, templates_store_branch_name = setting_ci_dir(
+    library_path, library, main_branch, library_mo, ci_dir = setting_ci_library()
+    templates_store_local_path, templates_store_folder, templates_store_project, templates_store_branch_name = setting_ci_dir(
         library_path=library_path
     )
 
@@ -1179,8 +1185,9 @@ def create_toml_config():
     templates_toml_save_path = ci_config.get_dir_path(
         different_library_root=templates_store_local_path).joinpath("config", "templates_generator_config.toml")
     mopyci_toml_save_path = ci_config.get_dir_path(
-        different_library_root=templates_store_local_path).joinpath("config", "modelica_py_ci_config.toml")
+        different_library_root=library_path).joinpath("config", "modelica_py_ci_config.toml")
     os.makedirs(templates_toml_save_path.parent, exist_ok=True)
+    os.makedirs(mopyci_toml_save_path.parent, exist_ok=True)
 
     TemplateGeneratorConfig(
         stage_list=stage_list,
@@ -1188,6 +1195,7 @@ def create_toml_config():
         library_local_path=library_path,
         templates_store_local_path=templates_store_local_path,
         templates_store_project=templates_store_project,
+        templates_store_folder=templates_store_folder,
         templates_store_branch_name=templates_store_branch_name,
         main_branch=main_branch,
         packages=packages,
@@ -1212,7 +1220,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
     templates_config = TemplateGeneratorConfig.from_toml(path=templates_toml)
     ci_config = load_toml_config(ci_toml_path)
 
-    relative_ci_toml_path = ci_toml_path.relative_to(templates_config.templates_store_local_path).as_posix()
+    relative_ci_toml_path = ci_toml_path.relative_to(templates_config.library_local_path).as_posix()
     for temp in templates_config.stage_list:
         if temp == "check":
             write_check_template(templates_config=templates_config, ci_config=ci_config)
@@ -1277,9 +1285,9 @@ if __name__ == '__main__':
     ARGS = parse_args()
     # TEMPLATES_TOML_FILE, CI_TOML_FILE = create_toml_config()
     BASE = Path(r"D:/04_git/templates")
-    BASE = Path(r"D:/04_git/AixLib")
-    TEMPLATES_TOML_FILE = BASE.joinpath("ci/config/templates_generator_config.toml")
-    CI_TOML_FILE = BASE.joinpath("ci/config/modelica_py_ci_config.toml")
+    BASE_Aix = Path(r"D:/04_git/AixLib")
+    TEMPLATES_TOML_FILE = BASE.joinpath("modelica-ci-tests/config/templates_generator_config.toml")
+    CI_TOML_FILE = BASE_Aix.joinpath("ci/config/modelica_py_ci_config.toml")
     write_templates(templates_toml=TEMPLATES_TOML_FILE, ci_toml_path=CI_TOML_FILE)
 
     if ARGS.set_setting is True:
