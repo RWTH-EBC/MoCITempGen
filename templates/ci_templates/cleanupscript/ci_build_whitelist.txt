@@ -25,7 +25,7 @@ CI_Whitelist_Setting:
     stage: ${ci_stage_whitelist_setting}
     before_script:
         - !reference [.github_ssh_auth, script]
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - mkdir build_whitelist
         - cd build_whitelist

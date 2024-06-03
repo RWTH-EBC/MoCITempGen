@@ -18,7 +18,7 @@ StyleCheck:${library}:PR:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_PR}
     artifacts:
@@ -36,7 +36,7 @@ StyleCheck:${library}:Push:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_Push}
     artifacts:

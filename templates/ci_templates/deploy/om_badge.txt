@@ -7,7 +7,7 @@ create_om_badge:
     image: ${image_name}
     stage: ${ci_stage_om_badge}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
         - pip install --upgrade pip anybadge && apt-get update -y && apt-get install zip unzip -y
     script:
         - python -m ${modelicapyci_om_badge_module} ${arg}

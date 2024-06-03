@@ -28,7 +28,7 @@ stages:
     image: ${dym_image_name}
     stage: ${ci_stage_model_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_PR}
@@ -46,7 +46,7 @@ stages:
     image: ${dym_image_name}
     stage: ${ci_stage_model_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_push}
@@ -78,7 +78,7 @@ check_whitelist_job:
     image: ${dym_image_name}
     stage: ${ci_stage_create_whitelist}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
         - !reference [.github_ssh_auth, script]
 

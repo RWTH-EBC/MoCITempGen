@@ -20,7 +20,7 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_PR}
     artifacts:
@@ -38,7 +38,7 @@ stages:
     image: ${OM_Image}
     stage: ${ci_stage_OM_model_check}
     before_script:
-        - !reference [.clone_ci_templates, script]
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_push}
     artifacts:
