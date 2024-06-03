@@ -548,7 +548,8 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         template_script_args={
             "funnel_comp_flag": True,
             "templates_url": templates_config.template_files.url,
-            "line_html_flag": True, "error_flag": True})
+            "line_html_flag": True,
+            "error_flag": True})
     api_github_arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.api_github_module,
         user_args=templates_config.dict(),
