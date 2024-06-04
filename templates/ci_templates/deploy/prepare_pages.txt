@@ -6,12 +6,12 @@
 
 stages:
     - ${ci_stage_prepare_page}
-pages:
+prepare_pages:
     stage: ${ci_stage_prepare_page}
     script:
-        - mkdir -p public/$CI_COMMIT_REF_NAME
+        - mkdir -p $CI_COMMIT_REF_NAME
         - if [ ! -d "${result_dir}" ]; then echo "No results in this pipeline, no pages to publish" && exit 0; fi
-        - cp -r ${result_dir}/* public/$CI_COMMIT_REF_NAME
+        - cp -r ${result_dir}/* $CI_COMMIT_REF_NAME
     artifacts:
         paths:
          - public
