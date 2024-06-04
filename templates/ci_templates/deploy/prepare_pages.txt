@@ -14,7 +14,7 @@ prepare_pages:
         - cp -r ${result_dir}/* $CI_COMMIT_REF_NAME
     artifacts:
         paths:
-         - public
+         - $CI_COMMIT_REF_NAME
         expire_in: ${expire_in_time}
     when: always
     allow_failure: true
