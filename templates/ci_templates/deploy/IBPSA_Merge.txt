@@ -1,106 +1,94 @@
+# ci_stage_lib_merge : ${ci_stage_lib_merge}
+# ci_stage_update_whitelist : ${ci_stage_update_whitelist}
+# ci_stage_open_PR : ${ci_stage_open_PR}
+# image_name : ${image_name}
+
+# git_url : ${git_url}
+# library : ${library}
+# merge_branch : ${merge_branch}
+# modelicapyci_library_merge_module : ${modelicapyci_library_merge_module}
+# arg_lib : ${arg_lib}
+# ci_trigger_ibpsa_commit : ${ci_trigger_ibpsa_commit}
+# expire_in_time : ${expire_in_time}
+# modelicapyci_create_whitelist_module : ${modelicapyci_create_whitelist_module}
+# arg_whitelist_html : ${arg_whitelist_html}
+# modelicapyci_test_validate_module : ${modelicapyci_test_validate_module}
+# xvfb_flag : ${xvfb_flag}
+# arg_lock :  ${arg_lock}
+# whitelist_library : ${whitelist_library}
+# bot_merge_commit : ${bot_merge_commit}
+# result_dir : ${result_dir}
+# modelicapyci_api_github_module : ${modelicapyci_api_github_module}
+# arg_api_pr : ${arg_api_pr}
+# merge_library_dir: ${merge_library_dir}
+
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_lib_merge}
     - ${ci_stage_update_whitelist}
     - ${ci_stage_open_PR}
 
 IBPSA:
+    image: ${image_name}
     stage: ${ci_stage_lib_merge}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8 # just in case
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${modelica_ci_test_url}
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.github_ssh_auth, script]
     script:
-        - git clone --single-branch --branch  ${merge_branch} git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
-        - git clone ${git_url}
-        - cd ${library}/Resources/Scripts
-        - python mergeModelicaIBPSA.py
         - cd ..
-        - cd ..
-        - cd ..
-        - python MoCITempGen/CITests/deploy/IBPSA_Merge/library_merge.py
-        - rm -r modelica-ibpsa
-    only:
-        refs:
-            - ${merge_branch}
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
+        - cp -R ${library} temp_${library}
+        - rm -r ${merge_library_dir} || echo "all clear to clone"
+        - git clone ${git_url} ${merge_library_dir}
+        - export CI_PYTHON_CONFIG_FILE="${library}/${ci_toml_path}"
+        - python -m ${modelicapyci_library_merge_module} ${arg_lib}
+        - rm -r ${merge_library_dir}
+        - mkdir $CI_PROJECT_NAME/Merge_Package
+        - cp -R temp_${library} $CI_PROJECT_NAME/Merge_Package
+        - rm -r temp_${library}
+        - mv $CI_PROJECT_NAME/Merge_Package/temp_${library} $CI_PROJECT_NAME/Merge_Package/${library}
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/
+          when: always
     artifacts:
         paths:
-            - Merge_Package/$CI_PROJECT_NAME/
+            - Merge_Package
         expire_in: ${expire_in_time}
 
 WhiteList:
+    image: ${image_name}
     stage: ${ci_stage_update_whitelist}
     before_script:
-        - export PIP_CACHE_DIR="/opt/cache/pip"
-        - source activate ${python_version}
-        - pip install natsort toml
-        - export PYTHONIOENCODING=utf-8
-        - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-        - eval $(ssh-agent -s)
-        - mkdir -p ~/.ssh
-        - ssh-keyscan github.com >> ~/.ssh/known_hosts
-        - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
-        - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
-        - chmod 600 ~/.ssh/id_rsa
-        - git config --global user.name "$GITLAB_USER_NAME"
-        - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${modelica_ci_test_url}
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.github_ssh_auth, script]
     script:
-        - cd Merge_Package/$CI_PROJECT_NAME
-        - python MoCITempGen/CITests/SyntaxTests/html_tidy_errors.py --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist
-        - ${xvfb_flag} python ${dymola_python_test_validate_file} -DS ${dymola_version} --repo-dir ${wh_library} --git-url ${git_url} --library ${library} --wh-library ${wh_library} --whitelist --simulate-examples
-        - python MoCITempGen/CITests/Converter/lock_model.py --library ${library} --lock-library ${wh_library}
-        - rm  -r ${wh_library}
+        - cd Merge_Package/${library}
+        - python -m ${modelicapyci_create_whitelist_module} ${arg_whitelist_html}
+        - python -m ${modelicapyci_lock_model_module} ${arg_lock}
         - message="${bot_merge_commit}"
-        - push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
-        - git add  $push_model
+        - push_model=$(git ls-files --others --exclude-standard --directory ${library})
+        - git switch $CI_COMMIT_BRANCH
+        - git add $push_model
         - git commit -m "$message"
-        - git push --force git@github.com:$Github_Repository.git
-    only:
-        refs:
-            - ${merge_branch}
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
+        - git push git@github.com:$Github_Repository.git
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/
+          when: always
     artifacts:
         paths:
-            - Merge_Package/$CI_PROJECT_NAME/${wh_model_file}
-            - Merge_Package/$CI_PROJECT_NAME/${wh_library}/${wh_library}-errorlog.txt
+            - Merge_Package
         expire_in: ${expire_in_time}
 
-    allow_failure: true
-    needs:
-    - job: IBPSA
-      artifacts: true
 
 IBPSA_Pull_Request:
+    image: ${image_name}
     stage: ${ci_stage_open_PR}
     before_script:
-        - source activate ${python_version}
-        - pip install --upgrade pip &&  apt-get update -y && apt-get install zip unzip -y
-        - pip install requests toml
-        - export PYTHONIOENCODING=utf-8 # just in case
+        - !reference [.activate_python_and_install_requirements, script]
         - git config --global user.name "$GITLAB_USER_NAME"
         - git config --global user.email "$GITLAB_USER_EMAIL"
-        - git clone ${modelica_ci_test_url}
     script:
-       - python MoCITempGen/CITests/api_script/api_github.py --github-repo $Github_Repository --working-branch $CI_COMMIT_REF_NAME  --github-token $GITHUB_API_TOKEN --create-pr --ibpsa-merge
-    only:
-        refs:
-            - ${merge_branch}
-        variables:
-            - $CI_COMMIT_MESSAGE  =~ /${ci_trigger_ibpsa_commit}/
-
+       - python -m ${modelicapyci_api_github_module} ${arg_api_pr}
+    rules:
+       - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/
+         when: always

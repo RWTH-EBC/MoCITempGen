@@ -1,0 +1,250 @@
+# dym_image: ${dym_image}
+# ci_stage_regression_test: ${ci_stage_regression_test}
+# ci_stage_ref_check :${ci_stage_ref_check}
+# ci_stage_plot_ref : ${ci_stage_plot_ref}
+# ci_stage_prepare : ${ci_stage_prepare}
+
+# buildingspy_upgrade : ${buildingspy_upgrade}
+# modelicapyci_test_reference_module: ${modelicapyci_test_reference_module}
+# modelicapyci_google_chart_module : ${modelicapyci_google_chart_module}
+# config_ci_exit_file : ${config_ci_exit_file}
+# result_dir : ${result_dir}
+# ci_regression_test_commit : $ {ci_regression_test_commit}
+# expire_in_time : ${expire_in_time}
+# arg_PR: ${arg_PR}
+# arg_push: ${arg_push}
+# arg_chart: ${arg_chart}
+# package_list: ${package_list}
+# modelicapyci_api_github_module: ${modelicapyci_api_github_module}
+# {arg_create_plots} : ${arg_create_plots}
+# api_github_arg: ${api_github_arg}
+# PR_main_branch_rule : &{PR_main_branch_rule}
+# library: ${library}
+# ci_regression_test_commit :  ${ci_regression_test_commit}
+# xvfb_flag: ${xvfb_flag}
+# modelicapyci_structure_module: ${modelicapyci_structure_module}
+# arg_ref: ${arg_ref}
+# config_ci_new_create_ref_file: ${config_ci_new_create_ref_file}
+# bot_create_ref_commit: ${bot_create_ref_commit}
+# ci_show_ref_commit: ${ci_show_ref_commit}
+
+include: '${utilities_directory}'
+
+stages:
+    - ${ci_stage_regression_test}
+    - ${ci_stage_ref_check}
+    - ${ci_stage_plot_ref}
+    - ${ci_stage_prepare}
+
+
+.Regressiontest:PR:
+    image: ${dym_image}
+    stage: ${ci_stage_regression_test}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - pip install --upgrade ${buildingspy_upgrade}
+    script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_PR}
+    after_script:
+        - if cat ${config_ci_exit_file} | grep "FAIL"; then
+            source activate ${conda_environment} ;
+            python -m ${modelicapyci_google_chart_module} ${arg_chart} ;
+            exit 1 ;
+          else
+            exit 0 ;
+          fi
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    rules:
+        - !reference [.rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+.Regressiontest:Push:
+    image: ${dym_image}
+    stage: ${ci_stage_regression_test}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+
+        - pip install --upgrade ${buildingspy_upgrade}
+    script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_push}
+    after_script:
+        - if cat ${config_ci_exit_file} | grep "FAIL"; then
+            source activate ${conda_environment} ;
+            python -m ${modelicapyci_google_chart_module} ${arg_chart} ;
+            exit 1 ;
+          else
+            exit 0 ;
+          fi
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    rules:
+        - !reference [.rules:push , rules]
+
+%for package in package_list:
+Regressiontest_${library}_${package}:PR:
+    variables:
+        lib_package: ${library}.${package}
+    extends: .Regressiontest:PR
+
+%endfor
+
+%for package in package_list:
+Regressiontest_${library}_${package}:Push:
+    variables:
+        lib_package: ${library}.${package}
+    extends: .Regressiontest:Push
+
+%endfor
+
+Regression_overall_coverage:PR:
+    stage: ${ci_stage_regression_test}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - pip install --upgrade ${buildingspy_upgrade}
+    script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${coverage_arg}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    rules:
+        - !reference [.rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+Regression_overall_coverage:Push:
+    stage: ${ci_stage_regression_test}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - pip install --upgrade ${buildingspy_upgrade}
+    script:
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${coverage_arg}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    rules:
+        - !reference [.rules:push , rules]
+
+prepare_create_plots:Push:
+    stage: ${ci_stage_prepare}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - pip install --upgrade ${buildingspy_upgrade}
+        - apt-get update -y && apt-get install zip unzip -y
+        - pip install pandas mako matplot toml requests
+    script:
+        - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
+        - python -m ${modelicapyci_api_github_module} ${api_github_arg}
+    artifacts:
+        paths:
+            - ${result_dir}/
+    rules:
+        - !reference [.rules:push , rules]
+    when: on_failure
+    needs:
+    %for package in package_list:
+    - job: Regressiontest_${library}_${package}:Push
+      artifacts: true
+    %endfor
+
+prepare_create_plots:PR:
+    stage: ${ci_stage_prepare}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+    script:
+        - python -m ${modelicapyci_google_chart_module} ${arg_create_plots}
+        - python -m ${modelicapyci_api_github_module} ${api_github_arg}
+    artifacts:
+        paths:
+            - ${result_dir}/
+    rules:
+        - !reference [.rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_regression_test_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+    when: on_failure
+    needs:
+    %for package in package_list:
+    - job: Regressiontest_${library}_${package}:PR
+      artifacts: true
+    %endfor
+
+RegressionTest_Check_References:
+    stage: ${ci_stage_ref_check}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.github_ssh_auth, script]
+        - apt-get update -y && apt-get install xdg-utils --fix-missing -y
+        - pip install --upgrade ${buildingspy_upgrade}
+
+    script:
+        - mkdir CorrectedVersion && cd CorrectedVersion
+        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
+        - cd $CI_PROJECT_NAME
+        - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}
+    after_script:
+        - source activate ${conda_environment}
+        - cd CorrectedVersion/$CI_PROJECT_NAME
+        - if cat ${config_ci_exit_file} | grep "FAIL"; then
+            push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
+            (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
+            message="${bot_create_ref_commit}" ;
+            pip install pandas mako matplot;
+            python -m ${modelicapyci_google_chart_module} ${arg_check_ref_plot} ;
+            git add $push_model ;
+            git commit -m "$message";
+            git push git@github.com:$Github_Repository.git ;
+            mkdir -p ../../${result_dir}/ ;
+            cp -r ${result_dir}/* ../../${result_dir} ;
+            exit 1 ;
+          else
+            exit 0 ;
+          fi
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    rules:
+        - !reference [.rules:PR , rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_reference_check}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+
+plot_reference_results:
+    stage: ${ci_stage_plot_ref}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - apt-get update -y && apt-get install zip unzip -y
+        - pip install pandas mako matplot toml requests
+
+    script:
+        - python -m ${modelicapyci_google_chart_module} --line-html --show-ref --single-package ${library} --library ${library}
+        - python -m ${modelicapyci_api_github_module} --working-branch $CI_COMMIT_REF_NAME --github-repo $Github_Repository --gitlab-page $GITLAB_Page --github-token $GITHUB_API_TOKEN --post-pr-comment --show-plot
+    artifacts:
+        when: always
+        paths:
+            - ${result_dir}/
+    rules:
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_show_ref_commit}/
+          when: always

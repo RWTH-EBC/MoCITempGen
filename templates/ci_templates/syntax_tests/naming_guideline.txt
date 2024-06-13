@@ -1,0 +1,29 @@
+# image_name : ${image_name}
+# ci_stage_style_check : ${ci_stage_style_check}
+# modelicapyci_syntax_naming_guideline : ${modelicapyci_syntax_naming_guideline}
+# library : ${library}
+# ci_naming_guideline : ${ci_naming_guideline}
+# result_dir : ${result_dir}
+# arg : ${arg}
+
+include: '${utilities_directory}'
+stages:
+    - ${ci_stage_style_check}
+
+
+NamingGuideline:${library}:PR:
+    image: ${image_name}
+    stage: ${ci_stage_style_check}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+    script:
+        - python -m ${modelicapyci_syntax_naming_guideline} ${arg}
+    artifacts:
+        paths:
+            - ${result_dir}/
+        expire_in: 7 day
+    rules:
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_naming_guideline}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:PR , rules]
+

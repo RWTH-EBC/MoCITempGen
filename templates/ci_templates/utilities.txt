@@ -1,0 +1,52 @@
+# conda_environment: ${conda_environment}
+# modelica_py_ci_url: ${modelica_py_ci_url}
+# ci_toml_path: ${ci_toml_path}
+# commit_string: ${commit_string}
+#  PR_main_branch_rule: ${PR_main_branch_rule}
+# This file contains small scripts, rules or other templates
+# which can be referenced by other templates in this repo (or other repos as well).
+# Include the scripts using the `!reference` tag.
+
+.github_ssh_auth:
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - mkdir -p ~/.ssh
+    - ssh-keyscan github.com >> ~/.ssh/known_hosts
+    - ssh-agent -a /tmp/ssh_agent.sock > /dev/null
+    - echo "$GITHUB_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+
+.activate_python_and_install_requirements:
+  script:
+    - export PIP_CACHE_DIR="/opt/cache/pip"
+    - source activate ${conda_environment} || echo "${conda_environment} is not installed, can't activate it"
+    - pip install --upgrade pip && pip install natsort toml pandas mako requests
+    - export PYTHONIOENCODING=utf-8
+    - pip install git+https://github.com/lbl-srg/BuildingsPy.git@master
+    - pip install git+${modelica_py_ci_url}
+    - export CI_PYTHON_CONFIG_FILE="${ci_toml_path}"
+
+.custom_install_additional_modelica_libraries:
+  script:
+    - echo "Skipping custom installation of other Modelica libraries"
+
+.rules:PR:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
+          when: on_success
+        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
+          when: on_success
+
+.rules:push:
+    rules:
+        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+          when: on_success
+        - if:  (${PR_main_branch_rule})
+          when: never
+
+.open_modelica_git_user_setting:
+  script:
+    - runuser -u openmodelicausers -- sh -c 'git config --global --add safe.directory "$(pwd)"'

@@ -68,7 +68,7 @@
 
     <!-- Menu Navigation Bar -->
     <div class="menu">
-        <a href="#Plotresults">Plot results</a>
+        <a href="Plotresults">Plot results</a>
 
 
     </div>
@@ -76,9 +76,9 @@
     <!-- Body section -->
     <div class = "body_sec">
         <section id="Content">
-	    %for package in single_package:
+	    %for package in packages:
 	     <br><li><a href="${package}/index.html" target="content">${package}</a></li></br>
-            %endfor	 
+            %endfor
         </section>
     </div>
 

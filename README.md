@@ -1,81 +1,57 @@
-# MoCITempGen
-This repository holds functions to create your own, library dependant 
-CI-scripts. The goal is to improve quality of models through easier CI setup and
-let model developers focus on the modeling work. 
-The created templates hold functionality for:
-- Model checking 
-- Model simulation
-- Regression testing
-- Correct HTML 
-- Style Checking
-- Merge IBPSA library (specific for IBPSA context)
-
-The basic setup is shown in this picture:
-![process](/docs/images/mocitempgen_process.png)
-* MoCITempGen uses the base CI-Templates in .txt form stored in `templates` 
-folder to create a library related CI-structure.
-* This can then be placed inside the target Modelica library
-* The CI tasks are executed by a GitLab runner which uses the functionality 
-provided through the python functions in `CITests` folder. This will be moved 
-to a public ModelicaPyCI package on PyPi soon
-* Through the
-[GitLab mirroring feature](https://docs.gitlab.com/ee/user/project/repository/mirror/) 
-not only GitLab repos can use MoCITempGen generated templates but any GitHub,
-BitBucket or AWS CodeCommit repository
-
+# MoCiTempGen
+A template generator tool for GitLab CI templates that creates a CI setup that can perform various tasks for Modelica libraries.
 ## How to use
+### Create your templates
 
-### Installation
+If you start fresh, run 
+```
+python MoCiTempGen/ci_templates_build.py --create-templates
+```
+to create intial settings in form of two `.toml` files:
+1. `templates_generator_config.toml`
+2. `modelica_py_ci_config.toml` 
 
-You don't need to install the package, but the requirements 
-must be installed:
+`templates_generator_config.toml` stores information about how to generate your templates and can be stored local, while `modelica_py_ci_config.toml` stores information that is relevant for the later CI jobs and will always be placed in your repository.
+A prompt based process will guide you through the next steps and allow you to configure how your CI setup should look like.
 
-```bash
-pip install -r requirements.txt
+If you already have a config and just changed something inside your `templates_generator_config.toml`, you can run 
+```
+python MoCiTempGen/ci_templates_build.py --update-templates --templates-toml-file <path_tou_your_templates_generator_config.toml> --ci-toml-file <path_to_your_modelica_py_ci_config.toml>
 ```
 
-### Interactive mode
-For this a prompt menu will guide you through the needed inputs. This is still
-work in progress and not as robust as it should be.
-Be sure to be in the folder of the library you want to create tests for.
-Then, get the path to the folder `CI_templates_python`, e.g. `/path_to/CI_templates_python`
-and run:
-```bash
-python /path_to/CI_templates_python/ci_templates.py 
-```
-If the process in finished you will have your results stored under
-`CI_templates_python/dymola-ci-tests`. Additionally, you will be provided with a 
-fresh `CI_setting.toml` file that holds the configuration you created. You can 
-change this config and rerun the process in config mode:
-### Config mode
-This takes the configurations from the previous process which can be modified 
-and creates a new `dymola-ci-tests` setup. This is useful if you only want to 
-change a few settings. For this run 
-```bash
-python CI_templates_python/ci_templates.py --setting
+### Setup your own CI
+If you decided to create the CI setup inside in a separate repository, you need to create a link to this repository. 
+In the repository to be tested, the following content needs to be written to the .gitlab-ci.yml. 
+"ref" is the name of the branch of the separate template where the templates are located. 
+```	
+	include:
+            project: '<Path/to/your/GitLab/repository>'
+            ref: <branch_in_template_repository>
+            file: '<path to the created .gitlab-ci.yml' 
 ```
 
-## Folder Structure
+#### Variables (ToDo: Check if up2date)
+##### GitLab
+| GitLab Variables | Description                                                                                                                                                                      | 
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| 
+| CI_PYTHON_DYMOLA_NAME   | Deploy Username for Repository [Dymola_python_tests](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests)                                                       |
+| CI_PYTHON_DYMOLA_TOKEN   | Deploy Token for Repository [Dymola_python_tests](https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests)                                                          |
+| GITHUB_API_TOKEN | API Github [Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)                                              |
+| GITHUB_PRIVATE_KEY  | RSA Private [Key](https://docs.github.com/de/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent), Used to push to a repository |
 
-### CI_templates_python
-This folder holds the main scripts that perform the creation of the library 
-dependant ci-templates. For further information see it's
-[Readme](CI_templates_python) 
+##### GitHub
+| Github Variables | Description                             | 
+|------------------|-----------------------------------------| 
+| GIT_TOKEN     | Token for access to the API             |
+| SLACK_BOT_TOKEN    | RSA Private key to push to a repository |
 
-### CITests
-This folder contains all python functions that the CI will later run. This will
-be moved into the [ModelicaPyCI](https://github.com/RWTH-EBC/ModelicaPyCI)
-package soon. For further information see it's [Readme](CITests).
-
-### templates
-This folder contains the base templates for mako that will be used to create 
-your library dependant ci-templates.
+[//]: # (For more information look [here]&#40;https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/templates/-/wikis/Python-Dymola-CI-Templates&#41;.)
 
 
-## TODOS:
-* [ ] complete documentation
-* [ ] merge open modelica branch
-* [ ] complete extraction of python functions from CITests folder to 
-[ModelicaPyCI](https://github.com/RWTH-EBC/ModelicaPyCI) package
-* [ ] remove dymola functionality as far as possible 
-* [ ] maybe add template generation for GitHub actions
+## Repository structure
+
+## [MoCiTempGen](MoCITempGen)
+Holds the code to create your own CI structure
+
+## [templates](templates)
+This folder contains the base templates that are used to create your library specific templates

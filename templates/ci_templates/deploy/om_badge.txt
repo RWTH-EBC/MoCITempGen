@@ -1,0 +1,20 @@
+include: '${utilities_directory}'
+
+stages:
+    - ${ci_stage_om_badge}
+
+create_om_badge:
+    image: ${image_name}
+    stage: ${ci_stage_om_badge}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - pip install --upgrade pip anybadge && apt-get update -y && apt-get install zip unzip -y
+    script:
+        - python -m ${modelicapyci_om_badge_module} ${arg}
+    artifacts:
+        paths:
+         - ${result_dir}
+    rules:
+        - if:  ($CI_COMMIT_BRANCH  == "${main_branch}")
+          when: always
+    allow_failure: true

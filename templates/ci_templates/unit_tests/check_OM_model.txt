@@ -1,0 +1,69 @@
+# Variables:
+# ci_stage_OM_model_check: ${ci_stage_OM_model_check}
+# library: ${library}
+# ci_OM_check_commit: ${ci_OM_check_commit}
+# OM_Image: ${OM_Image}
+# OM_python_check_model_module: ${OM_python_check_model_module}
+# result_dir: ${result_dir}
+# expire_in_time: ${expire_in_time}
+# arg_PR: ${arg_PR}
+# arg_push: ${arg_push}
+# packages: ${packages}
+
+include: '${utilities_directory}'
+
+stages:
+    - ${ci_stage_OM_model_check}
+
+
+.OM_check_model_job:PR:
+    image: ${OM_Image}
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.open_modelica_git_user_setting, script]
+    script:
+        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_PR}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    allow_failure: true
+    rules:
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:PR , rules]
+
+.OM_check_model_job:push:
+    image: ${OM_Image}
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.open_modelica_git_user_setting, script]
+    script:
+        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_push}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    allow_failure: true
+    rules:
+        - !reference [.rules:push, rules]
+
+%for package in packages:
+OM_Check_${library}_${package}:PR:
+    variables:
+        lib_package: ${package}
+    extends: .OM_check_model_job:PR
+
+%endfor
+
+%for package in packages:
+OM_Check_${library}_${package}:push:
+    variables:
+        lib_package: ${package}
+    extends: .OM_check_model_job:push
+
+%endfor

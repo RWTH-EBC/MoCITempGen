@@ -1,1 +1,6 @@
+templates
+argparse
+toml
+pydantic
 mako
+git+https://github.com/RWTH-EBC/ModelicaPyCI@main

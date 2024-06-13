@@ -1,17 +1,18 @@
-image: ${image_name}
-
+# You can adjust the sequence of the stages to your needs
 stages:
     %for stage in stage_list:
     - ${stage}
     %endfor
-    
+
 variables:
-    %for variable in variable_list:
-    ${variable}
-    %endfor
-    
+    Github_Repository: ${github_repository}
+    GITLAB_Page:  ${gitlab_page}
+
 include:
   %for file in file_list:
     - '${file}'  
   %endfor
-  
+    - project: 'EBC/EBC_all/gitlab_ci/templates'
+      file: 'pages/gl-pages.gitlab-ci.yml'
+    - project: 'EBC/EBC_all/gitlab_ci/templates'
+      file: 'pages/gh-pages.gitlab-ci.yml'
