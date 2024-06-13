@@ -36,9 +36,10 @@ setup(
     license="LICENSE",
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='Sven Hinrichs',
-    author_email='sven.hinrichs@eonerc.rwth-aachen.de',
-    url="https://git.rwth-aachen.de/EBC/EBC_all/gitlab_ci/Dymola_python_tests",
+    author='Sven Hinrichs, Fabian Wuellhorst, David Jansen',
+    author_email='fabian.wuellhorst@eonerc.rwth-aachen.de,'
+                 ' david.jansen@eonerc.rwth-aachen.de',
+    url="https://github.com/RWTH-EBC/MoCITempGen/",
     packages=find_packages(include=['MoCITempGen*',
                                     'config*',
                                     'templates*']),

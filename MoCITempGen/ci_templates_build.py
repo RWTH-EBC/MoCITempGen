@@ -11,6 +11,7 @@ from ModelicaPyCI.structure import config_structure
 from ModelicaPyCI.config import CIConfig, save_toml_config, load_toml_config
 
 
+
 def _arg_list(_list: list):
     return " ".join(_list)
 
@@ -1263,19 +1264,25 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Set Github Environment Variables")
-    check_test_group = parser.add_argument_group("Arguments to set Environment Variables")
-    check_test_group.add_argument("--set-setting",
-                                  help=f'Create the CI from file Setting{os.sep}CI_setting.txt',
+    parser = argparse.ArgumentParser(
+        description="Set Github Environment Variables")
+    check_test_group = parser.add_argument_group(
+        "Arguments to set Environment Variables")
+    check_test_group.add_argument("--create-templates",
+                                  help=f'Create the CI from file '
+                                       f'Setting{os.sep}CI_setting.txt',
                                   action="store_true")
-    check_test_group.add_argument("--write-templates",
+    check_test_group.add_argument("--update-templates",
                                   default=False,
                                   action="store_true")
     check_test_group.add_argument("--templates-toml-file",
-                                  help="Path to the templates toml used if write-templates=True",
+                                  help="Path to the "
+                                       "templates_generator_config.toml"
+                                       " used if write-templates=True",
                                   default=None)
     check_test_group.add_argument("--ci-toml-file",
-                                  help="Path to the ci-config toml used if write-templates=True",
+                                  help="Path to the modelica_py_ci_config.toml"
+                                       " used if write-templates=True",
                                   default=None)
 
     return parser.parse_args()
@@ -1283,18 +1290,17 @@ def parse_args():
 
 if __name__ == '__main__':
     ARGS = parse_args()
-    # TEMPLATES_TOML_FILE, CI_TOML_FILE = create_toml_config()
-    BASE = Path(r"D:/04_git/templates")
-    BASE_Aix = Path(r"D:/04_git/AixLib")
-    TEMPLATES_TOML_FILE = BASE.joinpath("modelica-ci-tests/config/templates_generator_config.toml")
-    CI_TOML_FILE = BASE_Aix.joinpath("ci/config/modelica_py_ci_config.toml")
-    write_templates(templates_toml=TEMPLATES_TOML_FILE, ci_toml_path=CI_TOML_FILE)
-
-    if ARGS.set_setting is True:
-        create_toml_config()
-    if ARGS.write_templates is True:
-        if ARGS.templates_toml_file is None:
-            raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
-        if ARGS.ci_toml_file is None:
-            raise FileNotFoundError("You have to pass a toml-file in order to write the templates.")
-        write_templates(templates_toml=ARGS.templates_toml_file, ci_toml_path=ARGS.ci_toml_file)
+    if ARGS.create_templates is True:
+        template_toml_file, ci_toml_file = create_toml_config()
+        write_templates(templates_toml=Path(template_toml_file),
+                        ci_toml_path=Path(ci_toml_file))
+    if ARGS.update_templates is True:
+        if ARGS.templates_toml_file is None or ARGS.ci_toml_file is None:
+            raise FileNotFoundError(
+                "You have to pass --templates-toml-file and --ci-toml-file"
+                " in order to write the templates from an existing setup.\n"
+                "Run --create-templates instead to create a fresh setup")
+        write_templates(
+            templates_toml=Path(ARGS.templates_toml_file),
+            ci_toml_path=Path(ARGS.ci_toml_file)
+        )
