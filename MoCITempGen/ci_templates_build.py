@@ -1220,6 +1220,8 @@ def create_toml_config():
 def write_templates(templates_toml: Path, ci_toml_path: Path):
     templates_config = TemplateGeneratorConfig.from_toml(path=templates_toml)
     ci_config = load_toml_config(ci_toml_path)
+    if "CI_PYTHON_CONFIG_FILE" not in os.environ:
+        os.environ["CI_PYTHON_CONFIG_FILE"] = str(ci_toml_path)
 
     relative_ci_toml_path = ci_toml_path.relative_to(templates_config.library_local_path).as_posix()
     for temp in templates_config.stage_list:
