@@ -1302,8 +1302,6 @@ if __name__ == '__main__':
         write_templates(templates_toml=Path(template_toml_file),
                         ci_toml_path=Path(ci_toml_file))
     if ARGS.update_templates is True:
-        ARGS.templates_toml_file = r"D:\04_git\BESMod\ci-tests\config\templates_generator_config.toml"
-        ARGS.ci_toml_file = r"D:\04_git\BESMod\ci-tests\config\modelica_py_ci_config.toml"
         if ARGS.templates_toml_file is None or ARGS.ci_toml_file is None:
             raise FileNotFoundError(
                 "You have to pass --templates-toml-file and --ci-toml-file"
