@@ -32,7 +32,9 @@
 
 .custom_install_additional_modelica_libraries:
   script:
-    - echo "Skipping custom installation of other Modelica libraries"
+%for command in command_list:
+    - ${command}
+%endfor
 
 .rules:PR:
     rules:

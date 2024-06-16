@@ -1,15 +1,15 @@
+import argparse
 import os
 import shutil
-
-from mako.template import Template
-import argparse
-import toml
 import glob
 from pathlib import Path
-from MoCITempGen.ci_templates_config import TemplateGeneratorConfig, WhitelistAndMergeLibraryConfig, TemplateFilesConfig
-from ModelicaPyCI.structure import config_structure
-from ModelicaPyCI.config import CIConfig, save_toml_config, load_toml_config
 
+import toml
+from mako.template import Template
+
+from MoCITempGen.ci_templates_config import TemplateGeneratorConfig, WhitelistAndMergeLibraryConfig, TemplateFilesConfig
+from ModelicaPyCI.config import CIConfig, save_toml_config, load_toml_config
+from ModelicaPyCI.structure import config_structure
 
 
 def _arg_list(_list: list):
@@ -232,7 +232,11 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
     arg_correct_html = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
         user_args=templates_config.dict(),
-        template_script_args={"filter_whitelist_flag": True}
+        template_script_args={
+            "filter_whitelist_flag": True,
+            "correct_overwrite_flag": True,
+            "log_flag": True
+        }
     )
     arg_github_PR = write_parser_args(
         python_module=templates_config.modelica_py_ci.api_github_module,
@@ -253,6 +257,7 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         html_praefix=templates_config.html_praefix,
         python_version=templates_config.conda_environment,
         arg_correct_html=arg_correct_html,
+        config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         library=templates_config.library,
@@ -588,7 +593,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         ci_toml_path=ci_toml_path,
         modelicapyci_test_reference_module=templates_config.modelica_py_ci.test_reference_module,
         modelicapyci_google_chart_module=templates_config.modelica_py_ci.google_chart_module,
-        config_ci_exit_file=ci_config.ci_files.exit_file,
+        config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         arg_chart=arg_chart,
         ci_regression_test_commit=templates_config.commit_interaction.regression_test,
@@ -697,7 +702,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         arg_wh=arg_wh,
         arg_PR=arg_PR,
         package_list=templates_config.packages[templates_config.library],
-        config_ci_exit_file=ci_config.ci_files.exit_file,
+        config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_model_whitelist_commit,
         whitelist_model_file=ci_config.whitelist.dymola_check_file,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_model_whitelist,
@@ -758,7 +763,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
         xvfb_flag=templates_config.xvfb_flag,
-        config_ci_exit_file=ci_config.ci_files.exit_file,
+        config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         ci_stage_create_whitelist=templates_config.stage_names.create_whitelist,
         ci_stage_create_example_whitelist=templates_config.stage_names.create_example_whitelist
     )
@@ -829,7 +834,8 @@ def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CI
         modelica_py_ci_url=templates_config.modelica_py_ci.url,
         commit_string=templates_config.commit_string,
         PR_main_branch_rule=templates_config.pr_main_branch_rule,
-        ci_toml_path=ci_toml_path
+        ci_toml_path=ci_toml_path,
+        command_list=templates_config.extra_command_list
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -924,7 +930,7 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
 
 def get_ci_templates(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     yml_files = glob.glob(f'{templates_config.get_templates_dir()}\\**\\**\\*.yml', recursive=True)
-    yml_files = list(set(yml_files))
+    yml_files = sorted(list(set(yml_files)))
     mo_py_files = []
     for file in yml_files:
         if file.find(".gitlab-ci.yml") > -1:
@@ -1296,6 +1302,8 @@ if __name__ == '__main__':
         write_templates(templates_toml=Path(template_toml_file),
                         ci_toml_path=Path(ci_toml_file))
     if ARGS.update_templates is True:
+        ARGS.templates_toml_file = r"D:\04_git\BESMod\ci-tests\config\templates_generator_config.toml"
+        ARGS.ci_toml_file = r"D:\04_git\BESMod\ci-tests\config\modelica_py_ci_config.toml"
         if ARGS.templates_toml_file is None or ARGS.ci_toml_file is None:
             raise FileNotFoundError(
                 "You have to pass --templates-toml-file and --ci-toml-file"
