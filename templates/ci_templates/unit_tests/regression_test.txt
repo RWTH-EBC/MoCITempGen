@@ -4,7 +4,6 @@
 # ci_stage_plot_ref : ${ci_stage_plot_ref}
 # ci_stage_prepare : ${ci_stage_prepare}
 
-# buildingspy_upgrade : ${buildingspy_upgrade}
 # modelicapyci_test_reference_module: ${modelicapyci_test_reference_module}
 # modelicapyci_google_chart_module : ${modelicapyci_google_chart_module}
 # config_ci_exit_file : ${config_ci_exit_file}
@@ -43,7 +42,6 @@ stages:
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_PR}
@@ -72,7 +70,6 @@ stages:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
 
-        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_push}
@@ -113,7 +110,6 @@ Regression_overall_coverage:PR:
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${coverage_arg}
@@ -132,7 +128,6 @@ Regression_overall_coverage:Push:
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install --upgrade ${buildingspy_upgrade}
     script:
         - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${coverage_arg}
@@ -149,7 +144,6 @@ prepare_create_plots:Push:
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
-        - pip install --upgrade ${buildingspy_upgrade}
         - apt-get update -y && apt-get install zip unzip -y
         - pip install pandas mako matplot toml requests
     script:
@@ -195,7 +189,6 @@ RegressionTest_Check_References:
         - !reference [.custom_install_additional_modelica_libraries, script]
         - !reference [.github_ssh_auth, script]
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
-        - pip install --upgrade ${buildingspy_upgrade}
 
     script:
         - mkdir CorrectedVersion && cd CorrectedVersion

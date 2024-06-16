@@ -586,7 +586,6 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         ci_stage_prepare=templates_config.stage_names.prepare,
         arg_ref_check=arg_ref_check,
         ci_toml_path=ci_toml_path,
-        buildingspy_upgrade=templates_config.buildingspy_upgrade,
         modelicapyci_test_reference_module=templates_config.modelica_py_ci.test_reference_module,
         modelicapyci_google_chart_module=templates_config.modelica_py_ci.google_chart_module,
         config_ci_exit_file=ci_config.ci_files.exit_file,
