@@ -1,6 +1,7 @@
 include: '${utilities_directory}'
 image: ${image_name}
 
+
 stages:
     - ${ci_stage_check_setting}
     - ${ci_stage_build_templates}

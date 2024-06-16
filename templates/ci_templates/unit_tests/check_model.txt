@@ -1,3 +1,4 @@
+# Variables
 # dym_image_name: ${dym_image_name}
 # ci_stage_model_check: ${ci_stage_model_check}
 # ci_stage_create_whitelist: ${ci_stage_create_whitelist}

@@ -1,8 +1,8 @@
+# Variables
 # ci_stage_lib_merge : ${ci_stage_lib_merge}
 # ci_stage_update_whitelist : ${ci_stage_update_whitelist}
 # ci_stage_open_PR : ${ci_stage_open_PR}
 # image_name : ${image_name}
-
 # git_url : ${git_url}
 # library : ${library}
 # merge_branch : ${merge_branch}

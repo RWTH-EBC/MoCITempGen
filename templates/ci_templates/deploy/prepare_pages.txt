@@ -1,8 +1,7 @@
+# Variables
 # ci_stage_prepare_page : ${ci_stage_prepare_page}
 # result_dir : ${result_dir}
 # expire_in_time : ${expire_in_time}
-
-
 
 stages:
     - ${ci_stage_prepare_page}

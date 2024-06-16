@@ -1,3 +1,4 @@
+# Variables
 # image_name : ${image_name}
 # ci_stage_style_check : ${ci_stage_style_check}
 # modelicapyci_syntax_naming_guideline : ${modelicapyci_syntax_naming_guideline}

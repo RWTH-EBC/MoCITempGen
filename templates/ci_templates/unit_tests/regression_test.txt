@@ -1,9 +1,9 @@
+# Variables
 # dym_image: ${dym_image}
 # ci_stage_regression_test: ${ci_stage_regression_test}
 # ci_stage_ref_check :${ci_stage_ref_check}
 # ci_stage_plot_ref : ${ci_stage_plot_ref}
 # ci_stage_prepare : ${ci_stage_prepare}
-
 # modelicapyci_test_reference_module: ${modelicapyci_test_reference_module}
 # modelicapyci_google_chart_module : ${modelicapyci_google_chart_module}
 # config_ci_exit_file : ${config_ci_exit_file}

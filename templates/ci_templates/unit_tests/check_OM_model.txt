@@ -1,4 +1,3 @@
-# Variables:
 # ci_stage_OM_model_check: ${ci_stage_OM_model_check}
 # library: ${library}
 # ci_OM_check_commit: ${ci_OM_check_commit}

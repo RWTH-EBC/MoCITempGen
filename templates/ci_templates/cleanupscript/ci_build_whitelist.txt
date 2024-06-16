@@ -1,6 +1,6 @@
+# Variables
 # image_name : ${image_name}
 # ci_stage_whitelist_setting : ${ci_stage_whitelist_setting}
-
 # modelicapyci_config_structure_module:  ${modelicapyci_config_structure_module}
 # arg_struc_wh : ${arg_struc_wh}
 # arg_whitelist_check : ${arg_whitelist_check}

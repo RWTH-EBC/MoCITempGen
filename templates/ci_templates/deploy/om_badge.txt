@@ -1,5 +1,6 @@
 include: '${utilities_directory}'
 
+
 stages:
     - ${ci_stage_om_badge}
 

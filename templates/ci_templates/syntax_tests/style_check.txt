@@ -1,9 +1,9 @@
+# Variables
 # image_name : ${image_name}
 # ci_stage_style_check : ${ci_stage_style_check}
 # modelicapyci_syntax_test_module : ${modelicapyci_syntax_test_module}
 # xvfb_flag : ${xvfb_flag}
 # library : ${library}
-
 # ci_style_commit : ${ci_style_commit}
 # result_dir : ${result_dir}
 # arg_PR : ${arg_PR}
