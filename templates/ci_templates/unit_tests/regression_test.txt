@@ -186,19 +186,19 @@ RegressionTest_Check_References:
     stage: ${ci_stage_ref_check}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
-        - !reference [.custom_install_additional_modelica_libraries, script]
         - !reference [.github_ssh_auth, script]
         - apt-get update -y && apt-get install xdg-utils --fix-missing -y
-
     script:
-        - mkdir CorrectedVersion && cd CorrectedVersion
-        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
+        #- mkdir CorrectedVersion && cd CorrectedVersion
+        #- git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
+        #- cd $CI_PROJECT_NAME
+        - pip install git+https://github.com/FWuellhorst/BuildingsPy.git@issue558
+        - !reference [.custom_install_additional_modelica_libraries, script]
         - export CI_PYTHON_CONFIG_FILE="../${ci_toml_path}"
-        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module}  ${arg_ref_check}
+        - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_ref_check}
     after_script:
         - source activate ${conda_environment}
-        - cd CorrectedVersion/$CI_PROJECT_NAME
+        #- cd CorrectedVersion/$CI_PROJECT_NAME
         - if cat ${config_ci_exit_file} | grep "FAIL"; then
             push_model=$(git ls-files --others --exclude-standard --directory ${library}) ;
             (git ls-files --others --exclude-standard --directory ${library}) > ${config_ci_new_create_ref_file} ;
@@ -208,8 +208,8 @@ RegressionTest_Check_References:
             git add $push_model ;
             git commit -m "$message";
             git push git@github.com:$Github_Repository.git ;
-            mkdir -p ../../${result_dir}/ ;
-            cp -r ${result_dir}/* ../../${result_dir} ;
+            mkdir -p ../${result_dir}/ ;
+            cp -r ${result_dir}/* ../${result_dir} ;
             exit 1 ;
           else
             exit 0 ;
