@@ -27,20 +27,12 @@ CI_Whitelist_Setting:
         - !reference [.github_ssh_auth, script]
         - !reference [.activate_python_and_install_requirements, script]
     script:
-        - mkdir build_whitelist
-        - cd build_whitelist
-        - git clone --single-branch --branch $CI_COMMIT_REF_NAME git@github.com:$Github_Repository.git
-        - cd $CI_PROJECT_NAME
         - python -m ${modelicapyci_configuration_module} ${arg_struc_wh}
-
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_whitelist_check}
         - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_whitelist_sim}
         - message="${bot_build_whitelist_commit}"
-        - push_model=$(git ls-files --others --exclude-standard --directory ${ci_dir})
-        - git switch $CI_COMMIT_BRANCH
-        - git add  $push_model
-        - git commit -m "$message"
-        - git push git@github.com:$Github_Repository.git
+        - files_to_push=$(git ls-files --others --exclude-standard --directory ${ci_dir})
+        - !reference [.git_push, script]
     rules:
         - if: $CI_PIPELINE_SOURCE == "push"  &&  $CI_COMMIT_MESSAGE  =~ /${ci_build_whitelist_structure_commit}/
           when: always

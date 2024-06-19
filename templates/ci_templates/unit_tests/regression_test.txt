@@ -196,23 +196,19 @@ RegressionTest_Check_References:
         - cd ${library} && ${xvfb_flag} python -m ${modelicapyci_test_reference_module} ${arg_ref_check}
     after_script:
         - source activate ${conda_environment}
-        - |
-            if cat ${config_ci_exit_file} | grep "GENERATED_NEW_RESULTS"; then
-              # Get newly created files
-              push_model=$(git ls-files --others --exclude-standard --directory ${library});
-              # Save them for google_charts templates
-              echo $push_model > ${config_ci_new_create_ref_file};
-              message="${bot_create_ref_commit}";
-              pip install pandas mako matplot;
-              python -m ${modelicapyci_google_chart_module} ${arg_check_ref_plot};
-              git switch $CI_COMMIT_BRANCH;
-              git add $push_model;
-              git commit -m "$message";
-              git push git@github.com:$Github_Repository.git;
-              exit 1 ;
-            else
-              exit 0 ;
-            fi
+        - if ! cat ${config_ci_exit_file} | grep "GENERATED_NEW_RESULTS"; then
+            exit 0;
+          fi
+        # Get newly created files
+        - files_to_push=$(git ls-files --others --exclude-standard --directory ${library});
+        # Save them for google_charts templates
+        - echo $files_to_push > ${config_ci_new_create_ref_file};
+        - message="${bot_create_ref_commit}";
+        - pip install pandas mako matplot;
+        - python -m ${modelicapyci_google_chart_module} ${arg_check_ref_plot};
+        - !reference [.git_push, script]
+        - exit 1 ;
+
     artifacts:
         when: on_failure
         paths:
