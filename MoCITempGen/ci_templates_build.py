@@ -576,8 +576,8 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
             "funnel_comp_flag": False,
             "create_layout_flag": False,
             "error_flag": False,
-            "new_ref_flag": True},
-        skip_args=["packages"])
+            "new_ref_flag": True}
+    )
     # python ${modelicapyci_google_chart_file} - -line - html - -new - ref - -packages ${library};
 
     template_kwargs = dict(
