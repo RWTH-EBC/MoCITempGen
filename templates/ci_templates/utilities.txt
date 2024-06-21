@@ -56,7 +56,8 @@
 
 .git_push:
   script:
-    - git switch $CI_COMMIT_BRANCH
+    #- git switch $CI_COMMIT_BRANCH
+    - git status
     - git add $files_to_push
     - git commit -m "$message"
-    - git push git@github.com:$Github_Repository.git
+    - git push git@github.com:$Github_Repository.git "HEAD:$CI_COMMIT_REF_NAME"

@@ -187,28 +187,6 @@ def write_page_template(templates_config: TemplateGeneratorConfig, ci_config: CI
     )
 
 
-def _write_setting_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    """
-    Write setting template, create template with own Syntax
-    """
-    template_kwargs = dict(
-        utilities_directory=get_utilities_path(templates_config=templates_config),
-        image_name=templates_config.dymola_image,
-        github_repo=templates_config.github_repo,
-        ci_setting_commit=templates_config.commit_interaction.setting,
-        python_version=templates_config.conda_environment,
-        ci_stage_check_setting=templates_config.stage_names.check_setting,
-        ci_stage_build_templates=templates_config.stage_names.build_templates,
-        bot_create_CI_template_commit=templates_config.bot_messages.create_CI_template_commit,
-        temp_dir=templates_config.get_templates_dir()
-    )
-    _write_yml_templates(
-        templates_config=templates_config, ci_config=ci_config,
-        file=templates_config.template_files.page_file,
-        template_kwargs=template_kwargs
-    )
-
-
 def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     arg_PR = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
@@ -255,7 +233,6 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         ci_stage_html_whitelist=templates_config.stage_names.html_whitelist,
         ci_stage_open_PR=templates_config.stage_names.open_PR,
         html_praefix=templates_config.html_praefix,
-        python_version=templates_config.conda_environment,
         arg_correct_html=arg_correct_html,
         config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
@@ -299,7 +276,6 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
         utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_style_check=templates_config.stage_names.style_check,
-        python_version=templates_config.conda_environment,
         modelicapyci_syntax_test_module=templates_config.modelica_py_ci.syntax_test_module,
         xvfb_flag=templates_config.xvfb_flag,
         library=templates_config.library,
@@ -332,7 +308,6 @@ def write_naming_template(templates_config: TemplateGeneratorConfig, ci_config: 
         utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
         ci_stage_style_check=templates_config.stage_names.style_check,
-        python_version=templates_config.conda_environment,
         modelicapyci_syntax_test_module=templates_config.modelica_py_ci.syntax_test_module,
         xvfb_flag=templates_config.xvfb_flag,
         library=templates_config.library,
@@ -538,23 +513,13 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
             "library_root": "..",
             "changed_flag": False}
     )
-    arg_create_plots = write_parser_args(
-        python_module=templates_config.modelica_py_ci.google_chart_module,
-        user_args=templates_config.dict(),
-        template_script_args={
-            "create_layout_flag": True,
-            "funnel_comp_flag": False,
-            "error_flag": False,
-            "templates_url": templates_config.template_files.url,
-            "line_html_flag": False}
-    )
+
     arg_chart = write_parser_args(
         python_module=templates_config.modelica_py_ci.google_chart_module,
         user_args=templates_config.dict(),
         template_script_args={
             "funnel_comp_flag": True,
             "templates_url": templates_config.template_files.url,
-            "line_html_flag": True,
             "error_flag": True})
     api_github_arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.api_github_module,
@@ -563,6 +528,15 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
                               "github_token": "${GITHUB_API_TOKEN}",
                               "post_pr_comment_flag": True,
                               "prepare_plot_flag": True})
+    api_github_create_ref_arg = write_parser_args(
+        python_module=templates_config.modelica_py_ci.api_github_module,
+        user_args=templates_config.dict(),
+        template_script_args={
+            "working_branch": "$CI_COMMIT_REF_NAME",
+            "github_token": "${GITHUB_API_TOKEN}",
+            "post_pr_comment_flag": True,
+            "show_plot_flag": True}
+    )
     arg_ref = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_reference_module,
         user_args=templates_config.dict(),
@@ -571,10 +545,8 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         python_module=templates_config.modelica_py_ci.google_chart_module,
         user_args=templates_config.dict(),
         template_script_args={
-            "line_html_flag": True,
             "templates_url": templates_config.template_files.url,
             "funnel_comp_flag": False,
-            "create_layout_flag": False,
             "error_flag": False,
             "new_ref_flag": True}
     )
@@ -583,7 +555,6 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config),
         dym_image=templates_config.dymola_image,
-        conda_environment=templates_config.conda_environment,
         coverage_arg=coverage_arg,
         ci_stage_regression_test=templates_config.stage_names.regression_test,
         ci_stage_ref_check=templates_config.stage_names.ref_check,
@@ -602,18 +573,18 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         arg_push=arg_push,
         package_list=templates_config.packages[templates_config.library],
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
-        arg_create_plots=arg_create_plots,
         api_github_arg=api_github_arg,
+        api_github_create_ref_arg=api_github_create_ref_arg,
         library=templates_config.library,
         xvfb_flag=templates_config.xvfb_flag,
         modelicapyci_structure_module=templates_config.modelica_py_ci.config_structure_module,
         arg_ref=arg_ref,
-        config_ci_new_create_ref_file=ci_config.ci_files.new_create_ref_file,
+        config_ci_new_create_ref_file=ci_config.get_file_path("ci_files", "new_create_ref_file").as_posix(),
         bot_create_ref_commit=templates_config.bot_messages.create_ref_commit,
         ci_show_ref_commit=templates_config.commit_interaction.show_ref,
         arg_check_ref_plot=arg_check_ref_plot,
-        modelicapyci_configuration_module=templates_config.modelica_py_ci.configuration_module,
-        ci_reference_check=templates_config.commit_interaction.reference_check)
+        ci_reference_check=templates_config.commit_interaction.reference_check
+    )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
         file=templates_config.template_files.regression_file,
@@ -707,7 +678,6 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         whitelist_model_file=ci_config.whitelist.dymola_check_file,
         ci_create_model_whitelist_commit=templates_config.commit_interaction.create_model_whitelist,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
-        modelicapyci_configuration_module=templates_config.modelica_py_ci.configuration_module
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -903,7 +873,6 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
     template_kwargs = dict(
         library=templates_config.library,
         package_list=templates_config.packages[templates_config.library],
-        modelicapyci_configuration_module=templates_config.modelica_py_ci.configuration_module,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
         modelicapyci_syntax_test_module=templates_config.modelica_py_ci.syntax_test_module,
         modelicapyci_html_tidy_module=templates_config.modelica_py_ci.html_tidy_module,
@@ -1276,8 +1245,7 @@ def parse_args():
     check_test_group = parser.add_argument_group(
         "Arguments to set Environment Variables")
     check_test_group.add_argument("--create-templates",
-                                  help=f'Create the CI from file '
-                                       f'Setting{os.sep}CI_setting.txt',
+                                  help=f'Create the CI templates and configs',
                                   action="store_true")
     check_test_group.add_argument("--update-templates",
                                   default=False,
