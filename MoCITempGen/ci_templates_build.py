@@ -97,7 +97,10 @@ def write_parser_args(
         if var in skip_args:
             continue
         value = replace_parsers_args_defaults.get(var, arg_parser[var])
-        if value is None or value == "None":
+        if value is None:
+            if arg_parser[var] == "None":
+                # Default which must not be set:
+                continue
             raise ValueError(f"Parser argument {var} is None, but needs to be set")
         if isinstance(value, bool):
             if value is True:
