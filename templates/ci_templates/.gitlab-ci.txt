@@ -6,7 +6,6 @@ stages:
 
 variables:
     Github_Repository: ${github_repository}
-    GITLAB_Page:  ${gitlab_page}
     CREATE_PAGES_ON_FAILURE: true
 
 include:
@@ -14,7 +13,4 @@ include:
     - '${file}'  
   %endfor
     - project: 'EBC/EBC_all/gitlab_ci/templates'
-      file: 'pages/gl-pages.gitlab-ci.yml'
-      ref: AixLibCI
-    #- project: 'EBC/EBC_all/gitlab_ci/templates'
-    #  file: 'pages/gh-pages.gitlab-ci.yml'
+      file: '${pages_file}'

@@ -228,7 +228,7 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
             "create_pr_flag": True,
             "correct_html_flag": True
         },
-        skip_args=["gitlab_page"])
+        skip_args=["page"])
     template_kwargs = dict(
         utilities_directory=get_utilities_path(templates_config=templates_config),
         image_name=templates_config.dymola_image,
@@ -757,13 +757,18 @@ def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfi
     ci_template_list = [
         str(Path(file).relative_to(templates_config.templates_store_local_path).as_posix()) for file in ci_template_list
     ]
+    if "github.io" in templates_config.page:
+        pages_file = "pages/gh-pages.gitlab-ci.yml"
+    else:
+        pages_file = "pages/gl-pages.gitlab-ci.yml"
 
     template_kwargs = dict(
         image_name=templates_config.dymola_image,
         stage_list=stage_list,
         github_repository=templates_config.github_repository,
-        gitlab_page=templates_config.gitlab_page,
-        file_list=ci_template_list
+        page=templates_config.page,
+        file_list=ci_template_list,
+        pages_file=pages_file
     )
     gitlab_ci_yml = _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -1122,13 +1127,13 @@ def setting_ci_github_repo():
     return github_repository
 
 
-def setting_ci_gitlab_page():
-    gitlab_page = input_with_default(
+def setting_ci_page():
+    page = input_with_default(
         message='Which gitlab page should be used?',
         default="https://ebc.pages.rwth-aachen.de/EBC_all/github_ci/AixLib"
     )
-    print(f'Setting gitlab page: {gitlab_page}')
-    return gitlab_page
+    print(f'Setting gitlab page: {page}')
+    return page
 
 
 def setting_image_names():
@@ -1157,7 +1162,7 @@ def create_toml_config():
     conda_environment = setting_ci_python_conda_env()
     dymola_version = setting_ci_dymola_version()
     github_repository = setting_ci_github_repo()
-    gitlab_page = setting_ci_gitlab_page()
+    page = setting_ci_page()
     dymola_image, open_modelica_image = setting_image_names()
     ci_config = CIConfig(dir=str(ci_dir), library_root="")
     templates_toml_save_path = ci_config.get_dir_path(
@@ -1180,7 +1185,7 @@ def create_toml_config():
         conda_environment=conda_environment,
         dymola_version=dymola_version,
         github_repository=github_repository,
-        gitlab_page=gitlab_page,
+        page=page,
         dymola_image=dymola_image,
         open_modelica_image=open_modelica_image,
         whitelist_library_config=whitelist_library_config,
@@ -1233,6 +1238,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
         templates_config=templates_config, ci_config=ci_config,
         ci_toml_path=relative_ci_toml_path
     )
+
     write_main_yml(
         templates_config=templates_config,
         ci_config=ci_config,
