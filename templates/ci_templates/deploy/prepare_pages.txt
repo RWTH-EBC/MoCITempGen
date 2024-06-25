@@ -16,6 +16,7 @@ prepare_pages:
         - mkdir -p $CI_COMMIT_REF_NAME
         - python -m ${modelicapyci_api_github_module} ${arg}
         - if [ ! -d "${result_dir}" ]; then echo "No results in this pipeline, no pages to publish" && exit 0; fi
+        - python -m ModelicaPyCI.deploy.create_central_index_html
         - cp -r ${result_dir}/* $CI_COMMIT_REF_NAME
     artifacts:
         paths:
