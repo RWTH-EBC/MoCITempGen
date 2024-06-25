@@ -3,10 +3,12 @@
 # modelicapyci_api_github_module: ${modelicapyci_api_github_module}
 # arg: ${arg}
 
+include: '${utilities_directory}'
+
 stages:
     - ${ci_stage_post_pr}
 
-prepare_pages:
+post_ci_comment:
     stage: ${ci_stage_post_pr}
     before_script:
      - !reference [.github_ssh_auth, script]
@@ -14,4 +16,5 @@ prepare_pages:
     script:
         - python -m ${modelicapyci_api_github_module} ${arg}
     rules:
-        - !reference [.rules:PR , rules]
+        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+          when: always

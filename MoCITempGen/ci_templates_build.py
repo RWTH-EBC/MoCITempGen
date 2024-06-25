@@ -197,6 +197,7 @@ def write_ci_pr_interact_template(templates_config: TemplateGeneratorConfig, ci_
         template_script_args={"post_initial_pr_comment": True}
     )
     template_kwargs = dict(
+        utilities_directory=get_utilities_path(templates_config=templates_config),
         ci_stage_post_pr=templates_config.stage_names.post_initial_pr_comment,
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         arg=arg
@@ -1248,6 +1249,8 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
             )
         if temp == "om_badge":
             write_om_badge_template(templates_config=templates_config, ci_config=ci_config)
+    write_ci_pr_interact_template(templates_config=templates_config, ci_config=ci_config)
+
     # write_ci_whitelist_setting_template(templates_config=templates_config, ci_config=ci_config)
     write_page_template(templates_config=templates_config, ci_config=ci_config)
     ci_template_list = get_ci_templates(templates_config=templates_config, ci_config=ci_config)
@@ -1256,7 +1259,6 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
         templates_config=templates_config, ci_config=ci_config,
         ci_toml_path=relative_ci_toml_path
     )
-    write_ci_pr_interact_template(templates_config=templates_config, ci_config=ci_config)
     write_main_yml(
         templates_config=templates_config,
         ci_config=ci_config,
