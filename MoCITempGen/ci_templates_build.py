@@ -178,21 +178,32 @@ def write_page_template(templates_config: TemplateGeneratorConfig, ci_config: CI
     """
     Write page template, deploy artifacts, plots, reference results
     """
+    template_kwargs = dict(
+        ci_stage_prepare_page=templates_config.stage_names.prepare_pages,
+        expire_in_time=templates_config.expire_in_time,
+        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
+    )
+    _write_yml_templates(
+        templates_config=templates_config, ci_config=ci_config,
+        file=templates_config.template_files.page_file,
+        template_kwargs=template_kwargs
+    )
+
+
+def write_ci_pr_interact_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     arg = write_parser_args(
         python_module=templates_config.modelica_py_ci.api_github_module,
         user_args=templates_config.dict(),
         template_script_args={"post_initial_pr_comment": True}
     )
     template_kwargs = dict(
-        ci_stage_prepare_page=templates_config.stage_names.prepare_pages,
-        expire_in_time=templates_config.expire_in_time,
-        result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
+        ci_stage_post_pr=templates_config.stage_names.post_initial_pr_comment,
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         arg=arg
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
-        file=templates_config.template_files.page_file,
+        file=templates_config.template_files.ci_pr_interact_comment_file,
         template_kwargs=template_kwargs
     )
 
@@ -1245,7 +1256,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
         templates_config=templates_config, ci_config=ci_config,
         ci_toml_path=relative_ci_toml_path
     )
-
+    write_ci_pr_interact_template(templates_config=templates_config, ci_config=ci_config)
     write_main_yml(
         templates_config=templates_config,
         ci_config=ci_config,
