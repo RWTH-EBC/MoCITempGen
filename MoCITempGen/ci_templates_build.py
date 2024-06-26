@@ -174,7 +174,7 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
     )
 
 
-def write_page_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
+def write_prepare_page_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
     """
     Write page template, deploy artifacts, plots, reference results
     """
@@ -182,6 +182,7 @@ def write_page_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         ci_stage_prepare_page=templates_config.stage_names.prepare_pages,
         expire_in_time=templates_config.expire_in_time,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
+        utilities_directory=get_utilities_path(templates_config=templates_config)
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -1252,7 +1253,7 @@ def write_templates(templates_toml: Path, ci_toml_path: Path):
     write_ci_pr_interact_template(templates_config=templates_config, ci_config=ci_config)
 
     # write_ci_whitelist_setting_template(templates_config=templates_config, ci_config=ci_config)
-    write_page_template(templates_config=templates_config, ci_config=ci_config)
+    write_prepare_page_template(templates_config=templates_config, ci_config=ci_config)
     ci_template_list = get_ci_templates(templates_config=templates_config, ci_config=ci_config)
     stage_list = get_ci_stages(file_list=ci_template_list, template_config=templates_config)
     write_utilities_yml(

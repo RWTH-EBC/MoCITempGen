@@ -4,10 +4,15 @@
 # expire_in_time : ${expire_in_time}
 
 
+include: '${utilities_directory}'
+
+
 stages:
     - ${ci_stage_prepare_page}
 prepare_pages:
     stage: ${ci_stage_prepare_page}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
     script:
         - mkdir -p $CI_COMMIT_REF_NAME
         - if [ ! -d "${result_dir}" ]; then echo "No results in this pipeline, no pages to publish" && exit 0; fi
