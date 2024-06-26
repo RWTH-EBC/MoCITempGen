@@ -8,7 +8,7 @@
 # result_dir: ${result_dir}
 # OM_Image:  ${OM_Image}
 # expire_in_time: ${expire_in_time}
-# packages: ${packages}
+# packages_per_job: ${packages_per_job}
 
 include: '${utilities_directory}'
 
@@ -58,18 +58,18 @@ stages:
     rules:
         - !reference [.rules:push, rules]
 
-%for package in packages:
-OM_Simulate_${library}_${package}:PR:
+%for job_name, packages in packages_per_job.items():
+OM_Simulate_${library}_${job_name}:PR:
     variables:
-        lib_package: ${package}
+        lib_package: ${packages}
     extends: .OM_simulate_model_job:PR
 
 %endfor
 
-%for package in packages:
-OM_Simulate_${library}_${package}:push:
+%for job_name, packages in packages_per_job.items():
+OM_Simulate_${library}_${job_name}:push:
     variables:
-        lib_package: ${package}
+        lib_package: ${packages}
     extends: .OM_simulate_model_job:push
 
 %endfor

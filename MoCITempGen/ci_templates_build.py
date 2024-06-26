@@ -25,6 +25,9 @@ def _arg_dict(_dict: dict):
     return " ".join(list(_dict.values()))
 
 
+def convert_packages_per_job(packages_per_job):
+    return {job: " ".join(packages) for job, packages in packages_per_job.items()}
+
 def recursive_type(arg):
     """if isinstance(arg, arg.values()):
         print(arg)
@@ -164,7 +167,7 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
         expire_in_time=templates_config.expire_in_time,
         arg_PR=arg_pull_request,
         arg_push=arg_push,
-        packages=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module
     )
     _write_yml_templates(
@@ -594,7 +597,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         expire_in_time=templates_config.expire_in_time,
         arg_PR=arg_PR,
         arg_push=arg_push,
-        package_list=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         api_github_arg=api_github_arg,
         api_github_create_ref_arg=api_github_create_ref_arg,
@@ -638,7 +641,7 @@ def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_con
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         OM_Image=templates_config.open_modelica_image,
         expire_in_time=templates_config.expire_in_time,
-        packages=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module
     )
     _write_yml_templates(
@@ -695,7 +698,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         arg_push=arg_push,
         arg_wh=arg_wh,
         arg_PR=arg_PR,
-        package_list=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_model_whitelist_commit,
         whitelist_model_file=ci_config.whitelist.dymola_check_file,
@@ -748,7 +751,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         library=templates_config.library,
         ci_check_commit=templates_config.commit_interaction.simulate,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
-        package_list=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         arg_wh=arg_wh,
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_example_whitelist_commit,
         whitelist_model_file=ci_config.whitelist.dymola_simulate_file,
@@ -900,7 +903,7 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
 
     template_kwargs = dict(
         library=templates_config.library,
-        package_list=templates_config.packages[templates_config.library],
+        packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
         modelicapyci_syntax_test_module=templates_config.modelica_py_ci.syntax_test_module,
         modelicapyci_html_tidy_module=templates_config.modelica_py_ci.html_tidy_module,
@@ -1073,23 +1076,21 @@ def setting_ci_dir(library_path: str):
 
 
 def setting_ci_packages(library: str, library_mo: Path):
-    packages = {}
-    package_list = []
-    package_lib = []
+    packages_in_lib = []
     print(f'**** Library {library} ****')
     library_dir = Path(library_mo).parent
     for package in os.listdir(library_dir):
         if package.find(".") == -1 and os.path.isfile(library_dir.joinpath(package, "package.mo")):
-            package_list.append(package)
-    if package_list is None:
+            packages_in_lib.append(package)
+    if packages_in_lib is None:
         print(f'Dont find library {library}')
         exit(1)
-    for package in package_list:
+    packages = []
+    for package in packages_in_lib:
         yes = yes_no_input(f'Test package {package} in library {library}?')
         if yes:
-            package_lib.append(package)
+            packages.append(package)
             continue
-    packages[library] = package_lib
     print(f'Setting packages: {packages}')
     return packages
 
@@ -1202,6 +1203,7 @@ def create_toml_config():
         templates_store_branch_name=templates_store_branch_name,
         main_branch=main_branch,
         packages=packages,
+        packages_per_job={package: [package] for package in packages},
         conda_environment=conda_environment,
         dymola_version=dymola_version,
         github_repository=github_repository,

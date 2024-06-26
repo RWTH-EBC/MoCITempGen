@@ -12,9 +12,9 @@ python -m ${modelicapyci_syntax_test_module} ${arg_push_syntax}
 
 python -m ${modelicapyci_syntax_naming_guideline} ${arg_naming_guideline}
 
-%for package in package_list:
-:: Check & Simulate ${library} ${package} on PR
-python -m ${modelicapyci_test_validate_module} ${arg_PR} --packages ${package}
-:: Check & Simulate ${library} ${package} on push
-python -m ${modelicapyci_test_validate_module} ${arg_push} --packages ${package}
+%for job_name, packages in packages_per_job.items():
+:: Check & Simulate ${library} ${packages} on PR
+python -m ${modelicapyci_test_validate_module} ${arg_PR} --packages ${packages}
+:: Check & Simulate ${library} ${packages} on push
+python -m ${modelicapyci_test_validate_module} ${arg_push} --packages ${packages}
 %endfor

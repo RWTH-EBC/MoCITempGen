@@ -15,7 +15,7 @@
 # bot_update_model_whitelist_commit: ${bot_update_model_whitelist_commit}
 # whitelist_model_file: ${whitelist_model_file}
 # arg_wh: ${arg_wh}
-# package_list: ${package_list}
+# packages_per_job: ${packages_per_job}
 # modelicapyci_config_structure_module: ${modelicapyci_config_structure_module}
 
 include: '${utilities_directory}'
@@ -59,18 +59,18 @@ stages:
     rules:
         - !reference [.rules:push , rules]
 
-%for package in package_list:
-Check_${library}_${package}:PR:
+%for job_name, packages in packages_per_job.items():
+Check_${library}_${job_name}:PR:
     variables:
-        lib_package: ${package}
+        lib_package: ${packages}
     extends: .check_model_job:PR
 
 %endfor
 
-%for package in package_list:
-Check_${library}_${package}:Push:
+%for job_name, packages in packages_per_job.items():
+Check_${library}_${job_name}:Push:
     variables:
-        lib_package: ${package}
+        lib_package: ${packages}
     extends: .check_model_job:Push
 
 %endfor
