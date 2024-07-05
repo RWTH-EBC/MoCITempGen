@@ -42,6 +42,10 @@ Check_HTML:PR:
             exit 0;
           fi
         - python -m ${modelicapyci_html_tidy_module} ${arg_correct_html};
+        - if [[ $CI_COMMIT_REF_NAME =~ ^$Praefix_Branch ]]; then
+            echo "Branch is already used to fix html, exiting";
+            exit 1;
+          fi
         - git checkout -B $Newbranch;
         - git add ${library};
         - git commit -m "${bot_create_html_file_commit}";
