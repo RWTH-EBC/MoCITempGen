@@ -36,7 +36,7 @@ Check_HTML:PR:
     script:
         - python -m ${modelicapyci_html_tidy_module} ${arg_PR}
     after_script:
-        - if ! cat ${config_ci_exit_file} | grep "exit 1"; then
+        - if ! cat ${config_ci_exit_file} | grep "Syntax Error"; then
             exit 0;
           fi
         - !reference [.activate_python_and_install_requirements, script]
