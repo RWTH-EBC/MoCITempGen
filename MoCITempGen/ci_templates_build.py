@@ -134,7 +134,7 @@ def get_result_dir_path_for_pages(ci_config: CIConfig):
 
 
 def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_pull_request = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -143,7 +143,7 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
         },
         overwrite_user_args_with_template_args=True
     )
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -165,8 +165,8 @@ def write_OM_check_template(templates_config: TemplateGeneratorConfig, ci_config
         OM_python_check_model_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
-        arg_PR=arg_pull_request,
         arg_push=arg_push,
+        arg_changed=arg_changed,
         packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module
     )
@@ -214,14 +214,14 @@ def write_ci_pr_interact_template(templates_config: TemplateGeneratorConfig, ci_
 
 
 def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
         user_args=templates_config.dict(),
         template_script_args={"correct_view_flag": True,
                               "log_flag": True, "filter_whitelist_flag": True},
         skip_args=["git_url"]
     )
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
         user_args=templates_config.dict(),
         template_script_args={"correct_view_flag": True,
@@ -267,10 +267,10 @@ def write_html_template(templates_config: TemplateGeneratorConfig, ci_config: CI
         ci_html_commit=templates_config.commit_interaction.html,
         modelicapyci_html_tidy_module=templates_config.modelica_py_ci.html_tidy_module,
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
-        arg_PR=arg_PR,
+        arg_push=arg_push,
         arg_wh=arg_wh,
         arg_github_PR=arg_github_PR,
-        arg_push=arg_push,
+        arg_changed=arg_changed,
         bot_create_html_file_commit=templates_config.bot_messages.create_html_file_commit,
         bot_update_whitelist_commit=templates_config.bot_messages.update_whitelist_commit,
         whitelist_html_file=ci_config.whitelist.ibpsa_file,
@@ -287,12 +287,12 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
     """
     Write Style Check template
     """
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.syntax_test_module,
         template_script_args={"changed_flag": False},
         user_args=templates_config.dict()
     )
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.syntax_test_module,
         user_args=templates_config.dict(),
         template_script_args={"changed_flag": True}
@@ -307,8 +307,8 @@ def write_style_template(templates_config: TemplateGeneratorConfig, ci_config: C
         library=templates_config.library,
         ci_style_commit=templates_config.commit_interaction.style,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
-        arg_PR=arg_PR,
-        arg_Push=arg_push
+        arg_push=arg_push,
+        arg_changed=arg_changed
     )
     _write_yml_templates(
         templates_config=templates_config, ci_config=ci_config,
@@ -499,7 +499,7 @@ def _write_yml_templates(
 
 
 def write_regression_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: str):
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_reference_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -510,7 +510,7 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         },
         overwrite_user_args_with_template_args=True
     )
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_reference_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -598,8 +598,8 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
         arg_chart=arg_chart,
         ci_regression_test_commit=templates_config.commit_interaction.regression_test,
         expire_in_time=templates_config.expire_in_time,
-        arg_PR=arg_PR,
         arg_push=arg_push,
+        arg_changed=arg_changed,
         packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         modelicapyci_api_github_module=templates_config.modelica_py_ci.api_github_module,
         api_github_arg=api_github_arg,
@@ -622,13 +622,13 @@ def write_regression_template(templates_config: TemplateGeneratorConfig, ci_conf
 
 
 def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         template_script_args={
             "om_options": "OM_SIM"
         },
         user_args=templates_config.dict())
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.OM_python_check_model_module,
         user_args=templates_config.dict(),
         template_script_args={"om_options": "OM_SIM", "changed_flag": True})
@@ -639,8 +639,8 @@ def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_con
         library=templates_config.library,
         ci_OM_sim_commit=templates_config.commit_interaction.OM_simulate,
         OM_python_check_model_module=templates_config.modelica_py_ci.OM_python_check_model_module,
-        arg_PR=arg_PR,
         arg_push=arg_push,
+        arg_changed=arg_changed,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         OM_Image=templates_config.open_modelica_image,
         expire_in_time=templates_config.expire_in_time,
@@ -655,7 +655,7 @@ def write_OM_simulate_template(templates_config: TemplateGeneratorConfig, ci_con
 
 
 def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -665,7 +665,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         },
         overwrite_user_args_with_template_args=True
     )
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -698,9 +698,9 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
         result_dir=get_result_dir_path_for_pages(ci_config=ci_config),
         expire_in_time=templates_config.expire_in_time,
-        arg_push=arg_push,
+        arg_changed=arg_changed,
         arg_wh=arg_wh,
-        arg_PR=arg_PR,
+        arg_push=arg_push,
         packages_per_job=convert_packages_per_job(templates_config.packages_per_job),
         config_ci_exit_file=ci_config.get_file_path("ci_files", "exit_file").as_posix(),
         bot_update_model_whitelist_commit=templates_config.bot_messages.update_model_whitelist_commit,
@@ -716,7 +716,7 @@ def write_check_template(templates_config: TemplateGeneratorConfig, ci_config: C
 
 
 def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -727,7 +727,7 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         },
         overwrite_user_args_with_template_args=True
     )
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -749,8 +749,8 @@ def write_simulate_template(templates_config: TemplateGeneratorConfig, ci_config
         ci_stage_simulate=templates_config.stage_names.simulate,
         ci_stage_create_exampel_whitelist=templates_config.stage_names.create_example_whitelist,
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
+        arg_changed=arg_changed,
         arg_push=arg_push,
-        arg_PR=arg_PR,
         library=templates_config.library,
         ci_check_commit=templates_config.commit_interaction.simulate,
         modelicapyci_test_validate_module=templates_config.modelica_py_ci.test_validate_module,
@@ -850,7 +850,7 @@ def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CI
 
 
 def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_config: CIConfig):
-    arg_push = write_parser_args(
+    arg_changed = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -860,7 +860,7 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         skip_args=["packages"],
         overwrite_user_args_with_template_args=True
     )
-    arg_PR = write_parser_args(
+    arg_push = write_parser_args(
         python_module=templates_config.modelica_py_ci.test_validate_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -869,14 +869,14 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         skip_args=["packages"],
         overwrite_user_args_with_template_args=True
     )
-    arg_PR_html = write_parser_args(
+    arg_push_html = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
         user_args=templates_config.dict(),
         template_script_args={
             "correct_view_flag": True,
             "log_flag": True, "filter_whitelist_flag": True}
     )
-    arg_push_html = write_parser_args(
+    arg_changed_html = write_parser_args(
         python_module=templates_config.modelica_py_ci.html_tidy_module,
         user_args=templates_config.dict(),
         template_script_args={
@@ -885,12 +885,12 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
             "filter_whitelist_flag": True
         }
     )
-    arg_PR_syntax = write_parser_args(
+    arg_push_syntax = write_parser_args(
         python_module=templates_config.modelica_py_ci.syntax_test_module,
         template_script_args={"changed_flag": False},
         user_args=templates_config.dict()
     )
-    arg_push_syntax = write_parser_args(
+    arg_changed_syntax = write_parser_args(
         python_module=templates_config.modelica_py_ci.syntax_test_module,
         user_args=templates_config.dict(),
         template_script_args={"changed_flag": True}
@@ -914,12 +914,12 @@ def write_local_windows_test(templates_config: TemplateGeneratorConfig, ci_confi
         modelicapyci_config_structure_module=templates_config.modelica_py_ci.config_structure_module,
         modelicapyci_syntax_naming_guideline=templates_config.modelica_py_ci.naming_guideline_module,
         arg_naming_guideline=arg_naming_guideline,
+        arg_changed=arg_changed,
         arg_push=arg_push,
-        arg_PR=arg_PR,
+        arg_changed_syntax=arg_changed_syntax,
         arg_push_syntax=arg_push_syntax,
-        arg_PR_syntax=arg_PR_syntax,
+        arg_changed_html=arg_changed_html,
         arg_push_html=arg_push_html,
-        arg_PR_html=arg_PR_html,
         log_path="local_execution_logs"
     )
     _write_yml_templates(

@@ -5,8 +5,8 @@
 # OM_python_check_model_module: ${OM_python_check_model_module}
 # result_dir: ${result_dir}
 # expire_in_time: ${expire_in_time}
-# arg_PR: ${arg_PR}
 # arg_push: ${arg_push}
+# arg_changed: ${arg_changed}
 # packages_per_job: ${packages_per_job}
 
 include: '${utilities_directory}'
@@ -14,26 +14,6 @@ include: '${utilities_directory}'
 stages:
     - ${ci_stage_OM_model_check}
 
-
-.OM_check_model_job:PR:
-    image: ${OM_Image}
-    stage: ${ci_stage_OM_model_check}
-    before_script:
-        - !reference [.activate_python_and_install_requirements, script]
-        - !reference [.custom_install_additional_modelica_libraries, script]
-        - !reference [.open_modelica_git_user_setting, script]
-    script:
-        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_PR}
-    artifacts:
-        when: on_failure
-        paths:
-            - ${result_dir}/
-        expire_in: ${expire_in_time}
-    allow_failure: true
-    rules:
-        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
-          when: always
-        - !reference [.rules:PR , rules]
 
 .OM_check_model_job:push:
     image: ${OM_Image}
@@ -51,20 +31,40 @@ stages:
         expire_in: ${expire_in_time}
     allow_failure: true
     rules:
-        - !reference [.rules:push, rules]
+        - if: $CI_COMMIT_MESSAGE  =~ /${ci_OM_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
+          when: always
+        - !reference [.rules:push , rules]
 
-%for job_name, packages in packages_per_job.items():
-OM_Check_${library}_${job_name}:PR:
-    variables:
-        lib_package: ${packages}
-    extends: .OM_check_model_job:PR
-
-%endfor
+.OM_check_model_job:changed:
+    image: ${OM_Image}
+    stage: ${ci_stage_OM_model_check}
+    before_script:
+        - !reference [.activate_python_and_install_requirements, script]
+        - !reference [.custom_install_additional_modelica_libraries, script]
+        - !reference [.open_modelica_git_user_setting, script]
+    script:
+        - runuser -u openmodelicausers -- python3 -m ${OM_python_check_model_module} ${arg_changed}
+    artifacts:
+        when: on_failure
+        paths:
+            - ${result_dir}/
+        expire_in: ${expire_in_time}
+    allow_failure: true
+    rules:
+        - !reference [.rules:changed, rules]
 
 %for job_name, packages in packages_per_job.items():
 OM_Check_${library}_${job_name}:push:
     variables:
         lib_package: ${packages}
     extends: .OM_check_model_job:push
+
+%endfor
+
+%for job_name, packages in packages_per_job.items():
+OM_Check_${library}_${job_name}:changed:
+    variables:
+        lib_package: ${packages}
+    extends: .OM_check_model_job:changed
 
 %endfor

@@ -12,7 +12,7 @@ stages:
     - ${ci_stage_style_check}
 
 
-NamingGuideline:${library}:PR:
+NamingGuideline:${library}:push:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
@@ -26,5 +26,5 @@ NamingGuideline:${library}:PR:
     rules:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_naming_guideline}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
-        - !reference [.rules:PR , rules]
+        - !reference [.rules:push , rules]
 

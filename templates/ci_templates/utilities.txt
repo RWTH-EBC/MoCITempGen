@@ -36,18 +36,18 @@
     - ${command}
 %endfor
 
-.rules:PR:
-    rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"  &&  ${commit_string}
-          when: on_success
-        - if: $CI_PIPELINE_SOURCE == "push"  && (${PR_main_branch_rule})
-          when: on_success
-
 .rules:push:
     rules:
-        - if: $CI_PIPELINE_SOURCE == "push"  &&  ${commit_string}
+        - if: $CI_PIPELINE_SOURCE == "push" && ${commit_string}
           when: on_success
-        - if:  (${PR_main_branch_rule})
+        - if: $CI_PIPELINE_SOURCE == "push" && (${PR_main_branch_rule})
+          when: on_success
+
+.rules:changed:
+    rules:
+        - if: $CI_COMMIT_MESSAGE =~ /ci_changed_only/  &&  ${commit_string}
+          when: on_success
+        - if: (${PR_main_branch_rule})
           when: never
 
 .open_modelica_git_user_setting:

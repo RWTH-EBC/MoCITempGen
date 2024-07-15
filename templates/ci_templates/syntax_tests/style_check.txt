@@ -6,21 +6,21 @@
 # library : ${library}
 # ci_style_commit : ${ci_style_commit}
 # result_dir : ${result_dir}
-# arg_PR : ${arg_PR}
-# arg_Push : ${arg_Push}
+# arg_push : ${arg_push}
+# arg_changed : ${arg_changed}
 
 include: '${utilities_directory}'
 stages:
     - ${ci_stage_style_check}
 
 
-StyleCheck:${library}:PR:
+StyleCheck:${library}:push:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_PR}
+        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_push}
     artifacts:
         when: on_failure
         paths:
@@ -30,15 +30,15 @@ StyleCheck:${library}:PR:
     rules:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_style_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
-        - !reference [.rules:PR , rules]
+        - !reference [.rules:push , rules]
 
-StyleCheck:${library}:Push:
+StyleCheck:${library}:changed:
     image: ${image_name}
     stage: ${ci_stage_style_check}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_Push}
+        - ${xvfb_flag} python -m ${modelicapyci_syntax_test_module} ${arg_changed}
     artifacts:
         when: on_failure
         paths:
@@ -46,5 +46,5 @@ StyleCheck:${library}:Push:
         expire_in: 7 day
     allow_failure: true
     rules:
-        - !reference [.rules:push , rules]
+        - !reference [.rules:changed , rules]
 

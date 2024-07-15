@@ -2,8 +2,8 @@
 # dym_image_name : ${dym_image_name}
 # ci_stage_simulate: ${ci_stage_simulate}
 # ci_stage_create_exampel_whitelist: ${ci_stage_create_exampel_whitelist}
-# arg_push : ${arg_push}
-# arg_PR: ${arg_PR}
+# arg_changed : ${arg_changed}
+# arg_push: ${arg_push}
 # library: ${library}
 # ci_check_commit ${ci_check_commit}
 # modelicapyci_test_validate_module: ${modelicapyci_test_validate_module}
@@ -24,14 +24,14 @@ stages:
     - ${ci_stage_create_example_whitelist}
 
 
-.simulate_model_job:PR:
+.simulate_model_job:push:
     image: ${dym_image_name}
     stage: ${ci_stage_simulate}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_PR}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module}  ${arg_push}
     artifacts:
         when: on_failure
         paths:
@@ -40,38 +40,38 @@ stages:
     rules:
         - if: $CI_COMMIT_MESSAGE  =~ /${ci_check_commit}/ && $CI_PIPELINE_SOURCE == "push"
           when: always
-        - !reference [.rules:PR , rules]
+        - !reference [.rules:push , rules]
 
-.simulate_model_job:Push:
+.simulate_model_job:changed:
     image: ${dym_image_name}
     stage: ${ci_stage_simulate}
     before_script:
         - !reference [.activate_python_and_install_requirements, script]
         - !reference [.custom_install_additional_modelica_libraries, script]
     script:
-        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_push}
+        - ${xvfb_flag} python -m ${modelicapyci_test_validate_module} ${arg_changed}
     artifacts:
         when: on_failure
         paths:
             - ${result_dir}/
         expire_in: ${expire_in_time}
     rules:
-        - !reference [.rules:push , rules]
+        - !reference [.rules:changed , rules]
 
 %for job_name, packages in packages_per_job.items():
-Simulate_${library}_${job_name}:PR:
+Simulate_${library}_${job_name}:push:
     variables:
         lib_package: ${packages}
-    extends: .simulate_model_job:PR
+    extends: .simulate_model_job:push
 
 %endfor
 
 
 %for job_name, packages in packages_per_job.items():
-Simulate_${library}_${job_name}:Push:
+Simulate_${library}_${job_name}:changed:
     variables:
         lib_package: ${packages}
-    extends: .simulate_model_job:Push
+    extends: .simulate_model_job:changed
 
 %endfor
 
