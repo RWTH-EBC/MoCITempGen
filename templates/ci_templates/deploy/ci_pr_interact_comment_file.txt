@@ -16,5 +16,5 @@ post_ci_comment:
     script:
         - python -m ${modelicapyci_api_github_module} ${arg}
     rules:
-        - if: $CI_PIPELINE_SOURCE == "external_pull_request_event"
+        - if: $CI_PIPELINE_SOURCE == "push"
           when: always
