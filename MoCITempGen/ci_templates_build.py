@@ -1098,12 +1098,6 @@ def setting_ci_packages(library: str, library_mo: Path):
     return packages
 
 
-def setting_ci_dymola_version():
-    dymola_version = input_with_default(message='Give the dymola version?', default="2022")
-    print(f'Setting dymola version: {dymola_version}')
-    return dymola_version
-
-
 def setting_ci_python_conda_env():
     conda_environment = input_with_default(message="Give the conda environment in your image", default="myenv")
     print(f'Setting conda environment: {conda_environment}')
@@ -1184,7 +1178,6 @@ def create_toml_config():
     packages = setting_ci_packages(library=library, library_mo=library_mo)
     stage_list = setting_ci_templates_types()
     conda_environment = setting_ci_python_conda_env()
-    dymola_version = setting_ci_dymola_version()
     github_repository = setting_ci_github_repo()
     page = setting_ci_page()
     dymola_image, open_modelica_image = setting_image_names()
@@ -1208,7 +1201,6 @@ def create_toml_config():
         packages=packages,
         packages_per_job={package: [package] for package in packages},
         conda_environment=conda_environment,
-        dymola_version=dymola_version,
         github_repository=github_repository,
         page=page,
         dymola_image=dymola_image,
