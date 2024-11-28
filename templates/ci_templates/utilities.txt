@@ -1,5 +1,5 @@
 # Variables
-# conda_environment: ${conda_environment}
+# activate_python_environment: ${activate_python_environment}
 # modelica_py_ci_url: ${modelica_py_ci_url}
 # ci_toml_path: ${ci_toml_path}
 # commit_string: ${commit_string}
@@ -23,7 +23,7 @@
 .activate_python_and_install_requirements:
   script:
     - export PIP_CACHE_DIR="/opt/cache/pip"
-    - source activate ${conda_environment} || echo "${conda_environment} is not installed, can't activate it"
+    - ${activate_python_environment} || echo "Could not activate python environment"
     - pip install --upgrade pip && pip install natsort toml pandas mako requests
     - export PYTHONIOENCODING=utf-8
     - pip install git+https://github.com/FWuellhorst/BuildingsPy.git@issue253_coverage

@@ -834,7 +834,7 @@ def write_main_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfi
 
 def write_utilities_yml(templates_config: TemplateGeneratorConfig, ci_config: CIConfig, ci_toml_path: str):
     template_kwargs = dict(
-        conda_environment=templates_config.conda_environment,
+        activate_python_environment=templates_config.activate_python_environment,
         modelica_py_ci_url=templates_config.modelica_py_ci.url,
         commit_string=templates_config.commit_string,
         PR_main_branch_rule=templates_config.pr_main_branch_rule,
@@ -1099,9 +1099,12 @@ def setting_ci_packages(library: str, library_mo: Path):
 
 
 def setting_ci_python_conda_env():
-    conda_environment = input_with_default(message="Give the conda environment in your image", default="myenv")
-    print(f'Setting conda environment: {conda_environment}')
-    return conda_environment
+    activate_python_environment = input_with_default(
+        message="Give the command to activate a python environment in the image",
+        default='eval "$(micromamba shell hook --shell bash)" && micromamba activate base'
+    )
+    print(f'Setting environment activation command: {activate_python_environment}')
+    return activate_python_environment
 
 
 def setting_ci_whitelist():
@@ -1157,7 +1160,7 @@ def setting_ci_page():
 def setting_image_names():
     dymola_image = input_with_default(
         message=f'Which dymola docker image should be used? ',
-        default="registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola_2022-miniconda"
+        default="registry.git.rwth-aachen.de/ebc/ebc_intern/dymola-docker:Dymola2024xRefresh1-micromamba"
     )
     print(f'Setting dymola image: {dymola_image}')
     open_modelica_image = input_with_default(
@@ -1177,7 +1180,7 @@ def create_toml_config():
     whitelist_library_config = setting_ci_whitelist()
     packages = setting_ci_packages(library=library, library_mo=library_mo)
     stage_list = setting_ci_templates_types()
-    conda_environment = setting_ci_python_conda_env()
+    activate_python_environment = setting_ci_python_conda_env()
     github_repository = setting_ci_github_repo()
     page = setting_ci_page()
     dymola_image, open_modelica_image = setting_image_names()
@@ -1200,7 +1203,7 @@ def create_toml_config():
         main_branch=main_branch,
         packages=packages,
         packages_per_job={package: [package] for package in packages},
-        conda_environment=conda_environment,
+        activate_python_environment=activate_python_environment,
         github_repository=github_repository,
         page=page,
         dymola_image=dymola_image,
