@@ -67,6 +67,7 @@ WhiteList:
         - python -m ${modelicapyci_lock_model_module} ${arg_lock}
         - message="${bot_merge_commit}"
         - files_to_push=$(git ls-files --others --exclude-standard --directory ${library})
+        - git switch $CI_COMMIT_BRANCH
         - !reference [.git_push, script]
     rules:
         - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "${merge_branch}" && $CI_COMMIT_MESSAGE =~ /${ci_trigger_ibpsa_commit}/

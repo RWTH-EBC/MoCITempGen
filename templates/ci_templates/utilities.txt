@@ -61,6 +61,7 @@
   script:
     #- git switch $CI_COMMIT_BRANCH
     - git status
-    - git add $files_to_push
+    - git add $files_to_push  # New files
+    - git add -u  # Modified files
     - git commit -m "$message"
     - git push git@github.com:$Github_Repository.git "HEAD:$CI_COMMIT_REF_NAME"
